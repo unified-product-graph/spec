@@ -27,6 +27,8 @@ export type FrameworkCategory =
   // Engineering & Ops
   | 'engineering'
   | 'devops'
+  | 'security'
+  | 'qa_testing'
   | 'ai_ml'
   | 'agentic'
   // Growth & GTM
@@ -35,12 +37,17 @@ export type FrameworkCategory =
   | 'go_to_market'
   | 'sales'
   | 'pricing'
-  // Data & Ops
+  // Data, Legal & Ops
   | 'data_analytics'
+  | 'legal_compliance'
   | 'customer_success'
   | 'team_process'
   | 'program_mgmt'
+  // Content & Portfolio
+  | 'content'
+  | 'education'
   | 'partnerships'
+  | 'localisation'
   | 'portfolio'
 
 /** All valid framework categories as a runtime array */
@@ -64,6 +71,8 @@ export const UPG_FRAMEWORK_CATEGORIES: readonly FrameworkCategory[] = [
   // Engineering & Ops
   'engineering',
   'devops',
+  'security',
+  'qa_testing',
   'ai_ml',
   'agentic',
   // Growth & GTM
@@ -72,12 +81,17 @@ export const UPG_FRAMEWORK_CATEGORIES: readonly FrameworkCategory[] = [
   'go_to_market',
   'sales',
   'pricing',
-  // Data & Ops
+  // Data, Legal & Ops
   'data_analytics',
+  'legal_compliance',
   'customer_success',
   'team_process',
   'program_mgmt',
+  // Content & Portfolio
+  'content',
+  'education',
   'partnerships',
+  'localisation',
   'portfolio',
 ] as const
 

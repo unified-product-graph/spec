@@ -40,6 +40,9 @@
   "devDependencies": {
     "tsup": "^8.5.1"
   },
+  "devDependencies": {
+    "tsup": "^8.5.1"
+  },
   "keywords": [
     "product-management",
     "product-graph",
