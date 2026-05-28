@@ -148,11 +148,14 @@ describe('GetUPGEdgeMigrations version range', () => {
  it('v0.2.6 → v0.2.7 returns only v0.2.7 rules (experiment + user_story)', () => {
  const rules = getUPGEdgeMigrations('0.2.6', '0.2.7')
  expect(rules.length).toBeGreaterThan(0)
- // Includes the 2 user_story drops + experiment_tests_hypothesis drop.
+ // Includes the user_story_broken_into_task drop + experiment_tests_hypothesis drop.
  const drops = rules.filter((r) => r.kind === 'drop').map((r) => r.from)
  expect(drops).toContain('experiment_tests_hypothesis')
  expect(drops).toContain('user_story_broken_into_task')
- expect(drops).toContain('task_implements_user_story')
+ // task_implements_user_story is NO LONGER dropped — v0.7.0/ re-canon
+ // (story_statement → user_story) makes it the canonical implements edge again,
+ // and a drop rule must never name a canonical edge.
+ expect(drops).not.toContain('task_implements_user_story')
  // v0.2.0 backfill rules must NOT appear.
  expect(rules.find((r) => r.from === 'persona_has_jtbd')).toBeUndefined()
  })
@@ -163,9 +166,11 @@ describe('GetUPGEdgeMigrations version range', () => {
  // v0.2.0: 18 informal-edge drops (was 19; restored
  // `product_contains_competitive_analysis`) + 6 follow-on
  // product_contains_<v0.2.6+ child> drops = 24
- // v0.2.7: experiment_tests_hypothesis + user_story_broken_into_task + task_implements_user_story
+ // v0.2.7: experiment_tests_hypothesis + user_story_broken_into_task
+ //   (the task_implements_user_story drop was removed at v0.7.0/ —
+ //    re-canon makes it the canonical implements edge again)
  // v0.2.8: evidence_supports_hypothesis
- expect(drops.length).toBe(28)
+ expect(drops.length).toBe(27)
  expect(drops.find((r) => r.from === 'evidence_supports_hypothesis')).toBeDefined()
  expect(drops.find((r) => r.from === 'product_contains_persona')).toBeDefined()
  expect(drops.find((r) => r.from === 'product_contains_experiment_run')).toBeDefined()

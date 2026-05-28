@@ -378,7 +378,7 @@ export const PRODUCT_DELIVERY_PLAYBOOK: UPGPlaybook = {
       ['epic'],
       'Group related features into epics that ship together. Epics are user-visible; tasks are not.'),
     seqStep(3, 'Stories',
-      ['story_statement', 'acceptance_criterion'],
+      ['user_story', 'acceptance_criterion'],
       'Write each feature from the user perspective. "As [persona], I want [job], so that [outcome]." Define acceptance criteria.'),
     seqStep(4, 'Tasks & Dependencies',
       ['task', 'dependency'],

@@ -187,20 +187,19 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'feature_area', type_id: 'ent_314', maturity: 'stable', since: '0.1.0' },
   { name: 'feature', type_id: 'ent_071', maturity: 'stable', since: '0.1.0' },
   { name: 'epic', type_id: 'ent_072', maturity: 'stable', since: '0.1.0' },
-  // split 2 (v0.2.7): `user_story` decomposes into `story_statement`
-  // (P5 templated-statement, lifecycle-free design artefact) +
-  // `story_task` (P4 work-unit, the engineering work to implement). The
-  // statement is the "As X, I want Y so Z" stable promise; the task carries
-  // the lifecycle (backlog → in_progress → done). Replacement points to
-  // `story_task` because legacy user_story rows almost always carried task
-  // properties (assignee, status, priority); the statement is additive
-  // structural surface. Narrows to `never` in v0.2.9.
-  // user_story → story_task was the v0.2.7 migration. story_task is now
-  // deprecated at v0.4.0 and collapsed into canonical `task`. story_task carried
-  // no unique properties or lifecycle that task doesn't already carry, so the
-  // additive-vocabulary rule keeps one.
-  { name: 'user_story', type_id: 'ent_073', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.2.7', replacement: 'task' },
-  { name: 'story_statement', type_id: 'ent_342', maturity: 'proposed', since: '0.2.7' },
+  // `user_story` is the templated "As X, I want Y so Z" promise — a stable,
+  // lifecycle-free design artefact (UCS pattern P5). The v0.2.7 split EXTRACTED
+  // the engineering work into a separate `task` (the lifecycle-bearing work-unit,
+  // linked via `task_implements_user_story`); the split was right. But the
+  // surviving statement half was renamed to the coined `story_statement`, which
+  // raised the adoption barrier — "user story" is the universally-recognised
+  // industry term for exactly this artefact. v0.7.0 re-canonicalises
+  // the statement under `user_story`; `story_statement` becomes a deprecated
+  // alias. `story_task` (the original work half) was already collapsed into
+  // canonical `task` at v0.4.0. So the canonical shape is: user_story (statement)
+  // + task (work), linked by `task_implements_user_story`.
+  { name: 'user_story', type_id: 'ent_073', maturity: 'proposed', since: '0.1.0' },
+  { name: 'story_statement', type_id: 'ent_342', maturity: 'deprecated', since: '0.2.7', deprecated_in: '0.7.0', replacement: 'user_story' },
   { name: 'story_task', type_id: 'ent_343', maturity: 'deprecated', since: '0.2.7', deprecated_in: '0.4.0', replacement: 'task' },
   { name: 'acceptance_criterion', type_id: 'ent_074', maturity: 'stable', since: '0.1.0' },
   { name: 'release', type_id: 'ent_075', maturity: 'stable', since: '0.1.0' },

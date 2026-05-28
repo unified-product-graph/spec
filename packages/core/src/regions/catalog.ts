@@ -881,7 +881,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "feature_affected_by_bug",
       "epic_specified_by_user_story",
       "user_story_verified_by_acceptance_criterion",
-      "user_story_broken_into_task",
+      "task_implements_user_story",
       "roadmap_contains_roadmap_item",
       "roadmap_categorised_by_theme",
       "roadmap_schedules_release",

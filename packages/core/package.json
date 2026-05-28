@@ -1,6 +1,6 @@
 {
   "name": "@unified-product-graph/core",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Unified Product Graph — open specification and TypeScript types for product knowledge",
   "type": "module",
   "license": "MIT",
@@ -36,9 +36,6 @@
     "lint": "eslint src/",
     "audit:slot-connectivity": "tsx scripts/audit-framework-slot-connectivity.ts",
     "prepublishOnly": "npm run build"
-  },
-  "devDependencies": {
-    "tsup": "^8.5.1"
   },
   "devDependencies": {
     "tsup": "^8.5.1"

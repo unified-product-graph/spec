@@ -194,7 +194,7 @@ export function pickCanonicalEdge(
 /**
  * Resolve the canonical `UPGEdgeType` for a containment relationship.
  *
- * Import adapters need to emit edges like "epic contains story_statement" but
+ * Import adapters need to emit edges like "epic contains user_story" but
  * cannot safely construct raw `${parent}_contains_${child}` template strings —
  * that union is closed and most pairs are not registered. This function looks
  * up the canonical edge for the given parent→child pair using
@@ -215,7 +215,7 @@ export function pickCanonicalEdge(
  * should call `pickCanonicalEdge(source, target, hint)` directly.
  *
  * @param parentType - Source entity type string (e.g. `'epic'`)
- * @param childType  - Target entity type string (e.g. `'story_statement'`)
+ * @param childType  - Target entity type string (e.g. `'user_story'`)
  * @returns Canonical `UPGEdgeType` key, or `null` if the pair has no edges.
  *
  * @example

@@ -1314,60 +1314,17 @@ const EPIC_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * user_story — Product Specification domain
- *
- * @deprecated since v0.2.7. The original lifecycle (draft → ready →
- * in_progress → done) conflated statement-shape state ("draft": is the
- * promise written?, "ready": acceptance criteria defined?) with task-shape
- * state ("in_progress": code being written?, "done": merged + verified?).
- * split 2 separated these: `story_statement` is lifecycle-free
- * (a stable promise either holds or is superseded); `story_task` carries
- * the WORK_ITEM lifecycle (todo → in_progress → in_review → done).
- * Retained for one version while consumers migrate; narrows in v0.2.9.
- */
-const USER_STORY_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'user_story',
-  initial_phase: 'draft',
-  terminal_phases: ['done'],
-  phases: [
-    {
-      id: 'draft',
-      label: 'Draft',
-      description:
-        'The story has been written but has not been reviewed or refined. It may not yet have acceptance criteria.',
-      transitions_to: ['ready'],
-    },
-    {
-      id: 'ready',
-      label: 'Ready',
-      description:
-        'The story has been refined. Acceptance criteria are defined. It is ready to be pulled into a sprint.',
-      transitions_to: ['in_progress'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'A developer is actively working on this story.',
-      transitions_to: ['done'],
-    },
-    {
-      id: 'done',
-      label: 'Done',
-      description:
-        'The story meets all acceptance criteria and has been merged and verified.',
-      transitions_to: [],
-    },
-  ],
-}
-
-// `story_task` uses the standard WORK_ITEM template
-// (todo → in_progress → in_review → done). The paired `story_statement` is
-// lifecycle-free (declared in `UPG_LIFECYCLE_FREE_TYPES` below) — it's a
-// stable design artefact, not a state machine. The lifecycle entry is
-// added to `UPG_LIFECYCLES` via `fromTemplate('story_task', WORK_ITEM_TEMPLATE)`
-// below the template definitions.
+// `user_story` (re-canonicalised from `story_statement` at v0.7.0/) is
+// the templated "As X, I want Y so Z" promise — a stable design artefact, NOT a
+// state machine. It is lifecycle-free (declared in `UPG_LIFECYCLE_FREE_TYPES`
+// below): a promise either holds or is superseded. The paired `task` carries the
+// WORK_ITEM lifecycle (todo → in_progress → in_review → done) and implements the
+// statement via `task_implements_user_story`.
+//
+// (Pre-v0.2.7 the bundled `user_story` had its own draft → ready → in_progress →
+// done lifecycle, which conflated statement-shape state with task-shape state.
+// The v0.2.7 split moved that lifecycle onto the task; the statement became
+// lifecycle-free.)
 
 /**
  * release — Product Specification domain
@@ -3502,9 +3459,9 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   FEATURE_AREA_LIFECYCLE,
   FEATURE_LIFECYCLE,
   EPIC_LIFECYCLE,
-  USER_STORY_LIFECYCLE,
-  // story_task lifecycle removed v0.4.0 collapsed story_task into task.
-  // task uses TASK_LIFECYCLE (WORK_ITEM_TEMPLATE) which is equivalent.
+  // user_story is lifecycle-free (declared in UPG_LIFECYCLE_FREE_TYPES below).
+  // story_task lifecycle removed v0.4.0 — collapsed into task (TASK_LIFECYCLE,
+  // WORK_ITEM_TEMPLATE).
   RELEASE_LIFECYCLE,
   TASK_LIFECYCLE,
   BUG_LIFECYCLE,
@@ -3652,9 +3609,10 @@ export const UPG_LIFECYCLE_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   'brand_colour', 'brand_typography', 'brand_imagery',
 
   // ── Product Specification (4 of 5) — criteria, grouping, historical, +
-  //    story_statement (v0.2.7 split: the templated promise is a stable
-  //    design artefact; the paired story_task carries the lifecycle) ─
-  'acceptance_criterion', 'changelog', 'theme', 'story_statement',
+  //    user_story (the templated promise is a stable design artefact; the paired
+  //    task carries the lifecycle). Re-canon story_statement → user_story at
+  //    v0.7.0/. ─
+  'acceptance_criterion', 'changelog', 'theme', 'user_story',
 
   // ── Strategy — metric is a measurement definition; metric_quality_assessment
   //    is a point-in-time snapshot; value_stream is a mapped flow;

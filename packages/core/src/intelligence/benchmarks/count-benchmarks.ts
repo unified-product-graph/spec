@@ -1123,7 +1123,7 @@ export const UPG_COUNT_BENCHMARKS: CountBenchmark[] = [
     "rationale": "Epics group related stories. Not needed at idea stage."
   },
   {
-    "type": "story_statement",
+    "type": "user_story",
     "domain": "product_spec",
     "concept": null,
     "validation": {

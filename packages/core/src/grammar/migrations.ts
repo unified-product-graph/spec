@@ -22,6 +22,24 @@ export interface UPGTypeMigration {
  * Each entry describes how an old type maps to a new canonical type.
  */
 export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
+  '0.7.0': [
+    // (since v0.7.0) story_statement → user_story. The v0.2.7 split
+    // correctly separated the templated promise from the engineering work
+    // (task), but renamed the surviving statement half to the coined
+    // `story_statement`. "User story" is the universally-recognised industry
+    // term for exactly that artefact, and UPG's value is being the recognisable
+    // canonical vocabulary — so the statement is re-canonicalised under
+    // `user_story`. Lifecycle-free, same property surface (as_a / i_want_to /
+    // so_that / text); no property migration required. The paired `task` and
+    // the `task_implements_*` / `epic_specified_by_*` / `*_verified_by_*` /
+    // `test_case_covers_*` edges are renamed in UPG_EDGE_MIGRATIONS['0.7.0'].
+    {
+      from: 'story_statement',
+      to: 'user_story',
+      reason: 'story_statement re-canonicalised to user_story. The v0.2.7 Statement/Implementation split was sound — it extracted the lifecycle-bearing work into `task` — but the coined `story_statement` name raised the adoption barrier; "user story" is the industry-standard term for the templated promise. Lifecycle-free, identical property surface (as_a / i_want_to / so_that / text); no property migration needed.',
+    },
+  ],
+
   '0.4.0': [
     // (since v0.4.0) hypothesis_claim reverts to hypothesis (the simpler
     // canonical name — "claim" is implied). hypothesis_evidence deprecated
@@ -1484,6 +1502,19 @@ export type UPGEdgeMigration =
  * Key is the version that INTRODUCES the migration (target version).
  */
 export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
+  '0.7.0': [
+    // (since v0.7.0) story_statement → user_story re-canon. The four
+    // canonical edges that touch the statement are renamed to the user_story
+    // form. Endpoint guards reference the POST-migration (user_story) types —
+    // edge migration runs after node migration, so by the time these rules
+    // apply the statement node has already been renamed story_statement →
+    // user_story (UPG_MIGRATIONS['0.7.0']).
+    { kind: 'rename', from: 'task_implements_story_statement', to: 'task_implements_user_story', requires_source_type: 'task', requires_target_type: 'user_story', reason: 'story_statement → user_story. Task still implements the statement; edge key updated to the re-canonicalised target type.' },
+    { kind: 'rename', from: 'epic_specified_by_story_statement', to: 'epic_specified_by_user_story', requires_source_type: 'epic', requires_target_type: 'user_story', reason: 'story_statement → user_story. Epics specify the statement; edge key updated to the re-canonicalised target type.' },
+    { kind: 'rename', from: 'story_statement_verified_by_acceptance_criterion', to: 'user_story_verified_by_acceptance_criterion', requires_source_type: 'user_story', requires_target_type: 'acceptance_criterion', reason: 'story_statement → user_story. Acceptance criteria verify the statement; edge key updated to the re-canonicalised source type.' },
+    { kind: 'rename', from: 'test_case_covers_story_statement', to: 'test_case_covers_user_story', requires_source_type: 'test_case', requires_target_type: 'user_story', reason: 'story_statement → user_story. Test cases cover the statement; edge key updated to the re-canonicalised target type.' },
+  ],
+
   '0.4.0': [
     // ── hypothesis_claim → hypothesis reverse rename ───────────────
     // Every edge that was renamed FROM hypothesis_* TO hypothesis_claim_* in
@@ -1971,18 +2002,19 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
       requires_target_type: 'story_statement',
       reason: 'Test cases cover the spec, not the work; retargets target to story_statement.',
     },
-    // Two user_story-edges drop (consolidated into the new canonical
-    // story_task_implements_story_statement edge).
+    // user_story_broken_into_task drops — consolidated into the implements edge.
     {
       kind: 'drop',
       from: 'user_story_broken_into_task',
-      reason: 'Consolidated into the canonical story_task_implements_story_statement (the implements relationship now flows from task to statement directly). CHANGELOG v0.2.7: "user_story_broken_into_task → dropped; consolidated into story_task_implements_story_statement."',
+      reason: 'Consolidated into the canonical implements edge (the relationship now flows from task to statement directly). CHANGELOG v0.2.7: "user_story_broken_into_task → dropped."',
     },
-    {
-      kind: 'drop',
-      from: 'task_implements_user_story',
-      reason: 'Consolidated as above — story_task IS the task, statements carry the implements relationship directly. CHANGELOG v0.2.7: "task_implements_user_story → dropped; consolidated as above."',
-    },
+    // NOTE: the v0.2.7 drop of `task_implements_user_story` was REMOVED at v0.7.0
+    //. Re-canonicalising story_statement → user_story makes
+    // `task_implements_user_story` the canonical implements edge again, so the
+    // name is no longer retired (a drop rule must never name a canonical edge).
+    // Legacy pre-0.2.7 instances are reconnected by the v0.2.7 split's emitted
+    // implements edge; any residual dangling edge is handled by
+    // repair_dangling_edges.
   ],
 
   '0.2.8': [

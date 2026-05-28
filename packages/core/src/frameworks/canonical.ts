@@ -146,7 +146,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       },
       {
         "label": "User Stories",
-        "entityTypeId": "story_statement",
+        "entityTypeId": "user_story",
         "description": "Detailed stories prioritised vertically"
       },
       {
@@ -166,7 +166,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "bucket"
         },
         {
-          "type": "story_statement",
+          "type": "user_story",
           "role": "bucket"
         },
         {

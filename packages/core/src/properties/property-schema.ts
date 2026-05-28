@@ -2550,8 +2550,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     risks_flagged: { type: 'number', description: 'Number of risks flagged in this report' },
     blockers: { type: 'string', description: 'Description of current blockers' },
   },
-  // StoryStatementProperties — "As X, I want Y so Z" templated promise on a user story (UCS pattern P5).
-  story_statement: {
+  // UserStoryProperties — "As X, I want Y so Z" templated promise — a user story (UCS pattern P5).
+  user_story: {
     as_a: { type: 'string', description: '"As a [persona], …". Free-text persona name or slug ref.' },
     i_want_to: { type: 'string', description: 'Capability or action the persona wants.' },
     so_that: { type: 'string', description: 'Benefit or outcome the persona expects.' },

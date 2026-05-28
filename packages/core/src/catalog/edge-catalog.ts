@@ -331,16 +331,15 @@ export const UPG_EDGE_CATALOG = {
   outcome_delivered_by_feature: { forward_verb: 'delivered_by', reverse_verb: 'delivers', classification: 'cross-domain', source_type: 'outcome', target_type: 'feature' },
   outcome_delivered_via_feature_area: { forward_verb: 'delivered_via', reverse_verb: 'delivers_for', classification: 'cross-domain', source_type: 'outcome', target_type: 'feature_area' },
   feature_decomposed_into_epic: { forward_verb: 'decomposed_into', reverse_verb: 'implements', classification: 'hierarchy', source_type: 'feature', target_type: 'epic' },
-  // user_story → story_statement (P5 templated-statement,
-  // lifecycle-free design artefact) + story_task (P4 work-unit, the engineering
-  // work). Statement carries the "As X, I want Y so Z" stable promise + verifies
-  // through acceptance criteria + is covered by test cases + is targeted by
-  // epics; task carries the lifecycle and the implementation work.
-  epic_specified_by_story_statement: { forward_verb: 'specified_by', reverse_verb: 'specifies', classification: 'hierarchy', source_type: 'epic', target_type: 'story_statement' },
-  story_statement_verified_by_acceptance_criterion: { forward_verb: 'verified_by', reverse_verb: 'verifies', classification: 'hierarchy', source_type: 'story_statement', target_type: 'acceptance_criterion' },
-  // story_task collapsed into task. Edge renamed accordingly.
-  // UPG_EDGE_MIGRATIONS['0.4.0'] carries the rename rule for old graphs.
-  task_implements_story_statement: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'cross-domain', source_type: 'task', target_type: 'story_statement' },
+  // user_story (P5 templated-statement, the "As X, I want Y so Z" lifecycle-free
+  // promise) verifies through acceptance criteria, is covered by test cases, and
+  // is specified by epics; the paired `task` carries the lifecycle and the
+  // implementation work, and implements the statement. (v0.2.7 split extracted
+  // the work into `task`; v0.7.0/ re-canonicalised the statement
+  // story_statement → user_story — see UPG_EDGE_MIGRATIONS['0.7.0'].)
+  epic_specified_by_user_story: { forward_verb: 'specified_by', reverse_verb: 'specifies', classification: 'hierarchy', source_type: 'epic', target_type: 'user_story' },
+  user_story_verified_by_acceptance_criterion: { forward_verb: 'verified_by', reverse_verb: 'verifies', classification: 'hierarchy', source_type: 'user_story', target_type: 'acceptance_criterion' },
+  task_implements_user_story: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'cross-domain', source_type: 'task', target_type: 'user_story' },
   feature_affected_by_bug: { forward_verb: 'affected_by', reverse_verb: 'affects', classification: 'hierarchy', source_type: 'feature', target_type: 'bug' },
   // release containment edges — used by the GitHub adapter when
   // importing milestone→issue relationships. resolveContainmentEdge('release',
@@ -356,10 +355,10 @@ export const UPG_EDGE_CATALOG = {
   // feature_area is not contained by theme — themes span multiple
   // areas cross-cuttingly. Containment path: product → feature_area.
   theme_spans_feature_area: { forward_verb: 'spans', reverse_verb: 'spanned_by', classification: 'semantic', source_type: 'theme', target_type: 'feature_area' },
-  // `task_implements_user_story` consolidated into the
-  // canonical `story_task_implements_story_statement` above. The legacy
-  // task→user_story edge is no longer registered — story_task IS the task,
-  // and statements carry the implements relationship directly.
+  // The legacy `story_task` collapsed into `task` (v0.4.0), so the implements
+  // relationship is the canonical `task_implements_user_story` above — there is
+  // no separate story_task edge. (v0.2.7 introduced the Statement/Implementation
+  // split; v0.7.0/ re-canonicalised the statement to user_story.)
   bug_affects_feature: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'bug', target_type: 'feature' },
   roadmap_item_references_feature: { forward_verb: 'references', reverse_verb: 'referenced_by', classification: 'cross-domain', source_type: 'roadmap_item', target_type: 'feature' },
   feature_decomposes_into_task:           { forward_verb: 'decomposes_into',   reverse_verb: 'implements',       classification: 'hierarchy',  source_type: 'feature',           target_type: 'task' },
@@ -618,7 +617,7 @@ export const UPG_EDGE_CATALOG = {
   test_suite_covers_feature: { forward_verb: 'covers', reverse_verb: 'covered_by', classification: 'cross-domain', source_type: 'test_suite', target_type: 'feature' },
   test_environment_mirrors_deployment: { forward_verb: 'mirrors', reverse_verb: 'mirrored_by', classification: 'cross-domain', source_type: 'test_environment', target_type: 'deployment' },
   regression_test_guards_release: { forward_verb: 'guards', reverse_verb: 'guarded_by', classification: 'cross-domain', source_type: 'regression_test', target_type: 'release' },
-  test_case_covers_story_statement: { forward_verb: 'covers', reverse_verb: 'covered_by', classification: 'cross-domain', source_type: 'test_case', target_type: 'story_statement' },
+  test_case_covers_user_story: { forward_verb: 'covers', reverse_verb: 'covered_by', classification: 'cross-domain', source_type: 'test_case', target_type: 'user_story' },
   qa_session_targets_feature: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'qa_session', target_type: 'feature' },
   test_coverage_report_covers_service: { forward_verb: 'covers', reverse_verb: 'covered_by', classification: 'cross-domain', source_type: 'test_coverage_report', target_type: 'service' },
   test_suite_produces_test_result:        { forward_verb: 'produces',          reverse_verb: 'produced_by',      classification: 'causal',     source_type: 'test_suite',        target_type: 'test_result' },

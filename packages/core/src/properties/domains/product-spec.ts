@@ -192,19 +192,19 @@ export interface EpicProperties {
  * persona will be able to do. Lifecycle-free: a statement either still
  * describes a real promise, or is superseded by a new one when the promise changes.
  *
- * Pairs with `story_task` (UCS pattern P4) via `story_task_implements_story_statement`.
+ * Pairs with `task` (UCS pattern P4 — story_task collapsed into task) via `task_implements_user_story`.
  * One statement can have many tasks (re-implementation, per-platform variants);
  * each task carries its own lifecycle.
  *
  * @example
- * const statement: StoryStatementProperties = {
+ * const statement: UserStoryProperties = {
  *   as_a: 'product manager',
  *   i_want_to: 'compare two metrics side-by-side',
  *   so_that: 'I can prioritise this week with confidence',
  *   text: 'As a product manager, I want to compare two metrics side-by-side so that I can prioritise this week with confidence.',
  * }
  */
-export interface StoryStatementProperties {
+export interface UserStoryProperties {
   /** "As a [persona], …". Free-text persona name or slug ref. */
   as_a?: string
   /** Capability or action the persona wants. */
@@ -217,7 +217,7 @@ export interface StoryStatementProperties {
 
 /**
  * @deprecated since v0.4.0. Use `TaskProperties`. `story_task` collapsed into
- * canonical `task`. `estimate` absorbed; `task_implements_story_statement`
+ * canonical `task`. `estimate` absorbed; `task_implements_user_story`
  * edge expresses the story relationship.
  * Migration: `UPG_MIGRATIONS['0.4.0']` renames story_task nodes to task.
  */

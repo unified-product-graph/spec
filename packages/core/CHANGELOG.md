@@ -11,6 +11,38 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.0] — 2026-05-28
+
+**Minor.** Re-canonicalise the user story. `story_statement` → `user_story`.
+
+### Changed
+
+- **`story_statement` → `user_story`.** The v0.2.7 Statement/Implementation split was sound — it extracted the lifecycle-bearing work into `task` — but renamed the surviving statement half to the coined `story_statement`. "User story" is the universally-recognised industry term for the templated "As X, I want Y so Z" promise, and UPG's value is being the recognisable canonical vocabulary — so the statement is re-canonicalised under `user_story`. The split itself is unchanged: the canonical shape remains a lifecycle-free `user_story` (statement) + a `task` (work), linked by `task_implements_user_story`.
+  - `user_story` (`ent_073`) is canonical again (`proposed`, lifecycle-free); `story_statement` (`ent_342`) is now deprecated (`replacement: user_story`).
+  - Four edges renamed: `epic_specified_by_story_statement` → `epic_specified_by_user_story`; `story_statement_verified_by_acceptance_criterion` → `user_story_verified_by_acceptance_criterion`; `task_implements_story_statement` → `task_implements_user_story`; `test_case_covers_story_statement` → `test_case_covers_user_story`.
+
+### Migration
+
+- `UPG_MIGRATIONS['0.7.0']`: `story_statement` → `user_story` (1→1 type rename; identical property surface `as_a` / `i_want_to` / `so_that` / `text` — no property migration).
+- `UPG_EDGE_MIGRATIONS['0.7.0']`: the four edge renames above (endpoint guards target the post-migration `user_story` type).
+- The v0.2.7 `user_story` → statement + task split is retained as the historical record. Legacy graphs migrate `user_story` (bundle) → `story_statement` + `task` at 0.2.7, then `story_statement` → `user_story` at 0.7.0 — converging on the canonical `user_story` (statement) + `task`.
+
+---
+
+## [0.6.2] — 2026-05-27
+
+**Patch.** Sync `FrameworkCategory` with the framework library.
+
+### Fixed
+
+- `FrameworkCategory` was missing 6 values (`security`, `qa_testing`, `legal_compliance`, `content`, `education`, `localisation`) that framework definitions already referenced — which broke the TypeScript build in downstream consumers (e.g. the docs site's `FrameworksView`). Purely additive; no existing value changed.
+
+## [0.6.1] — 2026-05-26
+
+**Patch.** Metadata only: `UPG_VERSION` spec constant aligned to 0.6.x and `repository` repointed to the public `unified-product-graph/spec` mirror. No API or schema changes.
+
+---
+
 ## [0.6.0] — 2026-05-22
 
 **Minor.** v1 editorial cut: the public framework surface is narrowed to the 34 canonical, famous frameworks (Wardley Map, BMC, OST, RICE, JTBD, North Star, OKR, AARRR, Porter Five Forces, RACI, C4, etc.) — one entry per famous-author archetype, balanced across the six lifecycle bands. The broader research catalog of 182 additional definitions is retained internally for tier-1 wiring tests and future promotion but is no longer re-exported from the package entry point or shipped in mirrors. Also lands the status-migrations axis prepared during the unreleased window.

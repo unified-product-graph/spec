@@ -13,7 +13,7 @@ import type { ResearchStudyProperties, ParticipantProperties, ObservationPropert
 import type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, AnnotationProperties, InteractionSpecProperties } from './domains/ux-design.js'
 import type { DesignComponentProperties, DesignTokenProperties, DesignSystemProperties, DesignPatternProperties, DesignGuidelineProperties } from './domains/design-system.js'
 import type { BrandIdentityProperties, BrandColourProperties, BrandTypographyProperties, BrandVoiceProperties, BrandLogoProperties, BrandImageryProperties } from './domains/brand.js'
-import type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, StoryStatementProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, ThemeProperties, ChangelogProperties } from './domains/product-spec.js'
+import type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, UserStoryProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, ThemeProperties, ChangelogProperties } from './domains/product-spec.js'
 import type { MetricProperties, MetricQualityAssessmentProperties } from './domains/metrics.js'
 import type { BoundedContextProperties, ServiceProperties, DomainEventProperties, ApiContractProperties, TechnicalDebtItemProperties, FeatureFlagProperties, DeploymentProperties, AggregateProperties, DomainEntityProperties, ValueObjectProperties, CommandProperties, ReadModelProperties, ApiEndpointProperties, DatabaseSchemaProperties, QueueTopicProperties, BuildArtifactProperties, CodeRepositoryProperties, LibraryDependencyProperties, IntegrationPatternProperties, ExternalApiProperties, DataFlowProperties, InvestigationProperties, RootCauseProperties, SymptomProperties, FixProperties } from './domains/engineering.js'
 import type { FunnelProperties, FunnelStepProperties, AcquisitionChannelProperties, GrowthCampaignProperties, CohortProperties, BehavioralSegmentProperties, GrowthLoopProperties, VariantProperties, AttributionModelProperties } from './domains/growth.js'
@@ -54,7 +54,7 @@ export type { ResearchStudyProperties, ParticipantProperties, ObservationPropert
 export type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, AnnotationProperties, InteractionSpecProperties }
 export type { DesignComponentProperties, DesignTokenProperties, DesignSystemProperties, DesignPatternProperties, DesignGuidelineProperties }
 export type { BrandIdentityProperties, BrandColourProperties, BrandTypographyProperties, BrandVoiceProperties, BrandLogoProperties, BrandImageryProperties }
-export type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, StoryStatementProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, ThemeProperties, ChangelogProperties }
+export type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, UserStoryProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, ThemeProperties, ChangelogProperties }
 export type { MetricProperties, MetricQualityAssessmentProperties }
 export type { BoundedContextProperties, ServiceProperties, DomainEventProperties, ApiContractProperties, TechnicalDebtItemProperties, FeatureFlagProperties, DeploymentProperties, AggregateProperties, DomainEntityProperties, ValueObjectProperties, CommandProperties, ReadModelProperties, ApiEndpointProperties, DatabaseSchemaProperties, QueueTopicProperties, BuildArtifactProperties, CodeRepositoryProperties, LibraryDependencyProperties, IntegrationPatternProperties, ExternalApiProperties, DataFlowProperties, InvestigationProperties, RootCauseProperties, SymptomProperties, FixProperties }
 export type { FunnelProperties, FunnelStepProperties, AcquisitionChannelProperties, GrowthCampaignProperties, CohortProperties, BehavioralSegmentProperties, GrowthLoopProperties, VariantProperties, AttributionModelProperties }
@@ -266,8 +266,8 @@ export interface UPGPropertyMap {
   feature: FeatureProperties
   /** An epic grouping related user stories under a deliverable theme */
   epic: EpicProperties
-  /** The "As X, I want Y so Z" templated promise on a user story (UCS pattern P5 — templated-statement). Implemented by `task` via `task_implements_story_statement`. */
-  story_statement: StoryStatementProperties
+  /** The "As X, I want Y so Z" templated promise — a user story (UCS pattern P5 — templated-statement). Implemented by `task` via `task_implements_user_story`. */
+  user_story: UserStoryProperties
   /**
    * @deprecated since v0.4.0. story_task collapsed into task.
    * Use the `task` entry below.

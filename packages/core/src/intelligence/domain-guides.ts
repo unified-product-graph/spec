@@ -270,19 +270,19 @@ const PRODUCT_SPEC_GUIDE: UPGDomainUsageGuide = {
   // registered to product_spec but missing from the navigation order).
   // `changelog` lives here because it is a structural product-shipping
   // artefact; content domain references it only via cross-domain bridges.
-  creation_sequence: ['feature_area', 'feature', 'epic', 'story_statement', 'acceptance_criterion', 'task', 'bug', 'release', 'roadmap', 'roadmap_item', 'theme', 'changelog'],
+  creation_sequence: ['feature_area', 'feature', 'epic', 'user_story', 'acceptance_criterion', 'task', 'bug', 'release', 'roadmap', 'roadmap_item', 'theme', 'changelog'],
   patterns: [
     {
       name: 'Feature Decomposition',
-      description: 'Features group into areas, decompose into epics, epics specify story_statements (the templated promise), and tasks implement statements as the engineering work',
-      entity_types: ['feature_area', 'feature', 'epic', 'story_statement', 'task'],
-      edge_chain: ['feature_area_contains_feature', 'feature_decomposed_into_epic', 'epic_specified_by_story_statement', 'task_implements_story_statement'],
+      description: 'Features group into areas, decompose into epics, epics specify user stories (the templated promise), and tasks implement them as the engineering work',
+      entity_types: ['feature_area', 'feature', 'epic', 'user_story', 'task'],
+      edge_chain: ['feature_area_contains_feature', 'feature_decomposed_into_epic', 'epic_specified_by_user_story', 'task_implements_user_story'],
     },
   ],
   required_bridges: [
     { edge_type: 'feature_tests_hypothesis', target_domain: 'validation', when: 'Features should trace back to validated hypotheses' },
     { edge_type: 'outcome_delivered_by_feature', target_domain: 'strategy', when: 'Every feature should connect to a strategic outcome' },
-    { edge_type: 'test_case_covers_story_statement', target_domain: 'testing', when: 'Story statements should have acceptance tests' },
+    { edge_type: 'test_case_covers_user_story', target_domain: 'testing', when: 'User stories should have acceptance tests' },
   ],
   anti_patterns: [
     { description: 'Features without outcomes. Features serve strategic outcomes; the rest is waste.' },
@@ -472,7 +472,7 @@ const TESTING_GUIDE: UPGDomainUsageGuide = {
     },
   ],
   required_bridges: [
-    { edge_type: 'test_case_covers_story_statement', target_domain: 'product_spec', when: 'Test cases should trace back to story statements (which in turn trace to features via epics)' },
+    { edge_type: 'test_case_covers_user_story', target_domain: 'product_spec', when: 'Test cases should trace back to user stories (which in turn trace to features via epics)' },
     { edge_type: 'test_case_validates_acceptance_criterion', target_domain: 'product_spec', when: 'Acceptance criteria define what "done" means and must be validated by tests' },
   ],
   anti_patterns: [

@@ -193,12 +193,12 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
 
   // ── Product Specification hierarchy ─────────────────────────────────────────
   // story_task collapsed into canonical task. feature now owns
-  // task directly; story-derived tasks implement story_statement via
-  // task_implements_story_statement edge.
+  // task directly; story-derived tasks implement user_story via
+  // task_implements_user_story edge.
   feature: ['epic', 'bug', 'task'],
   feature_area: ['feature', 'feature_area'],
-  epic: ['story_statement'],
-  story_statement: ['acceptance_criterion'],
+  epic: ['user_story'],
+  user_story: ['acceptance_criterion'],
   task: ['task'],
 
   // ── Engineering hierarchy ───────────────────────────────────────────────────

@@ -82,7 +82,7 @@ export const UPG_RATIO_BENCHMARKS: RatioBenchmark[] = [
   },
   {
     "name": "Story coverage",
-    "numerator_type": "story_statement",
+    "numerator_type": "user_story",
     "denominator_type": "feature",
     "expected_min": 2,
     "stages": [

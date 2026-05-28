@@ -1,33 +1,49 @@
 /**
- * User Story Split (v0.2.7 split 2) — Spec Tests
+ * User Story (v0.2.7 split 2 + v0.7.0 re-canon) — Spec Tests
  *
- * Validates the structural and semantic integrity of the user_story →
- * story_statement + story_task decomposition. Mirrors the shape of
- * `experiment-split.test.ts` (split 1) — same three-question test
- * applied to the Statement/Implementation sub-pattern instead of Plan/Run.
+ * Validates the structural and semantic integrity of the Statement/Implementation
+ * pattern: a lifecycle-free `user_story` (the templated "As X, I want Y so Z"
+ * promise) + a lifecycle-bearing `task` (the work), linked by
+ * `task_implements_user_story`.
  *
- * Two layers of assertion:
+ * History: v0.2.7 split the bundled `user_story` into `story_statement` + a work
+ * type (story_task → task at v0.4.0). v0.7.0 re-canonicalised the
+ * statement back to its industry-standard name `user_story`; `story_statement`
+ * is now a deprecated alias. The split itself is unchanged — the v0.2.7 rule
+ * still produces `story_statement`, which the v0.7.0 type migration renames
+ * forward to `user_story`.
  *
- * 1. **Structural integrity** — the new types are registered, the statement
- * is lifecycle-free + the task uses WORK_ITEM, the new edge resolves,
- * user_story is correctly deprecated, the 5 incumbent user_story-edges
- * are retargeted.
+ * Three layers of assertion:
  *
- * 2. **Migration adapter contract** — the 1→N split rule in
- * `UPG_SPLIT_MIGRATIONS['0.2.7']` produces the expected target nodes +
- * edges for every legacy `user_story.status` value. Always-spawn-both
- * shape (no status routing of which targets to spawn — every legacy
- * row produces both a statement and a task).
+ * 1. **Structural integrity** — user_story is canonical + lifecycle-free,
+ * story_statement is the deprecated alias, the four canonical edges are the
+ * user_story form, the property schema + hierarchy use user_story.
  *
- * The migration adapter itself lives in the MCP server. This test file
- * is the executable contract that adapter runtime must satisfy. The same
- * inline runner pattern from the experiment-split test is used here.
+ * 2. **v0.7.0 re-canon migration** — UPG_MIGRATIONS + UPG_EDGE_MIGRATIONS carry
+ * story_statement → user_story (type) and the four edge renames; the
+ * split → rename chain converges on user_story.
+ *
+ * 3. **Migration adapter contract** — the 1→N split rule in
+ * `UPG_SPLIT_MIGRATIONS['0.2.7']` (retained as the historical record) produces
+ * the expected target nodes + edges for every legacy `user_story.status` value.
+ *
+ * The migration adapter itself lives in the MCP server. This test file is the
+ * executable contract that adapter runtime must satisfy.
  */
 
 import { describe, it, expect } from 'vitest'
 import { UPG_EDGE_CATALOG } from '../catalog/edge-catalog.js'
 import { UPG_VALID_CHILDREN } from '../grammar/hierarchy.js'
-import { UPG_SPLIT_MIGRATIONS, getSplitMigrations, type UPGSplitMigration, type UPGSplitRouteTarget } from '../grammar/migrations.js'
+import {
+  UPG_SPLIT_MIGRATIONS,
+  getSplitMigrations,
+  UPG_MIGRATIONS,
+  UPG_EDGE_MIGRATIONS,
+  getMigrationMap,
+  getUPGEdgeMigrations,
+  type UPGSplitMigration,
+  type UPGSplitRouteTarget,
+} from '../grammar/migrations.js'
 import { UPG_LIFECYCLES, getLifecycleForType, UPG_LIFECYCLE_FREE_TYPES } from '../grammar/lifecycles.js'
 import { UPG_ENTITY_META, isDeprecatedType, getReplacementType } from '../registry/entity-meta.js'
 import { UPG_DOMAINS } from '../registry/domains.js'
@@ -36,47 +52,60 @@ import { UPG_PROPERTY_SCHEMA } from '../properties/property-schema.js'
 // ─── Structural integrity ──────────────────────────────────────────────────────
 
 describe('Entity registration', () => {
- it('story_statement and story_task are registered in entity-meta', () => {
+ it('user_story, story_statement and story_task are registered in entity-meta', () => {
  const names = new Set(UPG_ENTITY_META.map((m) => m.name))
+ expect(names.has('user_story')).toBe(true)
  expect(names.has('story_statement')).toBe(true)
  expect(names.has('story_task')).toBe(true)
  })
 
- it('story_task is deprecated at v0.4.0 (collapse into task)', () => {
+ it('user_story is canonical again (ent_073, proposed, not deprecated) —', () => {
+ const userStory = UPG_ENTITY_META.find((m) => m.name === 'user_story')!
+ expect(userStory.type_id).toBe('ent_073')
+ expect(userStory.maturity).toBe('proposed')
+ expect(isDeprecatedType('user_story')).toBe(false)
+ expect(userStory.deprecated_in).toBeUndefined()
+ expect(userStory.replacement).toBeUndefined()
+ })
+
+ it('story_statement is now the deprecated alias → user_story (v0.7.0)', () => {
  const statement = UPG_ENTITY_META.find((m) => m.name === 'story_statement')!
- const storyTask = UPG_ENTITY_META.find((m) => m.name === 'story_task')!
  expect(statement.type_id).toBe('ent_342')
+ expect(statement.maturity).toBe('deprecated')
+ expect(statement.deprecated_in).toBe('0.7.0')
+ expect(statement.replacement).toBe('user_story')
+ expect(isDeprecatedType('story_statement')).toBe(true)
+ expect(getReplacementType('story_statement')).toBe('user_story')
+ })
+
+ it('story_task remains deprecated at v0.4.0 (collapse into task)', () => {
+ const storyTask = UPG_ENTITY_META.find((m) => m.name === 'story_task')!
  expect(storyTask.type_id).toBe('ent_343')
- expect(statement.maturity).toBe('proposed')
  expect(storyTask.maturity).toBe('deprecated')
  expect(storyTask.deprecated_in).toBe('0.4.0')
  expect(storyTask.replacement).toBe('task')
  })
 
- it('user_story is deprecated in v0.2.7 (replacement chain leads to task via story_task → task)', () => {
- expect(isDeprecatedType('user_story')).toBe(true)
- // user_story replacement updated to task (chain: user_story → story_task → task collapses)
- expect(getReplacementType('user_story')).toBe('task')
- const userStory = UPG_ENTITY_META.find((m) => m.name === 'user_story')!
- expect(userStory.deprecated_in).toBe('0.2.7')
- })
-
- it('product_spec domain contains story_statement but not story_task (deprecated)', () => {
+ it('product_spec domain contains user_story + task but not the deprecated aliases', () => {
  const productSpec = UPG_DOMAINS.find((d) => d.id === 'product_spec')!
- expect(productSpec.types).toContain('story_statement')
+ expect(productSpec.types).toContain('user_story')
  expect(productSpec.types).toContain('task')
  expect(productSpec.types).not.toContain('story_task')
- expect(productSpec.types).not.toContain('user_story')
+ expect(productSpec.types).not.toContain('story_statement')
  })
 })
 
 describe('Property interfaces', () => {
- it('story_statement schema has the templated promise fields', () => {
- const schema = UPG_PROPERTY_SCHEMA['story_statement']
+ it('user_story schema has the templated promise fields', () => {
+ const schema = UPG_PROPERTY_SCHEMA['user_story']
  expect(schema).toBeDefined()
  expect(Object.keys(schema!)).toEqual(
  expect.arrayContaining(['as_a', 'i_want_to', 'so_that', 'text']),
  )
+ })
+
+ it('story_statement (deprecated alias) carries no schema of its own', () => {
+ expect(UPG_PROPERTY_SCHEMA['story_statement']).toBeUndefined()
  })
 
  it('task schema absorbed estimate from story_task (v0.4.0)', () => {
@@ -86,7 +115,7 @@ describe('Property interfaces', () => {
  })
 
  it('statement and task schemas do not overlap on shape-determining fields', () => {
- const statementFields = new Set(Object.keys(UPG_PROPERTY_SCHEMA['story_statement'] ?? {}))
+ const statementFields = new Set(Object.keys(UPG_PROPERTY_SCHEMA['user_story'] ?? {}))
  const taskFields = new Set(Object.keys(UPG_PROPERTY_SCHEMA['task'] ?? {}))
  const statementOnly = ['as_a', 'i_want_to', 'so_that', 'text']
  const taskOnly = ['estimate', 'effort', 'priority']
@@ -102,9 +131,9 @@ describe('Property interfaces', () => {
 })
 
 describe('Lifecycles', () => {
- it('story_statement is lifecycle-free (the templated promise is a stable design artefact)', () => {
- expect(UPG_LIFECYCLE_FREE_TYPES.has('story_statement')).toBe(true)
- expect(getLifecycleForType('story_statement')).toBeUndefined()
+ it('user_story is lifecycle-free (the templated promise is a stable design artefact)', () => {
+ expect(UPG_LIFECYCLE_FREE_TYPES.has('user_story')).toBe(true)
+ expect(getLifecycleForType('user_story')).toBeUndefined()
  })
 
  it('task has its own lifecycle with todo→done phases (story_task lifecycle removed)', () => {
@@ -117,64 +146,65 @@ describe('Lifecycles', () => {
  expect(getLifecycleForType('story_task')).toBeUndefined()
  })
 
- it('UPG_LIFECYCLES registry does NOT include story_task (deprecated, lifecycle removed)', () => {
+ it('UPG_LIFECYCLES registry has task but not the lifecycle-free/deprecated types', () => {
  const types = new Set(UPG_LIFECYCLES.map((l) => l.entity_type))
  expect(types.has('story_task')).toBe(false)
  expect(types.has('task')).toBe(true)
+ expect(types.has('user_story')).toBe(false) // lifecycle-free
  expect(types.has('story_statement')).toBe(false)
  })
 })
 
-describe('Canonical edge (v0.4.0 state)', () => {
- it('task_implements_story_statement replaces story_task_implements_story_statement', () => {
- // v0.4.0: source_type is now task (not story_task).
- const edge = UPG_EDGE_CATALOG.task_implements_story_statement
+describe('Canonical edges (v0.7.0 user_story form)', () => {
+ it('task_implements_user_story is the canonical implements edge', () => {
+ const edge = UPG_EDGE_CATALOG.task_implements_user_story
  expect(edge).toBeDefined()
  expect(edge.classification).toBe('cross-domain')
  expect(edge.source_type).toBe('task')
- expect(edge.target_type).toBe('story_statement')
+ expect(edge.target_type).toBe('user_story')
  expect(edge.forward_verb).toBe('implements')
- expect((UPG_EDGE_CATALOG as Record<string, unknown>).story_task_implements_story_statement).toBeUndefined()
- })
-})
-
-describe('Incumbent user_story edge retargets', () => {
- it('epic_specified_by_story_statement replaces epic_specified_by_user_story', () => {
- expect(UPG_EDGE_CATALOG.epic_specified_by_story_statement).toBeDefined()
- expect(UPG_EDGE_CATALOG.epic_specified_by_story_statement.target_type).toBe('story_statement')
  })
 
- it('story_statement_verified_by_acceptance_criterion replaces user_story_verified_by_acceptance_criterion', () => {
- const edge = UPG_EDGE_CATALOG.story_statement_verified_by_acceptance_criterion
+ it('epic_specified_by_user_story is canonical (epic → user_story)', () => {
+ const edge = UPG_EDGE_CATALOG.epic_specified_by_user_story
  expect(edge).toBeDefined()
- expect(edge.source_type).toBe('story_statement')
+ expect(edge.source_type).toBe('epic')
+ expect(edge.target_type).toBe('user_story')
+ })
+
+ it('user_story_verified_by_acceptance_criterion is canonical', () => {
+ const edge = UPG_EDGE_CATALOG.user_story_verified_by_acceptance_criterion
+ expect(edge).toBeDefined()
+ expect(edge.source_type).toBe('user_story')
  expect(edge.target_type).toBe('acceptance_criterion')
  })
 
- it('test_case_covers_story_statement replaces test_case_covers_user_story', () => {
- const edge = UPG_EDGE_CATALOG.test_case_covers_story_statement
+ it('test_case_covers_user_story is canonical', () => {
+ const edge = UPG_EDGE_CATALOG.test_case_covers_user_story
  expect(edge).toBeDefined()
  expect(edge.source_type).toBe('test_case')
- expect(edge.target_type).toBe('story_statement')
+ expect(edge.target_type).toBe('user_story')
  })
 
- it('legacy user_story-edges are no longer in the catalog', () => {
- expect((UPG_EDGE_CATALOG as Record<string, unknown>).epic_specified_by_user_story).toBeUndefined()
- expect((UPG_EDGE_CATALOG as Record<string, unknown>).user_story_verified_by_acceptance_criterion).toBeUndefined()
+ it('the story_statement-form edges are no longer in the catalog', () => {
+ expect((UPG_EDGE_CATALOG as Record<string, unknown>).epic_specified_by_story_statement).toBeUndefined()
+ expect((UPG_EDGE_CATALOG as Record<string, unknown>).story_statement_verified_by_acceptance_criterion).toBeUndefined()
+ expect((UPG_EDGE_CATALOG as Record<string, unknown>).task_implements_story_statement).toBeUndefined()
+ expect((UPG_EDGE_CATALOG as Record<string, unknown>).test_case_covers_story_statement).toBeUndefined()
+ // and the original pre-0.2.7 names that were genuinely dropped stay gone
  expect((UPG_EDGE_CATALOG as Record<string, unknown>).user_story_broken_into_task).toBeUndefined()
- expect((UPG_EDGE_CATALOG as Record<string, unknown>).task_implements_user_story).toBeUndefined()
- expect((UPG_EDGE_CATALOG as Record<string, unknown>).test_case_covers_user_story).toBeUndefined()
  })
 })
 
 describe('Hierarchy registration', () => {
- it('epic owns story_statement (the spec) — not story_task (the work)', () => {
- expect(UPG_VALID_CHILDREN['epic']).toContain('story_statement')
+ it('epic owns user_story (the spec) — not story_statement/story_task', () => {
+ expect(UPG_VALID_CHILDREN['epic']).toContain('user_story')
+ expect(UPG_VALID_CHILDREN['epic']).not.toContain('story_statement')
  expect(UPG_VALID_CHILDREN['epic']).not.toContain('story_task')
  })
 
- it('story_statement owns acceptance_criterion (criteria define what done looks like)', () => {
- expect(UPG_VALID_CHILDREN['story_statement']).toContain('acceptance_criterion')
+ it('user_story owns acceptance_criterion (criteria define what done looks like)', () => {
+ expect(UPG_VALID_CHILDREN['user_story']).toContain('acceptance_criterion')
  })
 
  it('feature owns task (story_task removed — v0.4.0)', () => {
@@ -184,6 +214,49 @@ describe('Hierarchy registration', () => {
 
  it('story_task is no longer a hierarchy parent (deprecated)', () => {
  expect(UPG_VALID_CHILDREN['story_task']).toBeUndefined()
+ })
+})
+
+// ─── v0.7.0 re-canonicalisation ───────────────────────────────────────
+
+describe('v0.7.0 re-canon: story_statement → user_story', () => {
+ it('UPG_MIGRATIONS["0.7.0"] renames story_statement → user_story', () => {
+ const rule = UPG_MIGRATIONS['0.7.0']?.find((m) => m.from === 'story_statement')
+ expect(rule).toBeDefined()
+ expect(rule!.to).toBe('user_story')
+ })
+
+ it('getMigrationMap up to 0.7.0 resolves story_statement → user_story', () => {
+ const map = getMigrationMap('0.6.2', '0.7.0')
+ expect(map.story_statement).toBe('user_story')
+ })
+
+ it('UPG_EDGE_MIGRATIONS["0.7.0"] renames the four statement edges to user_story form', () => {
+ const rules = UPG_EDGE_MIGRATIONS['0.7.0'] ?? []
+ const byFrom = Object.fromEntries(rules.map((r) => [r.from, r])) as Record<string, { to?: string }>
+ expect(byFrom['task_implements_story_statement']?.to).toBe('task_implements_user_story')
+ expect(byFrom['epic_specified_by_story_statement']?.to).toBe('epic_specified_by_user_story')
+ expect(byFrom['story_statement_verified_by_acceptance_criterion']?.to).toBe('user_story_verified_by_acceptance_criterion')
+ expect(byFrom['test_case_covers_story_statement']?.to).toBe('test_case_covers_user_story')
+ })
+
+ it('getUPGEdgeMigrations(0.6.2, 0.7.0) returns exactly the four re-canon renames', () => {
+ const rules = getUPGEdgeMigrations('0.6.2', '0.7.0')
+ expect(rules).toHaveLength(4)
+ for (const r of rules) {
+ expect(r.kind).toBe('rename')
+ expect(r.from).toContain('story_statement')
+ expect((r as { to: string }).to).toContain('user_story')
+ }
+ })
+
+ it('chain converges: the split emits story_statement, which the 0.7.0 map renames to user_story', () => {
+ // The v0.2.7 split (historical) still produces a `story_statement` node;
+ // applying the 0.7.0 type map carries it forward to the canonical user_story.
+ const splitStatementType = UPG_SPLIT_MIGRATIONS['0.2.7'][0].produces.find((p) => p.ref === 'statement')!.type
+ expect(splitStatementType).toBe('story_statement')
+ const map = getMigrationMap('0.2.7', '0.7.0')
+ expect(map[splitStatementType]).toBe('user_story')
  })
 })
 
