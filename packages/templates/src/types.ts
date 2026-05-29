@@ -14,7 +14,7 @@ export interface EntityTemplate {
   default_status?: string
 }
 
-/** A template set — multiple related entities created together */
+/** A template set: multiple related entities created together */
 export interface TemplateSet {
   /** Template ID */
   id: string

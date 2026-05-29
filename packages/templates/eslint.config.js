@@ -12,7 +12,7 @@ export default tseslint.config(
       ],
       // Warn on explicit any rather than error, so reviewers can decide case by case.
       '@typescript-eslint/no-explicit-any': 'warn',
-      // Warn on prefer-const — auto-fixable, low priority.
+      // Warn on prefer-const; auto-fixable, low priority.
       'prefer-const': 'warn',
     },
   },

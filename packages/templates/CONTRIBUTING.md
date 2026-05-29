@@ -4,23 +4,23 @@ Thanks for your interest in `@unified-product-graph/templates`. This package shi
 
 ## What belongs here
 
-A template captures a pattern worth reusing across products: a persona archetype, a funnel shape, a business model skeleton, a hypothesis set, a launch checklist. Templates are pure data — no runtime logic.
+A template captures a pattern worth reusing across products: a persona archetype, a funnel shape, a business model skeleton, a hypothesis set, a launch checklist. Templates are pure data; no runtime logic.
 
 Good candidates:
 - Patterns that recur across many products in an industry.
 - Patterns whose structure is more valuable than any specific instance.
 - Patterns the consumer can fill in with `{{placeholder}}` values in under five minutes.
 
-If a template only fits one product, it is not a template — it is a graph.
+If a template only fits one product, it is not a template; it is a graph.
 
 ## Template conventions
 
 Every template is a `TemplateSet` (see `src/types.ts`) with:
 
 - `id`, `name`, `description`, `industry`, `stage`.
-- `entities[]` — each entity has a `type` (matching the UPG spec), `title_template`, optional `description_template`, and `default_properties`.
-- `edges[]` — each edge wires entities together by **position in the `entities` array**, using `source_index` and `target_index`. Edges do not embed entity IDs.
-- `prompts` — a map from placeholder key to the question shown to the user when filling the template.
+- `entities[]`: each entity has a `type` (matching the UPG spec), `title_template`, optional `description_template`, and `default_properties`.
+- `edges[]`: each edge wires entities together by **position in the `entities` array**, using `source_index` and `target_index`. Edges do not embed entity IDs.
+- `prompts`: a map from placeholder key to the question shown to the user when filling the template.
 
 ### Placeholders
 

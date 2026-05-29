@@ -4,13 +4,13 @@ export const saasTemplates: TemplateSet[] = [
   {
     id: 'saas-technical-buyer-persona',
     name: 'SaaS Technical Buyer Persona',
-    description: 'A technical decision-maker persona with 2 jobs-to-be-done and 2 pain points — the foundation for any B2B SaaS product.',
+    description: 'A technical decision-maker persona with 2 jobs-to-be-done and 2 pain points: the foundation for any B2B SaaS product.',
     industries: ['saas'],
     stages: ['idea', 'mvp'],
     entities: [
       {
         type: 'persona',
-        title_template: '{{persona_name}} — {{persona_role}}',
+        title_template: '{{persona_name}}, {{persona_role}}',
         description_template: '{{persona_motivation}}',
         default_properties: {
           context: '{{persona_context}}',
@@ -49,7 +49,7 @@ export const saasTemplates: TemplateSet[] = [
       },
       {
         type: 'need',
-        title_template: 'No single source of truth — data scattered across tools',
+        title_template: 'No single source of truth: data scattered across tools',
         description_template: 'Critical {{problem_domain}} data lives in 3-5 different tools. Nobody trusts any single source, so decisions get delayed or made on gut feel.',
         default_properties: { frequency: 4, severity: 4 },
       },
@@ -63,7 +63,7 @@ export const saasTemplates: TemplateSet[] = [
     prompts: {
       persona_name: "What's this persona's name? (e.g. Alex Chen, Jordan Rivera)",
       persona_role: "What's their role? (e.g. VP of Engineering, Staff Developer)",
-      persona_context: 'Describe their world — company size, industry, team, daily reality',
+      persona_context: 'Describe their world: company size, industry, team, daily reality',
       persona_motivation: 'What drives this person? What gets them excited about their work?',
       problem_domain: 'What problem domain does your product address? (e.g. deployment, data pipelines, customer support)',
     },
@@ -71,7 +71,7 @@ export const saasTemplates: TemplateSet[] = [
   {
     id: 'saas-plg-funnel',
     name: 'PLG Acquisition Funnel',
-    description: 'A product-led growth funnel with 5 stages from awareness to referral — the pirate metrics (AARRR) framework applied to your product.',
+    description: 'A product-led growth funnel with 5 stages from awareness to referral: the pirate metrics (AARRR) framework applied to your product.',
     industries: ['saas'],
     stages: ['mvp', 'growth'],
     entities: [
@@ -84,35 +84,35 @@ export const saasTemplates: TemplateSet[] = [
       },
       {
         type: 'funnel_step',
-        title_template: 'Awareness — First discovers {{product_name}}',
+        title_template: 'Awareness: First discovers {{product_name}}',
         description_template: 'User first hears about or encounters the product. Channels: organic search, content marketing, word of mouth, social.',
         default_properties: { order: 1 },
         default_tags: ['awareness'],
       },
       {
         type: 'funnel_step',
-        title_template: 'Activation — Reaches first value moment',
-        description_template: 'User signs up and experiences the core value proposition for the first time. The "aha moment" — when they understand why this exists.',
+        title_template: 'Activation: Reaches first value moment',
+        description_template: 'User signs up and experiences the core value proposition for the first time. The "aha moment": when they understand why this exists.',
         default_properties: { order: 2 },
         default_tags: ['activation'],
       },
       {
         type: 'funnel_step',
-        title_template: 'Revenue — Converts to paid',
+        title_template: 'Revenue: Converts to paid',
         description_template: 'User upgrades from free to paid. Triggered by hitting usage limits, needing team features, or wanting advanced capabilities.',
         default_properties: { order: 3 },
         default_tags: ['revenue'],
       },
       {
         type: 'funnel_step',
-        title_template: 'Retention — Returns and builds habits',
+        title_template: 'Retention: Returns and builds habits',
         description_template: 'User comes back repeatedly and integrates the product into their workflow. Daily/weekly active usage becomes habitual.',
         default_properties: { order: 4 },
         default_tags: ['retention'],
       },
       {
         type: 'funnel_step',
-        title_template: 'Referral — Tells others and invites teammates',
+        title_template: 'Referral: Tells others and invites teammates',
         description_template: 'User actively recommends the product to peers, invites teammates, or shares publicly. The viral coefficient that compounds growth.',
         default_properties: { order: 5 },
         default_tags: ['referral'],
@@ -132,7 +132,7 @@ export const saasTemplates: TemplateSet[] = [
   {
     id: 'saas-business-model',
     name: 'SaaS Business Model',
-    description: 'A complete SaaS business model with revenue stream, value proposition, and cost structure — the economics of your product in one template.',
+    description: 'A complete SaaS business model with revenue stream, value proposition, and cost structure: the economics of your product in one template.',
     industries: ['saas'],
     stages: ['mvp', 'growth'],
     entities: [
@@ -150,7 +150,7 @@ export const saasTemplates: TemplateSet[] = [
       },
       {
         type: 'revenue_stream',
-        title_template: 'Subscription Revenue — {{pricing_model}}',
+        title_template: 'Subscription Revenue: {{pricing_model}}',
         description_template: 'Primary revenue from {{pricing_model}} subscriptions. Target ARPU: {{target_arpu}}/month.',
         default_properties: {},
         default_tags: ['recurring', 'primary'],
@@ -190,7 +190,7 @@ export const saasTemplates: TemplateSet[] = [
   {
     id: 'saas-feature-roadmap',
     name: 'Feature-Led Roadmap',
-    description: '3 features grouped into 3 epics with a release milestone — a structured starting point for your first product roadmap.',
+    description: '3 features grouped into 3 epics with a release milestone: a structured starting point for your first product roadmap.',
     industries: ['saas'],
     stages: ['mvp', 'growth'],
     entities: [
@@ -247,11 +247,11 @@ export const saasTemplates: TemplateSet[] = [
       release_name: "What's this release called? (e.g. v1.0, Public Beta, MVP Launch)",
       release_date: 'Target date? (e.g. Q2 2026, June 2026)',
       release_goal: 'What does this release achieve for users?',
-      feature_1_name: 'Feature 1 — the must-have. What is it?',
+      feature_1_name: 'Feature 1: the must-have. What is it?',
       feature_1_description: 'Describe what Feature 1 does for the user.',
-      feature_2_name: 'Feature 2 — the differentiator. What sets you apart?',
+      feature_2_name: 'Feature 2: the differentiator. What sets you apart?',
       feature_2_description: 'Describe what Feature 2 does for the user.',
-      feature_3_name: 'Feature 3 — the delight. What makes users love this?',
+      feature_3_name: 'Feature 3: the delight. What makes users love this?',
       feature_3_description: 'Describe what Feature 3 does for the user.',
       epic_1_name: 'Epic name for Feature 1 work (e.g. Core Engine, Auth & Onboarding)',
       epic_2_name: 'Epic name for Feature 2 work',
@@ -261,7 +261,7 @@ export const saasTemplates: TemplateSet[] = [
   {
     id: 'saas-hypothesis-set',
     name: 'SaaS Hypothesis Set',
-    description: '3 structured hypotheses — value, usability, and feasibility — plus an experiment template. Start validating before you build.',
+    description: '3 structured hypotheses (value, usability, and feasibility) plus an experiment template. Start validating before you build.',
     industries: ['saas'],
     stages: ['idea', 'mvp'],
     entities: [

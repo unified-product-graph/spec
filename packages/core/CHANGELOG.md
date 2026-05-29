@@ -11,6 +11,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.4] - 2026-05-29
+
+**Patch.** Em-dash-free sweep completed across the published packages and their bundled
+dependencies. Two PRs: #1842 swept the remaining published packages (`sdk`, `cli`, `mcp-server`,
+`cloud-server`, `adapters`, `markdown`, plus private `templates` / `mcp-tooling` for mirror parity);
+#1845 swept the private `frameworks` package, whose content is bundled (via tsup) into the `sdk` /
+`cli` / `mcp-server` / `cloud-server` dists, so its em-dashes had been riding into those four
+published bundles. Package descriptions, JSDoc, and tool reference text only. No catalogue, schema,
+or API changes; `UPG_VERSION` stays `'0.7.3'`. All seven packages republished at 0.7.4 so the
+cleaned text ships and the family stays co-versioned. (`core`/`spec` content was already swept at
+0.7.3 via #1834; remaining em-dashes in shipped bytes are the documented `catalog.ts` wire-format
+delimiter and incidental JSDoc in third-party bundled dependencies, neither UPG-authored prose.)
+
+---
+
 ## [0.7.3] — 2026-05-29
 
 **Em dash removal across the published spec.** All em dashes in JSDoc and

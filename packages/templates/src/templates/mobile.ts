@@ -10,12 +10,12 @@ export const mobileTemplates: TemplateSet[] = [
     entities: [
       {
         type: 'persona',
-        title_template: '{{persona_name}} — {{persona_role}}',
+        title_template: '{{persona_name}}, {{persona_role}}',
         description_template: '{{persona_motivation}}',
         default_properties: {
           context: '{{persona_context}}. Uses their phone {{phone_usage}} per day. Primary device: {{primary_device}}.',
           goals: ['Get things done in micro-moments between other activities', 'Have a seamless experience that works on spotty connections'],
-          frustrations: ['Apps that require too many taps for simple actions', 'Features that only work well on desktop — mobile feels like an afterthought'],
+          frustrations: ['Apps that require too many taps for simple actions', 'Features that only work well on desktop: mobile feels like an afterthought'],
         },
         default_tags: ['mobile-user', 'on-the-go'],
       },
@@ -63,7 +63,7 @@ export const mobileTemplates: TemplateSet[] = [
     prompts: {
       persona_name: "What's this persona's name?",
       persona_role: 'Their role? (e.g. Busy Parent, Sales Rep on the Road, Fitness Enthusiast)',
-      persona_context: 'Describe their world — lifestyle, work style, when/where they use their phone',
+      persona_context: 'Describe their world: lifestyle, work style, when/where they use their phone',
       persona_motivation: 'What drives them? Why would they reach for your app?',
       phone_usage: 'How much do they use their phone? (e.g. 3-4 hours, constantly, only for essentials)',
       primary_device: 'Primary device? (e.g. iPhone 15, Android mid-range, iPad mini)',
@@ -74,7 +74,7 @@ export const mobileTemplates: TemplateSet[] = [
   {
     id: 'mobile-engagement-loop',
     name: 'App Engagement Loop',
-    description: 'A mobile app funnel from download to daily habit — 5 stages covering onboarding, first value, habit formation, and sharing.',
+    description: 'A mobile app funnel from download to daily habit: 5 stages covering onboarding, first value, habit formation, and sharing.',
     industries: ['mobile'],
     stages: ['mvp', 'growth'],
     entities: [
@@ -87,35 +87,35 @@ export const mobileTemplates: TemplateSet[] = [
       },
       {
         type: 'funnel_step',
-        title_template: 'Download — Installs from app store',
+        title_template: 'Download: Installs from app store',
         description_template: 'User discovers the app through {{discovery_channel}} and installs it. First impression: app store listing, screenshots, reviews, and download size all matter.',
         default_properties: { order: 1 },
         default_tags: ['download'],
       },
       {
         type: 'funnel_step',
-        title_template: 'Onboard — Completes first-run experience',
+        title_template: 'Onboard: Completes first-run experience',
         description_template: 'User opens the app for the first time. Goal: get them to {{onboarding_goal}} within 60 seconds. Minimize permission prompts, skip lengthy tutorials, show value immediately.',
         default_properties: { order: 2 },
         default_tags: ['onboarding'],
       },
       {
         type: 'funnel_step',
-        title_template: 'First Value — Completes the core action',
-        description_template: 'User experiences the primary value proposition by completing {{core_action}}. This is the "aha moment" — the point where the app proves it is worth keeping.',
+        title_template: 'First Value: Completes the core action',
+        description_template: 'User experiences the primary value proposition by completing {{core_action}}. This is the "aha moment": the point where the app proves it is worth keeping.',
         default_properties: { order: 3 },
         default_tags: ['activation'],
       },
       {
         type: 'funnel_step',
-        title_template: 'Habit — Returns daily/weekly without prompting',
-        description_template: 'User returns to the app on their own — not because of a push notification, but because the app has become part of their routine. Trigger: {{habit_trigger}}.',
+        title_template: 'Habit: Returns daily/weekly without prompting',
+        description_template: 'User returns to the app on their own, not because of a push notification, but because the app has become part of their routine. Trigger: {{habit_trigger}}.',
         default_properties: { order: 4 },
         default_tags: ['retention', 'habit'],
       },
       {
         type: 'funnel_step',
-        title_template: 'Share — Invites others or creates shareable content',
+        title_template: 'Share: Invites others or creates shareable content',
         description_template: 'User shares their results, invites friends, or creates content that drives new downloads. Viral loop: shared content → app store → new user → shared content.',
         default_properties: { order: 5 },
         default_tags: ['referral', 'viral'],
@@ -145,7 +145,7 @@ export const mobileTemplates: TemplateSet[] = [
     entities: [
       {
         type: 'release',
-        title_template: '{{app_name}} v1.0 — App Store Launch',
+        title_template: '{{app_name}} v1.0: App Store Launch',
         description_template: 'First public release of {{app_name}}. Target: {{launch_date}}. Minimum viable features to validate the core value proposition with real users.',
         default_properties: {},
         default_tags: ['launch', 'v1'],
@@ -160,7 +160,7 @@ export const mobileTemplates: TemplateSet[] = [
       {
         type: 'feature',
         title_template: '{{core_loop_name}}',
-        description_template: '{{core_loop_description}}. This is the reason the app exists — the core loop users come back for every day.',
+        description_template: '{{core_loop_description}}. This is the reason the app exists: the core loop users come back for every day.',
         default_properties: { status: 'planned' },
         default_tags: ['core-loop', 'must-have'],
       },
@@ -174,7 +174,7 @@ export const mobileTemplates: TemplateSet[] = [
       {
         type: 'feature',
         title_template: 'Analytics & Event Tracking',
-        description_template: 'Core event tracking: app_open, onboarding_complete, core_action_complete, session_duration, retention_d1/d7/d30. Tooling: {{analytics_tool}}. Privacy-first — no PII in events.',
+        description_template: 'Core event tracking: app_open, onboarding_complete, core_action_complete, session_duration, retention_d1/d7/d30. Tooling: {{analytics_tool}}. Privacy-first; no PII in events.',
         default_properties: { status: 'planned' },
         default_tags: ['analytics', 'infrastructure'],
       },

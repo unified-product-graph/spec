@@ -4,13 +4,13 @@ export const marketplaceTemplates: TemplateSet[] = [
   {
     id: 'marketplace-two-sided-personas',
     name: 'Two-Sided Persona Pair',
-    description: 'A buyer persona and a seller persona, each with 2 jobs-to-be-done — the foundation for any marketplace where both sides need to win.',
+    description: 'A buyer persona and a seller persona, each with 2 jobs-to-be-done: the foundation for any marketplace where both sides need to win.',
     industries: ['marketplace'],
     stages: ['idea', 'mvp'],
     entities: [
       {
         type: 'persona',
-        title_template: '{{buyer_name}} — {{buyer_role}}',
+        title_template: '{{buyer_name}}, {{buyer_role}}',
         description_template: '{{buyer_motivation}}',
         default_properties: {
           context: '{{buyer_context}}',
@@ -43,12 +43,12 @@ export const marketplaceTemplates: TemplateSet[] = [
       },
       {
         type: 'persona',
-        title_template: '{{seller_name}} — {{seller_role}}',
+        title_template: '{{seller_name}}, {{seller_role}}',
         description_template: '{{seller_motivation}}',
         default_properties: {
           context: '{{seller_context}}',
           goals: ['Reach more {{demand_noun}} without spending on ads', 'Build a reputation that compounds over time'],
-          frustrations: ['Competing on price alone — no way to stand out on quality', 'Platform takes too large a cut for the value it provides'],
+          frustrations: ['Competing on price alone, no way to stand out on quality', 'Platform takes too large a cut for the value it provides'],
         },
         default_tags: ['seller', 'supply-side'],
       },
@@ -84,11 +84,11 @@ export const marketplaceTemplates: TemplateSet[] = [
     prompts: {
       buyer_name: "Buyer persona name? (e.g. Maya, Alex)",
       buyer_role: 'Buyer role? (e.g. Homeowner, Small Business Owner, Hiring Manager)',
-      buyer_context: "Describe the buyer's world — who are they, what do they need?",
+      buyer_context: "Describe the buyer's world: who are they, what do they need?",
       buyer_motivation: 'What drives the buyer? Why are they searching?',
       seller_name: 'Seller persona name?',
       seller_role: 'Seller role? (e.g. Freelance Designer, Local Contractor, Course Creator)',
-      seller_context: "Describe the seller's world — what do they offer, how do they work?",
+      seller_context: "Describe the seller's world: what do they offer, how do they work?",
       seller_motivation: "What drives the seller? Why do they want a platform?",
       supply_noun: 'What does the seller provide? (e.g. design service, cleaning service, online course)',
       demand_noun: 'What do you call the buyers? (e.g. clients, customers, students)',
@@ -117,8 +117,8 @@ export const marketplaceTemplates: TemplateSet[] = [
       },
       {
         type: 'revenue_stream',
-        title_template: 'Take Rate — {{take_rate}}% per transaction',
-        description_template: 'Commission on each completed transaction. {{take_rate}}% of GMV. This is the primary revenue driver — scales directly with marketplace activity.',
+        title_template: 'Take Rate: {{take_rate}}% per transaction',
+        description_template: 'Commission on each completed transaction. {{take_rate}}% of GMV. This is the primary revenue driver; scales directly with marketplace activity.',
         default_properties: {},
         default_tags: ['take-rate', 'primary'],
       },
@@ -143,7 +143,7 @@ export const marketplaceTemplates: TemplateSet[] = [
       {
         type: 'value_proposition',
         title_template: 'For {{supply_side}}: Steady demand without marketing spend',
-        description_template: 'For {{supply_side}} struggling to find customers, {{marketplace_name}} delivers qualified {{demand_side}} directly — no ads, no cold outreach, just great work that compounds into reputation.',
+        description_template: 'For {{supply_side}} struggling to find customers, {{marketplace_name}} delivers qualified {{demand_side}} directly: no ads, no cold outreach, just great work that compounds into reputation.',
         default_properties: {
           for_segment: '{{supply_side}}',
           gains: ['Steady stream of qualified leads', 'Reputation that compounds over time', 'Handled payments and admin'],

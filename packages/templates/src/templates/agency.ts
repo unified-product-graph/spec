@@ -4,18 +4,18 @@ export const agencyTemplates: TemplateSet[] = [
   {
     id: 'agency-client-persona',
     name: 'Client Persona',
-    description: 'An agency client persona with budget, timeline, and decision process — the key details that determine whether a lead becomes a project.',
+    description: 'An agency client persona with budget, timeline, and decision process: the key details that determine whether a lead becomes a project.',
     industries: ['agency'],
     stages: ['idea', 'mvp', 'growth'],
     entities: [
       {
         type: 'persona',
-        title_template: '{{client_name}} — {{client_title}} at {{company_type}}',
+        title_template: '{{client_name}}, {{client_title}} at {{company_type}}',
         description_template: '{{client_motivation}}',
         default_properties: {
           context: '{{client_context}}. Budget range: {{budget_range}}. Typical project timeline: {{timeline}}. Decision process: {{decision_process}}.',
           goals: ['Launch {{project_goal}} on time and within budget', 'Find an agency partner who understands the business, not just the deliverable', 'Demonstrate ROI to internal stakeholders within {{roi_timeline}}'],
-          frustrations: ['Agencies over-promise and under-deliver — scope creep, missed deadlines', 'Hard to evaluate agency quality before signing a contract', 'Communication gaps — no visibility into progress between milestone reviews'],
+          frustrations: ['Agencies over-promise and under-deliver (scope creep, missed deadlines)', 'Hard to evaluate agency quality before signing a contract', 'Communication gaps: no visibility into progress between milestone reviews'],
         },
         default_tags: ['client', 'agency'],
       },
@@ -43,7 +43,7 @@ export const agencyTemplates: TemplateSet[] = [
       },
       {
         type: 'need',
-        title_template: 'Every agency proposal looks the same — impossible to compare',
+        title_template: 'Every agency proposal looks the same, impossible to compare',
         description_template: 'RFP responses are full of jargon and case studies but never clearly answer: what will you build, how long, how much, and what happens when scope changes? No standardized way to compare.',
         default_properties: { frequency: 4, severity: 4 },
       },
@@ -64,7 +64,7 @@ export const agencyTemplates: TemplateSet[] = [
       client_name: "Client persona name?",
       client_title: 'Their title? (e.g. VP of Marketing, Head of Product, Founder)',
       company_type: 'Company type? (e.g. Series B startup, mid-market SaaS, enterprise retail)',
-      client_context: 'Describe their world — industry, team size, what pressures they face',
+      client_context: 'Describe their world: industry, team size, what pressures they face',
       client_motivation: 'What drives this person to seek agency help?',
       budget_range: 'Typical budget range? (e.g. $20-50K, $50-150K, $200K+)',
       timeline: 'Typical project timeline? (e.g. 6-8 weeks, 3 months, 6 months)',
@@ -77,7 +77,7 @@ export const agencyTemplates: TemplateSet[] = [
   {
     id: 'agency-service-blueprint',
     name: 'Service Blueprint',
-    description: 'An agency business model with 3 revenue streams — project-based, retainer, and advisory — covering the full spectrum of how agencies make money.',
+    description: 'An agency business model with 3 revenue streams (project-based, retainer, and advisory) covering the full spectrum of how agencies make money.',
     industries: ['agency'],
     stages: ['mvp', 'growth'],
     entities: [
@@ -99,7 +99,7 @@ export const agencyTemplates: TemplateSet[] = [
       {
         type: 'revenue_stream',
         title_template: 'Project-Based Delivery',
-        description_template: 'Fixed-scope, fixed-price engagements. Typical size: {{project_size}}. Duration: {{project_duration}}. Margin target: {{project_margin}}%. The bread and butter — predictable delivery, clear milestones.',
+        description_template: 'Fixed-scope, fixed-price engagements. Typical size: {{project_size}}. Duration: {{project_duration}}. Margin target: {{project_margin}}%. The bread and butter: predictable delivery, clear milestones.',
         default_properties: {},
         default_tags: ['project', 'primary'],
       },
@@ -113,7 +113,7 @@ export const agencyTemplates: TemplateSet[] = [
       {
         type: 'revenue_stream',
         title_template: 'Strategic Advisory',
-        description_template: 'High-value, low-effort advisory engagements. {{advisory_hours}} hours/month at {{advisory_rate}}/hour. Senior partners only. Highest margin stream — pure expertise, no delivery overhead.',
+        description_template: 'High-value, low-effort advisory engagements. {{advisory_hours}} hours/month at {{advisory_rate}}/hour. Senior partners only. Highest margin stream: pure expertise, no delivery overhead.',
         default_properties: {},
         default_tags: ['advisory', 'high-margin'],
       },
@@ -146,7 +146,7 @@ export const agencyTemplates: TemplateSet[] = [
     entities: [
       {
         type: 'release',
-        title_template: '{{project_name}} — {{client_name}} Engagement',
+        title_template: '{{project_name}}: {{client_name}} Engagement',
         description_template: 'Full engagement for {{client_name}}. Scope: {{engagement_scope}}. Timeline: {{engagement_timeline}}. Budget: {{engagement_budget}}.',
         default_properties: {},
         default_tags: ['engagement', 'client-project'],
