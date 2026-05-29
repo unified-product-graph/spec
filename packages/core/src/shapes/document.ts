@@ -39,7 +39,7 @@ export interface UPGSource {
  * const product: UPGProduct = {
  *   id: 'entopo',
  *   title: 'Entopo',
- *   description: 'The product creation tool — canvas + AI + graph, built on UPG.',
+ *   description: 'The product creation tool: canvas + AI + graph, built on UPG.',
  *   stage: 'beta',
  * }
  */

@@ -6,7 +6,7 @@ import type { UPGEntityType } from '../../catalog/entity-catalog.js'
 import type { UPGDomainId } from '../../registry/domains.js'
 import type { UPGProductStage } from '../../shapes/document.js'
 
-// ─── Benchmark source — controlled vocabulary ───────────────────────
+// ─── Benchmark source: controlled vocabulary ────────────────────────
 
 /**
  * Where a benchmark's range or expectation comes from.
@@ -16,8 +16,8 @@ import type { UPGProductStage } from '../../shapes/document.js'
  * against free-form strings. Each variant carries enough metadata to render
  * the citation inline without further lookup.
  *
- * @example { kind: 'book', citation: 'The Lean Startup — Eric Ries (2011), ch. 7' }
- * @example { kind: 'practitioner', attribution: 'Teresa Torres — Continuous Discovery Habits' }
+ * @example { kind: 'book', citation: 'The Lean Startup, Eric Ries (2011), ch. 7' }
+ * @example { kind: 'practitioner', attribution: 'Teresa Torres, Continuous Discovery Habits' }
  * @example { kind: 'industry_practice', category: 'devops' }
  * @example { kind: 'fundamental' }
  */
@@ -32,7 +32,7 @@ export type UPGBenchmarkSource =
    * voice_of_customer, etc.) so consumers can filter by space.
    */
   | { kind: 'industry_practice'; category: string }
-  /** Definitional — true by the spec's own construction, not externally sourced. */
+  /** Definitional: true by the spec's own construction, not externally sourced. */
   | { kind: 'fundamental' }
 
 // Canonical product stages re-exported for consumer convenience.
@@ -107,7 +107,7 @@ export interface RatioBenchmark {
   numerator_type: UPGEntityType | UPGEntityType[]
   /** Entity type(s) forming the denominator of the ratio */
   denominator_type: UPGEntityType | UPGEntityType[]
-  /** Minimum acceptable ratio value — below this signals an imbalance */
+  /** Minimum acceptable ratio value. Below this signals an imbalance. */
   expected_min: number
   /** Stages where this ratio is meaningful and should be evaluated */
   stages: UPGProductStage[]

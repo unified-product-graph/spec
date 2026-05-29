@@ -12,9 +12,9 @@
  *
  * Benchmark shape: see `DomainActivation` in `./types.ts`.
  *
- * @see ./types.ts — `DomainActivation`
- * @see ../../registry/domains.ts — canonical domain registry
- * @see ../intelligence.ts — domain-activation audit consumer
+ * @see ./types.ts `DomainActivation`
+ * @see ../../registry/domains.ts canonical domain registry
+ * @see ../intelligence.ts domain-activation audit consumer
  * https://unifiedproductgraph.org/spec | MIT
  */
 

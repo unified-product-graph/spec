@@ -1,13 +1,13 @@
 /**
- * approaches/definitions/ — the five canonical UPGApproach records.
+ * approaches/definitions/: the five canonical UPGApproach records.
  *
- * Each record is a definition lookup — id, label, description (cartographic
+ * Each record is a definition lookup: id, label, description (cartographic
  * framing), question_answered, signature_hint, framework_id_examples.
  * Structured execution semantics are a forthcoming follow-up; the LLM is the
  * executor today.
  *
  * Order is stable: Plan / Inspect / Prioritise / Trace / Reflect. Matches the
- * cognitive flow — decide what to build, check what's broken, rank what's
+ * cognitive flow: decide what to build, check what's broken, rank what's
  * most important, walk a path through what exists, question what you're
  * assuming.
  *

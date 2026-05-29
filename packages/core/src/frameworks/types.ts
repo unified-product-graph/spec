@@ -29,13 +29,13 @@ export interface FrameworkSlot {
 
 // ─── Origin ─────────────────────────────────────────────────────────────────
 
-/** Where the framework came from — attribution and licensing */
+/** Where the framework came from: attribution and licensing */
 export interface FrameworkOrigin {
   /** Whether the framework is from academia, a practitioner, the community, or original to UPG */
   type: 'academic' | 'practitioner' | 'community' | 'custom'
   /** Human-readable attribution (e.g. "Sean Ellis", "Marty Cagan", "Teresa Torres") */
   attribution?: string
-  /** Provenance narrative — how the framework came about (e.g. "Published in Business Model Generation") */
+  /** Provenance narrative: how the framework came about (e.g. "Published in Business Model Generation") */
   description?: string
   /** URL to the original source or publication */
   url?: string
@@ -104,12 +104,12 @@ export interface FrameworkConstant {
 }
 
 /**
- * Everything the framework needs from the graph's data layer — which entity
+ * Everything the framework needs from the graph's data layer: which entity
  * types play which roles, which properties each type must carry under the
  * lens, and any computed or scaffolded constants.
  *
  * @example
- * // RICE — scores a feature on reach, impact, confidence, effort.
+ * // RICE: scores a feature on reach, impact, confidence, effort.
  * const riceData: FrameworkDataSpec = {
  *   entity_types: [
  *     { type: 'feature', role: 'item', min_count: 1 },
@@ -145,12 +145,12 @@ export interface FrameworkDataSpec {
    * domain-specific fields on top of canonical entities (RICE adds
    * `reach`/`impact`/`confidence`/`effort` to a feature; Kano adds
    * `functional_response`/`dysfunctional_response`). These fields are NOT
-   * universal to the entity — they live inside the framework context.
+   * universal to the entity; they live inside the framework context.
    *
    * Consumers must read framework-introduced properties from this spec, not
    * from `UPG_PROPERTY_SCHEMA`. Renderers merge both when displaying an
-   * entity under a framework. See `src/ARCHITECTURE.md` —
-   * "Framework Properties — Lens-Scoped Fields".
+   * entity under a framework. See `src/ARCHITECTURE.md`,
+   * "Framework Properties: Lens-Scoped Fields".
    */
   required_properties: Record<string, FrameworkPropertyRequirement[]>
   /** Properties that are derived from other properties via expressions */
@@ -226,15 +226,15 @@ export interface NamedGroup {
 export interface FrameworkStructureSpec {
   /** The visual / topological pattern (tree, table, matrix, etc.) */
   pattern: StructurePattern
-  /** Tree levels — only used when pattern is 'tree' */
+  /** Tree levels (only used when pattern is 'tree') */
   levels?: FrameworkLevel[]
   /** Edge types used to connect entities in this framework */
   edge_types?: string[]
-  /** Matrix slots — only used when pattern is 'matrix' */
+  /** Matrix slots (only used when pattern is 'matrix') */
   slots?: MatrixSlot[]
-  /** Funnel stages — only used when pattern is 'funnel' */
+  /** Funnel stages (only used when pattern is 'funnel') */
   stages?: FunnelStage[]
-  /** Named groups — only used when pattern is 'collection' */
+  /** Named groups (only used when pattern is 'collection') */
   groups?: NamedGroup[]
 }
 
@@ -289,7 +289,7 @@ export interface FrameworkPresentationSpec {
   card_fields?: string[]
   /** Whether tree branches can be collapsed */
   collapsible?: boolean
-  /** Custom colour map — keys are values of the colour_by dimension, values are CSS colours */
+  /** Custom colour map: keys are values of the colour_by dimension, values are CSS colours */
   colour_map?: Record<string, string>
 }
 
@@ -329,11 +329,11 @@ export interface FrameworkEducation {
  * A UPG Framework is a declarative, config-driven lens that structures
  * UPG graph data into a well-known product management pattern.
  *
- * Frameworks are pure data — no code. The rendering engine reads the
+ * Frameworks are pure data; no code. The rendering engine reads the
  * framework definition and produces the appropriate UI.
  *
  * @example
- * // Abbreviated RICE definition — shows the layer split (data / structure
+ * // Abbreviated RICE definition, showing the layer split (data / structure
  * // / presentation / education). Real definitions live in
  * // `src/frameworks/definitions/`.
  * const riceFramework: UPGFramework = {
@@ -409,20 +409,20 @@ export interface UPGFramework {
   /** ID of a parent framework this one extends */
   extends?: string
   /**
-   * The approaches this framework serves — many-to-many. Each value is a
+   * The approaches this framework serves (many-to-many). Each value is a
    * `UPGApproachId` (`'plan' | 'inspect' | 'prioritise' | 'trace' | 'reflect'`).
-   * Optional — partial coverage is by design; adding tags later is additive.
+   * Optional: partial coverage is by design; adding tags later is additive.
    *
    * Type-erased to `string[]` to avoid a circular import with
    * `approaches/types.ts`. Conceptually `readonly UPGApproachId[]`.
    *
-   * @see MENTAL-MODEL.md — approach × framework relationship
+   * @see MENTAL-MODEL.md, approach × framework relationship
    */
   approach_ids?: readonly string[]
 }
 
 /**
- * Lightweight framework metadata — the identity + origin subset of UPGFramework.
+ * Lightweight framework metadata: the identity + origin subset of UPGFramework.
  *
  * Use this type for catalogue listings, site data, and anywhere that needs
  * framework identity without the full data/structure/presentation/education layers.
@@ -453,5 +453,5 @@ export interface UPGFrameworkMeta {
 //
 // UPGMethodology + MethodologyStep were removed in v0.2.
 // Methodologies are now UPGWorkflow records with all `kind: 'framework'`
-// steps — single primitive, one-to-one coverage. See packages/upg-spec/
+// steps, a single primitive with one-to-one coverage. See packages/upg-spec/
 // src/workflows/ for the canonical shape.

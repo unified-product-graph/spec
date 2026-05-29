@@ -83,7 +83,7 @@ export interface RiskRegisterProperties {
  * const properties: ChangeRequestProperties = {
  *   change_type: 'scope',
  *   priority: 'high',
- *   impact_assessment: 'Medium — affects onboarding success metric.',
+ *   impact_assessment: 'Medium: affects onboarding success metric.',
  * }
  */
 export interface ChangeRequestProperties {

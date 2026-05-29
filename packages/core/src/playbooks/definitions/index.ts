@@ -11,7 +11,7 @@
  *   discovery-validation-hypothesis-cycle → build-measure-learn
  *
  * Every existing v0.2.x workflow maps here; cross-region lens workflows
- * (`product-journey`, `full-product-journey`) were dropped — their content
+ * (`product-journey`, `full-product-journey`) were dropped; their content
  * is already covered by the 10 canonical region playbooks.
  */
 
@@ -65,7 +65,7 @@ function domainGuideStep(
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 1 — strategy_outcomes (anchor `objective`)
+// Region 1 - strategy_outcomes (anchor `objective`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const STRATEGY_OUTCOMES_PLAYBOOK: UPGPlaybook = {
@@ -73,20 +73,20 @@ export const STRATEGY_OUTCOMES_PLAYBOOK: UPGPlaybook = {
   name: 'Strategy & Outcomes',
   version: '0.2.0',
   description:
-    'Cascade vision through themes, outcomes, objectives, key results — and the bets you are making to get there.',
+    'Cascade vision through themes, outcomes, objectives, key results, and the bets you are making to get there.',
   region: 'strategy_outcomes',
   is_canonical: true,
   target_anchor_entity: 'objective',
   creation_sequence: [
     seqStep(1, 'Vision & Mission',
       ['vision', 'mission'],
-      'Name what you are building toward and how you will get there. Vision is the destination; mission is the orientation. One of each — more is dilution.'),
+      'Name what you are building toward and how you will get there. Vision is the destination; mission is the orientation. One of each, no more.'),
     seqStep(2, 'Themes',
       ['strategic_theme', 'strategic_pillar'],
       'Choose 2–4 strategic themes that focus the work. Past four, you have lost focus, not gained coverage.'),
     seqStep(3, 'Outcomes',
       ['outcome'],
-      'Frame the changes in the world the product is trying to cause — shifts in behavior, perception, or position. Not features shipped.'),
+      'Frame the changes in the world the product is trying to cause: shifts in behavior, perception, or position. Not features shipped.'),
     seqStep(4, 'Objectives',
       ['objective'],
       'Translate outcomes into directional bets the team commits to within a horizon. An objective is an ambition with a deadline attached.'),
@@ -104,11 +104,11 @@ export const STRATEGY_OUTCOMES_PLAYBOOK: UPGPlaybook = {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 2 — users_needs (anchor `persona`)
+// Region 2 - users_needs (anchor `persona`)
 // ════════════════════════════════════════════════════════════════════════════
 
 /**
- * Canonical users_needs playbook — net-new authored content per Q.C of the
+ * Canonical users_needs playbook: net-new authored content per Q.C of the
  * decision doc. Persona has 25 inbound cross-edges; the spec's gravitational
  * centre. Skeleton-only is not acceptable here.
  */
@@ -168,7 +168,7 @@ export const USERS_NEEDS_PLAYBOOK: UPGPlaybook = {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 3 — discovery_research_validation (anchor `opportunity`)
+// Region 3 - discovery_research_validation (anchor `opportunity`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const DISCOVERY_RESEARCH_VALIDATION_PLAYBOOK: UPGPlaybook = {
@@ -228,7 +228,7 @@ export const DISCOVERY_VALIDATION_HYPOTHESIS_PLAYBOOK: UPGPlaybook = {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 4 — market_competitive (anchor `competitor`)
+// Region 4 - market_competitive (anchor `competitor`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const MARKET_COMPETITIVE_PLAYBOOK: UPGPlaybook = {
@@ -243,13 +243,13 @@ export const MARKET_COMPETITIVE_PLAYBOOK: UPGPlaybook = {
   creation_sequence: [
     seqStep(1, 'Market',
       ['market_segment', 'classification_axis', 'classification_value'],
-      'Frame the market you compete in. What axes distinguish segments — size, vertical, sophistication, urgency?'),
+      'Frame the market you compete in. What axes distinguish segments: size, vertical, sophistication, urgency?'),
     seqStep(2, 'Competitors',
       ['competitor'],
-      'List the 3–7 closest alternatives — including DIY, status quo, and adjacent solutions. "No competition" is rarely true.'),
+      'List the 3–7 closest alternatives, including DIY, status quo, and adjacent solutions. "No competition" is rarely true.'),
     seqStep(3, 'Their offerings',
       ['competitor_feature'],
-      'For the top 3–5 competitors, catalog what they actually ship — not their marketing claims.'),
+      'For the top 3–5 competitors, catalog what they actually ship, not their marketing claims.'),
     seqStep(4, 'Trends',
       ['market_trend'],
       'Capture the shifts in technology, behavior, regulation, or economy that change the playing field underneath everyone.'),
@@ -258,12 +258,12 @@ export const MARKET_COMPETITIVE_PLAYBOOK: UPGPlaybook = {
       'Synthesize into structured comparisons: feature parity matrices, win/loss patterns, positioning maps.'),
     seqStep(6, 'Moves',
       ['partnership'],
-      'Look where competitors are weak and trends are strong. That intersection is where your moves live — including who to partner with.'),
+      'Look where competitors are weak and trends are strong. That intersection is where your moves live, including who to partner with.'),
   ],
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 5 — experience_design_brand (anchor `user_journey`)
+// Region 5 - experience_design_brand (anchor `user_journey`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const EXPERIENCE_DESIGN_BRAND_PLAYBOOK: UPGPlaybook = {
@@ -358,7 +358,7 @@ export const EXPERIENCE_CONTENT_PLAYBOOK: UPGPlaybook = {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 6 — product_delivery (anchor `feature`)
+// Region 6 - product_delivery (anchor `feature`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const PRODUCT_DELIVERY_PLAYBOOK: UPGPlaybook = {
@@ -385,7 +385,7 @@ export const PRODUCT_DELIVERY_PLAYBOOK: UPGPlaybook = {
       'Decompose stories into the smallest unit of work an engineer can pick up. Surface the dependencies between them.'),
     seqStep(5, 'Releases & Milestones',
       ['release', 'milestone'],
-      'Bundle stories into releases. Milestones mark moments of strategic significance — first paying customer, first 1000 users.'),
+      'Bundle stories into releases. Milestones mark moments of strategic significance: first paying customer, first 1000 users.'),
     seqStep(6, 'Themes & Changelog',
       ['theme', 'changelog'],
       'Group releases into strategic themes. Maintain a changelog the team and customers can read together.'),
@@ -411,7 +411,7 @@ export const PRODUCT_FEEDBACK_SYNTHESIS_PLAYBOOK: UPGPlaybook = {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 7 — engineering_platform (anchor `service`)
+// Region 7 - engineering_platform (anchor `service`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const ENGINEERING_PLATFORM_PLAYBOOK: UPGPlaybook = {
@@ -469,7 +469,7 @@ export const ENGINEERING_ARCHITECTURE_ONLY_PLAYBOOK: UPGPlaybook = {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 8 — business_gtm_growth (anchor `value_proposition`)
+// Region 8 - business_gtm_growth (anchor `value_proposition`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const BUSINESS_GTM_GROWTH_PLAYBOOK: UPGPlaybook = {
@@ -643,7 +643,7 @@ export const BUSINESS_MARKETING_AUDIENCE_FIRST_PLAYBOOK: UPGPlaybook = {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 9 — analytics_data (anchor `metric`)
+// Region 9 - analytics_data (anchor `metric`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const ANALYTICS_DATA_PLAYBOOK: UPGPlaybook = {
@@ -658,7 +658,7 @@ export const ANALYTICS_DATA_PLAYBOOK: UPGPlaybook = {
   creation_sequence: [
     seqStep(1, 'Data Sources',
       ['data_source'],
-      'List where the truth lives — the systems that emit events you can measure. Product, billing, support, CRM, external.'),
+      'List where the truth lives: the systems that emit events you can measure. Product, billing, support, CRM, external.'),
     seqStep(2, 'Event Schemas',
       ['event_schema'],
       'Define the events you will instrument. Schema first; instrumentation second. Each event needs a name, properties, and emit conditions.'),
@@ -678,7 +678,7 @@ export const ANALYTICS_DATA_PLAYBOOK: UPGPlaybook = {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Region 10 — operations_quality (anchor `incident`)
+// Region 10 - operations_quality (anchor `incident`)
 // ════════════════════════════════════════════════════════════════════════════
 
 export const OPERATIONS_QUALITY_PLAYBOOK: UPGPlaybook = {
@@ -686,7 +686,7 @@ export const OPERATIONS_QUALITY_PLAYBOOK: UPGPlaybook = {
   name: 'Operations & Quality',
   version: '0.2.0',
   description:
-    'The operational backbone — pipelines, monitoring, incident response, security, quality gates, compliance, support. Specialised playbooks cover team rituals.',
+    'The operational backbone: pipelines, monitoring, incident response, security, quality gates, compliance, support. Specialised playbooks cover team rituals.',
   region: 'operations_quality',
   is_canonical: true,
   target_anchor_entity: 'incident',
@@ -696,7 +696,7 @@ export const OPERATIONS_QUALITY_PLAYBOOK: UPGPlaybook = {
       'Establish the pipeline. How does code go from commit to production reliably and reversibly?'),
     seqStep(2, 'Monitoring & SLOs',
       ['service_level_indicator', 'service_level_objective', 'monitor', 'alert_rule'],
-      'Decide what you measure for availability, latency, and quality. Set targets. Wire alerts to people — not silence.'),
+      'Decide what you measure for availability, latency, and quality. Set targets. Wire alerts to people, not silence.'),
     seqStep(3, 'Incident Response',
       ['incident', 'postmortem', 'root_cause'],
       'Define how you respond when things break. Every incident gets a postmortem; every postmortem identifies root causes; root causes drive change.'),
@@ -708,7 +708,7 @@ export const OPERATIONS_QUALITY_PLAYBOOK: UPGPlaybook = {
       'Establish what does not ship until tests pass. Define the test pyramid: unit, integration, end-to-end.'),
     seqStep(6, 'Compliance & Accessibility',
       ['compliance_framework', 'a11y_audit', 'security_policy'],
-      'Map the frameworks you must comply with — SOC 2, GDPR, HIPAA, WCAG. Surface controls and audit cadence.'),
+      'Map the frameworks you must comply with: SOC 2, GDPR, HIPAA, WCAG. Surface controls and audit cadence.'),
     seqStep(7, 'Customer Support',
       ['support_ticket', 'knowledge_base_article'],
       'Define how customers reach you when things break, and how you build collective memory from each interaction.'),
@@ -744,27 +744,27 @@ export const OPERATIONS_TEAM_RITUALS_PLAYBOOK: UPGPlaybook = {
  * Order: by region (1 → 10), canonical first within each region.
  */
 export const UPG_PLAYBOOKS: readonly UPGPlaybook[] = [
-  // Region 1 — strategy_outcomes
+  // Region 1 - strategy_outcomes
   STRATEGY_OUTCOMES_PLAYBOOK,
-  // Region 2 — users_needs
+  // Region 2 - users_needs
   USERS_NEEDS_PLAYBOOK,
-  // Region 3 — discovery_research_validation
+  // Region 3 - discovery_research_validation
   DISCOVERY_RESEARCH_VALIDATION_PLAYBOOK,
   DISCOVERY_VALIDATION_HYPOTHESIS_PLAYBOOK,
-  // Region 4 — market_competitive
+  // Region 4 - market_competitive
   MARKET_COMPETITIVE_PLAYBOOK,
-  // Region 5 — experience_design_brand
+  // Region 5 - experience_design_brand
   EXPERIENCE_DESIGN_BRAND_PLAYBOOK,
   EXPERIENCE_UX_DOMAIN_ONLY_PLAYBOOK,
   EXPERIENCE_DESIGN_SYSTEM_PLAYBOOK,
   EXPERIENCE_CONTENT_PLAYBOOK,
-  // Region 6 — product_delivery
+  // Region 6 - product_delivery
   PRODUCT_DELIVERY_PLAYBOOK,
   PRODUCT_FEEDBACK_SYNTHESIS_PLAYBOOK,
-  // Region 7 — engineering_platform
+  // Region 7 - engineering_platform
   ENGINEERING_PLATFORM_PLAYBOOK,
   ENGINEERING_ARCHITECTURE_ONLY_PLAYBOOK,
-  // Region 8 — business_gtm_growth
+  // Region 8 - business_gtm_growth
   BUSINESS_GTM_GROWTH_PLAYBOOK,
   BUSINESS_MODEL_BMC_PLAYBOOK,
   BUSINESS_PRICING_PLAYBOOK,
@@ -772,9 +772,9 @@ export const UPG_PLAYBOOKS: readonly UPGPlaybook[] = [
   BUSINESS_MARKETING_PLAYBOOK,
   BUSINESS_GROWTH_METRIC_DRIVEN_PLAYBOOK,
   BUSINESS_MARKETING_AUDIENCE_FIRST_PLAYBOOK,
-  // Region 9 — analytics_data
+  // Region 9 - analytics_data
   ANALYTICS_DATA_PLAYBOOK,
-  // Region 10 — operations_quality
+  // Region 10 - operations_quality
   OPERATIONS_QUALITY_PLAYBOOK,
   OPERATIONS_TEAM_RITUALS_PLAYBOOK,
 ]

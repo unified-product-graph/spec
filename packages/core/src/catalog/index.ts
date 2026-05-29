@@ -1,5 +1,5 @@
 /**
- * catalog/ — Layer 1a: What Exists.
+ * catalog/: Layer 1a. What Exists.
  * Entity type catalog and edge catalog. Zero imports.
  */
 

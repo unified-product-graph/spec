@@ -192,7 +192,7 @@ export interface EpicProperties {
  * persona will be able to do. Lifecycle-free: a statement either still
  * describes a real promise, or is superseded by a new one when the promise changes.
  *
- * Pairs with `task` (UCS pattern P4 — story_task collapsed into task) via `task_implements_user_story`.
+ * Pairs with `task` (UCS pattern P4, story_task collapsed into task) via `task_implements_user_story`.
  * One statement can have many tasks (re-implementation, per-platform variants);
  * each task carries its own lifecycle.
  *

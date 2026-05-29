@@ -67,7 +67,7 @@ export interface VisionProperties {
  * @example
  * const properties: MissionProperties = {
  *   target_audience: 'Product managers and founders at 10–200-person B2B SaaS companies.',
- *   core_value: 'Clarity beats velocity — decisions you can justify compound faster than code.',
+ *   core_value: 'Clarity beats velocity: decisions you can justify compound faster than code.',
  *   differentiation: 'Open interchange format + works where you already think.',
  * }
  */

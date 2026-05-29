@@ -1,5 +1,5 @@
 /**
- * UPG Intelligence Conditions — structured, machine-evaluable graph predicates.
+ * UPG Intelligence Conditions: structured, machine-evaluable graph predicates.
  *
  * Three check types: `EntityCheck` (count by criteria), `RelationshipCheck`
  * (edge existence/count), `BenchmarkCheck` (compare against stage benchmark).

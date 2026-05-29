@@ -1,5 +1,5 @@
 /**
- * UPG Approach primitive — the cognitive *path of arrival* to a region.
+ * UPG Approach primitive: the cognitive *path of arrival* to a region.
  *
  * Five canonical approaches: Plan, Inspect, Prioritise, Trace, Reflect.
  * The catalog is closed. New techniques land as frameworks under existing
@@ -16,7 +16,7 @@ import type { FrameworkOrigin } from '../frameworks/types.js'
 // ─── Approach identity ──────────────────────────────────────────────────────
 
 /**
- * The five canonical approach ids. Closed catalog — adding a sixth is a
+ * The five canonical approach ids. Closed catalog: adding a sixth is a
  * coordinated breaking-shape change.
  *
  * Source of truth for `UPGFramework.approach_ids` and the MCP tool dispatch
@@ -35,17 +35,17 @@ export type UPGApproachId =
  * A definition record describing a cognitive engagement category exposed as
  * a verb-led MCP tool (`plan` / `inspect` / `prioritise` / `trace` / `reflect`).
  *
- * Today these ship as definition lookups — the MCP handler returns the
+ * Today these ship as definition lookups: the MCP handler returns the
  * approach record + invocation parameters; the LLM is the executor.
  * Structured execution is forward-declared (see `ApproachRuntime`) and is
  * a forthcoming follow-up.
  *
  * @example
- * // The Prioritise approach — "what's most important?"
+ * // The Prioritise approach: "what's most important?"
  * const prioritise: UPGApproach = {
  *   id: 'prioritise',
  *   label: 'Prioritise',
- *   description: 'Rank a candidate set by an explicit framework — RICE, ICE, Kano, Cost of Delay.',
+ *   description: 'Rank a candidate set by an explicit framework: RICE, ICE, Kano, Cost of Delay.',
  *   question_answered: "what's most important?",
  *   signature_hint: '({ candidates: entity_ids[], framework_id }) → { ranked, framework_used }',
  *   framework_id_examples: ['rice-scoring', 'ice-scoring', 'kano-model', 'cost-of-delay'],
@@ -53,11 +53,11 @@ export type UPGApproachId =
  */
 export interface UPGApproach {
   /**
-   * Unique identifier — bare verb, matches the MCP tool name. One of
+   * Unique identifier: bare verb, matches the MCP tool name. One of
    * `'plan' | 'inspect' | 'prioritise' | 'trace' | 'reflect'`.
    */
   id: UPGApproachId
-  /** Human-readable label (Title Case) — `'Plan'`, `'Inspect'`, etc. */
+  /** Human-readable label (Title Case): `'Plan'`, `'Inspect'`, etc. */
   label: string
   /** One-paragraph description of the cognitive engagement category. */
   description: string
@@ -67,13 +67,13 @@ export interface UPGApproach {
    */
   question_answered: string
   /**
-   * Compact signature reminder — `(args) → return-shape`. Documents the
+   * Compact signature reminder: `(args) → return-shape`. Documents the
    * structured-execution shape; today the MCP handler returns the approach
    * record + invocation parameters (definition lookup).
    */
   signature_hint: string
   /**
-   * 3-5 canonical framework ids inside this approach (`UPGFramework.id`) —
+   * 3-5 canonical framework ids inside this approach (`UPGFramework.id`),
    * a discoverability surface, not exhaustive coverage. Full reverse-lookup
    * is via `UPGFramework.approach_ids`.
    */
@@ -83,7 +83,7 @@ export interface UPGApproach {
 // ─── Reflect-mode vocabulary ────────────────────────────────────────────────
 
 /**
- * Canonical reflect modes — the 4 nouns the `reflect` approach accepts as an
+ * Canonical reflect modes: the 4 nouns the `reflect` approach accepts as an
  * optional `mode` parameter. Absence of `mode` is open reflection.
  *
  * Locked vocabulary; agent-facing. Users speak natural language; the LLM
@@ -95,7 +95,7 @@ export type ReflectMode =
   | 'blind-spots'
   | 'load-bearing'
 
-/** Closed list — useful for tool input-schema enums. */
+/** Closed list, useful for tool input-schema enums. */
 export const REFLECT_MODES: readonly ReflectMode[] = [
   'assumptions',
   'alternatives',
@@ -107,20 +107,20 @@ export const REFLECT_MODES: readonly ReflectMode[] = [
 
 /**
  * Shared envelope every approach handler returns. The handler-specific
- * payload spreads into `...payload` — see each approach's `signature_hint`
+ * payload spreads into `...payload`; see each approach's `signature_hint`
  * for the per-id shape.
  */
 export interface UPGApproachEnvelope {
   /** The approach id this envelope is wrapping. */
   approach_id: UPGApproachId
   /**
-   * Approach-specific scope — a region id (Plan, Inspect, Reflect), an
+   * Approach-specific scope: a region id (Plan, Inspect, Reflect), an
    * anchor entity id (Trace), an entity id array (Prioritise candidates),
    * or `null` (open invocation). Typed `unknown` because the shape varies
    * by approach.
    */
   scope: unknown
-  /** ISO-8601 datetime — when the handler produced the envelope. */
+  /** ISO-8601 datetime when the handler produced the envelope. */
   generated_at: string
 }
 
@@ -138,15 +138,15 @@ export interface ApproachBinding {
   surface: SurfaceId
   /** Identifier the runtime maps to a component or handler */
   renderer: string
-  /** Per-step renderer overrides — keyed by `Step.order` */
+  /** Per-step renderer overrides, keyed by `Step.order` */
   step_renderers?: Record<number, string>
   /** Surface-specific step kinds the runtime handles */
   custom_step_kinds?: readonly string[]
-  /** Lifecycle hook id — runtime-resolved, fires when an invocation starts */
+  /** Lifecycle hook id: runtime-resolved, fires when an invocation starts */
   on_start?: string
-  /** Lifecycle hook id — runtime-resolved, fires after each step */
+  /** Lifecycle hook id: runtime-resolved, fires after each step */
   on_step_complete?: string
-  /** Lifecycle hook id — runtime-resolved, fires when an invocation completes */
+  /** Lifecycle hook id: runtime-resolved, fires when an invocation completes */
   on_run_complete?: string
 }
 
@@ -154,14 +154,14 @@ export interface ApproachBinding {
 export interface ApproachFilter {
   /** Filter to approaches whose framework_id_examples include this id */
   framework_id?: string
-  /** Filter to approaches relevant to a specific region (forward-compat — all five are cross-region today) */
+  /** Filter to approaches relevant to a specific region (forward-compat; all five are cross-region today) */
   region?: UPGRegionId
   /** Filter to approaches reachable via a specific entry mode (forward-compat) */
   entry_mode?: EntryMode
 }
 
 /**
- * A concrete invocation of a `UPGApproach`. Forward-declared — the MCP
+ * A concrete invocation of a `UPGApproach`. Forward-declared: the MCP
  * handlers are stateless definition lookups today; structured execution
  * with run tracking is a forthcoming follow-up.
  */
@@ -182,7 +182,7 @@ export interface ApproachRun {
 
 /**
  * Forward-declared interface for a future structured-execution runtime. No
- * current surface implements it — the MCP tools ship as definition lookups.
+ * current surface implements it; the MCP tools ship as definition lookups.
  */
 export interface ApproachRuntime {
   /** Return all approaches matching an optional filter */

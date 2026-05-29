@@ -1,5 +1,5 @@
 /**
- * playbooks/ — UPG Playbook public API.
+ * playbooks/: UPG Playbook public API.
  *
  * Exports: `UPGPlaybook`, `PlaybookRuntime`, `PlaybookFilter`, `PlaybookRun`,
  * `PlaybookBinding`, `UPG_PLAYBOOKS`, and the lookup helpers
@@ -57,7 +57,7 @@ export function getPlaybookById(id: string): UPGPlaybook | undefined {
 /**
  * Return the single canonical playbook for a region (the "start here" path).
  * Returns `null` when the region has no canonical playbook (W1 invariant
- * violation — caught by `audit-playbook-coverage.ts`).
+ * violation, caught by `audit-playbook-coverage.ts`).
  */
 export function getCanonicalPlaybookForRegion(
   region: UPGRegionId,
@@ -68,7 +68,7 @@ export function getCanonicalPlaybookForRegion(
 
 /**
  * Return every playbook (canonical + specialised) anchored at a region.
- * Order is the canonical `UPG_PLAYBOOKS` order — canonical entry first by
+ * Order is the canonical `UPG_PLAYBOOKS` order, canonical entry first by
  * convention (catalog authoring discipline).
  */
 export function getPlaybooksForRegion(

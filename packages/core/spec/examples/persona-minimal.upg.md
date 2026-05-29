@@ -1,5 +1,5 @@
 ---
-title: "Alex (Senior PM) — Persona Profile"
+title: "Alex (Senior PM): Persona Profile"
 upg_product: entopo
 upg_version: "0.4.0"
 entity_type: document
@@ -19,4 +19,4 @@ status: published
 
 ## What gets in her way
 
-The biggest blocker is [[need:no-single-source-of-truth|valence:pain|severity:Significant]] — context lives in seven tools and nobody owns reconciling them.
+The biggest blocker is [[need:no-single-source-of-truth|valence:pain|severity:Significant]]: context lives in seven tools and nobody owns reconciling them.

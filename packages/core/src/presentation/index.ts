@@ -1,5 +1,5 @@
 /**
- * presentation/ — Layer 4a: How Things Look.
+ * presentation/: Layer 4a: How Things Look.
  * Labels, lenses, domain rings. Applied on read.
  */
 

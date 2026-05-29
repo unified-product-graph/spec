@@ -1,5 +1,5 @@
 /**
- * Canonical Framework Library — v1 public surface.
+ * Canonical Framework Library: v1 public surface.
  *
  * The 34 famous, battle-tested product frameworks that anchor the public
  * Unified Product Graph framework catalog. Curated for editorial confidence
@@ -11,7 +11,7 @@
  * promoted into this canonical set incrementally as each framework is
  * reviewed and validated.
  *
- * THIS FILE IS GENERATED — see scripts/regen-canonical-frameworks.mjs.
+ * THIS FILE IS GENERATED. See scripts/regen-canonical-frameworks.mjs.
  */
 
 import type { UPGFramework } from './types.js'
@@ -544,7 +544,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "User Need",
         "entityTypeId": "need",
-        "description": "The anchor — what the user actually needs"
+        "description": "The anchor: what the user actually needs"
       },
       {
         "label": "Value Chain",
@@ -667,7 +667,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "type": "number",
             "required": true,
             "label": "Visibility",
-            "description": "Y-axis position (0=infrastructure, 1=anchor/user — needs sit at 1.0)"
+            "description": "Y-axis position (0=infrastructure, 1=anchor/user); needs sit at 1.0"
           }
         ]
       }
@@ -831,7 +831,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     },
     "education": {
       "purpose": "Map all nine building blocks of a business model so teams see how value creation, delivery, and capture connect end-to-end.",
-      "core_question": "How does our organisation create, deliver, and capture value — and where are the dependencies between those activities?",
+      "core_question": "How does our organisation create, deliver, and capture value, and where are the dependencies between those activities?",
       "when_to_use": [
         "You are designing or redesigning how the business creates and captures value",
         "You need to communicate the business model to stakeholders or investors",
@@ -1048,32 +1048,32 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Inbound Logistics",
         "entityTypeId": "key_activity",
-        "description": "Inbound Logistics phase — key activity entities move through this stage"
+        "description": "Inbound Logistics phase: key activity entities move through this stage"
       },
       {
         "label": "Operations",
         "entityTypeId": "key_activity",
-        "description": "Operations phase — key activity entities move through this stage"
+        "description": "Operations phase: key activity entities move through this stage"
       },
       {
         "label": "Outbound Logistics",
         "entityTypeId": "key_activity",
-        "description": "Outbound Logistics phase — key activity entities move through this stage"
+        "description": "Outbound Logistics phase: key activity entities move through this stage"
       },
       {
         "label": "Marketing & Sales",
         "entityTypeId": "key_activity",
-        "description": "Marketing & Sales phase — key activity entities move through this stage"
+        "description": "Marketing & Sales phase: key activity entities move through this stage"
       },
       {
         "label": "Service",
         "entityTypeId": "key_activity",
-        "description": "Service phase — key activity entities move through this stage"
+        "description": "Service phase: key activity entities move through this stage"
       },
       {
         "label": "Support Activities",
         "entityTypeId": "capability",
-        "description": "Support Activities phase — capability entities move through this stage"
+        "description": "Support Activities phase: capability entities move through this stage"
       }
     ],
     "data": {
@@ -1143,27 +1143,27 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Portfolio",
         "entityTypeId": "portfolio",
-        "description": "Innovation portfolio balanced across three horizons — core performance, emerging growth, and future creation"
+        "description": "Innovation portfolio balanced across three horizons: core performance, emerging growth, and future creation"
       },
       {
         "label": "Product",
         "entityTypeId": "product",
-        "description": "Product or business unit assigned to a horizon — H1 (defend and extend), H2 (build), or H3 (seed and explore)"
+        "description": "Product or business unit assigned to a horizon: H1 (defend and extend), H2 (build), or H3 (seed and explore)"
       },
       {
         "label": "Initiative",
         "entityTypeId": "portfolio",
-        "description": "Growth initiative positioned in a horizon — with appropriate funding model, governance, and success metrics"
+        "description": "Growth initiative positioned in a horizon, with appropriate funding model, governance, and success metrics"
       },
       {
         "label": "Product Area",
         "entityTypeId": "product_area",
-        "description": "Product area representing a horizon — core products (H1), adjacent expansions (H2), or experimental ventures (H3)"
+        "description": "Product area representing a horizon: core products (H1), adjacent expansions (H2), or experimental ventures (H3)"
       },
       {
         "label": "Capability",
         "entityTypeId": "capability",
-        "description": "Capability needed to execute across horizons — H1 needs efficiency, H2 needs scaling, H3 needs discovery"
+        "description": "Capability needed to execute across horizons: H1 needs efficiency, H2 needs scaling, H3 needs discovery"
       }
     ],
     "data": {
@@ -1388,7 +1388,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "id": "build-measure-learn",
     "name": "Build-Measure-Learn",
     "version": "1.0.0",
-    "description": "The core Lean Startup feedback loop — build a minimum viable product, measure its impact with actionable metrics, and learn whether to pivot or persevere.",
+    "description": "The core Lean Startup feedback loop: build a minimum viable product, measure its impact with actionable metrics, and learn whether to pivot or persevere.",
     "category": "validation",
     "origin": {
       "type": "practitioner",
@@ -1406,17 +1406,17 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Build",
         "entityTypeId": "prototype",
-        "description": "Build phase — prototype entities move through this stage"
+        "description": "Build phase: prototype entities move through this stage"
       },
       {
         "label": "Measure",
         "entityTypeId": "metric",
-        "description": "Measure phase — metric entities move through this stage"
+        "description": "Measure phase: metric entities move through this stage"
       },
       {
         "label": "Learn",
         "entityTypeId": "learning",
-        "description": "Learn phase — learning entities move through this stage"
+        "description": "Learn phase: learning entities move through this stage"
       }
     ],
     "data": {
@@ -1452,7 +1452,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       ]
     },
     "education": {
-      "purpose": "Iterate through the Lean Startup loop — build the smallest thing, measure what matters, learn whether to persevere or pivot — minimising waste on unvalidated ideas.",
+      "purpose": "Iterate through the Lean Startup loop (build the smallest thing, measure what matters, learn whether to persevere or pivot), minimising waste on unvalidated ideas.",
       "core_question": "What is the minimum we need to build to test our current hypothesis, and what metric tells us whether to continue or pivot?",
       "when_to_use": [
         "You have hypotheses about user needs or solutions that need testing",
@@ -1490,17 +1490,17 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Must-haves",
         "entityTypeId": "feature",
-        "description": "Expected features — absence causes dissatisfaction"
+        "description": "Expected features: absence causes dissatisfaction"
       },
       {
         "label": "Performance",
         "entityTypeId": "feature",
-        "description": "More is better — linear satisfaction increase"
+        "description": "More is better, with linear satisfaction increase"
       },
       {
         "label": "Delighters",
         "entityTypeId": "feature",
-        "description": "Unexpected features — presence creates delight"
+        "description": "Unexpected features: presence creates delight"
       },
       {
         "label": "Indifferent",
@@ -1751,12 +1751,12 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Should Have",
         "entityTypeId": "feature",
-        "description": "Important but not critical — workaround exists"
+        "description": "Important but not critical; a workaround exists"
       },
       {
         "label": "Could Have",
         "entityTypeId": "feature",
-        "description": "Nice to have — include if time permits"
+        "description": "Nice to have; include if time permits"
       },
       {
         "label": "Won't Have",
@@ -2030,7 +2030,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       ]
     },
     "education": {
-      "purpose": "Document software architecture at four zoom levels — Context, Containers, Components, Code — so every stakeholder gets the diagram at the right level of detail.",
+      "purpose": "Document software architecture at four zoom levels (Context, Containers, Components, Code) so every stakeholder gets the diagram at the right level of detail.",
       "core_question": "Can every team member (from PM to engineer) understand our architecture at the level of detail they need?",
       "when_to_use": [
         "You need to structure complex technical decisions or architecture",
@@ -2065,22 +2065,22 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Decision",
         "entityTypeId": "decision",
-        "description": "Decision — decision entries to evaluate"
+        "description": "Decision: decision entries to evaluate"
       },
       {
         "label": "Context",
         "entityTypeId": "bounded_context",
-        "description": "Context — bounded context entries to evaluate"
+        "description": "Context: bounded context entries to evaluate"
       },
       {
         "label": "Options Considered",
         "entityTypeId": "solution",
-        "description": "Options Considered — solution entries to evaluate"
+        "description": "Options Considered: solution entries to evaluate"
       },
       {
         "label": "Consequences",
         "entityTypeId": "outcome",
-        "description": "Consequences — outcome entries to evaluate"
+        "description": "Consequences: outcome entries to evaluate"
       }
     ],
     "data": {
@@ -2178,27 +2178,27 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Atoms",
         "entityTypeId": "design_component",
-        "description": "Atoms — design component entities for this dimension of the framework"
+        "description": "Atoms: design component entities for this dimension of the framework"
       },
       {
         "label": "Molecules",
         "entityTypeId": "design_component",
-        "description": "Molecules — design token entities for this dimension of the framework"
+        "description": "Molecules: design token entities for this dimension of the framework"
       },
       {
         "label": "Organisms",
         "entityTypeId": "design_pattern",
-        "description": "Organisms — design pattern entities for this dimension of the framework"
+        "description": "Organisms: design pattern entities for this dimension of the framework"
       },
       {
         "label": "Templates",
         "entityTypeId": "wireframe",
-        "description": "Templates — design system entities for this dimension of the framework"
+        "description": "Templates: design system entities for this dimension of the framework"
       },
       {
         "label": "Pages",
         "entityTypeId": "screen",
-        "description": "Pages — screen entities for this dimension of the framework"
+        "description": "Pages: screen entities for this dimension of the framework"
       }
     ],
     "data": {
@@ -2275,22 +2275,22 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Discover",
         "entityTypeId": "insight",
-        "description": "Explore the problem space — research, observe, and interview users to understand unmet needs"
+        "description": "Explore the problem space: research, observe, and interview users to understand unmet needs"
       },
       {
         "label": "Define",
         "entityTypeId": "design_question",
-        "description": "Converge on the core problem — synthesise research into a clear problem statement"
+        "description": "Converge on the core problem: synthesise research into a clear problem statement"
       },
       {
         "label": "Develop",
         "entityTypeId": "design_concept",
-        "description": "Diverge on solutions — ideate, prototype, and explore multiple approaches"
+        "description": "Diverge on solutions: ideate, prototype, and explore multiple approaches"
       },
       {
         "label": "Deliver",
         "entityTypeId": "prototype",
-        "description": "Converge on the best solution — test, refine, and ship"
+        "description": "Converge on the best solution: test, refine, and ship"
       }
     ],
     "data": {
@@ -2458,17 +2458,17 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Shaping",
         "entityTypeId": "feature",
-        "description": "Define the problem and solution at the right level of abstraction — rough enough to leave room, specific enough to act on"
+        "description": "Define the problem and solution at the right level of abstraction: rough enough to leave room, specific enough to act on"
       },
       {
         "label": "Betting Table",
         "entityTypeId": "decision",
-        "description": "Betting Table phase — decision entities move through this stage"
+        "description": "Betting Table phase: decision entities move through this stage"
       },
       {
         "label": "Building (6-week cycle)",
         "entityTypeId": "epic",
-        "description": "Building (6-week cycle) phase — epic entities move through this stage"
+        "description": "Building (6-week cycle) phase: epic entities move through this stage"
       },
       {
         "label": "Cooldown",
@@ -2729,7 +2729,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Product",
         "entityTypeId": "product",
-        "description": "What you offer — features, quality, branding"
+        "description": "What you offer: features, quality, branding"
       },
       {
         "label": "Price",
@@ -2964,7 +2964,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       ]
     },
     "education": {
-      "purpose": "Design the product itself as the primary growth driver — free tier, self-serve onboarding, in-product virality — reducing dependence on sales-led acquisition.",
+      "purpose": "Design the product itself as the primary growth driver (free tier, self-serve onboarding, in-product virality), reducing dependence on sales-led acquisition.",
       "core_question": "Can our product acquire, activate, and expand users without human intervention, and where in the loop do we still need sales?",
       "when_to_use": [
         "You are launching a new product, feature, or entering a new market",
@@ -3282,7 +3282,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Metric",
         "entityTypeId": "metric",
-        "description": "A measurable indicator at any level of the tree — north star at the root, driver and input metrics as children"
+        "description": "A measurable indicator at any level of the tree: north star at the root, driver and input metrics as children"
       },
       {
         "label": "Outcome",
@@ -3356,7 +3356,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "id": "team-health-check",
     "name": "Team Health Check",
     "version": "1.0.0",
-    "description": "A facilitated team self-assessment across dimensions like mission, fun, learning, speed, and support — using traffic-light voting to surface strengths and improvement areas in a safe format.",
+    "description": "A facilitated team self-assessment across dimensions like mission, fun, learning, speed, and support, using traffic-light voting to surface strengths and improvement areas in a safe format.",
     "category": "team_process",
     "origin": {
       "type": "practitioner",
@@ -3374,7 +3374,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Team",
         "entityTypeId": "team",
-        "description": "Team conducting the health check — all members vote anonymously on each dimension"
+        "description": "Team conducting the health check: all members vote anonymously on each dimension"
       },
       {
         "label": "Retrospective",
@@ -3384,7 +3384,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Metric",
         "entityTypeId": "metric",
-        "description": "Health dimension scored — e.g. delivering value, teamwork, fun, learning, mission clarity, speed"
+        "description": "Health dimension scored, e.g. delivering value, teamwork, fun, learning, mission clarity, speed"
       },
       {
         "label": "Team OKR",
@@ -3462,8 +3462,8 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       ]
     },
     "education": {
-      "purpose": "Regularly assess team health across dimensions — psychological safety, autonomy, mission clarity, fun, speed, learning — to catch problems early and celebrate strengths.",
-      "core_question": "How is the team really doing — where do they feel strong, where do they feel stuck, and what has changed since last check?",
+      "purpose": "Regularly assess team health across dimensions (psychological safety, autonomy, mission clarity, fun, speed, learning) to catch problems early and celebrate strengths.",
+      "core_question": "How is the team really doing? Where do they feel strong, where do they feel stuck, and what has changed since last check?",
       "when_to_use": [
         "You need to improve team collaboration, clarity, or effectiveness",
         "Roles and responsibilities are unclear or causing friction",
@@ -3479,7 +3479,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "id": "raid-log",
     "name": "RAID Log",
     "version": "1.0.0",
-    "description": "A project management register tracking Risks, Assumptions, Issues, and Dependencies — the four categories most likely to derail a project if left unmanaged.",
+    "description": "A project management register tracking Risks, Assumptions, Issues, and Dependencies: the four categories most likely to derail a project if left unmanaged.",
     "category": "program_mgmt",
     "origin": {
       "type": "practitioner",
@@ -3504,12 +3504,12 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Status Report",
         "entityTypeId": "status_report",
-        "description": "Status update summarising RAID log changes — new risks, resolved issues, and dependency updates"
+        "description": "Status update summarising RAID log changes: new risks, resolved issues, and dependency updates"
       },
       {
         "label": "Deliverable",
         "entityTypeId": "deliverable",
-        "description": "Deliverable affected by logged risks, issues, or dependencies — linking RAID items to project scope"
+        "description": "Deliverable affected by logged risks, issues, or dependencies, linking RAID items to project scope"
       }
     ],
     "data": {

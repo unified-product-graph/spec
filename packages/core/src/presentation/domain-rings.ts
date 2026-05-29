@@ -1,5 +1,5 @@
 /**
- * UPG Domain Rings — 7 concentric groupings of the 36 UPG domains.
+ * UPG Domain Rings: 7 concentric groupings of the 36 UPG domains.
  *
  * Defines the ring assignment for every domain and the canonical ring metadata.
  *

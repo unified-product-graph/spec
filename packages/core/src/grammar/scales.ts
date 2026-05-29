@@ -232,7 +232,7 @@ export const UPG_SCALES: Record<string, UPGScaleDefinition> = {
 /**
  * Look up a scale definition by its ID.
  *
- * Returns undefined for unknown IDs — callers should handle this case
+ * Returns undefined for unknown IDs; callers should handle this case
  * gracefully (e.g. fall back to displaying raw value).
  *
  * @example
@@ -247,7 +247,7 @@ export function getScale(scaleId: string): UPGScaleDefinition | undefined {
  * Per-property scale overrides.
  *
  * Maps a property name to the scale that best captures its semantics.
- * Properties absent from this map fall back to `'scale_5'` — a generic
+ * Properties absent from this map fall back to `'scale_5'`, a generic
  * 1–5 ordinal. The mapping is keyed by property name only; the `entityType`
  * parameter on `getPropertyDefaultScale` is reserved for future per-entity
  * disambiguation.
@@ -291,7 +291,7 @@ const PROPERTY_SCALE_MAP: Record<string, string> = {
 
 /**
  * The default scale ID for properties not listed in `PROPERTY_SCALE_MAP`.
- * A generic 1–5 ordinal — tools that display `UPGAssessment` values without
+ * A generic 1–5 ordinal. Tools that display `UPGAssessment` values without
  * a known scale should fall back to this rather than no scale at all.
  */
 const DEFAULT_SCALE_ID = 'scale_5'
@@ -303,8 +303,8 @@ const DEFAULT_SCALE_ID = 'scale_5'
  * 1. Check `PROPERTY_SCALE_MAP` for a property-level override.
  * 2. Fall back to `'scale_5'` (generic 1–5 ordinal) for all other properties.
  *
- * The `entityType` parameter is accepted for API stability — future versions
- * may add per-entity overrides — but the initial implementation ignores it.
+ * The `entityType` parameter is accepted for API stability; future versions
+ * may add per-entity overrides, but the initial implementation ignores it.
  *
  * @param entityType  - The UPG entity type string (e.g. `'problem_statement'`).
  *                      Currently unused; reserved for future per-entity overrides.

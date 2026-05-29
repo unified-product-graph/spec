@@ -85,7 +85,7 @@ export interface A11yAuditProperties {
  * @example
  * const properties: A11yIssueProperties = {
  *   severity: 'minor',
- *   wcag_criterion: '1.4.3 — Contrast (Minimum)',
+ *   wcag_criterion: '1.4.3: Contrast (Minimum)',
  *   rule_id: 'dqr_nodes_no_null_title',
  * }
  */

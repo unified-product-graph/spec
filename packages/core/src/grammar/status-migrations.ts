@@ -28,7 +28,7 @@ import { getLifecycleForType } from './lifecycles.js'
  * Each top-level key is an entity type; each inner key is a legacy status
  * value observed in real graphs; the value is the canonical phase id from
  * that type's lifecycle. Entity types absent from this map have no
- * registered status migration — `migrateStatusValue` returns `null` for
+ * registered status migration; `migrateStatusValue` returns `null` for
  * them, signalling "no automated fix; surface to operator".
  *
  * **Population strategy.** Only mappings that are unambiguous from observed
@@ -36,7 +36,7 @@ import { getLifecycleForType } from './lifecycles.js'
  * different canonical phases, the type is left empty rather than guessing.
  *
  * **Why this is a map of maps rather than a list of rules.** Status values
- * are entity-type-scoped — `"active"` means different things on `service`,
+ * are entity-type-scoped: `"active"` means different things on `service`,
  * `feature`, and `hypothesis`. A flat `[{ from, to, type }]` list would
  * force every lookup to filter; a map of maps gives O(1) `[type][value]`
  * lookup and makes the per-type registry obvious to readers.
@@ -45,7 +45,7 @@ export const UPG_STATUS_MIGRATIONS: Partial<Record<UPGEntityType, Record<string,
   // ── Engineering / Operations ─────────────────────────────────────────────
   service: {
     // Lifecycle: [development, staging, production, deprecated]
-    // Authoring habit from before lifecycle adoption — every long-lived
+    // Authoring habit from before lifecycle adoption: every long-lived
     // entity got `active`. For a service, "active" almost always means
     // "live in production" (operators don't tag dev or staging services
     // active).
@@ -72,7 +72,7 @@ export const UPG_STATUS_MIGRATIONS: Partial<Record<UPGEntityType, Record<string,
 
   feature_area: {
     // Lifecycle: [planned, active, deprecated]
-    // `active` IS canonical here — included as an identity mapping so
+    // `active` IS canonical here, included as an identity mapping so
     // callers don't accidentally re-rewrite it, AND so the only other
     // observed drift values have a target.
     live: 'active',
@@ -130,7 +130,7 @@ export const UPG_STATUS_MIGRATIONS: Partial<Record<UPGEntityType, Record<string,
   // ── Engineering: deployment ──────────────────────────────────────────────
   deployment: {
     // Lifecycle: [rolling, success, failure]
-    // Deployments are events — once terminal they don't move. Most legacy
+    // Deployments are events; once terminal they don't move. Most legacy
     // values describe a settled outcome.
     in_progress: 'rolling',
     deploying: 'rolling',
@@ -169,7 +169,7 @@ export const UPG_STATUS_MIGRATIONS: Partial<Record<UPGEntityType, Record<string,
  * Caller contract: only invoke when the current status is known-invalid
  * for the entity's lifecycle. `null` signals "no automated fix is on
  * file; surface to the operator". The presence of a mapping does NOT
- * imply the current status is invalid — checking validity is the caller's
+ * imply the current status is invalid; checking validity is the caller's
  * job (typically via `getLifecycleForType(entityType).phases`).
  *
  * @example

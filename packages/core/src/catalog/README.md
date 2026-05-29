@@ -1,4 +1,4 @@
-# `catalog/` — What Exists
+# `catalog/`: What Exists
 
 The catalog enumerates everything that can appear in a UPG document: every entity type and every edge type. Zero imports. Every other layer builds on top of it.
 

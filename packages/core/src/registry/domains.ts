@@ -8,7 +8,7 @@ import type { UPGEntityType } from '../catalog/entity-catalog.js'
 // ─── Domain definition ──────────────────────────────────────────────────────────
 
 /**
- * A semantic domain — a flat grouping of related entity types.
+ * A semantic domain: a flat grouping of related entity types.
  *
  * @example
  * const userDomain: UPGDomain = {
@@ -31,7 +31,7 @@ export interface UPGDomain {
 
 // ─── Domain registry ────────────────────────────────────────────────────────────
 
-// No explicit type annotation — `as const satisfies` preserves the literal ID
+// No explicit type annotation; `as const satisfies` preserves the literal ID
 // tuple so `UPGDomainId` below resolves to a proper union.
 export const UPG_DOMAINS = [
   {
@@ -235,7 +235,7 @@ export const UPG_DOMAINS = [
   {
     id: 'pricing',
     label: 'Pricing & Packaging',
-    description: 'How you package and price your product. Pricing strategies set the overall approach. Pricing tiers define what customers buy — bundling features, trials, gates, and discounts. Discount strategies manage promotions. Trial configs define free-to-paid conversion mechanics. Paywalls gate premium features. Connects Business Model (revenue streams) to Growth (conversion optimization) and Sales (deal structure).',
+    description: 'How you package and price your product. Pricing strategies set the overall approach. Pricing tiers define what customers buy, bundling features, trials, gates, and discounts. Discount strategies manage promotions. Trial configs define free-to-paid conversion mechanics. Paywalls gate premium features. Connects Business Model (revenue streams) to Growth (conversion optimization) and Sales (deal structure).',
     types: [
       'pricing_strategy', 'pricing_tier', 'discount_strategy',
       'trial_config', 'paywall',
@@ -351,8 +351,8 @@ export const UPG_DOMAINS = [
 /**
  * Union of every canonical domain identifier, derived from UPG_DOMAINS.
  *
- * Adding, removing, or renaming a domain updates this type automatically —
- * do NOT maintain a separate list here.
+ * Adding, removing, or renaming a domain updates this type automatically.
+ * Do NOT maintain a separate list here.
  */
 export type UPGDomainId = typeof UPG_DOMAINS[number]['id']
 
@@ -360,7 +360,7 @@ export type UPGDomainId = typeof UPG_DOMAINS[number]['id']
 
 /**
  * Canonical entity-type → domain-id lookup. O(1) access, derived from
- * `UPG_DOMAINS` at module init — never maintained by hand.
+ * `UPG_DOMAINS` at module init. Never maintained by hand.
  *
  * Prefer this over walking `UPG_DOMAINS` in downstream packages: the repeated
  * `UPG_DOMAINS.find(d => d.types.includes(t))?.id` pattern is a drift risk
@@ -408,7 +408,7 @@ export function getDomainForType(entityType: string): UPGDomain | undefined {
  * Look up the canonical domain id for a typed entity type. O(1).
  *
  * Returns `undefined` only for the degenerate case where an entity type is
- * absent from every domain — which spec-integrity tests guarantee never
+ * absent from every domain, which spec-integrity tests guarantee never
  * happens for active types. Callers with a `UPGEntityType` can treat the
  * result as non-null, but the return type keeps the escape hatch for
  * defensive string-typed call sites.

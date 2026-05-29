@@ -1,5 +1,5 @@
 /**
- * shapes/ — Layer 1b: Structural Primitives.
+ * shapes/: Layer 1b: Structural Primitives.
  * Interfaces for nodes, edges, and documents. Imports `catalog/` only.
  */
 

@@ -1,4 +1,4 @@
-# `presentation/` — How Things Look
+# `presentation/`: How Things Look
 
 Presentation concerns. Applied on read, never stored in a `.upg` file. This directory holds the cosmetic and display-layer types: human-readable labels, role-based lenses, and the concentric-ring grouping of domains.
 

@@ -1,5 +1,5 @@
 /**
- * Legacy product-stage aliases —.
+ * Legacy product-stage aliases.
  *
  * Existing graphs (`entopo.upg`, `sanity.upg`, `maximum-minimum.upg`,
  * `notion-saturated.upg`, etc.) carry `product.stage` values that pre-date
@@ -16,7 +16,7 @@
  * already canonical and not a known legacy alias).
  *
  * Mapping rationale:
- * - `idea → concept` — pre-canonical alias from early v0.1 product nodes;
+ * - `idea → concept`: pre-canonical alias from early v0.1 product nodes;
  *   matches the v0.2.13 `properties.stage` migration `value_map` and the
  *   `UPG_PRODUCT_STAGE_COERCION_MAP` documented mapping.
  *
@@ -47,7 +47,7 @@ export const LEGACY_PRODUCT_STAGES: Readonly<Record<string, UPGProductStage>> =
  *
  * - Returns the canonical stage when `stage` is a known legacy alias.
  * - Returns `stage` verbatim when it is not a known legacy alias (the input
- *   may itself already be canonical, or genuinely unknown — the strict
+ *   may itself already be canonical, or genuinely unknown. The strict
  *   write path is responsible for rejecting genuinely-unknown values).
  * - Returns `undefined` for `undefined` / `null` inputs.
  *
@@ -58,7 +58,7 @@ export const LEGACY_PRODUCT_STAGES: Readonly<Record<string, UPGProductStage>> =
  * migrateProductStage('IDEA')      // → 'concept'
  * migrateProductStage('concept')   // → 'concept'  (already canonical, passthrough)
  * migrateProductStage('launch')    // → 'launch'   (already canonical, passthrough)
- * migrateProductStage('xyz')       // → 'xyz'      (unknown, passthrough — callers decide)
+ * migrateProductStage('xyz')       // → 'xyz'      (unknown, passthrough; callers decide)
  * migrateProductStage(undefined)   // → undefined
  */
 export function migrateProductStage<T extends string | undefined | null>(

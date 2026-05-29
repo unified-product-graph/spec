@@ -38,7 +38,7 @@ export type UPGRegionShape =
 /**
  * The graph role an entity plays *within* its super-domain.
  *
- * Purely structural — independent of any rendering concept.
+ * Purely structural, independent of any rendering concept.
  */
 export type UPGRegionEntityRole =
   | 'anchor'      // the region's anchor entity
@@ -84,20 +84,20 @@ export interface UPGAnchorEntity {
 }
 
 /**
- * A super-domain region — a coherent rollup of 1–N atomic domains.
+ * A super-domain region: a coherent rollup of 1-N atomic domains.
  *
  * Topology only: regions describe what is connected to what, not how it
  * renders. Rendering concerns live in Entopo (`apps/entopo/src/regions/`).
  *
- * @see {@link UPG_REGIONS} — the canonical catalog
- * @see MENTAL-MODEL.md — regions as the static "place" primitive
+ * @see {@link UPG_REGIONS} for the canonical catalog
+ * @see MENTAL-MODEL.md for regions as the static "place" primitive
  */
 export interface UPGRegion {
   /** Machine-readable region id (snake_case) */
   id: string
   /** Human-readable name */
   label: string
-  /** Numeric order — matches prose file prefix (01–10) */
+  /** Numeric order, matches prose file prefix (01-10) */
   order: number
   /** Shape archetype */
   shape: UPGRegionShape

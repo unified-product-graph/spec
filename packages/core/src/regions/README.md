@@ -1,4 +1,4 @@
-# `@unified-product-graph/core/regions` — Super-Domain Regions (topology only)
+# `@unified-product-graph/core/regions`: Super-Domain Regions (topology only)
 
 Ten super-domain rollups over the 36 atomic domains in `../registry/domains.ts`. Each region captures **pure graph topology**:
 

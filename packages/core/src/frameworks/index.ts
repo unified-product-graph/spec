@@ -1,8 +1,8 @@
 /**
- * frameworks/ — Layer 4c: Framework Library.
+ * frameworks/: Layer 4c: Framework Library.
  *
  * The public surface ships only the **34 canonical frameworks** in
- * `canonical.ts` — famous, universally-taught product frameworks curated
+ * `canonical.ts`: famous, universally-taught product frameworks curated
  * for editorial confidence.
  *
  * The full research catalog (~182 additional definitions) lives in
@@ -10,7 +10,7 @@
  * tier-1 wiring tests). It is excluded from public mirrors via
  * `scripts/sync-oss-repos.sh` and is not re-exported from the package
  * entry point. Frameworks are promoted into `canonical.ts` one at a time
- * as each is reviewed — see `scripts/regen-canonical-frameworks.mjs`.
+ * as each is reviewed; see `scripts/regen-canonical-frameworks.mjs`.
  */
 
 export * from './types.js'

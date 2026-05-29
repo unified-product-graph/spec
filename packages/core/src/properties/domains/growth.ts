@@ -213,7 +213,7 @@ export interface GrowthLoopProperties {
  *
  * @example
  * const properties: VariantProperties = {
- *   variant_name: 'B — simplified onboarding',
+ *   variant_name: 'B: simplified onboarding',
  *   traffic_percentage: 42,
  *   variant_status: 'active',
  * }

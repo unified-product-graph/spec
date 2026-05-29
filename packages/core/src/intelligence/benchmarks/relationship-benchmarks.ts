@@ -4,7 +4,7 @@
  *
  * Encodes wisdom like "each persona should have at least 2 jobs" (JTBD) or
  * "each hypothesis should produce at least one learning" (Lean Startup).
- * Relationship benchmarks are stage-scoped — a persona doesn't need 2 jobs
+ * Relationship benchmarks are stage-scoped: a persona doesn't need 2 jobs
  * at `concept`, but does by `build`.
  *
  * Consumers:
@@ -13,8 +13,8 @@
  *
  * Benchmark shape: see `RelationshipBenchmark` in `./types.ts`.
  *
- * @see ./types.ts — `RelationshipBenchmark`
- * @see ../intelligence.ts — audit consumer
+ * @see ./types.ts `RelationshipBenchmark`
+ * @see ../intelligence.ts audit consumer
  * https://unifiedproductgraph.org/spec | MIT
  */
 
@@ -95,7 +95,7 @@ export const UPG_RELATIONSHIP_BENCHMARKS: RelationshipBenchmark[] = [
       "mature"
     ],
     "source": {"kind":"book","citation":"Continuous Discovery Habits (Torres)"},
-    "rationale": "Pain should surface opportunities. 0 is the minimum — but flag if many pains have no opportunities."
+    "rationale": "Pain should surface opportunities. 0 is the minimum, but flag if many pains have no opportunities."
   },
   {
     "parent_type": "solution",

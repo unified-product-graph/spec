@@ -25,9 +25,9 @@ export interface UPGValidationError {
 export interface UPGValidationResult {
   /** Whether the document passed all mandatory spec checks */
   valid: boolean
-  /** Spec violations — any entry here means `valid` is false */
+  /** Spec violations: any entry here means `valid` is false */
   errors: UPGValidationError[]
-  /** Best-practice notices — present even when `valid` is true */
+  /** Best-practice notices: present even when `valid` is true */
   warnings: UPGValidationWarning[]
 }
 
@@ -104,7 +104,7 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
     errors.push({ path: '$.nodes', message: 'nodes is required and must be an array' })
   } else {
     const nodeIds = new Set<string>()
-    // Lookup by id — used for cross-property referential checks (empty-cell detection).
+    // Lookup by id, used for cross-property referential checks (empty-cell detection).
     const nodesById = new Map<string, Record<string, unknown>>()
     d.nodes.forEach((node: unknown, i: number) => {
       const path = `$.nodes[${i}]`
@@ -267,7 +267,7 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
             errors.push({ path: `${cpath}.axis_b_value_ref`, message: `Expected classification_value, found "${String(bNode.type)}" at ${bRef}` })
           }
 
-          // Distinct-axis check — only meaningful if both refs resolve to
+          // Distinct-axis check: only meaningful if both refs resolve to
           // classification_value AND we know their axes.
           if (aNode && bNode && aNode.type === 'classification_value' && bNode.type === 'classification_value') {
             const aAxis = valueToAxis.get(aRef)
@@ -297,7 +297,7 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
 }
 
 /**
- * Type guard — returns true if the document is a valid UPGDocument.
+ * Type guard: returns true if the document is a valid UPGDocument.
  * Use `validateUPGDocument` for detailed error reporting.
  *
  * @example

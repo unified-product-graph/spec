@@ -1,4 +1,4 @@
-# `registry/` — Identity & Organisation
+# `registry/`: Identity & Organisation
 
 The registry assigns each entity type a stable identity and places it in the spec's flat domain map. Imports from `catalog/` only.
 

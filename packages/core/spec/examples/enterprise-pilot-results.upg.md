@@ -1,5 +1,5 @@
 ---
-title: "Enterprise Pilot Results — Q2 2026"
+title: "Enterprise Pilot Results: Q2 2026"
 upg_product: entopo
 upg_version: "0.4.0"
 entity_type: document
@@ -12,7 +12,7 @@ composition_pattern: experiment_report
 graph_source: enterprise-pilot.upg
 ---
 
-# Enterprise Pilot Results — Q2 2026
+# Enterprise Pilot Results: Q2 2026
 
 ## Background
 
@@ -20,12 +20,12 @@ Our primary persona [[persona:alex-senior-pm]] faces a critical need:
 [[need:no-single-source-of-truth|valence:pain|severity:Significant]].
 
 This was identified through research that surfaced a key insight:
-{{insight:tool-fragmentation → opportunity:unified-knowledge|informs}} —
+{{insight:tool-fragmentation → opportunity:unified-knowledge|informs}},
 our strongest evidence chain from user research to strategic opportunity.
 
 [[persona:alex-senior-pm|"Alex"]] leads a 12-person team and
 {{persona:alex-senior-pm -> job:keep-team-aligned|pursues}} alignment as
-a core job — but today that job is underserved.
+a core job, but today that job is underserved.
 
 ## What We Tested
 
@@ -41,7 +41,7 @@ The chain from need to hypothesis:
 - The solution proposes
   [[hypothesis:structured-knowledge-reduces-planning]]
 
-We ran [[experiment:enterprise-pilot-q2]] — a controlled pilot with 5
+We ran [[experiment:enterprise-pilot-q2]], a controlled pilot with 5
 enterprise teams over 8 weeks.
 
 ## Results
@@ -49,8 +49,8 @@ enterprise teams over 8 weeks.
 {{experiment:enterprise-pilot-q2 → learning:planning-time-reduction|produces}}
 
 [[learning:planning-time-reduction|"The key learning"]]: teams reduced
-planning time by 22% — below the 30% target but statistically
-significant. 3 of 5 teams exceeded the 20% threshold.
+planning time by 22% (below the 30% target but statistically
+significant). 3 of 5 teams exceeded the 20% threshold.
 
 [[metric:planning-time|current:22%|target:30%]] is trending positive.
 
@@ -77,14 +77,14 @@ The discovery came from the experiment itself:
    strong and statistically significant.
 
 2. **Adjust the target.** [[metric:planning-time]] target should move
-   from 30% to 25% — more realistic based on pilot data.
+   from 30% to 25%, a more realistic target based on pilot data.
 
 3. **Investigate the new need.**
    [[need:context-loss-between-sprints]] is a potential second
    opportunity worth sizing.
 
 4. **North star remains.**
-   [[objective:reduce-context-switching]] is the right objective —
+   [[objective:reduce-context-switching]] is the right objective;
    the pilot confirms the direction.
 
 ## Full Evidence Chain

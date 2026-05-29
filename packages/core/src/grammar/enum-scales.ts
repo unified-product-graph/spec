@@ -22,7 +22,7 @@ export interface UPGEnumScaleValue {
  *
  * `values` is ordered semantically (e.g. low → high for ordinal scales;
  * strict → permissive for rule strength). Array index is the canonical
- * position — no separate `position` field.
+ * position (no separate `position` field).
  */
 export interface UPGEnumScaleDefinition {
   /** Matches the TypeScript type name (e.g. `'HealthStatus'`) */
@@ -34,12 +34,12 @@ export interface UPGEnumScaleDefinition {
   /** Per-value metadata in semantic order */
   values: UPGEnumScaleValue[]
   /**
-   * Optional rendering hint — which end of the scale is desirable.
+   * Optional rendering hint: which end of the scale is desirable.
    * Parallel to `SCALE_TONE_DIRECTION` for numeric scales.
    *
-   * `'high-is-good'`  — first value is best (e.g. on_track, high confidence)
-   * `'low-is-good'`   — last value in natural order is worst (e.g. critical urgency is bad)
-   * `'neutral'`       — no inherent good/bad direction (e.g. Cadence, Priority)
+   * `'high-is-good'`: first value is best (e.g. on_track, high confidence)
+   * `'low-is-good'`: last value in natural order is worst (e.g. critical urgency is bad)
+   * `'neutral'`: no inherent good/bad direction (e.g. Cadence, Priority)
    */
   tone_direction?: 'high-is-good' | 'low-is-good' | 'neutral'
 }
@@ -82,7 +82,7 @@ export const UPG_ENUM_SCALES: Record<string, UPGEnumScaleDefinition> = {
   Priority: {
     id: 'Priority',
     label: 'Priority',
-    description: 'Task or strategic priority level. Neutral direction — urgent is not inherently bad; none is not inherently good.',
+    description: 'Task or strategic priority level. Neutral direction: urgent is not inherently bad; none is not inherently good.',
     tone_direction: 'neutral',
     values: [
       { value: 'urgent', label: 'Urgent', description: 'Blocking progress or time-critical; must be addressed immediately.' },
@@ -135,11 +135,11 @@ export const UPG_ENUM_SCALES: Record<string, UPGEnumScaleDefinition> = {
     description: 'Imperative force of a constraint, guideline, or policy rule.',
     tone_direction: 'neutral',
     values: [
-      { value: 'must',      label: 'Must',      description: 'Hard requirement. Violation blocks — no exceptions without an explicit carve-out.' },
-      { value: 'must_not',  label: 'Must not',  description: 'Hard prohibition. Violation blocks — no exceptions without an explicit carve-out.' },
+      { value: 'must',      label: 'Must',      description: 'Hard requirement. Violation blocks; no exceptions without an explicit carve-out.' },
+      { value: 'must_not',  label: 'Must not',  description: 'Hard prohibition. Violation blocks; no exceptions without an explicit carve-out.' },
       { value: 'exception', label: 'Exception', description: 'Documented carve-out from a must or must_not rule; captures the approved deviation.' },
-      { value: 'warning',   label: 'Warning',   description: 'Soft signal — should consider and address, but can override with justification.' },
-      { value: 'guideline', label: 'Guideline', description: 'Recommendation — encouraged and expected in most cases, but not enforced.' },
+      { value: 'warning',   label: 'Warning',   description: 'Soft signal: should consider and address, but can override with justification.' },
+      { value: 'guideline', label: 'Guideline', description: 'Recommendation: encouraged and expected in most cases, but not enforced.' },
     ],
   },
 

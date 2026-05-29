@@ -38,7 +38,7 @@ export type UPGEntityTypeMaturity = 'draft' | 'proposed' | 'stable' | 'deprecate
  * }
  *
  * @example
- * // Deprecated type — readable in .upg files, migrates on write.
+ * // Deprecated type: readable in .upg files, migrates on write.
  * const painPointMeta: EntityTypeMeta = {
  *   name: 'pain_point',
  *   type_id: 'ent_018',
@@ -107,10 +107,10 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
 
   // ── Validation ──
   // (since v0.4.0) `hypothesis` re-promoted to canonical-stable. The
-  // v0.2.8 rename to `hypothesis_claim` was over-split — "claim" is implied
+  // v0.2.8 rename to `hypothesis_claim` was over-split: "claim" is implied
   // by being a hypothesis. Canonical name reverts; HypothesisClaimProperties
   // renamed to HypothesisProperties. `hypothesis_claim` is now deprecated
-  // (→ `hypothesis`). `hypothesis_evidence` deprecated (→ `evidence`) — the
+  // (→ `hypothesis`). `hypothesis_evidence` deprecated (→ `evidence`): the
   // dual evidence_type enum smell resolved by enriching canonical `evidence`
   // with evidence_rigor + evidence_source axes. Edge pattern switches to
   // `hypothesis_has_evidence` (neutral, direction on node).
@@ -136,7 +136,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'market_trend', type_id: 'ent_035', maturity: 'stable', since: '0.1.0' },
   { name: 'market_segment', type_id: 'ent_036', maturity: 'stable', since: '0.1.0' },
   { name: 'competitive_analysis', type_id: 'ent_037', maturity: 'stable', since: '0.1.0' },
-  // — classification taxonomy hosted by competitive_analysis.
+  // Classification taxonomy hosted by competitive_analysis.
   { name: 'classification_axis', type_id: 'ent_346', maturity: 'proposed', since: '0.4.0' },
   { name: 'classification_value', type_id: 'ent_347', maturity: 'proposed', since: '0.4.0' },
 
@@ -187,12 +187,12 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'feature_area', type_id: 'ent_314', maturity: 'stable', since: '0.1.0' },
   { name: 'feature', type_id: 'ent_071', maturity: 'stable', since: '0.1.0' },
   { name: 'epic', type_id: 'ent_072', maturity: 'stable', since: '0.1.0' },
-  // `user_story` is the templated "As X, I want Y so Z" promise — a stable,
+  // `user_story` is the templated "As X, I want Y so Z" promise: a stable,
   // lifecycle-free design artefact (UCS pattern P5). The v0.2.7 split EXTRACTED
   // the engineering work into a separate `task` (the lifecycle-bearing work-unit,
   // linked via `task_implements_user_story`); the split was right. But the
   // surviving statement half was renamed to the coined `story_statement`, which
-  // raised the adoption barrier — "user story" is the universally-recognised
+  // raised the adoption barrier. "user story" is the universally-recognised
   // industry term for exactly this artefact. v0.7.0 re-canonicalises
   // the statement under `user_story`; `story_statement` becomes a deprecated
   // alias. `story_task` (the original work half) was already collapsed into
@@ -576,7 +576,7 @@ export function getTypeId(name: string): string | undefined {
  *
  * @example
  * getTypeName('ent_016')   // → 'persona'
- * getTypeName('ent_018')   // → 'pain_point' (deprecated — see `getReplacementType`)
+ * getTypeName('ent_018')   // → 'pain_point' (deprecated; see `getReplacementType`)
  * getTypeName('ent_9999')  // → undefined
  */
 export function getTypeName(typeId: string): string | undefined {

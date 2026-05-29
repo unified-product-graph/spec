@@ -191,7 +191,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     ],
     anchor: {
       type: "persona",
-      rationale: "Persona carries 25 inbound cross-edge types from 13 atomic domains — the graph's gravitational centre. Solve persona's P1 SoT and all P1 members inherit.",
+      rationale: "Persona carries 25 inbound cross-edge types from 13 atomic domains, making it the graph's gravitational centre. Solve persona's P1 SoT and all P1 members inherit.",
       outbound_cross_edge_count: 1,
       inbound_cross_edge_count: 25,
     },
@@ -543,7 +543,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     ],
     anchor: {
       type: "competitor",
-      rationale: "The spec's clearest dual-pattern entity — identity in \"rivals\" view, container in \"their catalog\" view. Stress-tests UCS pattern assignment.",
+      rationale: "The spec's clearest dual-pattern entity: identity in \"rivals\" view, container in \"their catalog\" view. Stress-tests UCS pattern assignment.",
       outbound_cross_edge_count: 1,
       inbound_cross_edge_count: 4,
     },
@@ -870,7 +870,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     ],
     anchor: {
       type: "feature",
-      rationale: "The accountability entity — the narrowest scope answering \"what did we commit to?\". Every other P4 in the domain is feature-adjacent.",
+      rationale: "The accountability entity, the narrowest scope answering \"what did we commit to?\". Every other P4 in the domain is feature-adjacent.",
       outbound_cross_edge_count: 4,
       inbound_cross_edge_count: 4,
     },
@@ -1069,7 +1069,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     ],
     anchor: {
       type: "service",
-      rationale: "Has 9 hierarchy children — more than any other entity in v0.2. Stress-tests P9 rendering with rich child catalogs.",
+      rationale: "Has 9 hierarchy children, more than any other entity in v0.2. Stress-tests P9 rendering with rich child catalogs.",
       outbound_cross_edge_count: 4,
       inbound_cross_edge_count: 4,
     },

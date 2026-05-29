@@ -91,7 +91,7 @@ import type { UPGBaseNode } from '../shapes/base-node.js'
  *  Every active entity type has an entry. */
 export interface UPGPropertyMap {
   // ─── Strategy ───────────────────────────────────────────────────────────────
-  /** The product being built — root node of every product graph */
+  /** The product being built: root node of every product graph */
   product: ProductProperties
   /** A measurable outcome the product is working toward */
   outcome: OutcomeProperties
@@ -99,13 +99,13 @@ export interface UPGPropertyMap {
   objective: ObjectiveProperties
   /** A quantifiable key result used to measure an objective */
   key_result: KeyResultProperties
-  /** A tracked metric — present when a quantitative measure is defined */
+  /** A tracked metric, present when a quantitative measure is defined */
   metric: MetricProperties
   /** A point-in-time review of a metric's quality and fitness for purpose. */
   metric_quality_assessment: MetricQualityAssessmentProperties
   /** The long-horizon vision statement for the product */
   vision: VisionProperties
-  /** The mission statement — who is served and what core value is delivered */
+  /** The mission statement: who is served and what core value is delivered */
   mission: MissionProperties
   /** A strategic theme grouping related initiatives under a common direction */
   strategic_theme: StrategicThemeProperties
@@ -117,22 +117,22 @@ export interface UPGPropertyMap {
   value_stream: ValueStreamProperties
   /** A durable strategic pillar spanning multi-year horizons */
   strategic_pillar: StrategicPillarProperties
-  /** An assumption that underpins strategy or design — present when validation is being tracked */
+  /** An assumption that underpins strategy or design, present when validation is being tracked */
   assumption: AssumptionProperties
-  /** A decision record — strategic, product, engineering, or design */
+  /** A decision record (strategic, product, engineering, or design) */
   decision: DecisionProperties
-  /** A named limitation or boundary — resource, technical, regulatory,
-   *  temporal, or compliance — that bounds product creation. Edge-defined. */
+  /** A named limitation or boundary (resource, technical, regulatory,
+   *  temporal, or compliance) that bounds product creation. Edge-defined. */
   constraint: ConstraintProperties
 
   // ─── Users & Needs ──────────────────────────────────────────────────────────
   /** A user persona representing a segment of people the product serves */
   persona: PersonaProperties
-  /** A job-to-be-done — the progress a user is trying to make */
+  /** A job-to-be-done: the progress a user is trying to make */
   job: JobProperties
   /** A user need derived from research or synthesis */
   need: NeedProperties
-  /** A desired outcome — the specific result a user wants from a job step */
+  /** A desired outcome: the specific result a user wants from a job step */
   desired_outcome: DesiredOutcomeProperties
   /** A discrete step within a job-to-be-done */
   job_step: JobStepProperties
@@ -142,7 +142,7 @@ export interface UPGPropertyMap {
   // ─── Discovery ──────────────────────────────────────────────────────────────
   /** A product opportunity identified from user needs or market gaps */
   opportunity: OpportunityProperties
-  /** A proposed solution to an opportunity — present before commitment */
+  /** A proposed solution to an opportunity, present before commitment */
   solution: SolutionProperties
   /** A feasibility study assessing viability of a solution */
   feasibility_study: FeasibilityStudyProperties
@@ -150,15 +150,15 @@ export interface UPGPropertyMap {
   design_sprint: DesignSprintProperties
 
   // ─── Validation ─────────────────────────────────────────────────────────────
-  /** A testable belief — the canonical validation design artefact. */
+  /** A testable belief: the canonical validation design artefact. */
   hypothesis: HypothesisProperties
-  /** @deprecated since v0.4.0 — use `evidence` + `hypothesis_has_evidence` edge instead. */
+  /** @deprecated since v0.4.0. Use `evidence` + `hypothesis_has_evidence` edge instead. */
   hypothesis_evidence: HypothesisEvidenceProperties
   /** A general-purpose experiment entity (canonical-stable). Use `experiment_plan` + `experiment_run` for fine-grained plan/run separation. */
   experiment: ExperimentProperties
-  /** Planning intent for a structured test of a hypothesis (UCS pattern P4 — work-unit). Pairs with `experiment_run`. */
+  /** Planning intent for a structured test of a hypothesis (UCS pattern P4, work-unit). Pairs with `experiment_run`. */
   experiment_plan: ExperimentPlanProperties
-  /** Execution evidence for a structured test of a hypothesis (UCS pattern P6 — event-occurrence). Pairs with `experiment_plan`. */
+  /** Execution evidence for a structured test of a hypothesis (UCS pattern P6, event-occurrence). Pairs with `experiment_plan`. */
   experiment_run: ExperimentRunProperties
   /** A learning captured from an experiment or research activity */
   learning: LearningProperties
@@ -170,7 +170,7 @@ export interface UPGPropertyMap {
   research_plan: ResearchPlanProperties
 
   // ─── Market Intelligence ─────────────────────────────────────────────────────
-  /** A competitor in the market — present when competitive tracking is active */
+  /** A competitor in the market, present when competitive tracking is active */
   competitor: CompetitorProperties
   /** A specific feature offered by a competitor */
   competitor_feature: CompetitorFeatureProperties
@@ -182,15 +182,15 @@ export interface UPGPropertyMap {
   competitive_analysis: CompetitiveAnalysisProperties
   /** A dimension along which subjects are classified */
   classification_axis: ClassificationAxisProperties
-  /** A value on a classification axis — one position in a taxonomy */
+  /** A value on a classification axis: one position in a taxonomy */
   classification_value: ClassificationValueProperties
 
   // ─── User Research ───────────────────────────────────────────────────────────
-  /** A formal user research study — interview series, survey, usability test */
+  /** A formal user research study (interview series, survey, usability test) */
   research_study: ResearchStudyProperties
-  /** An insight synthesised from research — a meaningful pattern or finding */
+  /** An insight synthesised from research: a meaningful pattern or finding */
   insight: InsightProperties
-  /** A research participant — present when participant tracking is needed */
+  /** A research participant, present when participant tracking is needed */
   participant: ParticipantProperties
   /** A raw observation recorded during research */
   observation: ObservationProperties
@@ -224,7 +224,7 @@ export interface UPGPropertyMap {
   wireframe: WireframeProperties
   /** A user flow showing task-level paths through the product */
   user_flow: UserFlowProperties
-  /** A screen in the product UI — present when screen mapping is tracked */
+  /** A screen in the product UI, present when screen mapping is tracked */
   screen: ScreenProperties
   /** A specific UI state of a screen (empty, loading, error, etc.) */
   screen_state: ScreenStateProperties
@@ -236,9 +236,9 @@ export interface UPGPropertyMap {
   // ─── Design System ───────────────────────────────────────────────────────────
   /** A reusable UI component in the design system */
   design_component: DesignComponentProperties
-  /** A design token — a named value for colour, spacing, typography, etc. */
+  /** A design token: a named value for colour, spacing, typography, etc. */
   design_token: DesignTokenProperties
-  /** The design system itself — governance, tooling, and coverage metadata */
+  /** The design system itself, covering governance, tooling, and coverage metadata */
   design_system: DesignSystemProperties
   /** A recurring interaction or layout pattern documented in the design system */
   design_pattern: DesignPatternProperties
@@ -246,27 +246,27 @@ export interface UPGPropertyMap {
   design_guideline: DesignGuidelineProperties
 
   // ─── Brand Identity ──────────────────────────────────────────────────────────
-  /** The brand identity — values, personality, and positioning */
+  /** The brand identity, covering values, personality, and positioning */
   brand_identity: BrandIdentityProperties
   /** A specific brand colour with usage guidance */
   brand_colour: BrandColourProperties
-  /** A brand typography pairing — typeface, scale, and usage rules */
+  /** A brand typography pairing (typeface, scale, and usage rules) */
   brand_typography: BrandTypographyProperties
-  /** The brand voice — tone, register, and writing principles */
+  /** The brand voice: tone, register, and writing principles */
   brand_voice: BrandVoiceProperties
-  /** A brand logo variant — full, icon, wordmark, etc. */
+  /** A brand logo variant (full, icon, wordmark, etc.) */
   brand_logo: BrandLogoProperties
-  /** Brand imagery guidelines — photography and illustration style */
+  /** Brand imagery guidelines covering photography and illustration style */
   brand_imagery: BrandImageryProperties
 
   // ─── Product Spec ────────────────────────────────────────────────────────────
   /** A feature area grouping related features under a product section */
   feature_area: FeatureAreaProperties
-  /** A product feature — a discrete unit of user-facing functionality */
+  /** A product feature: a discrete unit of user-facing functionality */
   feature: FeatureProperties
   /** An epic grouping related user stories under a deliverable theme */
   epic: EpicProperties
-  /** The "As X, I want Y so Z" templated promise — a user story (UCS pattern P5 — templated-statement). Implemented by `task` via `task_implements_user_story`. */
+  /** The "As X, I want Y so Z" templated promise: a user story (UCS pattern P5, templated-statement). Implemented by `task` via `task_implements_user_story`. */
   user_story: UserStoryProperties
   /**
    * @deprecated since v0.4.0. story_task collapsed into task.
@@ -275,15 +275,15 @@ export interface UPGPropertyMap {
   story_task: StoryTaskProperties
   /** An acceptance criterion defining when a story or feature is complete */
   acceptance_criterion: AcceptanceCriterionProperties
-  /** A product release — present when versioned delivery is tracked */
+  /** A product release, present when versioned delivery is tracked */
   release: ReleaseProperties
   /** A discrete task assigned to a person or team */
   task: TaskProperties
-  /** A bug report — present when a defect is being tracked */
+  /** A bug report, present when a defect is being tracked */
   bug: BugProperties
   /** A product roadmap grouping features and themes over a planning horizon */
   roadmap: RoadmapProperties
-  /** A single item on a roadmap — a feature, epic, or theme with timing */
+  /** A single item on a roadmap: a feature, epic, or theme with timing */
   roadmap_item: RoadmapItemProperties
   /** A thematic grouping used to cluster work on the roadmap */
   theme: ThemeProperties
@@ -299,31 +299,31 @@ export interface UPGPropertyMap {
   domain_event: DomainEventProperties
   /** An API contract specifying the interface between services or clients */
   api_contract: ApiContractProperties
-  /** A technical debt item — present when debt is being tracked for remediation */
+  /** A technical debt item, present when debt is being tracked for remediation */
   technical_debt_item: TechnicalDebtItemProperties
   /** A feature flag controlling runtime behaviour without deployment */
   feature_flag: FeatureFlagProperties
-  /** A deployment record — present when a specific release was deployed */
+  /** A deployment record, present when a specific release was deployed */
   deployment: DeploymentProperties
-  /** A DDD aggregate — a cluster of domain objects with a consistency boundary */
+  /** A DDD aggregate: a cluster of domain objects with a consistency boundary */
   aggregate: AggregateProperties
-  /** A domain entity — an object with identity that changes over time */
+  /** A domain entity: an object with identity that changes over time */
   domain_entity: DomainEntityProperties
-  /** A value object — an immutable domain concept identified by its attributes */
+  /** A value object: an immutable domain concept identified by its attributes */
   value_object: ValueObjectProperties
   /** A command representing an intent to change system state */
   command: CommandProperties
-  /** A read model — a query-optimised projection of domain state */
+  /** A read model: a query-optimised projection of domain state */
   read_model: ReadModelProperties
-  /** A specific API endpoint — present when endpoint-level tracking is needed */
+  /** A specific API endpoint, present when endpoint-level tracking is needed */
   api_endpoint: ApiEndpointProperties
-  /** A database schema — table structure, constraints, and migration status */
+  /** A database schema (table structure, constraints, and migration status) */
   database_schema: DatabaseSchemaProperties
   /** A message queue topic or channel */
   queue_topic: QueueTopicProperties
   /** A build artifact produced by the CI pipeline */
   build_artifact: BuildArtifactProperties
-  /** A code repository — present when repo-level tracking is needed */
+  /** A code repository, present when repo-level tracking is needed */
   code_repository: CodeRepositoryProperties
   /** A library dependency tracked for version and licence compliance */
   library_dependency: LibraryDependencyProperties
@@ -337,7 +337,7 @@ export interface UPGPropertyMap {
   investigation: InvestigationProperties
   /** The root cause identified during an incident investigation */
   root_cause: RootCauseProperties
-  /** A symptom observed during an incident — present before root cause is known */
+  /** A symptom observed during an incident, present before root cause is known */
   symptom: SymptomProperties
   /** A fix applied to resolve a bug or incident */
   fix: FixProperties
@@ -355,7 +355,7 @@ export interface UPGPropertyMap {
   cohort: CohortProperties
   /** A behavioural segment defined by in-product actions */
   behavioral_segment: BehavioralSegmentProperties
-  /** A growth loop — a self-reinforcing cycle that compounds user or revenue growth */
+  /** A growth loop: a self-reinforcing cycle that compounds user or revenue growth */
   growth_loop: GrowthLoopProperties
   /** A variant in an A/B or multivariate experiment */
   variant: VariantProperties
@@ -363,43 +363,43 @@ export interface UPGPropertyMap {
   attribution_model: AttributionModelProperties
 
   // ─── Business Model ──────────────────────────────────────────────────────────
-  /** The overall business model — present when BMC-level structure is tracked */
+  /** The overall business model, present when BMC-level structure is tracked */
   business_model: BusinessModelProperties
-  /** A value proposition — the core promise made to a customer segment */
+  /** A value proposition: the core promise made to a customer segment */
   value_proposition: ValuePropositionProperties
-  /** A revenue stream — a mechanism through which the product earns money */
+  /** A revenue stream: a mechanism through which the product earns money */
   revenue_stream: RevenueStreamProperties
   /** A pricing tier defining what a customer gets at a given price point */
   pricing_tier: PricingTierProperties
-  /** The cost structure — fixed and variable costs underpinning the business model */
+  /** The cost structure (fixed and variable costs underpinning the business model) */
   cost_structure: CostStructureProperties
-  /** Unit economics — per-unit revenue, cost, and margin metrics */
+  /** Unit economics: per-unit revenue, cost, and margin metrics */
   unit_economics: UnitEconomicsProperties
-  /** A partnership — a strategic relationship with an external organisation */
+  /** A partnership: a strategic relationship with an external organisation */
   partnership: PartnershipProperties
   /** A key resource required to deliver value (people, IP, infrastructure) */
   key_resource: KeyResourceProperties
   /** A key activity the business must perform to deliver its value proposition */
   key_activity: KeyActivityProperties
-  /** A customer relationship type — how the business interacts with a segment */
+  /** A customer relationship type: how the business interacts with a segment */
   customer_relationship: CustomerRelationshipProperties
   /** A distribution channel through which value reaches the customer */
   distribution_channel: DistributionChannelProperties
 
   // ─── Go-To-Market ────────────────────────────────────────────────────────────
-  /** The GTM strategy — present when go-to-market planning is formalised */
+  /** The GTM strategy, present when go-to-market planning is formalised */
   gtm_strategy: GtmStrategyProperties
   /** An ideal customer profile defining the best-fit buyer */
   ideal_customer_profile: IdealCustomerProfileProperties
   /** A positioning statement defining where the product sits in the market */
   positioning: PositioningProperties
-  /** A messaging framework — headlines, value pillars, and proof points */
+  /** A messaging framework (headlines, value pillars, and proof points) */
   messaging: MessagingProperties
-  /** A product launch — present when a coordinated launch is being planned */
+  /** A product launch, present when a coordinated launch is being planned */
   launch: LaunchProperties
   /** A content strategy defining themes, formats, and channels */
   content_strategy: ContentStrategyProperties
-  /** A sales motion — the repeatable process used to close deals */
+  /** A sales motion: the repeatable process used to close deals */
   sales_motion: SalesMotionProperties
   /** A competitive battle card for use by the sales team */
   competitive_battle_card: CompetitiveBattleCardProperties
@@ -415,17 +415,17 @@ export interface UPGPropertyMap {
   proof_point: ProofPointProperties
 
   // ─── Team & Organisation ─────────────────────────────────────────────────────
-  /** A team — a group of people working on a shared scope */
+  /** A team: a group of people working on a shared scope */
   team: TeamProperties
-  /** A role — a function or responsibility within the team or organisation */
+  /** A role: a function or responsibility within the team or organisation */
   role: RoleProperties
   /** A stakeholder with interest in or influence over the product */
   stakeholder: StakeholderProperties
-  /** A named, accountable individual — distinct from `stakeholder` (interested party) and `role` (responsibility slot) */
+  /** A named, accountable individual, distinct from `stakeholder` (interested party) and `role` (responsibility slot) */
   person: PersonProperties
   /** An OKR set at the team level */
   team_okr: TeamOkrProperties
-  /** A retrospective — present when team reflections are being tracked */
+  /** A retrospective, present when team reflections are being tracked */
   retrospective: RetrospectiveProperties
   /** A cross-team dependency that may block delivery */
   dependency: DependencyProperties
@@ -443,13 +443,13 @@ export interface UPGPropertyMap {
   data_source: DataSourceProperties
   /** An event schema defining the structure of a tracked event */
   event_schema: EventSchemaProperties
-  /** A dashboard — present when a reporting surface is being tracked */
+  /** A dashboard, present when a reporting surface is being tracked */
   dashboard: DashboardProperties
-  /** A data model — entity relationships and schema structure */
+  /** A data model covering entity relationships and schema structure */
   data_model: DataModelProperties
   /** A data quality rule defining expectations on a dataset or field */
   data_quality_rule: DataQualityRuleProperties
-  /** A data product — a curated, discoverable dataset made available to consumers */
+  /** A data product: a curated, discoverable dataset made available to consumers */
   data_product: DataProductProperties
   /** A data pipeline moving or transforming data between systems */
   data_pipeline: DataPipelineProperties
@@ -459,15 +459,15 @@ export interface UPGPropertyMap {
   glossary_term: GlossaryTermProperties
   /** A data domain grouping related data assets under a common owner */
   data_domain: DataDomainProperties
-  /** A report — a scheduled or on-demand analytical output */
+  /** A report: a scheduled or on-demand analytical output */
   report: ReportProperties
 
   // ─── Content & Knowledge ─────────────────────────────────────────────────────
-  /** A content piece — blog post, video, podcast, whitepaper, or case study */
+  /** A content piece (blog post, video, podcast, whitepaper, or case study) */
   content_piece: ContentPieceProperties
   /** A knowledge base article for customers, developers, or internal teams */
   knowledge_base_article: KnowledgeBaseArticleProperties
-  /** A brand asset — logo, illustration, photo, or video */
+  /** A brand asset (logo, illustration, photo, or video) */
   brand_asset: BrandAssetProperties
   /** A prompt template used for AI-assisted workflows */
   prompt_template: PromptTemplateProperties
@@ -477,25 +477,25 @@ export interface UPGPropertyMap {
   content_theme: ContentThemeProperties
   /** A documentation template defining structure for a class of documents */
   documentation_template: DocumentationTemplateProperties
-  /** A document entity — provenance container linking to a source file */
+  /** A document entity: provenance container linking to a source file */
   document: DocumentProperties
 
   // ─── Legal ───────────────────────────────────────────────────────────────────
-  /** A legal entity — company, subsidiary, or contracting party */
+  /** A legal entity (company, subsidiary, or contracting party) */
   legal_entity: LegalEntityProperties
-  /** An intellectual property asset — patent, trademark, copyright, or trade secret */
+  /** An intellectual property asset (patent, trademark, copyright, or trade secret) */
   ip_asset: IpAssetProperties
   /** A contract between the company and an external party */
   contract: ContractProperties
-  /** A specific clause within a contract — present when clause-level tracking is needed */
+  /** A specific clause within a contract, present when clause-level tracking is needed */
   contract_clause: ContractClauseProperties
-  /** A privacy policy document — present when policy tracking is active */
+  /** A privacy policy document, present when policy tracking is active */
   privacy_policy: PrivacyPolicyProperties
 
   // ─── Compliance ──────────────────────────────────────────────────────────────
   /** A compliance requirement from a regulation, standard, or customer contract */
   compliance_requirement: ComplianceRequirementProperties
-  /** A risk — a potential event with negative impact on the product or business */
+  /** A risk: a potential event with negative impact on the product or business */
   risk: RiskProperties
   /** A data contract defining agreed schema and SLAs between producer and consumer */
   data_contract: DataContractProperties
@@ -503,17 +503,17 @@ export interface UPGPropertyMap {
   audit_log_policy: AuditLogPolicyProperties
   /** A compliance framework being adhered to (SOC 2, ISO 27001, GDPR, etc.) */
   compliance_framework: ComplianceFrameworkProperties
-  /** A security audit — present when a formal review has been conducted */
+  /** A security audit, present when a formal review has been conducted */
   security_audit: SecurityAuditProperties
 
   // ─── DevOps ──────────────────────────────────────────────────────────────────
-  /** A service level indicator — a specific measurement of service behaviour */
+  /** A service level indicator: a specific measurement of service behaviour */
   service_level_indicator: ServiceLevelIndicatorProperties
-  /** A service level objective — a target range for an SLI */
+  /** A service level objective: a target range for an SLI */
   service_level_objective: ServiceLevelObjectiveProperties
-  /** An error budget derived from an SLO — present when reliability is tracked */
+  /** An error budget derived from an SLO, present when reliability is tracked */
   error_budget: ErrorBudgetProperties
-  /** An incident — a production event requiring response */
+  /** An incident: a production event requiring response */
   incident: IncidentProperties
   /** A postmortem written after an incident is resolved */
   postmortem: PostmortemProperties
@@ -523,13 +523,13 @@ export interface UPGPropertyMap {
   monitor: MonitorProperties
   /** An alert rule defining when a monitor fires a notification */
   alert_rule: AlertRuleProperties
-  /** A CI pipeline configuration — build, test, and deploy stages */
+  /** A CI pipeline configuration (build, test, and deploy stages) */
   ci_pipeline: CiPipelineProperties
   /** A release strategy defining how changes are deployed (blue-green, canary, etc.) */
   release_strategy: ReleaseStrategyProperties
   /** An on-call rotation assigning responders to incidents by schedule */
   on_call_rotation: OnCallRotationProperties
-  /** An infrastructure component — server, container, network resource, etc. */
+  /** An infrastructure component (server, container, network resource, etc.) */
   infrastructure_component: InfrastructureComponentProperties
 
   // ─── Security ────────────────────────────────────────────────────────────────
@@ -537,13 +537,13 @@ export interface UPGPropertyMap {
   threat_model: ThreatModelProperties
   /** A specific threat identified within a threat model */
   threat: ThreatProperties
-  /** A vulnerability — a known weakness that could be exploited */
+  /** A vulnerability: a known weakness that could be exploited */
   vulnerability: VulnerabilityProperties
   /** A security control mitigating one or more threats */
   security_control: SecurityControlProperties
   /** A security policy governing how the system or team handles a security domain */
   security_policy: SecurityPolicyProperties
-  /** A penetration test — present when external security testing is tracked */
+  /** A penetration test, present when external security testing is tracked */
   penetration_test: PenetrationTestProperties
   /** A security review of a feature, service, or architecture change */
   security_review: SecurityReviewProperties
@@ -557,7 +557,7 @@ export interface UPGPropertyMap {
   a11y_standard: A11yStandardProperties
   /** A specific accessibility guideline derived from a standard */
   a11y_guideline: A11yGuidelineProperties
-  /** An accessibility audit — present when a formal review has been run */
+  /** An accessibility audit, present when a formal review has been run */
   a11y_audit: A11yAuditProperties
   /** An accessibility issue found during audit or user research */
   a11y_issue: A11yIssueProperties
@@ -567,9 +567,9 @@ export interface UPGPropertyMap {
   // ─── Quality Assurance ───────────────────────────────────────────────────────
   /** A test suite grouping related test cases */
   test_suite: TestSuiteProperties
-  /** A test case — a single scenario with expected inputs and outputs */
+  /** A test case: a single scenario with expected inputs and outputs */
   test_case: TestCaseProperties
-  /** A QA session — present when exploratory testing is being tracked */
+  /** A QA session, present when exploratory testing is being tracked */
   qa_session: QaSessionProperties
   /** A regression test ensuring previously fixed behaviour does not break */
   regression_test: RegressionTestProperties
@@ -577,39 +577,39 @@ export interface UPGPropertyMap {
   test_coverage_report: TestCoverageReportProperties
   /** A test environment configuration used to run a test suite */
   test_environment: TestEnvironmentProperties
-  /** The result of a test run — pass, fail, or flaky */
+  /** The result of a test run (pass, fail, or flaky) */
   test_result: TestResultProperties
 
   // ─── Customer Feedback ───────────────────────────────────────────────────────
-  /** A feedback programme — present when structured customer feedback is collected */
+  /** A feedback programme, present when structured customer feedback is collected */
   feedback_program: FeedbackProgramProperties
   /** A feature request submitted by a customer or prospect */
   feature_request: FeatureRequestProperties
-  /** A vote on a feature request — present when voting is tracked */
+  /** A vote on a feature request, present when voting is tracked */
   feedback_vote: FeedbackVoteProperties
-  /** An NPS campaign — present when Net Promoter Score is being measured */
+  /** An NPS campaign, present when Net Promoter Score is being measured */
   nps_campaign: NpsCampaignProperties
-  /** A user advisory board — a formal group of customers shaping product direction */
+  /** A user advisory board: a formal group of customers shaping product direction */
   user_advisory_board: UserAdvisoryBoardProperties
-  /** A beta programme — present when pre-release access is being managed */
+  /** A beta programme, present when pre-release access is being managed */
   beta_program: BetaProgramProperties
   /** A feedback theme clustering related requests or complaints */
   feedback_theme: FeedbackThemeProperties
 
   // ─── Pricing ─────────────────────────────────────────────────────────────────
-  /** The pricing strategy — present when pricing approach is formalised */
+  /** The pricing strategy, present when pricing approach is formalised */
   pricing_strategy: PricingStrategyProperties
   /** A discount strategy defining when and how discounts are applied */
   discount_strategy: DiscountStrategyProperties
-  /** A trial configuration — present when a free trial or pilot is offered */
+  /** A trial configuration, present when a free trial or pilot is offered */
   trial_config: TrialConfigProperties
-  /** A paywall — the gate between free and paid access */
+  /** A paywall: the gate between free and paid access */
   paywall: PaywallProperties
 
   // ─── AI & Machine Learning ───────────────────────────────────────────────────
   /** An AI model used by or integrated into the product */
   ai_model: AiModelProperties
-  /** A versioned prompt — present when prompt engineering is tracked */
+  /** A versioned prompt, present when prompt engineering is tracked */
   prompt_version: PromptVersionProperties
   /** An evaluation benchmark defining pass/fail criteria for a model */
   eval_benchmark: EvalBenchmarkProperties
@@ -617,9 +617,9 @@ export interface UPGPropertyMap {
   eval_run: EvalRunProperties
   /** An AI cost tracker monitoring token usage and spend */
   ai_cost_tracker: AiCostTrackerProperties
-  /** A hallucination report — present when model output accuracy is audited */
+  /** A hallucination report, present when model output accuracy is audited */
   hallucination_report: HallucinationReportProperties
-  /** An AI guardrail — a safety or quality constraint applied to model output */
+  /** An AI guardrail: a safety or quality constraint applied to model output */
   ai_guardrail: AiGuardrailProperties
   /** A model comparison evaluating two or more models on the same benchmark */
   model_comparison: ModelComparisonProperties
@@ -633,17 +633,17 @@ export interface UPGPropertyMap {
   // ─── Workflows & Agents ──────────────────────────────────────────────────────
   /** A workflow template defining a reusable multi-step process */
   workflow_template: WorkflowTemplateProperties
-  /** A workflow run — a live execution of a workflow template */
+  /** A workflow run: a live execution of a workflow template */
   workflow_run: WorkflowRunProperties
-  /** An agent definition — the configuration and capabilities of an AI agent */
+  /** An agent definition: the configuration and capabilities of an AI agent */
   agent_definition: AgentDefinitionProperties
-  /** An agent session — a single interaction run by an agent */
+  /** An agent session: a single interaction run by an agent */
   agent_session: AgentSessionProperties
   /** A review gate requiring human approval before a workflow continues */
   review_gate: ReviewGateProperties
-  /** An approval record — the decision made at a review gate */
+  /** An approval record: the decision made at a review gate */
   approval_record: ApprovalRecordProperties
-  /** A skill available to an agent — a named, callable capability */
+  /** A skill available to an agent: a named, callable capability */
   agent_skill: AgentSkillProperties
   /** A hook executed before or after a workflow step */
   agent_hook: AgentHookProperties
@@ -653,51 +653,51 @@ export interface UPGPropertyMap {
   agent_task: AgentTaskProperties
 
   // ─── Portfolio & Organisation ─────────────────────────────────────────────────
-  /** An organisation — the company or entity that owns a portfolio of products */
+  /** An organisation: the company or entity that owns a portfolio of products */
   organization: OrganizationProperties
   /** A portfolio grouping multiple products under a common strategy */
   portfolio: PortfolioProperties
-  /** A product area — a named section of the product with its own ownership */
+  /** A product area: a named section of the product with its own ownership */
   product_area: ProductAreaProperties
 
   // ─── Workspace ──────────────────────────────────────────────────────────────
-  /** A workspace — the collaboration boundary for a team or organisation */
+  /** A workspace: the collaboration boundary for a team or organisation */
   workspace: WorkspaceProperties
 
   // ─── Sales ───────────────────────────────────────────────────────────────────
-  /** An account — a company or organisation in the CRM */
+  /** An account: a company or organisation in the CRM */
   account: AccountProperties
-  /** A contact — an individual person at an account */
+  /** A contact: an individual person at an account */
   contact: ContactProperties
-  /** A lead — an unqualified prospect entering the sales funnel */
+  /** A lead: an unqualified prospect entering the sales funnel */
   lead: LeadProperties
-  /** A deal — a qualified sales opportunity being pursued */
+  /** A deal: a qualified sales opportunity being pursued */
   deal: DealProperties
-  /** The sales pipeline — present when pipeline-level metadata is tracked */
+  /** The sales pipeline, present when pipeline-level metadata is tracked */
   pipeline_sales: PipelineSalesProperties
   /** A stage within the sales pipeline */
   pipeline_stage: PipelineStageProperties
   /** A quote document sent to a prospect */
   quote_document: QuoteDocumentProperties
-  /** A subscription — a recurring revenue relationship with a customer */
+  /** A subscription: a recurring revenue relationship with a customer */
   subscription: SubscriptionProperties
   /** An invoice issued to a customer */
   invoice: InvoiceProperties
-  /** A sales forecast — present when revenue prediction is tracked */
+  /** A sales forecast, present when revenue prediction is tracked */
   forecast: ForecastProperties
 
   // ─── Program Management ──────────────────────────────────────────────────────
   /** A programme grouping related projects under a strategic objective */
   program: ProgramProperties
-  /** A project — a time-boxed initiative with a defined scope */
+  /** A project: a time-boxed initiative with a defined scope */
   project: ProjectProperties
   /** A milestone marking a significant point in a project or release */
   milestone: MilestoneProperties
   /** A risk register capturing identified risks and mitigations */
   risk_register: RiskRegisterProperties
-  /** A change request — present when a formal change process is followed */
+  /** A change request, present when a formal change process is followed */
   change_request: ChangeRequestProperties
-  /** A deliverable — a tangible output committed to a stakeholder */
+  /** A deliverable: a tangible output committed to a stakeholder */
   deliverable: DeliverableProperties
   /** A resource allocation mapping team capacity to projects */
   resource_allocation: ResourceAllocationProperties
@@ -705,23 +705,23 @@ export interface UPGPropertyMap {
   status_report: StatusReportProperties
 
   // ─── Marketing ───────────────────────────────────────────────────────────────
-  /** The marketing strategy — present when marketing is formalised at the programme level */
+  /** The marketing strategy, present when marketing is formalised at the programme level */
   marketing_strategy: MarketingStrategyProperties
-  /** A marketing channel — a medium used to reach the target audience */
+  /** A marketing channel: a medium used to reach the target audience */
   marketing_channel: MarketingChannelProperties
-  /** A marketing campaign plan — present when a campaign is being planned */
+  /** A marketing campaign plan, present when a campaign is being planned */
   marketing_campaign_plan: MarketingCampaignPlanProperties
-  /** An email sequence — a series of automated emails sent to a segment */
+  /** An email sequence: a series of automated emails sent to a segment */
   email_sequence: EmailSequenceProperties
-  /** A social post — present when social content is being planned or tracked */
+  /** A social post, present when social content is being planned or tracked */
   social_post: SocialPostProperties
   /** An SEO keyword being targeted in content or paid search */
   seo_keyword: SeoKeywordProperties
-  /** An ad creative — copy and visual used in a paid media placement */
+  /** An ad creative: copy and visual used in a paid media placement */
   ad_creative: AdCreativeProperties
-  /** A press release — present when media outreach is being tracked */
+  /** A press release, present when media outreach is being tracked */
   press_release: PressReleaseProperties
-  /** An event — physical or virtual — being planned or tracked */
+  /** An event (physical or virtual) being planned or tracked */
   event: EventProperties
   /** A community initiative building engagement with users or prospects */
   community_initiative: CommunityInitiativeProperties
@@ -733,9 +733,9 @@ export interface UPGPropertyMap {
   customer_feedback: CustomerFeedbackProperties
   /** A churn reason explaining why a customer cancelled */
   churn_reason: ChurnReasonProperties
-  /** A customer health score — present when account health is tracked */
+  /** A customer health score, present when account health is tracked */
   customer_health_score: CustomerHealthScoreProperties
-  /** A playbook — a documented response to a customer scenario */
+  /** A playbook: a documented response to a customer scenario */
   playbook: PlaybookProperties
   /** A service level agreement defining commitments to a customer */
   service_level_agreement: ServiceLevelAgreementProperties
@@ -749,43 +749,43 @@ export interface UPGPropertyMap {
   service_blueprint: ServiceBlueprintProperties
 
   // ─── Localisation ────────────────────────────────────────────────────────────
-  /** A locale — a language and region combination supported by the product */
+  /** A locale: a language and region combination supported by the product */
   locale: LocaleProperties
   /** A translation key mapping a string identifier to localised text */
   translation_key: TranslationKeyProperties
-  /** A translation bundle — a collection of keys for a single locale */
+  /** A translation bundle: a collection of keys for a single locale */
   translation_bundle: TranslationBundleProperties
   /** A locale configuration defining date, number, and currency formatting */
   locale_config: LocaleConfigProperties
-  /** A cultural adaptation — a locale-specific change beyond string translation */
+  /** A cultural adaptation: a locale-specific change beyond string translation */
   cultural_adaptation: CulturalAdaptationProperties
   /** A regional pricing configuration adjusting price for a locale */
   regional_pricing: RegionalPricingProperties
 
   // ─── Customer Education ──────────────────────────────────────────────────────
-  /** An education programme — a structured curriculum for customer learning */
+  /** An education programme: a structured curriculum for customer learning */
   education_program: EducationProgramProperties
   /** A tutorial walking a user through a feature or workflow */
   tutorial: TutorialProperties
-  /** A walkthrough — an in-product guided tour */
+  /** A walkthrough: an in-product guided tour */
   walkthrough: WalkthroughProperties
-  /** A webinar — a live or recorded educational session */
+  /** A webinar: a live or recorded educational session */
   webinar: WebinarProperties
   /** A certification awarded upon completing a learning path */
   certification: CertificationProperties
-  /** A help video — a short screencast explaining a feature */
+  /** A help video: a short screencast explaining a feature */
   help_video: HelpVideoProperties
-  /** A learning path — a sequenced collection of tutorials, videos, and assessments */
+  /** A learning path: a sequenced collection of tutorials, videos, and assessments */
   learning_path: LearningPathProperties
 
   // ─── Partners & Ecosystem ────────────────────────────────────────────────────
   /** A partner programme defining tiers, benefits, and requirements */
   partner_program: PartnerProgramProperties
-  /** A partner tier within a programme — Bronze, Silver, Gold, etc. */
+  /** A partner tier within a programme (Bronze, Silver, Gold, etc.) */
   partner_tier: PartnerTierProperties
-  /** The API ecosystem — developer community and integration surface */
+  /** The API ecosystem: developer community and integration surface */
   api_ecosystem: ApiEcosystemProperties
-  /** A marketplace listing — present when the product is listed on a platform */
+  /** A marketplace listing, present when the product is listed on a platform */
   marketplace_listing: MarketplaceListingProperties
   /** A developer portal providing documentation and sandbox access */
   developer_portal: DeveloperPortalProperties
@@ -795,16 +795,16 @@ export interface UPGPropertyMap {
   partner_revenue_share: PartnerRevenueShareProperties
 }
 
-/** A fully typed UPG node — `UPGBaseNode` narrowed to a specific entity type.
+/** A fully typed UPG node. `UPGBaseNode` narrowed to a specific entity type.
  *
  * `T` is an entity-type literal from `UPGPropertyMap`. When supplied, it
  * constrains `type` to that literal and narrows `properties` to the matching
- * `*Properties` interface. When omitted, `T` defaults to the full union — the
+ * `*Properties` interface. When omitted, `T` defaults to the full union: the
  * node accepts any entity type and `properties` widens to the union of all
  * domain property shapes.
  *
  * @example
- * // Narrowed by T — `type` is locked to 'feature' and `properties` to
+ * // Narrowed by T: `type` is locked to 'feature' and `properties` to
  * // FeatureProperties.
  * const featureNode: UPGNode<'feature'> = {
  *   id: 'feat-1',
@@ -814,7 +814,7 @@ export interface UPGPropertyMap {
  * }
  *
  * @example
- * // A different instantiation of T — the generic lets a single helper
+ * // A different instantiation of T: the generic lets a single helper
  * // signature return the correctly typed node for any entity type.
  * const personaNode: UPGNode<'persona'> = {
  *   id: 'p-1',

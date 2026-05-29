@@ -1,5 +1,5 @@
 /**
- * UPG Lenses — role-specific projections combining vocabulary, visibility,
+ * UPG Lenses: role-specific projections combining vocabulary, visibility,
  * workflow, and intelligence. Applied on read.
  * https://unifiedproductgraph.org/spec | MIT
  */
@@ -16,24 +16,24 @@ import { getPlaybookById } from '../playbooks/index.js'
  * layer. Surfaces a message when a trigger condition evaluates to `true`
  * over the current product graph.
  *
- * Runtimes evaluate `structured_condition` — the machine-readable form.
+ * Runtimes evaluate `structured_condition`, the machine-readable form.
  * `condition` is a human-readable shadow kept for documentation, prompt
  * engineering, debug output, and grep-ability. The two should describe
  * the same intent; when they diverge (rare), `structured_condition` is
  * the source of truth.
  *
  * @example
- * // A simple "missing thing" nudge — fires when the product has no outcomes.
+ * // A simple "missing thing" nudge that fires when the product has no outcomes.
  * const noOutcomes: UPGLensIntelligencePrompt = {
  *   condition: 'outcomes.length === 0',
  *   structured_condition: {
  *     check: { type: 'entity_count', entity_type: 'outcome', comparison: 'zero' },
  *   },
- *   message: 'No outcomes defined yet. Start with what success looks like — what measurable result should this product drive?',
+ *   message: 'No outcomes defined yet. Start with what success looks like: what measurable result should this product drive?',
  * }
  *
  * @example
- * // A compound nudge — features exist but no hypotheses validate them.
+ * // A compound nudge: features exist but no hypotheses validate them.
  * const featuresWithoutHypotheses: UPGLensIntelligencePrompt = {
  *   condition: 'features.length > 0 && hypotheses.length === 0',
  *   structured_condition: {
@@ -48,12 +48,12 @@ import { getPlaybookById } from '../playbooks/index.js'
  */
 export interface UPGLensIntelligencePrompt {
   /**
-   * Human-readable shadow of `structured_condition`. Kept as documentary —
+   * Human-readable shadow of `structured_condition`. Kept as documentary reference,
    * useful for prompt engineering, debug output, and search. Not evaluated
    * at runtime; if the two ever diverge, `structured_condition` wins.
    */
   condition: string
-  /** Machine-evaluable condition — when to surface this prompt. */
+  /** Machine-evaluable condition: when to surface this prompt. */
   structured_condition: IntelligenceCondition
   /** The message to show, in the lens's voice */
   message: string
@@ -66,7 +66,7 @@ export interface UPGLensIntelligencePrompt {
  * A lens combines four orthogonal layers: vocabulary (which labels to
  * use), visibility (which domains to show), workflow (which guided
  * sequence to follow), and intelligence (which nudges to surface). The
- * `.upg` file format is lens-unaware — lenses apply on read only.
+ * `.upg` file format is lens-unaware; lenses apply on read only.
  *
  * @example
  * const productLens: UPGLens = {
@@ -121,7 +121,7 @@ export interface UPGLens {
    * mental model. Structure lives in the playbook registry; the lens owns
    * only presentation (labels, visibility, intelligence).
    *
-   * Lenses without a 1:1 region playbook (e.g. `product`, `full` — both
+   * Lenses without a 1:1 region playbook (e.g. `product`, `full`, both
    * cross-region) leave this field unset. Resolved via `getLensPlaybook`.
    *
    * Renamed from `workflow_id` (workflows → playbooks + techniques).
@@ -146,7 +146,7 @@ export interface UPGLens {
 export const UPG_LENSES: readonly UPGLens[] = [
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 1. PRODUCT LENS — the strategic command view
+  // 1. PRODUCT LENS - the strategic command view
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {
@@ -160,7 +160,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
       learning: 'Validated Learning',
     },
     visible_domains: [], // all domains visible
-    // playbook_id intentionally unset — the product lens spans every region;
+    // playbook_id intentionally unset: the product lens spans every region;
     // no single canonical playbook captures the cross-region "PM journey"
     // narrative that lived in the v0.2 lens-workflow `product-journey`.
     benchmark_domains: [
@@ -171,7 +171,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
       {
         condition: 'outcomes.length === 0',
         structured_condition: { check: { type: 'entity_count', entity_type: 'outcome', comparison: 'zero' } },
-        message: 'No outcomes defined yet. Start with what success looks like — what measurable result should this product drive?',
+        message: 'No outcomes defined yet. Start with what success looks like: what measurable result should this product drive?',
       },
       {
         condition: 'hypotheses.untested.length > 3',
@@ -208,7 +208,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 2. DESIGN LENS — user-centric, journey-first
+  // 2. DESIGN LENS - user-centric, journey-first
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {
@@ -251,7 +251,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
           { check: { type: 'entity_count', entity_type: 'user_journey', comparison: 'zero' } },
           { check: { type: 'entity_count', entity_type: 'screen', comparison: 'nonzero' } },
         ] },
-        message: 'You have screens but no user journeys. Without a journey, screens are disconnected pages — map the experience first.',
+        message: 'You have screens but no user journeys. Without a journey, screens are disconnected pages. Map the experience first.',
       },
       {
         condition: 'prototypes.length > 0 && experiments.length === 0',
@@ -275,7 +275,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
           { check: { type: 'entity_count', entity_type: 'a11y_audit', comparison: 'zero' } },
           { check: { type: 'entity_count', entity_type: 'screen', comparison: 'gt', threshold: 5 } },
         ] },
-        message: 'Many screens designed but no accessibility audit. Inclusive design is not a polish step — it is a design constraint.',
+        message: 'Many screens designed but no accessibility audit. Inclusive design is not a polish step; it is a design constraint.',
       },
     ],
     audience: 'Designers, UX researchers, and anyone focused on the user experience',
@@ -283,7 +283,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 3. ENGINEERING LENS — architecture-first, system-aware
+  // 3. ENGINEERING LENS - architecture-first, system-aware
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {
@@ -318,7 +318,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
       {
         condition: 'decisions.length === 0',
         structured_condition: { check: { type: 'entity_count', entity_type: 'decision', comparison: 'zero' } },
-        message: 'No decisions recorded. Document the key technical choices — future you will thank present you.',
+        message: 'No decisions recorded. Document the key technical choices; future you will thank present you.',
       },
       {
         condition: 'services.length > 0 && api_contracts.length === 0',
@@ -355,7 +355,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 4. GROWTH LENS — metrics-driven, experiment-focused
+  // 4. GROWTH LENS - metrics-driven, experiment-focused
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {
@@ -395,7 +395,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
       {
         condition: 'funnels.length === 0',
         structured_condition: { check: { type: 'entity_count', entity_type: 'funnel', comparison: 'zero' } },
-        message: 'No funnels mapped. You can\'t improve what you can\'t see — map the user journey from first touch to activation.',
+        message: 'No funnels mapped. You can\'t improve what you can\'t see. Map the user journey from first touch to activation.',
       },
       {
         condition: 'experiment_runs.length > 0 && metrics.length < 3',
@@ -408,16 +408,16 @@ export const UPG_LENSES: readonly UPGLens[] = [
       {
         condition: 'channels.length === 1',
         structured_condition: { check: { type: 'entity_count', entity_type: 'acquisition_channel', comparison: 'eq', threshold: 1 } },
-        message: 'Only one acquisition channel. Single-channel dependency is risky — what else could work?',
+        message: 'Only one acquisition channel. Single-channel dependency is risky. What else could work?',
       },
       {
         // The original second clause `users > 100` references a product-runtime
-        // count (real users), not a graph entity count — it cannot be encoded
+        // count (real users), not a graph entity count, so it cannot be encoded
         // in IntelligenceCondition. The structured form fires on the cohort
         // gap alone; the string preserves the original intent.
         condition: 'cohorts.length === 0 && users > 100',
         structured_condition: { check: { type: 'entity_count', entity_type: 'cohort', comparison: 'zero' } },
-        message: 'No cohort analysis yet. Not all users are the same — segment by behaviour to find what drives retention.',
+        message: 'No cohort analysis yet. Not all users are the same. Segment by behaviour to find what drives retention.',
       },
     ],
     audience: 'Growth marketers, data-driven founders, and anyone optimising acquisition and retention',
@@ -425,7 +425,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 5. BUSINESS LENS — viability-focused
+  // 5. BUSINESS LENS - viability-focused
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {
@@ -499,7 +499,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 6. RESEARCH LENS — evidence-first
+  // 6. RESEARCH LENS - evidence-first
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {
@@ -543,7 +543,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
           { check: { type: 'entity_count', entity_type: 'observation', comparison: 'gt', threshold: 10 } },
           { check: { type: 'entity_count', entity_type: 'insight', comparison: 'zero' } },
         ] },
-        message: 'Lots of observations but no synthesized insights. Raw data is not knowledge — cluster and extract patterns.',
+        message: 'Lots of observations but no synthesized insights. Raw data is not knowledge. Cluster and extract patterns.',
       },
       {
         condition: 'insights.length > 5 && opportunities.length === 0',
@@ -551,7 +551,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
           { check: { type: 'entity_count', entity_type: 'insight', comparison: 'gt', threshold: 5 } },
           { check: { type: 'entity_count', entity_type: 'opportunity', comparison: 'zero' } },
         ] },
-        message: 'Insights without opportunities. Research is powerful when it drives product decisions — what should the product do about what you learned?',
+        message: 'Insights without opportunities. Research is powerful when it drives product decisions. What should the product do about what you learned?',
       },
       {
         condition: 'hypothesiss.length > 3 && experiment_plans.length === 0',
@@ -567,7 +567,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
           { check: { type: 'entity_count', entity_type: 'participant', comparison: 'lt', threshold: 5 } },
           { check: { type: 'entity_count', entity_type: 'research_study', comparison: 'nonzero' } },
         ] },
-        message: 'Very few participants. Qualitative research needs enough voices to reveal patterns — aim for 5-8 per study minimum.',
+        message: 'Very few participants. Qualitative research needs enough voices to reveal patterns. Aim for 5-8 per study minimum.',
       },
     ],
     audience: 'User researchers, discovery coaches, and anyone in a research-heavy phase',
@@ -575,7 +575,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 7. MARKETING LENS — audience-aware, message-focused
+  // 7. MARKETING LENS - audience-aware, message-focused
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {
@@ -620,7 +620,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
           { check: { type: 'entity_count', entity_type: 'messaging', comparison: 'zero' } },
           { check: { type: 'entity_count', entity_type: 'feature', comparison: 'gt', threshold: 3 } },
         ] },
-        message: 'Features without messaging. Features don\'t sell themselves — what is the message that makes someone care?',
+        message: 'Features without messaging. Features don\'t sell themselves. What is the message that makes someone care?',
       },
       {
         condition: 'channels.length === 0',
@@ -649,18 +649,18 @@ export const UPG_LENSES: readonly UPGLens[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 8. FULL LENS — everything, canonical vocabulary (default)
+  // 8. FULL LENS - everything, canonical vocabulary (default)
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {
     id: 'full',
     name: 'Full',
-    description: 'Complete graph with canonical UPG vocabulary — the whole picture',
+    description: 'Complete graph with canonical UPG vocabulary: the whole picture',
     icon: 'layout-grid',
-    // No framework_id — uses canonical UPG labels
-    // No label_overrides — everything stays canonical
+    // No framework_id; uses canonical UPG labels
+    // No label_overrides; everything stays canonical
     visible_domains: [], // empty = show all
-    // playbook_id intentionally unset — the full lens spans every region;
+    // playbook_id intentionally unset: the full lens spans every region;
     // the v0.2 lens-workflow `full-product-journey` was a cross-region
     // traversal whose content is now covered by the 10 canonical region
     // playbooks at v0.3.0.
@@ -679,7 +679,7 @@ export const UPG_LENSES: readonly UPGLens[] = [
       {
         condition: 'orphan_entities.length > 5',
         structured_condition: { check: { type: 'orphan_count', comparison: 'gt', threshold: 5 } },
-        message: 'Several entities without connections. Every entity should relate to something — orphans are loose thoughts waiting to be placed.',
+        message: 'Several entities without connections. Every entity should relate to something; orphans are loose thoughts waiting to be placed.',
       },
       {
         condition: 'validation_domain.length === 0 && features.length > 3',
@@ -749,7 +749,7 @@ export function getVisibleTypes(lens: UPGLens): string[] {
   let baseTypes: string[]
 
   if (lens.visible_domains.length === 0) {
-    // Show all — collect every type from every domain
+    // Show all: collect every type from every domain
     baseTypes = UPG_DOMAINS.flatMap((d) => [...d.types])
   } else {
     // Filter to lens's visible domains
@@ -809,7 +809,7 @@ export function getLensIds(): string[] {
  * @example
  * const lens = getLens('design')!
  * const playbook = getLensPlaybook(lens)
- * // playbook?.id matches lens.playbook_id — the bootstrap path for the
+ * // playbook?.id matches lens.playbook_id, the bootstrap path for the
  * // experience_design_brand region.
  */
 export function getLensPlaybook(lens: UPGLens): UPGPlaybook | undefined {

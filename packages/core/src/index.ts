@@ -25,7 +25,7 @@ export * from './regions/index.js'
 export * from './frameworks/index.js'
 
 /** The current spec version implemented by this package */
-export const UPG_VERSION = '0.7.0' as const
+export const UPG_VERSION = '0.7.3' as const
 
 /**
  * The `.upg` JSON document format version. Written to the `upg_version` field.
@@ -73,7 +73,7 @@ export const UPG_EDGE_TYPES: readonly UPGEdgeType[] = Object.keys(
  * Lookup map: `"source_type:target_type"` → ordered list of canonical edge keys.
  *
  * Computed from the edge catalog. Multiple edges may share a `(source, target)`
- * pair — e.g. `learning_updates_hypothesis` (causal) and `learning_refines_hypothesis`
+ * pair, e.g. `learning_updates_hypothesis` (causal) and `learning_refines_hypothesis`
  * (cross-domain) both connect `learning → hypothesis`. Prior to v0.4.1 this map
  * was a `Record<string, UPGEdgeType>` populated by `Object.fromEntries`, which
  * silently dropped every collision but the last (35 pairs).
@@ -103,10 +103,10 @@ export type UPGEdgePickHint = 'hierarchy' | 'causal' | 'semantic' | 'cross-domai
  * Deterministic precedence used when no hint is given, or when the hinted
  * classification yields no match for the pair.
  *
- * Containment (hierarchy) wins — adapters and importers almost always mean
+ * Containment (hierarchy) wins: adapters and importers almost always mean
  * "parent contains child" when they ask for an edge. Causal beats lateral
  * (semantic / cross-domain) because cause/effect is structurally stronger
- * than association. Cross-domain is last — it is a deliberate "bridge"
+ * than association. Cross-domain is last, as it is a deliberate "bridge"
  * marker and should never silently win over an intra-domain edge.
  */
 const CLASSIFICATION_RANK: Record<UPGEdgePickHint, number> = {
@@ -140,14 +140,14 @@ export function resolveAllEdges(
  * **Policy:**
  * 1. If `hint` is provided and an edge with that `classification` exists for
  *    the pair, return it (first declared wins for sub-collisions inside a
- *    single classification — declaration order is the canonical tiebreaker).
+ *    single classification, declaration order is the canonical tiebreaker).
  * 2. Otherwise, return the highest-ranked classification edge available,
  *    using `CLASSIFICATION_RANK` (hierarchy ≻ causal ≻ semantic ≻ cross-domain).
  * 3. If the pair has no catalogued edges, return `null`.
  *
  * **Determinism:** for any `(source, target)` the picked edge is stable across
- * runs and never changes unless the catalog is edited. This is the v0.4.1 fix
- * — pair collisions are no longer last-wins.
+ * runs and never changes unless the catalog is edited. This is the v0.4.1 fix:
+ * pair collisions are no longer last-wins.
  *
  * @example
  * pickCanonicalEdge('product', 'decision', 'hierarchy')
@@ -195,8 +195,8 @@ export function pickCanonicalEdge(
  * Resolve the canonical `UPGEdgeType` for a containment relationship.
  *
  * Import adapters need to emit edges like "epic contains user_story" but
- * cannot safely construct raw `${parent}_contains_${child}` template strings —
- * that union is closed and most pairs are not registered. This function looks
+ * cannot safely construct raw `${parent}_contains_${child}` template strings,
+ * because that union is closed and most pairs are not registered. This function looks
  * up the canonical edge for the given parent→child pair using
  * `pickCanonicalEdge` with the `'hierarchy'` hint, falling back through the
  * standard precedence when no hierarchy-class edge exists for the pair.
@@ -210,7 +210,7 @@ export function pickCanonicalEdge(
  *   caller can fall back to `node_informs_node` or skip the edge entirely.
  *
  * **Design note:** the `hint` argument is omitted from this function for
- * back-compat — all in-tree callers (Markdown, Notion, Linear, GitHub
+ * back-compat. All in-tree callers (Markdown, Notion, Linear, GitHub
  * adapters) are containment-only. Callers that need a different classification
  * should call `pickCanonicalEdge(source, target, hint)` directly.
  *

@@ -1,5 +1,5 @@
 /**
- * properties/ — Layer 3: What Things Carry.
+ * properties/: Layer 3: What Things Carry.
  * Typed property interfaces per domain, `UPGPropertyMap`, `UPGNode<T>`,
  * and the auto-generated runtime schema.
  *
@@ -50,7 +50,7 @@ export * from './domains/education.js'
 export * from './domains/ecosystem.js'
 export * from './domains/workspace.js'
 
-// ─── Property map — UPGPropertyMap, UPGNode<T> ───────────────────────────────
+// ─── Property map: UPGPropertyMap, UPGNode<T> ────────────────────────────────
 export * from './property-map.js'
 
 // ─── Auto-generated schema ───────────────────────────────────────────────────

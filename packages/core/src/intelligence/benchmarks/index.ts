@@ -1,5 +1,5 @@
 /**
- * benchmarks/ — Product management wisdom as structured data.
+ * benchmarks/ Product management wisdom as structured data.
  *
  * Encodes expected entity counts, relationships, ratios, and domain activation
  * thresholds per product stage. All 9 stages populated.

@@ -1,5 +1,5 @@
 /**
- * grammar/ — Layer 2: How Things Behave.
+ * grammar/: Layer 2: How Things Behave.
  * Hierarchy rules, lifecycles, scales, migrations, document validation.
  */
 

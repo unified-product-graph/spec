@@ -61,7 +61,7 @@ export interface RoleProperties {
  *
  * Properties are minimal: identity, addressability, coordination. HR-shaped
  * fields (`seniority`, `employment_type`, `start_date`) are intentionally
- * out of scope — they encode org-design opinions that vary wildly across
+ * out of scope; they encode org-design opinions that vary wildly across
  * companies and have no bearing on product-graph reasoning. UPG is not
  * an HRIS.
  *

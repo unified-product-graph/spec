@@ -1,5 +1,5 @@
 /**
- * intelligence/ — Layer 4b: Graph Health & Guidance.
+ * intelligence/ Layer 4b: Graph Health & Guidance.
  * Benchmarks, intelligence conditions, domain construction guides, anti-patterns.
  */
 

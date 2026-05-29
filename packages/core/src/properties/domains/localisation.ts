@@ -106,7 +106,7 @@ export interface LocaleConfigProperties {
  * @example
  * const properties: CulturalAdaptationProperties = {
  *   adaptation_type: 'content',
- *   rationale: 'Reduces support burden and lifts activation — both priorities this quarter.',
+ *   rationale: 'Reduces support burden and lifts activation, both priorities this quarter.',
  * }
  */
 export interface CulturalAdaptationProperties {

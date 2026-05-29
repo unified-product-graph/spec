@@ -1,5 +1,5 @@
 /**
- * Framework validation — validates UPGFramework objects against the spec.
+ * Framework validation: validates UPGFramework objects against the spec.
  */
 
 import { UPG_FRAMEWORK_CATEGORIES, UPG_STRUCTURE_PATTERNS } from './categories.js'
@@ -214,10 +214,10 @@ function validateExpression(expr: string): string | null {
   for (const ch of expr) {
     if (ch === '(') depth++
     if (ch === ')') depth--
-    if (depth < 0) return 'Unbalanced parentheses — unexpected closing paren'
+    if (depth < 0) return 'Unbalanced parentheses: unexpected closing paren'
   }
   if (depth !== 0) {
-    return 'Unbalanced parentheses — missing closing paren'
+    return 'Unbalanced parentheses: missing closing paren'
   }
 
   // Check for valid tokens only: identifiers (a-z, _, digits), numbers, operators, parens, whitespace, dots

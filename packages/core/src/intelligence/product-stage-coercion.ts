@@ -41,7 +41,7 @@ export const UPG_PRODUCT_STAGE_COERCION_MAP: Readonly<Record<string, UPGProductS
   archived: 'sunset',
   retired: 'sunset',
   deprecated: 'sunset',
-  // Pass-through duplicates for safety — keeps the matcher table unsurprising
+  // Pass-through duplicates for safety, keeps the matcher table unsurprising
   // when a caller passes the canonical value but expects coercion to confirm.
   // We intentionally do NOT list every canonical value here; the canonical
   // check happens before the coercion lookup.
@@ -62,15 +62,15 @@ export function isCanonicalProductStage(value: unknown): value is UPGProductStag
 /**
  * Result of a soft-coercion attempt on a product `stage` value.
  *
- * - `canonical` — the canonical UPGProductStage to use, or `undefined` when
+ * - `canonical`: the canonical UPGProductStage to use, or `undefined` when
  *   the input was unrecognised (no entry in the coercion map AND not already
  *   canonical). Callers can choose to fall back to a default (typically
  *   `'concept'`) or surface the unknown value.
- * - `originalValue` — the raw input, for warning messages and audit trails.
- * - `wasCoerced` — `true` if the input was a known legacy value that was
+ * - `originalValue`: the raw input, for warning messages and audit trails.
+ * - `wasCoerced`: `true` if the input was a known legacy value that was
  *   mapped to a canonical equivalent. `false` if the input was already
  *   canonical or unrecognised.
- * - `wasUnknown` — `true` if the input was non-canonical AND not in the
+ * - `wasUnknown`: `true` if the input was non-canonical AND not in the
  *   coercion map. Callers should fall back to a default and log loudly.
  */
 export interface ProductStageCoercion {
@@ -104,17 +104,17 @@ export function coerceProductStage(value: unknown): ProductStageCoercion {
   if (typeof value !== 'string') {
     return { canonical: undefined, originalValue: value, wasCoerced: false, wasUnknown: true }
   }
-  // Already canonical — pass through.
+  // Already canonical: pass through.
   if (UPG_PRODUCT_STAGES_SET.has(value as UPGProductStage)) {
     return { canonical: value as UPGProductStage, originalValue: value, wasCoerced: false, wasUnknown: false }
   }
-  // Known legacy alias — coerce.
+  // Known legacy alias: coerce.
   const lower = value.toLowerCase()
   const mapped = UPG_PRODUCT_STAGE_COERCION_MAP[lower]
   if (mapped) {
     return { canonical: mapped, originalValue: value, wasCoerced: true, wasUnknown: false }
   }
-  // Truly unknown — caller decides what to do.
+  // Truly unknown: caller decides what to do.
   return { canonical: undefined, originalValue: value, wasCoerced: false, wasUnknown: true }
 }
 
@@ -140,7 +140,7 @@ export function validateProductStageStrict(value: unknown): string | null {
   if (coerced.wasCoerced && coerced.canonical) {
     return (
       `Invalid product stage: ${JSON.stringify(value)}. ` +
-      `This looks like a legacy value — pass ${JSON.stringify(coerced.canonical)} instead. ` +
+      `This looks like a legacy value. Pass ${JSON.stringify(coerced.canonical)} instead. ` +
       `Canonical UPGProductStage values: ${canonicalList}.`
     )
   }

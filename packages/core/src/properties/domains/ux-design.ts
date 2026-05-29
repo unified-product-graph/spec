@@ -119,7 +119,7 @@ export interface JourneyStepProperties {
  *   opportunity_score: 5,
  *   evidence: 'Pasted transcript appears as a single text node',
  *   system: 'canvas-paste-handler',
- *   notes: 'Most users hesitate before pasting — too much trust required.',
+ *   notes: 'Most users hesitate before pasting; too much trust required.',
  * }
  */
 export interface JourneyActionProperties {
@@ -195,7 +195,7 @@ export interface DesignQuestionProperties {
  * @example
  * const properties: DesignConceptProperties = {
  *   sketch_url: 'https://figma.com/file/abc/sketch',
- *   rationale: 'Reduces support burden and lifts activation — both priorities this quarter.',
+ *   rationale: 'Reduces support burden and lifts activation, both priorities this quarter.',
  *   concept_status: 'exploring',
  * }
  */

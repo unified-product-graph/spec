@@ -1,5 +1,5 @@
 /**
- * registry/ — Layer 1c: Identity & Organisation.
+ * registry/: Layer 1c: Identity & Organisation.
  * Domain definitions, type metadata, stable IDs, maturity, versioning.
  */
 

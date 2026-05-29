@@ -1,4 +1,4 @@
-# `properties/` — What Things Carry
+# `properties/`: What Things Carry
 
 Per-entity-type property definitions. For every entity in the catalog, this directory declares the typed fields that entity may carry: start dates, owners, priorities, scored assessments, lifecycle phases, and the rest.
 

@@ -1,9 +1,9 @@
 /**
- * UPG Framework Shape Audit — Library
+ * UPG Framework Shape Audit: Library
  *
  * Lints `UPG_FRAMEWORKS` for structural inconsistencies between the
  * `data`, `presentation`, `slots`, and `education` layers. The actual
- * CLI lives in `scripts/audit-framework-shape.ts` — this module exposes
+ * CLI lives in `scripts/audit-framework-shape.ts`; this module exposes
  * the pure audit logic so it can be imported by tests and the script
  * without re-implementing the rules in two places.
  *
@@ -52,10 +52,10 @@ export interface FrameworkAuditResult {
 
 // ── Constants ───────────────────────────────────────────────────────────────
 
-/** Properties that the renderer derives from any UPG node — always present. */
+/** Properties that the renderer derives from any UPG node (always present). */
 const UNIVERSAL_NODE_FIELDS = new Set(['title', 'description', 'status'])
 
-/** Identifiers an expression parser should skip — math built-ins, constants. */
+/** Identifiers an expression parser should skip: math built-ins and constants. */
 const EXPRESSION_RESERVED = new Set([
   'true',
   'false',
@@ -96,7 +96,7 @@ function normaliseBullet(bullet: string): string {
 /**
  * Audit a single framework for the intrinsic shape issues
  * (column refs, expression vars, slot/data drift).
- * Boilerplate detection is category-scoped — see auditCategoryBoilerplate.
+ * Boilerplate detection is category-scoped; see auditCategoryBoilerplate.
  */
 function auditFramework(fw: UPGFramework): FrameworkIssue[] {
   const issues: FrameworkIssue[] = []
@@ -237,7 +237,7 @@ function auditCategoryBoilerplate(
           kind: 'WHEN_TO_USE_BOILERPLATE',
           severity: 'warning',
           location: 'education.when_to_use',
-          detail: `${sharedBullets.length}/${bullets.length} when_to_use bullets appear in >=${sharedThreshold} of ${members.length} frameworks in category "${category}". Likely category boilerplate — consider rewriting in framework-specific terms.`,
+          detail: `${sharedBullets.length}/${bullets.length} when_to_use bullets appear in >=${sharedThreshold} of ${members.length} frameworks in category "${category}". Likely category boilerplate; consider rewriting in framework-specific terms.`,
         })
         issuesByFramework.set(fw.id, list)
       }

@@ -8,7 +8,7 @@
   },
   "product": {
     "id": "cms-field-guide",
-    "title": "CMS Editor Paradigms — A Studio PM Field Guide",
+    "title": "CMS Editor Paradigms: A Studio PM Field Guide",
     "description": "Proof-of-spec fixture for the classification model. Models the CMS Field Editor Guide end-to-end using only canonical UPG entities: a single competitive_analysis dimensioned by two classification_axis children, with five classification_value children per axis, two exemplar competitor nodes classified against axis values, three empty_cells covering all rationale_kind values, and a persona with an anti_fit_for edge.",
     "stage": "mvp"
   },
@@ -26,13 +26,13 @@
             "axis_a_value_ref": "val-composable",
             "axis_b_value_ref": "val-wysiwyg",
             "rationale_kind": "structural",
-            "rationale_md": "Composable rejects HTML blobs; WYSIWYG requires them. The two paradigms are structurally incompatible — you can't simultaneously commit to a typed content graph and to a free-form HTML editor."
+            "rationale_md": "Composable rejects HTML blobs; WYSIWYG requires them. The two paradigms are structurally incompatible: you can't simultaneously commit to a typed content graph and to a free-form HTML editor."
           },
           {
             "axis_a_value_ref": "val-git-based",
             "axis_b_value_ref": "val-portable-text",
             "rationale_kind": "opportunity",
-            "rationale_md": "No technical reason — only adoption inertia. Watching brief: anyone shipping a starter that drops .md into Portable Text JSON could change the row."
+            "rationale_md": "No technical reason, only adoption inertia. Watching brief: anyone shipping a starter that drops .md into Portable Text JSON could change the row."
           },
           {
             "axis_a_value_ref": "val-monolithic",
@@ -105,7 +105,7 @@
       "description": "Decouples content storage from presentation; serves content via an API.",
       "parent_id": "axis-architecture",
       "properties": {
-        "rationale": "Headless without the composable extensions — APIs over content but no typed graph guarantee, often without real-time, often with hosted-only editor.",
+        "rationale": "Headless without the composable extensions: APIs over content but no typed graph guarantee, often without real-time, often with hosted-only editor.",
         "exemplars": ["Contentstack", "Storyblok", "Strapi"],
         "commitments": [
           { "name": "API-only delivery", "description": "No coupled rendering layer; consumers pull content via REST/GraphQL." },
@@ -124,7 +124,7 @@
       "description": "API delivery plus optional coupled rendering; vendor-managed personalization layer.",
       "parent_id": "axis-architecture",
       "properties": {
-        "rationale": "Splits the difference between headless and monolithic — typically enterprise DXP vendors layering API delivery on top of their incumbent page-bound stack.",
+        "rationale": "Splits the difference between headless and monolithic, typically enterprise DXP vendors layering API delivery on top of their incumbent page-bound stack.",
         "exemplars": ["Optimizely", "Sitecore XM Cloud"]
       }
     },
@@ -191,7 +191,7 @@
       "description": "Long-form content as a typed array of typed blocks; rich text without HTML.",
       "parent_id": "axis-editing",
       "properties": {
-        "rationale": "Sanity's signature shape — long-form authoring without surrendering type guarantees. Each paragraph/heading/quote is a typed block; embedded references are first-class.",
+        "rationale": "Sanity's signature shape: long-form authoring without surrendering type guarantees. Each paragraph/heading/quote is a typed block; embedded references are first-class.",
         "exemplars": ["Sanity Studio"],
         "commitments": [
           { "name": "Typed blocks", "description": "Every paragraph, heading, list, quote is a typed JSON block with stable schema." },
@@ -227,7 +227,7 @@
         "strengths": [
           "Typed content graph with GROQ query language",
           "Real-time CRDT collaboration out of the box",
-          "Embeddable studio — owned inside the team's repo"
+          "Embeddable studio, owned inside the team's repo"
         ],
         "weaknesses": [
           "Steeper learning curve than form-based headless CMSs",

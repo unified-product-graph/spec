@@ -26,7 +26,7 @@ export type UPGMappingConfidence = 'high' | 'medium' | 'low' | 'manual'
  * Everything else is optional to keep the format lightweight.
  *
  * @example
- * // A minimal persona node — only required fields populated.
+ * // A minimal persona node, only required fields populated.
  * const persona: UPGBaseNode = {
  *   id: 'n_persona_1',
  *   type: 'persona',
@@ -55,7 +55,7 @@ export type UPGMappingConfidence = 'high' | 'medium' | 'low' | 'manual'
 export interface UPGBaseNode {
   /** Unique identifier within the graph */
   id: string
-  /** The UPG entity type — must be a value from UPGEntityType */
+  /** The UPG entity type (must be a value from UPGEntityType) */
   type: UPGEntityType
   /** Human-readable title */
   title: string
@@ -78,7 +78,7 @@ export interface UPGBaseNode {
   description?: string
   /** Freeform tags for filtering and grouping */
   tags?: string[]
-  /** Current lifecycle phase — must be a phase ID from getLifecycleForType().
+  /** Current lifecycle phase (must be a phase ID from getLifecycleForType()).
    *  E.g., for hypothesis: 'untested' | 'testing' | 'resolved'.
    *  Entity types without a lifecycle definition should omit this field.
    *  Validated at runtime against UPG_ALL_PHASES_SET. */
@@ -91,7 +91,7 @@ export interface UPGBaseNode {
   mapping_confidence?: UPGMappingConfidence
   /** External tool that holds the canonical artifact (e.g. "figma", "linear", "notion") */
   external_tool?: string
-  /** URI to the canonical artifact — https:// for cloud tools, file:// or relative path for local files */
+  /** URI to the canonical artifact: https:// for cloud tools, file:// or relative path for local files */
   external_ref?: string
   /** Identifier in the external tool's system (for sync / round-trip) */
   external_id?: string

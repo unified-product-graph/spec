@@ -1,5 +1,5 @@
 /**
- * UPG Labels — framework-vocabulary Rosetta Stone. Each entity type maps to a
+ * UPG Labels: framework-vocabulary Rosetta Stone. Each entity type maps to a
  * canonical label, alt labels, and framework-specific labels. Answers "what
  * does framework X call this concept?"
  *
@@ -29,7 +29,7 @@ export interface UPGTypeLabel {
 
 /**
  * Hand-authored label entries for types that appear across multiple frameworks.
- * These are the "Rosetta Stone" entries — the ones users will encounter across views.
+ * These are the "Rosetta Stone" entries, the ones users will encounter across views.
  */
 const PRIORITY_LABELS: UPGTypeLabel[] = [
 
@@ -948,7 +948,7 @@ for (const fw of UPG_FRAMEWORKS) {
 const _priorityIndex = new Map(PRIORITY_LABELS.map((p) => [p.id, p]))
 
 /**
- * The complete Rosetta Stone — one UPGTypeLabel for every active type.
+ * The complete Rosetta Stone: one UPGTypeLabel for every active type.
  *
  * Assembly logic:
  * 1. If a type has a PRIORITY_LABELS entry → use it (richest framework_labels)
@@ -1038,7 +1038,7 @@ export function resolveLabel(
 ): string {
   const entry = UPG_TYPE_LABELS_MAP.get(entityType)
   if (!entry) {
-    // Unknown type — best-effort Title Case
+    // Unknown type: best-effort Title Case
     return toTitleCase(entityType)
   }
 
@@ -1077,7 +1077,7 @@ export function buildTypeAliases(): Record<string, string> {
       // Normalise to snake_case for matching
       const snaked = label.toLowerCase().replace(/[\s\-\/]+/g, '_')
 
-      // First entry wins — don't overwrite existing aliases
+      // First entry wins; don't overwrite existing aliases
       if (!aliases[snaked]) {
         aliases[snaked] = entry.id
       }
@@ -1093,5 +1093,5 @@ export function buildTypeAliases(): Record<string, string> {
   return aliases
 }
 
-/** Pre-built alias map — import this instead of calling buildTypeAliases() repeatedly */
+/** Pre-built alias map. Import this instead of calling buildTypeAliases() repeatedly. */
 export const UPG_TYPE_ALIASES: Record<string, string> = buildTypeAliases()

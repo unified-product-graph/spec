@@ -13,8 +13,8 @@
  *
  * Benchmark shape: see `CountBenchmark` in `./types.ts`.
  *
- * @see ./types.ts — `CountBenchmark`, `StageRange`, `UPG_PRODUCT_STAGES`
- * @see ../intelligence.ts — health scoring consumer
+ * @see ./types.ts `CountBenchmark`, `StageRange`, `UPG_PRODUCT_STAGES`
+ * @see ../intelligence.ts health scoring consumer
  * https://unifiedproductgraph.org/spec | MIT
  */
 
@@ -139,7 +139,7 @@ export const UPG_COUNT_BENCHMARKS: CountBenchmark[] = [
     },
     "sunset": null,
     "source": {"kind":"book","citation":"Measure What Matters (Doerr)"},
-    "rationale": "Objectives give teams direction. Not needed at idea stage — outcomes suffice."
+    "rationale": "Objectives give teams direction. Not needed at idea stage; outcomes suffice."
   },
   {
     "type": "key_result",
@@ -391,7 +391,7 @@ export const UPG_COUNT_BENCHMARKS: CountBenchmark[] = [
     },
     "sunset": null,
     "source": {"kind":"book","citation":"Lean Startup (Ries)"},
-    "rationale": "Early stage should have MORE assumptions — they decrease as you validate."
+    "rationale": "Early stage should have MORE assumptions; they decrease as you validate."
   },
   {
     "type": "decision",
@@ -508,7 +508,7 @@ export const UPG_COUNT_BENCHMARKS: CountBenchmark[] = [
     },
     "sunset": null,
     "source": {"kind":"book","citation":"JTBD (Christensen)"},
-    "rationale": "2-4 JTBDs per persona. Jobs are the demand side — they drive everything."
+    "rationale": "2-4 JTBDs per persona. Jobs are the demand side; they drive everything."
   },
   {
     "type": "need",
@@ -547,7 +547,7 @@ export const UPG_COUNT_BENCHMARKS: CountBenchmark[] = [
     },
     "sunset": null,
     "source": {"kind":"industry_practice","category":"design_thinking"},
-    "rationale": "Needs have valence (pain, gap, desire, constraint). Surfaces opportunities — more needs = more signal."
+    "rationale": "Needs have valence (pain, gap, desire, constraint). Surfaces opportunities: more needs = more signal."
   },
   {
     "type": "desired_outcome",

@@ -102,7 +102,7 @@ export interface DesignPatternProperties {
  * const properties: DesignGuidelineProperties = {
  *   guideline_category: 'spacing',
  *   applies_to: 'All customer-facing surfaces',
- *   rationale: 'Reduces support burden and lifts activation — both priorities this quarter.',
+ *   rationale: 'Reduces support burden and lifts activation, both priorities this quarter.',
  * }
  */
 export interface DesignGuidelineProperties {

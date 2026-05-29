@@ -5,8 +5,8 @@
  * `UPG_TYPES` member, carrying the `from → to` alias trail when the input
  * was a deprecated synonym.
  *
- * Lives in `core` (rather than `mcp-tooling`) so every consumer — the SDK,
- * the local + cloud MCP servers, the LSP — shares ONE `UnknownEntityTypeError`
+ * Lives in `core` (rather than `mcp-tooling`) so every consumer (the SDK,
+ * the local + cloud MCP servers, the LSP) shares ONE `UnknownEntityTypeError`
  * class. That makes `instanceof` checks instance-safe across package
  * boundaries (the SDK can throw it and a server can catch it), and gives a
  * single canonical resolution path (`get_entity_schema('jtbd') → job`).

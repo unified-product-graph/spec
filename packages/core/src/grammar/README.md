@@ -1,4 +1,4 @@
-# `grammar/` — How Things Behave
+# `grammar/`: How Things Behave
 
 The runtime behaviour layer. Grammar holds the rules that govern a UPG graph: what can contain what, what lifecycle phases an entity passes through, what assessment scales exist, how old data migrates forward, and how a document is validated.
 

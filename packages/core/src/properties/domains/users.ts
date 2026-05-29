@@ -132,7 +132,7 @@ export interface JobStepProperties {
  * const properties: SwitchingCostProperties = {
  *   cost_type: 'financial',
  *   magnitude: 'high',
- *   barrier_description: 'Extensive Notion workspace with years of history — migration feels daunting.',
+ *   barrier_description: 'Extensive Notion workspace with years of history; migration feels daunting.',
  * }
  */
 export interface SwitchingCostProperties {

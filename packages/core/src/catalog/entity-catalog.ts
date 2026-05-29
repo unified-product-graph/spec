@@ -25,14 +25,14 @@ export type UPGEntityType =
   | 'job_step' | 'switching_cost'
   // Discovery
   | 'opportunity' | 'solution' | 'feasibility_study' | 'design_sprint'
-  // Validation — `hypothesis` canonical (re-promoted); `hypothesis_evidence`
+  // Validation: `hypothesis` canonical (re-promoted); `hypothesis_evidence`
   // deprecated at v0.4.0 (→ `evidence`), retained until v0.5.0.
   | 'hypothesis' | 'hypothesis_evidence'
   | 'experiment' | 'experiment_plan' | 'experiment_run'
   | 'learning' | 'test_plan' | 'evidence' | 'research_plan'
   // Market Intelligence
   | 'competitor' | 'competitor_feature' | 'market_trend' | 'market_segment' | 'competitive_analysis'
-  // Classification — taxonomy axes and their values, hosted by competitive_analysis
+  // Classification: taxonomy axes and their values, hosted by competitive_analysis
   | 'classification_axis' | 'classification_value'
   // User Research
   | 'research_study' | 'insight' | 'participant' | 'observation'
@@ -142,19 +142,19 @@ export type UPGEntityType =
 // ─── Deprecated types (bridge closed) ───────────────────────────────────────
 /**
  * No entity types are currently deprecated; this union is `never`. The
- * deprecated-name bridge — which previously widened this union to early
- * aliases (`jtbd`, `pain_point`, `kpi`, …) — is closed, so runtime callers no
+ * deprecated-name bridge, which previously widened this union to early
+ * aliases (`jtbd`, `pain_point`, `kpi`, …), is closed, so runtime callers no
  * longer need an alias-aware type.
  *
  * Narrowed to `never` so any code that still references this union for
  * widening cascades a type error and gets cleaned up. Migration runtime
  * (`migrateNode`, `UPG_MIGRATIONS`, `getReplacementType`) keeps its own
- * internal list of historical names — it does NOT depend on this union.
+ * internal list of historical names; it does NOT depend on this union.
  *
- * @see ../grammar/migrations.ts — runtime migration helpers
- * @see scripts/check-no-deprecated-symbols.ts — string-literal guard
+ * @see ../grammar/migrations.ts for runtime migration helpers
+ * @see scripts/check-no-deprecated-symbols.ts for the string-literal guard
  */
 export type DeprecatedUPGEntityType = never
 
-/** All entity types — `DeprecatedUPGEntityType` is `never`, so this equals `UPGEntityType`. */
+/** All entity types. `DeprecatedUPGEntityType` is `never`, so this equals `UPGEntityType`. */
 export type AnyUPGEntityType = UPGEntityType | DeprecatedUPGEntityType

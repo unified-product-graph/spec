@@ -9,7 +9,7 @@
   "product": {
     "id": "entopo",
     "title": "Entopo",
-    "description": "The product creation tool. Structure your product knowledge as a typed graph — queryable, traversable, AI-readable.",
+    "description": "The product creation tool. Structure your product knowledge as a typed graph: queryable, traversable, AI-readable.",
     "stage": "mvp"
   },
   "nodes": [
@@ -170,7 +170,7 @@
       "id": "solution_unified-product-graph",
       "type": "solution",
       "title": "Unified Product Graph",
-      "description": "A typed knowledge graph that models all product entities — personas, needs, opportunities, solutions, hypotheses, experiments, features, metrics — as nodes with semantic edges. Queryable, traversable, AI-readable.",
+      "description": "A typed knowledge graph that models all product entities (personas, needs, opportunities, solutions, hypotheses, experiments, features, metrics) as nodes with semantic edges. Queryable, traversable, AI-readable.",
       "status": "active",
       "tags": [
         "primary-solution"
@@ -245,7 +245,7 @@
     {
       "id": "learning_planning-time-reduction",
       "type": "learning",
-      "title": "22% reduction — below target but statistically significant",
+      "title": "22% reduction, below target but statistically significant",
       "description": "Teams reduced planning time by 22% (target was 30%). 3 of 5 teams exceeded the 20% threshold. The result is statistically significant and directionally positive, strengthening confidence in the hypothesis.",
       "status": "active",
       "tags": [
@@ -349,7 +349,7 @@
       "target": "need_context-loss-between-sprints",
       "type": "experiment_surfaces_need",
       "properties": {
-        "note": "Discovered during pilot — not part of original hypothesis"
+        "note": "Discovered during pilot; not part of original hypothesis"
       }
     },
     {
@@ -366,10 +366,10 @@
     }
   ],
   "metadata": {
-    "export_name": "Enterprise Pilot — UPG Markdown Spec Reference Graph",
+    "export_name": "Enterprise Pilot: UPG Markdown Spec Reference Graph",
     "exported_by": "mr-data",
     "node_count": 12,
     "edge_count": 11,
-    "purpose": "Companion graph for UPG-MARKDOWN-v0.1.upg.md — provides resolvable entities for the spec's worked example"
+    "purpose": "Companion graph for UPG-MARKDOWN-v0.1.upg.md. Provides resolvable entities for the spec's worked example."
   }
 }

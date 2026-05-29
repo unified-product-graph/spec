@@ -1,5 +1,5 @@
 /**
- * UPG Domain Usage Guides — operational knowledge for MCP agents.
+ * UPG Domain Usage Guides: operational knowledge for MCP agents.
  *
  * Each guide gives a domain's anchor entity, creation sequence, named
  * patterns (entity + edge chains), required cross-domain bridges, and
@@ -13,7 +13,7 @@ import type { UPGDomainId } from '../registry/domains.js'
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 export interface UPGDomainPattern {
-  /** Human-readable pattern name — no jargon, spell out acronyms */
+  /** Human-readable pattern name (no jargon, spell out acronyms) */
   name: string
   /** What this pattern accomplishes */
   description: string
@@ -34,16 +34,16 @@ export interface UPGDomainBridge {
 
 /**
  * A common mistake agents make in a domain. Structured so MCP
- * consumers can proactively surface violations — "you created a feature
- * without a persona, that's an anti-pattern" — instead of only rendering
+ * consumers can proactively surface violations (e.g. "you created a feature
+ * without a persona, that's an anti-pattern") instead of only rendering
  * prose. Migrated from `anti_patterns: string[]`; existing copy lives in
  * `description`, and `name` / `affected_entity` / `remediation` are
  * optional for backward migration but preferred for new entries.
  */
 export interface UPGAntiPattern {
-  /** Short title — enables compact display and cross-guide search. */
+  /** Short title. Enables compact display and cross-guide search. */
   name?: string
-  /** The anti-pattern itself — prose explanation of the mistake. */
+  /** The anti-pattern itself: prose explanation of the mistake. */
   description: string
   /** Which entity type is typically involved in this anti-pattern. */
   affected_entity?: UPGEntityType
@@ -54,7 +54,7 @@ export interface UPGAntiPattern {
 export interface UPGDomainUsageGuide {
   /** Domain ID this guide covers */
   domain_id: UPGDomainId
-  /** The entity you create first — everything else hangs from it */
+  /** The entity you create first. Everything else hangs from it. */
   anchor_entity: UPGEntityType
   /** Recommended creation sequence */
   creation_sequence: UPGEntityType[]
@@ -81,7 +81,7 @@ const USER_GUIDE: UPGDomainUsageGuide = {
     },
   ],
   required_bridges: [
-    // product → persona is the canonical anchor — every persona
+    // product → persona is the canonical anchor. Every persona
     // should attach to its product directly, not only via lateral
     // ICP / positioning intermediaries.
     { edge_type: 'product_targets_persona', target_domain: 'strategy', when: 'Every persona should attach directly to the product it targets' },
@@ -89,12 +89,12 @@ const USER_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'opportunity_addresses_need', target_domain: 'discovery', when: 'Validated needs should feed into opportunity discovery' },
   ],
   anti_patterns: [
-    { description: 'Creating features before personas — define who you are building for first' },
-    { description: 'Personas without jobs — a persona without jobs to be done is a demographic profile, not actionable' },
-    { description: 'Needs without valence — always specify pain, gap, or constraint' },
+    { description: 'Creating features before personas: define who you are building for first' },
+    { description: 'Personas without jobs: a persona without jobs to be done is a demographic profile, not actionable' },
+    { description: 'Needs without valence: always specify pain, gap, or constraint' },
     // orphan personas attached only via ICP / positioning are a
-    // structural smell — those are downstream uses, not the anchor.
-    { description: 'Personas without a `product_targets_persona` edge — the persona is reachable laterally but not anchored to the product it serves' },
+    // structural smell (those are downstream uses, not the anchor).
+    { description: 'Personas without a `product_targets_persona` edge: the persona is reachable laterally but not anchored to the product it serves' },
   ],
 }
 
@@ -116,9 +116,9 @@ const USER_RESEARCH_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'insight_validates_need', target_domain: 'user', when: 'Research evidence should validate or refute identified needs' },
   ],
   anti_patterns: [
-    { description: 'Insights without evidence — every insight must trace back to observations and quotes' },
-    { description: 'Orphan quotes — quotes should belong to observations, not float independently' },
-    { description: 'Research studies without questions — always define what you want to learn before starting' },
+    { description: 'Insights without evidence: every insight must trace back to observations and quotes' },
+    { description: 'Orphan quotes: quotes should belong to observations, not float independently' },
+    { description: 'Research studies without questions: always define what you want to learn before starting' },
   ],
 }
 
@@ -145,10 +145,10 @@ const MARKET_INTELLIGENCE_GUIDE: UPGDomainUsageGuide = {
   ],
   anti_patterns: [
     { description: 'Building without competitive context. Differentiation needs to know who else solves the problem.' },
-    { description: 'Feature comparisons without parity status — always assess whether you are ahead, behind, or at parity' },
-    { description: 'Stale competitive data — competitive intelligence decays quickly, track analysis dates' },
-    // orphan competitive_analysis nodes — surfaced via chain validation.
-    { description: 'Competitive analyses without a `product_contains_competitive_analysis` edge — the analysis floats in market_intelligence space without an anchor to which product contains it' },
+    { description: 'Feature comparisons without parity status: always assess whether you are ahead, behind, or at parity' },
+    { description: 'Stale competitive data: competitive intelligence decays quickly, track analysis dates' },
+    // orphan competitive_analysis nodes, surfaced via chain validation.
+    { description: 'Competitive analyses without a `product_contains_competitive_analysis` edge: the analysis floats in market_intelligence space without an anchor to which product contains it' },
   ],
 }
 
@@ -170,8 +170,8 @@ const DISCOVERY_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'insight_informs_opportunity', target_domain: 'user_research', when: 'Opportunities should be grounded in research insights' },
   ],
   anti_patterns: [
-    { description: 'Solutions without opportunities — always articulate the problem before proposing solutions' },
-    { description: 'Opportunities without needs — if no user feels the pain, the opportunity is imagined' },
+    { description: 'Solutions without opportunities: always articulate the problem before proposing solutions' },
+    { description: 'Opportunities without needs: if no user feels the pain, the opportunity is imagined' },
     { description: 'Skipping validation. Test every solution before promoting it to a feature.' },
   ],
 }
@@ -201,8 +201,8 @@ const VALIDATION_GUIDE: UPGDomainUsageGuide = {
   ],
   anti_patterns: [
     { description: 'Hypotheses without experiments. An untested hypothesis is an opinion.' },
-    { description: 'Experiments without success criteria — define what would change your mind before running the test' },
-    { description: 'Building features from unvalidated hypotheses — the most expensive way to learn you were wrong' },
+    { description: 'Experiments without success criteria: define what would change your mind before running the test' },
+    { description: 'Building features from unvalidated hypotheses: the most expensive way to learn you were wrong' },
   ],
 }
 
@@ -224,9 +224,9 @@ const FEEDBACK_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'nps_campaign_tracks_metric', target_domain: 'strategy', when: 'NPS scores should connect to the metrics they track' },
   ],
   anti_patterns: [
-    { description: 'Building what the loudest customer asks for — weight by segment, revenue impact, and strategic alignment' },
-    { description: 'Feature requests without provenance — always track where a request came from and who asked' },
-    { description: 'Ignoring detractor feedback — negative NPS responses are the highest-signal input you have' },
+    { description: 'Building what the loudest customer asks for: weight by segment, revenue impact, and strategic alignment' },
+    { description: 'Feature requests without provenance: always track where a request came from and who asked' },
+    { description: 'Ignoring detractor feedback: negative NPS responses are the highest-signal input you have' },
   ],
 }
 
@@ -236,10 +236,10 @@ const STRATEGY_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'strategy',
   anchor_entity: 'outcome',
   // creation_sequence covers every entity registered to the `strategy`
-  // domain ( — kept in sync with `UPG_DOMAINS.strategy.types` and
+  // domain (kept in sync with `UPG_DOMAINS.strategy.types` and
   // enforced by `creation-sequence-matches-registry.test.ts`). Trailing
   // entries are later additions appended in chronological-introduction
-  // order — placement reflects the order in which they would naturally be
+  // order. Placement reflects the order in which they would naturally be
   // authored after the canonical strategy spine.
   creation_sequence: ['product', 'vision', 'mission', 'outcome', 'objective', 'key_result', 'metric', 'metric_quality_assessment', 'strategic_theme', 'strategic_pillar', 'initiative', 'capability', 'value_stream', 'assumption', 'decision', 'constraint'],
   patterns: [
@@ -257,16 +257,16 @@ const STRATEGY_GUIDE: UPGDomainUsageGuide = {
   ],
   anti_patterns: [
     { description: 'Outcomes without metrics. Measurement is the signal an outcome happened.' },
-    { description: 'Objectives without key results — an objective without measurement is a wish' },
-    { description: 'Too many strategic themes — focus beats breadth, aim for 2-4 active themes' },
+    { description: 'Objectives without key results: an objective without measurement is a wish' },
+    { description: 'Too many strategic themes: focus beats breadth, aim for 2-4 active themes' },
   ],
 }
 
 const PRODUCT_SPEC_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'product_spec',
   anchor_entity: 'feature',
-  // story_task removed (v0.4.0 — collapsed into canonical `task`, see
-  // UPG_MIGRATIONS['0.4.0']). theme + changelog appended ( — were
+  // story_task removed (v0.4.0, collapsed into canonical `task`, see
+  // UPG_MIGRATIONS['0.4.0']). theme + changelog appended (were
   // registered to product_spec but missing from the navigation order).
   // `changelog` lives here because it is a structural product-shipping
   // artefact; content domain references it only via cross-domain bridges.
@@ -287,7 +287,7 @@ const PRODUCT_SPEC_GUIDE: UPGDomainUsageGuide = {
   anti_patterns: [
     { description: 'Features without outcomes. Features serve strategic outcomes; the rest is waste.' },
     { description: 'Long-running epics. Split any epic that runs over a month.' },
-    { description: 'Roadmap items without owners — every committed item needs a team' },
+    { description: 'Roadmap items without owners: every committed item needs a team' },
   ],
 }
 
@@ -309,9 +309,9 @@ const UX_DESIGN_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'screen_surfaces_feature', target_domain: 'product_spec', when: 'Screens should connect to the features they surface' },
   ],
   anti_patterns: [
-    { description: 'Screens without journeys — isolated screens miss the experience context' },
-    { description: 'Prototypes without testing — if nobody tests the prototype, it is just art' },
-    { description: 'Design questions left open — exploration status should progress to resolved or parked' },
+    { description: 'Screens without journeys: isolated screens miss the experience context' },
+    { description: 'Prototypes without testing: if nobody tests the prototype, it is just art' },
+    { description: 'Design questions left open: exploration status should progress to resolved or parked' },
   ],
 }
 
@@ -332,9 +332,9 @@ const DESIGN_SYSTEM_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'design_token_reflects_brand_colour', target_domain: 'brand', when: 'Tokens should trace back to brand definitions' },
   ],
   anti_patterns: [
-    { description: 'Components without tokens — hard-coded values bypass the design system' },
-    { description: 'Patterns without guidelines — document when and how to use each pattern' },
-    { description: 'One-off components — if it is used once, it might not belong in the system' },
+    { description: 'Components without tokens: hard-coded values bypass the design system' },
+    { description: 'Patterns without guidelines: document when and how to use each pattern' },
+    { description: 'One-off components: if it is used once, it might not belong in the system' },
   ],
 }
 
@@ -345,7 +345,7 @@ const BRAND_GUIDE: UPGDomainUsageGuide = {
   patterns: [
     {
       name: 'Brand Identity System',
-      description: 'Brand identity anchors all visual and verbal elements — voice, colour, type, logo, imagery',
+      description: 'Brand identity anchors all visual and verbal elements: voice, colour, type, logo, imagery',
       entity_types: ['brand_identity', 'brand_voice', 'brand_colour', 'brand_typography', 'brand_logo'],
       edge_chain: ['brand_identity_speaks_with_brand_voice', 'brand_identity_coloured_with_brand_colour', 'brand_identity_typeset_with_brand_typography', 'brand_identity_signed_with_brand_logo'],
     },
@@ -355,9 +355,9 @@ const BRAND_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'messaging_aligns_with_brand_voice', target_domain: 'go_to_market', when: 'GTM messaging should follow brand voice guidelines' },
   ],
   anti_patterns: [
-    { description: 'Brand elements without the identity root — everything should hang from brand_identity' },
-    { description: 'Orphan brand assets — every asset should link to the brand element it represents' },
-    { description: 'Voice without examples — brand voice needs concrete dos and don\'ts' },
+    { description: 'Brand elements without the identity root: everything should hang from brand_identity' },
+    { description: 'Orphan brand assets: every asset should link to the brand element it represents' },
+    { description: 'Voice without examples: brand voice needs concrete dos and don\'ts' },
   ],
 }
 
@@ -378,9 +378,9 @@ const LEGAL_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'contract_governs_partnership', target_domain: 'business_model', when: 'Partnership contracts should link to the partnership entity' },
   ],
   anti_patterns: [
-    { description: 'IP assets without ownership — every piece of IP must be assigned to a legal entity' },
-    { description: 'Contracts without clauses — the detail lives in the clauses, not the contract description' },
-    { description: 'Privacy policies without scope — specify which data sources and processing activities are covered' },
+    { description: 'IP assets without ownership: every piece of IP must be assigned to a legal entity' },
+    { description: 'Contracts without clauses: the detail lives in the clauses, not the contract description' },
+    { description: 'Privacy policies without scope: specify which data sources and processing activities are covered' },
   ],
 }
 
@@ -390,14 +390,14 @@ const ENGINEERING_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'engineering',
   anchor_entity: 'service',
   // creation_sequence covers every entity registered to `engineering`
-  // ( — kept in sync with `UPG_DOMAINS.engineering.types` and
+  // (kept in sync with `UPG_DOMAINS.engineering.types` and
   // enforced by `creation-sequence-matches-registry.test.ts`). The trailing
-  // RCA quartet — `investigation`, `root_cause`, `symptom`, `fix` — was
+  // RCA quartet (`investigation`, `root_cause`, `symptom`, `fix`) was
   // anchored to engineering at v0.2.0 (entity_meta `ent_315 → ent_318`)
   // because the work product is structurally engineering (code fixes,
   // technical analysis). The devops domain guide intentionally references
   // these entities cross-domain in its "Incident Response Chain" pattern
-  // and via the `required_bridges` declarations — devops is the operator
+  // and via the `required_bridges` declarations. Devops is the operator
   // surface; engineering owns the RCA artefacts. Earlier devops
   // creation_sequence entries (`root_cause`, `symptom`) were drift, not
   // ownership, and have been removed from there.
@@ -422,9 +422,9 @@ const ENGINEERING_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'technical_debt_item_blocks_feature', target_domain: 'product_spec', when: 'Tech debt that blocks delivery should be visible to product' },
   ],
   anti_patterns: [
-    { description: 'Services without bounded contexts — every service should own a clear domain boundary' },
-    { description: 'API contracts without versioning — always track contract status (draft, published, deprecated)' },
-    { description: 'Technical debt without severity — prioritise debt by impact on velocity and reliability' },
+    { description: 'Services without bounded contexts: every service should own a clear domain boundary' },
+    { description: 'API contracts without versioning: always track contract status (draft, published, deprecated)' },
+    { description: 'Technical debt without severity: prioritise debt by impact on velocity and reliability' },
   ],
 }
 
@@ -437,7 +437,7 @@ const DEVOPS_GUIDE: UPGDomainUsageGuide = {
   // remain referenced from the "Incident Response Chain" pattern below as
   // intentional cross-domain hops (the operator surface walks into
   // engineering for the RCA tail). SLI/SLO/CI-pipeline now appear in the
-  // sequence — they were registered but unsurfaced.
+  // sequence (they were registered but unsurfaced).
   creation_sequence: ['monitor', 'alert_rule', 'incident', 'postmortem', 'service_level_indicator', 'service_level_objective', 'runbook', 'error_budget', 'on_call_rotation', 'infrastructure_component', 'ci_pipeline', 'release_strategy'],
   patterns: [
     {
@@ -453,9 +453,9 @@ const DEVOPS_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'root_cause_manifests_as_technical_debt_item', target_domain: 'engineering', when: 'Systemic root causes should become tech debt items' },
   ],
   anti_patterns: [
-    { description: 'Incidents without postmortems — every significant incident should produce learnings' },
+    { description: 'Incidents without postmortems: every significant incident should produce learnings' },
     { description: 'Monitors without alert rules. A monitor that does not alert is logging.' },
-    { description: 'Runbooks without triggers — define when each runbook should be activated' },
+    { description: 'Runbooks without triggers: define when each runbook should be activated' },
   ],
 }
 
@@ -476,9 +476,9 @@ const TESTING_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'test_case_validates_acceptance_criterion', target_domain: 'product_spec', when: 'Acceptance criteria define what "done" means and must be validated by tests' },
   ],
   anti_patterns: [
-    { description: 'Tests without traceability — every test should link to a requirement or story' },
-    { description: 'Test environments without status — track whether environments are available or in use' },
-    { description: 'QA sessions without findings — document what was explored and what was found' },
+    { description: 'Tests without traceability: every test should link to a requirement or story' },
+    { description: 'Test environments without status: track whether environments are available or in use' },
+    { description: 'QA sessions without findings: document what was explored and what was found' },
   ],
 }
 
@@ -499,9 +499,9 @@ const SECURITY_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'security_policy_defines_access_policy', target_domain: 'compliance', when: 'Security policies should define the access policies they enforce' },
   ],
   anti_patterns: [
-    { description: 'Threats without controls — every identified threat needs a mitigation plan' },
-    { description: 'Controls without testing — untested controls may not work when needed' },
-    { description: 'Threat models that go stale — review when the system architecture changes' },
+    { description: 'Threats without controls: every identified threat needs a mitigation plan' },
+    { description: 'Controls without testing: untested controls may not work when needed' },
+    { description: 'Threat models that go stale: review when the system architecture changes' },
   ],
 }
 
@@ -521,9 +521,9 @@ const ACCESSIBILITY_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'a11y_issue_affects_design_component', target_domain: 'design_system', when: 'Accessibility issues should link to the design components they affect (which in turn render in screens)' },
   ],
   anti_patterns: [
-    { description: 'Audits without standards — specify which WCAG level you are auditing against' },
-    { description: 'Issues without severity — not all violations are equal, prioritise by impact' },
-    { description: 'Accessibility as an afterthought — annotate designs before building, not after' },
+    { description: 'Audits without standards: specify which WCAG level you are auditing against' },
+    { description: 'Issues without severity: not all violations are equal, prioritise by impact' },
+    { description: 'Accessibility as an afterthought: annotate designs before building, not after' },
   ],
 }
 
@@ -544,9 +544,9 @@ const DATA_ANALYTICS_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'dashboard_tracks_metric', target_domain: 'strategy', when: 'Dashboards should track the strategic metrics they display' },
   ],
   anti_patterns: [
-    { description: 'Events without schemas — every tracked event needs a defined payload structure' },
-    { description: 'Dashboards without audience — specify who needs this data and why' },
-    { description: 'Data pipelines without quality rules — validate data at ingestion, not after analysis' },
+    { description: 'Events without schemas: every tracked event needs a defined payload structure' },
+    { description: 'Dashboards without audience: specify who needs this data and why' },
+    { description: 'Data pipelines without quality rules: validate data at ingestion, not after analysis' },
   ],
 }
 
@@ -567,9 +567,9 @@ const AI_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'ai_guardrail_enforces_security_policy', target_domain: 'security', when: 'AI guardrails should map to the security policies that constrain them' },
   ],
   anti_patterns: [
-    { description: 'Models without evaluation — always benchmark before deploying' },
-    { description: 'Prompts without versioning — track prompt iterations like code versions' },
-    { description: 'Cost tracking as an afterthought — monitor spend from day one' },
+    { description: 'Models without evaluation: always benchmark before deploying' },
+    { description: 'Prompts without versioning: track prompt iterations like code versions' },
+    { description: 'Cost tracking as an afterthought: monitor spend from day one' },
   ],
 }
 
@@ -590,9 +590,9 @@ const AUTOMATION_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'review_gate_approved_via_approval_record', target_domain: 'program_mgmt', when: 'Quality gates should connect to approval workflows' },
   ],
   anti_patterns: [
-    { description: 'Agents without skills — define what each agent can do explicitly' },
-    { description: 'Workflows without gates — autonomous processes need human checkpoints' },
-    { description: 'Sessions without outcomes — track what each agent run accomplished' },
+    { description: 'Agents without skills: define what each agent can do explicitly' },
+    { description: 'Workflows without gates: autonomous processes need human checkpoints' },
+    { description: 'Sessions without outcomes: track what each agent run accomplished' },
   ],
 }
 
@@ -616,9 +616,9 @@ const BUSINESS_MODEL_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'business_model_targets_market_segment', target_domain: 'market_intelligence', when: 'The business model should specify which market segments it serves' },
   ],
   anti_patterns: [
-    { description: 'Business models without unit economics — know your LTV/CAC ratio' },
-    { description: 'Value propositions without persona links — who specifically benefits?' },
-    { description: 'Revenue streams without pricing — how does the money actually flow?' },
+    { description: 'Business models without unit economics: know your LTV/CAC ratio' },
+    { description: 'Value propositions without persona links: who specifically benefits?' },
+    { description: 'Revenue streams without pricing: how does the money actually flow?' },
   ],
 }
 
@@ -640,8 +640,8 @@ const GROWTH_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'acquisition_channel_drives_outcome', target_domain: 'strategy', when: 'Channels should connect to the strategic outcomes they drive' },
   ],
   anti_patterns: [
-    { description: 'Funnels without steps — define the stages users pass through' },
-    { description: 'Growth without retention — acquiring users who churn is expensive waste' },
+    { description: 'Funnels without steps: define the stages users pass through' },
+    { description: 'Growth without retention: acquiring users who churn is expensive waste' },
     { description: 'Campaigns without attribution. Attribution is what makes optimisation possible.' },
   ],
 }
@@ -666,7 +666,7 @@ const GTM_GUIDE: UPGDomainUsageGuide = {
   anti_patterns: [
     { description: 'Positioning without competitors. Differentiation requires a comparison frame.' },
     { description: 'Messaging without channel variants. Each channel needs its own variant.' },
-    { description: 'Objections without rebuttals — if you know the objection, prepare the answer' },
+    { description: 'Objections without rebuttals: if you know the objection, prepare the answer' },
   ],
 }
 
@@ -687,9 +687,9 @@ const PRICING_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'pricing_tier_targets_behavioral_segment', target_domain: 'growth', when: 'Tiers should map to user segments (free users, power users, teams)' },
   ],
   anti_patterns: [
-    { description: 'Pricing without tiers — even a single price point is a tier' },
-    { description: 'Tiers without feature differentiation — users need to understand what they get at each level' },
-    { description: 'Trials without conversion tracking — measure how many trial users convert to paid' },
+    { description: 'Pricing without tiers: even a single price point is a tier' },
+    { description: 'Tiers without feature differentiation: users need to understand what they get at each level' },
+    { description: 'Trials without conversion tracking: measure how many trial users convert to paid' },
   ],
 }
 
@@ -711,9 +711,9 @@ const SALES_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'account_partners_via_partnership', target_domain: 'business_model', when: 'Partner accounts should link to the partnership entity' },
   ],
   anti_patterns: [
-    { description: 'Deals without pipeline stages — every deal needs a current position in the pipeline' },
+    { description: 'Deals without pipeline stages: every deal needs a current position in the pipeline' },
     { description: 'Leads without source attribution. Attribution drives channel optimisation.' },
-    { description: 'Forecasts without probability — weight deals by likelihood to close' },
+    { description: 'Forecasts without probability: weight deals by likelihood to close' },
   ],
 }
 
@@ -735,9 +735,9 @@ const MARKETING_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'marketing_campaign_plan_targets_behavioral_segment', target_domain: 'growth', when: 'Campaigns should target specific user segments' },
   ],
   anti_patterns: [
-    { description: 'Campaigns without channels — every campaign runs on specific channels' },
-    { description: 'Channels without budget — allocate and track spend per channel' },
-    { description: 'Marketing without growth connection — marketing feeds the funnel, connect them' },
+    { description: 'Campaigns without channels: every campaign runs on specific channels' },
+    { description: 'Channels without budget: allocate and track spend per channel' },
+    { description: 'Marketing without growth connection: marketing feeds the funnel, connect them' },
   ],
 }
 
@@ -764,9 +764,9 @@ const CUSTOMER_SUCCESS_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'customer_feedback_becomes_feature_request', target_domain: 'feedback', when: 'Feedback signals should flow into feature requests where they can be prioritised' },
   ],
   anti_patterns: [
-    { description: 'Health scores without components — define which metrics compose the score' },
-    { description: 'Playbooks without triggers — specify what conditions activate each playbook' },
-    { description: 'Churn reasons without analysis — understand patterns, not just individual cases' },
+    { description: 'Health scores without components: define which metrics compose the score' },
+    { description: 'Playbooks without triggers: specify what conditions activate each playbook' },
+    { description: 'Churn reasons without analysis: understand patterns, not just individual cases' },
   ],
 }
 
@@ -792,8 +792,8 @@ const CONTENT_GUIDE: UPGDomainUsageGuide = {
   ],
   anti_patterns: [
     { description: 'Content without themes. Authority compounds when content stays on theme.' },
-    { description: 'Knowledge bases without feature links — help articles must stay current with the product' },
-    { description: 'Documents without types — always classify the document purpose (RFC, guide, spec, etc.)' },
+    { description: 'Knowledge bases without feature links: help articles must stay current with the product' },
+    { description: 'Documents without types: always classify the document purpose (RFC, guide, spec, etc.)' },
   ],
 }
 
@@ -814,9 +814,9 @@ const EDUCATION_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'tutorial_explains_feature', target_domain: 'product_spec', when: 'Tutorials should link to the features they explain' },
   ],
   anti_patterns: [
-    { description: 'Programs without audience — define who this education is for' },
-    { description: 'Tutorials without the feature they teach — keep learning content connected to the product' },
-    { description: 'Certifications without assessment — verify learning, do not just award badges' },
+    { description: 'Programs without audience: define who this education is for' },
+    { description: 'Tutorials without the feature they teach: keep learning content connected to the product' },
+    { description: 'Certifications without assessment: verify learning, do not just award badges' },
   ],
 }
 
@@ -839,9 +839,9 @@ const TEAM_ORG_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'team_okr_aligns_with_objective', target_domain: 'strategy', when: 'Team OKRs should align with product-level objectives' },
   ],
   anti_patterns: [
-    { description: 'Teams without OKRs — every team needs clear goals' },
-    { description: 'Dependencies without both teams linked — a dependency must connect blocker and blocked' },
-    { description: 'Retrospectives without action items — reflection without action is just venting' },
+    { description: 'Teams without OKRs: every team needs clear goals' },
+    { description: 'Dependencies without both teams linked: a dependency must connect blocker and blocked' },
+    { description: 'Retrospectives without action items: reflection without action is just venting' },
   ],
 }
 
@@ -862,9 +862,9 @@ const PROGRAM_MGMT_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'dependency_blocks_team', target_domain: 'team_org', when: 'Cross-team dependencies should be visible as blockers to the team that owns them' },
   ],
   anti_patterns: [
-    { description: 'Programs without milestones — define checkpoints to measure progress' },
-    { description: 'Risk registers without risk assessments — quantify likelihood and impact' },
-    { description: 'Change requests without approval tracking — document who approved what and when' },
+    { description: 'Programs without milestones: define checkpoints to measure progress' },
+    { description: 'Risk registers without risk assessments: quantify likelihood and impact' },
+    { description: 'Change requests without approval tracking: document who approved what and when' },
   ],
 }
 
@@ -885,9 +885,9 @@ const LOCALISATION_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'pricing_tier_localised_as_regional_pricing', target_domain: 'pricing', when: 'Pricing tiers should localise into regional pricing per market' },
   ],
   anti_patterns: [
-    { description: 'Locales without translation bundles — a locale without strings is just a flag' },
-    { description: 'Cultural adaptations without rationale — document why an adaptation is needed' },
-    { description: 'Regional pricing without market research — price sensitivity varies by region' },
+    { description: 'Locales without translation bundles: a locale without strings is just a flag' },
+    { description: 'Cultural adaptations without rationale: document why an adaptation is needed' },
+    { description: 'Regional pricing without market research: price sensitivity varies by region' },
   ],
 }
 
@@ -908,9 +908,9 @@ const ECOSYSTEM_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'revenue_stream_tiered_as_pricing_tier', target_domain: 'pricing', when: 'Partner revenue streams should connect to pricing tiers' },
   ],
   anti_patterns: [
-    { description: 'Partner programs without tiers — define what partners get at each level' },
-    { description: 'Marketplace listings without review process — quality control matters' },
-    { description: 'Developer portals without documentation — APIs need docs to drive adoption' },
+    { description: 'Partner programs without tiers: define what partners get at each level' },
+    { description: 'Marketplace listings without review process: quality control matters' },
+    { description: 'Developer portals without documentation: APIs need docs to drive adoption' },
   ],
 }
 
@@ -932,9 +932,9 @@ const COMPLIANCE_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'data_contract_governs_data_source', target_domain: 'data_analytics', when: 'Data contracts should connect to the sources they govern' },
   ],
   anti_patterns: [
-    { description: 'Compliance without a framework — always specify which standard you are working toward' },
-    { description: 'Requirements without audit evidence — compliance claims need proof' },
-    { description: 'Data contracts without both parties — a contract binds a provider and consumer' },
+    { description: 'Compliance without a framework: always specify which standard you are working toward' },
+    { description: 'Requirements without audit evidence: compliance claims need proof' },
+    { description: 'Data contracts without both parties: a contract binds a provider and consumer' },
   ],
 }
 
@@ -956,8 +956,8 @@ const PORTFOLIO_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'product_area_contains_product', target_domain: 'strategy', when: 'Product areas should contain the products they manage' },
   ],
   anti_patterns: [
-    { description: 'Products without a product area — every product should be classified' },
-    { description: 'Portfolios without strategic alignment — portfolio decisions should reflect strategy' },
+    { description: 'Products without a product area: every product should be classified' },
+    { description: 'Portfolios without strategic alignment: portfolio decisions should reflect strategy' },
   ],
 }
 
@@ -968,8 +968,8 @@ const WORKSPACE_GUIDE: UPGDomainUsageGuide = {
   patterns: [],
   required_bridges: [],
   anti_patterns: [
-    { description: 'Workspaces are containers for exploration — do not over-structure them' },
-    { description: 'Workspace content is transient by default — promote discoveries to the graph, do not leave them in the workspace' },
+    { description: 'Workspaces are containers for exploration: do not over-structure them' },
+    { description: 'Workspace content is transient by default: promote discoveries to the graph, do not leave them in the workspace' },
   ],
 }
 
@@ -1039,7 +1039,7 @@ export function getGuideForDomain(domainId: UPGDomainId | string): UPGDomainUsag
 }
 
 /**
- * Get the anchor entity for a domain — the entity you create first.
+ * Get the anchor entity for a domain (the entity you create first).
  *
  * @example
  * getAnchorEntity('user')                 // → 'persona'
@@ -1057,7 +1057,7 @@ export function getAnchorEntity(domainId: UPGDomainId | string): UPGEntityType |
  * const all = getAntiPatterns()
  * // all[0].domain                   === 'user'
  * // all[0].anti_pattern.name        === 'persona_without_jobs' (example)
- * // all.length                      — one entry per anti-pattern across all guides
+ * // all.length                      // one entry per anti-pattern across all guides
  */
 export function getAntiPatterns(): Array<{ domain: UPGDomainId; anti_pattern: UPGAntiPattern }> {
   return UPG_DOMAIN_GUIDES.flatMap((g) =>

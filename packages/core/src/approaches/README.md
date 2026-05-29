@@ -1,4 +1,4 @@
-# `approaches/` — Cognitive Engagement Categories
+# `approaches/`: Cognitive Engagement Categories
 
 Five canonical approaches name the *path of arrival* to a region of the graph: **Plan / Inspect / Prioritise / Trace / Reflect**. Each approach captures one cognitive engagement category that a tool or operator brings to the graph. Frameworks (in `frameworks/`) are the named techniques *inside* an approach.
 

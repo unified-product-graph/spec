@@ -1,5 +1,5 @@
 ---
-title: "Metric Tracking — Planning Time Reduction (Q2)"
+title: "Metric Tracking: Planning Time Reduction (Q2)"
 upg_product: entopo
 upg_version: "0.4.0"
 entity_type: document
@@ -12,7 +12,7 @@ tags: [metric, q2, validation]
 graph_source: ../enterprise-pilot.upg
 ---
 
-# Planning Time Reduction — Q2 Tracking
+# Planning Time Reduction: Q2 Tracking
 
 ## Headline
 
@@ -24,8 +24,8 @@ We're below target but trending positive. Statistical significance is confirmed 
 
 The metric decomposes into two input metrics:
 
-- [[metric:meeting-count-per-sprint|current:4.2|target:3.0|designation:input]] — how many planning meetings each team holds per sprint.
-- [[metric:context-handoff-time|current:18m|target:10m|designation:input]] — time spent re-establishing context at sprint boundaries.
+- [[metric:meeting-count-per-sprint|current:4.2|target:3.0|designation:input]]: how many planning meetings each team holds per sprint.
+- [[metric:context-handoff-time|current:18m|target:10m|designation:input]]: time spent re-establishing context at sprint boundaries.
 
 Both are moving in the right direction. Meeting count is at 4.2 (down from 6.1 baseline); context handoff is at 18 minutes (down from 27 minutes).
 
@@ -39,7 +39,7 @@ During pilot week 6, the team surfaced a previously unknown input we should add 
 
 [[+metric:re-planning-incidents|current:1.4|target:0.5|designation:input|"Times per sprint a team has to redo planning because of context loss"]].
 
-This is a creation reference — first occurrence in this document declares the metric. It enters the graph at next sync.
+This is a creation reference. The first occurrence in this document declares the metric; it enters the graph at next sync.
 
 ## Quality assessment
 

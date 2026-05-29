@@ -1,4 +1,4 @@
-# `shapes/` — Structural Primitives
+# `shapes/`: Structural Primitives
 
 The foundational shapes that every UPG document, node, and edge share. This is the highest-traffic entry surface in the spec. Most consumers start here.
 

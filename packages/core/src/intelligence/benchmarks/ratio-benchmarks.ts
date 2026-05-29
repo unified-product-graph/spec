@@ -16,8 +16,8 @@
  *
  * Benchmark shape: see `RatioBenchmark` in `./types.ts`.
  *
- * @see ./types.ts — `RatioBenchmark`
- * @see ../intelligence.ts — ratio audit consumer
+ * @see ./types.ts `RatioBenchmark`
+ * @see ../intelligence.ts ratio audit consumer
  * https://unifiedproductgraph.org/spec | MIT
  */
 
@@ -154,6 +154,6 @@ export const UPG_RATIO_BENCHMARKS: RatioBenchmark[] = [
       "mature"
     ],
     "source": {"kind":"industry_practice","category":"engineering"},
-    "rationale": "If you have services but zero documented debt, debt is invisible — not absent."
+    "rationale": "If you have services but zero documented debt, debt is invisible, not absent."
   }
 ]

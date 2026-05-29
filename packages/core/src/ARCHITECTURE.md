@@ -6,22 +6,22 @@ The spec is split into directories across 4 abstraction tiers. Each directory bu
 src/
 ├── index.ts                          Root: version, computed sets, barrel exports
 │
-├── catalog/       Layer 1a — what exists              (zero imports)
-├── shapes/        Layer 1b — structural primitives    (imports catalog/)
-├── registry/      Layer 1c — identity & organisation  (imports catalog/)
+├── catalog/       Layer 1a : what exists              (zero imports)
+├── shapes/        Layer 1b : structural primitives    (imports catalog/)
+├── registry/      Layer 1c : identity & organisation  (imports catalog/)
 │
-├── grammar/       Layer 2  — how things behave        (imports 1a, 1b, 1c)
-├── properties/    Layer 3  — what things carry        (imports 1b, 2)
+├── grammar/       Layer 2  : how things behave        (imports 1a, 1b, 1c)
+├── properties/    Layer 3  : what things carry        (imports 1b, 2)
 │
-├── frameworks/    Layer 4a — framework definitions    (self-contained)
-├── intelligence/  Layer 4b — graph health & guidance  (imports 1b)
-├── presentation/  Layer 4c — how things look          (imports 1c, 2, 4a)
+├── frameworks/    Layer 4a : framework definitions    (self-contained)
+├── intelligence/  Layer 4b : graph health & guidance  (imports 1b)
+├── presentation/  Layer 4c : how things look          (imports 1c, 2, 4a)
 │
-├── playbooks/     Layer 5a — guided bootstrap         (imports 4a, 4b, regions/)
-└── approaches/    Layer 5b — cognitive engagement     (imports 4a, regions/)
+├── playbooks/     Layer 5a : guided bootstrap         (imports 4a, 4b, regions/)
+└── approaches/    Layer 5b : cognitive engagement     (imports 4a, regions/)
 ```
 
-Layers 1–4 are **declarative** (what *is*). Layer 5 is **procedural** (what *to do*). A `UPGPlaybook` orchestrates the layers below it during region bootstrap. A `UPGApproach` names the cognitive engagement category — the path of arrival to a region — under which frameworks operate.
+Layers 1–4 are **declarative** (what *is*). Layer 5 is **procedural** (what *to do*). A `UPGPlaybook` orchestrates the layers below it during region bootstrap. A `UPGApproach` names the cognitive engagement category (the path of arrival to a region) under which frameworks operate.
 
 ## Root
 
@@ -29,18 +29,18 @@ Layers 1–4 are **declarative** (what *is*). Layer 5 is **procedural** (what *t
 |------|-----------|-----------------|
 | **index.ts** | Package entry point | Barrel re-exports across the directories. Computes `UPG_VERSION`, `UPG_TYPES` (active types from `getTypes()`), `UPG_TYPES_SET` (O(1) lookup), `UPG_TYPE_NAMES` (snake_case → Title Case). Edge lookup: `UPG_EDGE_TYPES`, `UPG_EDGE_PAIR_MAP`. Entity, domain, and edge counts. |
 
-## Layer 1a — `catalog/` — What Exists
+## Layer 1a: `catalog/`: What Exists
 
 Enumerations of everything that can exist in a UPG document. Zero imports.
 
 | File | What it is | What it contains |
 |------|-----------|-----------------|
-| **entity-catalog.ts** | The type catalog | `UPGEntityType` — union of active entity type names. `DeprecatedUPGEntityType`, `AnyUPGEntityType`. |
-| **edge-catalog.ts** | The edge catalog | `UPG_EDGE_CATALOG` — `as const` map from each edge type key to `{forward_verb, reverse_verb, classification, source_type, target_type}`. Also `UPGEdgeDefinition`. |
+| **entity-catalog.ts** | The type catalog | `UPGEntityType`: union of active entity type names. `DeprecatedUPGEntityType`, `AnyUPGEntityType`. |
+| **edge-catalog.ts** | The edge catalog | `UPG_EDGE_CATALOG`: `as const` map from each edge type key to `{forward_verb, reverse_verb, classification, source_type, target_type}`. Also `UPGEdgeDefinition`. |
 
 **Mental model:** the nouns and verbs of the language.
 
-## Layer 1b — `shapes/` — Structural Primitives
+## Layer 1b: `shapes/`: Structural Primitives
 
 Interfaces shared by every node, edge, and document. Imports from `catalog/` only.
 
@@ -52,18 +52,18 @@ Interfaces shared by every node, edge, and document. Imports from `catalog/` onl
 
 **Mental model:** what a noun, verb, or sentence looks like on the wire.
 
-## Layer 1c — `registry/` — Identity & Organisation
+## Layer 1c: `registry/`: Identity & Organisation
 
 Stable identities and semantic groupings. Imports from `catalog/` only.
 
 | File | What it is | What it contains |
 |------|-----------|-----------------|
 | **entity-meta.ts** | The type ID registry | `UPG_ENTITY_META` entries with `name`, immutable `type_id`, `maturity`, `since`, optional `deprecated_in`/`replacement`. Computed arrays (`UPG_ACTIVE_TYPES`, `UPG_DEPRECATED_TYPES`) and helpers (`isDeprecatedType`, `getReplacementType`, `getTypeId`, `getTypeName`). |
-| **domains.ts** | The domain map | `UPG_DOMAINS` — 36 domains, each with `id`, `label`, `description`, `types`. Helpers: `getTypes`, `getDomainForType`. |
+| **domains.ts** | The domain map | `UPG_DOMAINS`: 36 domains, each with `id`, `label`, `description`, `types`. Helpers: `getTypes`, `getDomainForType`. |
 
 **Mental model:** where a type lives, its stable ID, and whether it's current.
 
-## Layer 2 — `grammar/` — How Things Behave
+## Layer 2: `grammar/`: How Things Behave
 
 Rules and constraints. Imports `catalog/`, `shapes/`, `registry/`.
 
@@ -77,20 +77,20 @@ Rules and constraints. Imports `catalog/`, `shapes/`, `registry/`.
 
 **Mental model:** what's allowed, what states things can be in, and how old data upgrades.
 
-## Layer 3 — `properties/` — What Things Carry
+## Layer 3: `properties/`: What Things Carry
 
 Per-entity-type field definitions. Imports `shapes/`, `grammar/`.
 
 | File | What it is |
 |------|-----------|
 | **primitives.ts** | Shared types: `Priority`, `HealthStatus`, `Confidence`, `ISODate`, `ISODateTime`. Re-exports `UPGAssessment`. |
-| **property-map.ts** | `UPGPropertyMap` — maps each entity name to its property interface. `UPGNode<T>` typed wrapper. |
-| **property-schema.ts** | `UPG_PROPERTY_SCHEMA` — auto-generated runtime schema. Generator: `scripts/generate-property-registry.ts`. |
+| **property-map.ts** | `UPGPropertyMap`: maps each entity name to its property interface. `UPGNode<T>` typed wrapper. |
+| **property-schema.ts** | `UPG_PROPERTY_SCHEMA`: auto-generated runtime schema. Generator: `scripts/generate-property-registry.ts`. |
 | **domains/** | One file per domain, exporting typed property interfaces (e.g. `users.ts` → `PersonaProperties`, `JobProperties`). |
 
 **Mental model:** the fields available when creating an entity of each type.
 
-## Layer 4a — `presentation/` — How Things Look
+## Layer 4a: `presentation/`: How Things Look
 
 Applied on read.
 
@@ -100,15 +100,15 @@ Applied on read.
 | **lenses.ts** | Role-based views | Lens configurations for PM, Engineer, Designer, Growth. `UPG_LENSES`, `getLens`, `getVisibleTypes`. |
 | **domain-rings.ts** | Concentric rings | Rings grouping the 36 domains. `UPG_DOMAIN_RINGS`, `getRingForDomain`. |
 
-## Layer 4b — `intelligence/` — Graph Health & Guidance
+## Layer 4b: `intelligence/`: Graph Health & Guidance
 
 | File | What it is | What it contains |
 |------|-----------|-----------------|
-| **intelligence.ts** | Condition types | `IntelligenceCondition` — structured predicates for graph state checks. |
-| **domain-guides.ts** | Construction patterns | `UPG_DOMAIN_GUIDES` — anchor entities, creation sequences, named patterns, required bridges, anti-patterns. |
+| **intelligence.ts** | Condition types | `IntelligenceCondition`: structured predicates for graph state checks. |
+| **domain-guides.ts** | Construction patterns | `UPG_DOMAIN_GUIDES`: anchor entities, creation sequences, named patterns, required bridges, anti-patterns. |
 | **benchmarks/** | Health scoring | Stage-appropriate entity count, ratio, relationship, and domain activation targets. |
 
-## Layer 4c — `frameworks/` — Framework Definitions
+## Layer 4c: `frameworks/`: Framework Definitions
 
 216 declarative framework definitions in `UPG_FRAMEWORKS`. Self-contained.
 
@@ -119,7 +119,7 @@ Applied on read.
 | **validate.ts** | Validation | `validateUPGFramework`. |
 | **definitions/** | Category files | Combined into `UPG_FRAMEWORKS`, `UPG_FRAMEWORKS_BY_ID`, `UPG_FRAMEWORKS_BY_CATEGORY`. |
 
-## Layer 5a — `playbooks/` — Guided Bootstrap
+## Layer 5a: `playbooks/`: Guided Bootstrap
 
 Region-anchored bootstrap recipes. One canonical playbook per region, plus optional framework-anchored specialised playbooks.
 
@@ -132,18 +132,18 @@ Region-anchored bootstrap recipes. One canonical playbook per region, plus optio
 
 **Chaining.** A step's `next_sequence_on_gap` names the next playbook (or approach) to run when a gap is detected. Example: `playbook:business-model-bmc` → `playbook:business-pricing`.
 
-## Layer 5b — `approaches/` — Cognitive Engagement Categories
+## Layer 5b: `approaches/`: Cognitive Engagement Categories
 
-Five canonical approaches: Plan / Inspect / Prioritise / Trace / Reflect. Each records id, label, description, question_answered, signature_hint, and `framework_id_examples`. The MCP tools `plan` / `inspect` / `prioritise` / `trace` / `reflect` ship as **definition lookups** — the LLM is the executor.
+Five canonical approaches: Plan / Inspect / Prioritise / Trace / Reflect. Each records id, label, description, question_answered, signature_hint, and `framework_id_examples`. The MCP tools `plan` / `inspect` / `prioritise` / `trace` / `reflect` ship as **definition lookups**; the LLM is the executor.
 
 | File | What it is | What it contains |
 |------|-----------|-----------------|
 | **types.ts** | Approach primitive | `UPGApproach`, `UPGApproachId` (literal union of the five ids), `ReflectMode` (`'assumptions' \| 'alternatives' \| 'blind-spots' \| 'load-bearing'`), `REFLECT_MODES`, `UPGApproachEnvelope`, `ApproachBinding`, `ApproachFilter`, `ApproachRun`, `ApproachRuntime`. |
 | **definitions/index.ts** | Five canonical approaches | `UPG_APPROACHES` (length 5, locked) and `UPG_APPROACHES_BY_ID`. |
 
-**Mental model — cartographic framing.** Each approach is a path of arrival: Plan → "what should I build next?", Inspect → "what's broken?", Prioritise → "what's most important?", Trace → "walk a meaningful path", Reflect → "what should I be questioning?". Frameworks are the named techniques *inside* an approach, bridged via `UPGFramework.approach_ids` — 34 canonical frameworks ship publicly, with a fuller research library kept internal and promoted in over time. Entity scaffolding is playbook territory.
+**Mental model (cartographic framing).** Each approach is a path of arrival: Plan → "what should I build next?", Inspect → "what's broken?", Prioritise → "what's most important?", Trace → "walk a meaningful path", Reflect → "what should I be questioning?". Frameworks are the named techniques *inside* an approach, bridged via `UPGFramework.approach_ids`. 34 canonical frameworks ship publicly, with a fuller research library kept internal and promoted in over time. Entity scaffolding is playbook territory.
 
-## Shared step machinery — `step-sequence.ts`
+## Shared step machinery: `step-sequence.ts`
 
 Step types used by both playbooks and approaches. Re-exported from the package root via `playbooks/index.ts` so consumers like `@unified-product-graph/mcp-server` can construct and traverse steps.
 
@@ -193,7 +193,7 @@ Each directory imports only from the directories above it.
 
 **`frameworks/` is self-contained.** 216 definitions, ready to extract into a separate package when useful.
 
-## Framework Properties — Lens-Scoped Fields
+## Framework Properties: Lens-Scoped Fields
 
 Frameworks are **lenses**. They layer domain-specific fields on top of canonical entities. RICE adds `reach` / `impact` / `confidence` / `effort` to a feature. Kano adds `functional_response` / `dysfunctional_response`. Weighted Scoring adds `benefit_weight` / `cost_weight` / `risk_weight`. These fields belong to the framework's scoring context.
 
@@ -207,13 +207,13 @@ Frameworks are **lenses**. They layer domain-specific fields on top of canonical
 
 The `06-framework-coupling` audit surfaces these at info level.
 
-## Hierarchy vs Edges — The Two-Mechanism Rule
+## Hierarchy vs Edges: The Two-Mechanism Rule
 
 Containment is expressed **twice** on purpose:
 
 1. **`parent_id`** on `UPGBaseNode` carries containment. Every node has exactly one parent. The tree is the primary spatial organisation.
 2. **`UPG_VALID_CHILDREN`** in `grammar/hierarchy.ts` declares which types are permitted under which parent types. Drives UI affordances (add menus), validation, and traversal.
-3. **`UPG_EDGE_CATALOG`** entries with `classification: 'hierarchy'` are *optional* named verbs for containment relationships where the verb carries meaning beyond "contains" — e.g. `experiment_produces_learning` over a plain `experiment → learning` hierarchy.
+3. **`UPG_EDGE_CATALOG`** entries with `classification: 'hierarchy'` are *optional* named verbs for containment relationships where the verb carries meaning beyond "contains" (e.g. `experiment_produces_learning` over a plain `experiment → learning` hierarchy).
 
 **Rule:** A hierarchy pair in `UPG_VALID_CHILDREN` may stand without a corresponding named edge. Edges are for:
 

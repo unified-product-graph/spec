@@ -47,7 +47,7 @@ export interface KnowledgeBaseArticleProperties {
  * const properties: BrandAssetProperties = {
  *   asset_type: 'logo',
  *   url: 'https://example.com/doc',
- *   usage_rights: 'Internal use only — do not redistribute without written approval.',
+ *   usage_rights: 'Internal use only. Do not redistribute without written approval.',
  * }
  */
 export interface BrandAssetProperties {

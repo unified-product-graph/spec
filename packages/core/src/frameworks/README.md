@@ -1,10 +1,10 @@
-# `frameworks/` — Framework Definitions
+# `frameworks/`: Framework Definitions
 
 Declarative records describing each named product technique (RICE, Kano, BMC, AARRR, OKRs, JTBD, North Star, and so on). Self-contained: this directory has no internal dependencies on other spec layers.
 
 A framework is a **lens** layered over canonical entities. RICE adds `reach`, `impact`, `confidence`, and `effort` to a feature. Kano adds `functional_response` and `dysfunctional_response`. These lens-scoped fields live inside the framework's scoring context. They are not promoted onto the universal entity property schema.
 
-## Two layers — canonical (public) and research (internal)
+## Two layers: canonical (public) and research (internal)
 
 | Layer | What | Where | Surfaces |
 |---|---|---|---|
@@ -36,7 +36,7 @@ Internal consumers (vocabulary mapping in `presentation/labels.ts`, tier-1 wirin
 | `types.ts` | The `UPGFramework` interface. Four layers: data, structure, presentation, education. |
 | `categories.ts` | `UPG_FRAMEWORK_CATEGORIES` and `UPG_STRUCTURE_PATTERNS`. |
 | `validate.ts` | `validateUPGFramework()`: structural validation for individual records. |
-| `canonical.ts` | **Generated** — the 34 canonical framework records. Public surface. |
+| `canonical.ts` | **Generated**: the 34 canonical framework records. Public surface. |
 | `definitions/` | 30 category files holding the full 216-record research library. Internal-only. |
 
 ## Start here

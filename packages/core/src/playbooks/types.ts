@@ -24,7 +24,7 @@ export interface UPGPlaybook {
   version: string
   /** One-sentence description */
   description: string
-  /** REQUIRED — the region this playbook anchors */
+  /** REQUIRED: the region this playbook anchors */
   region: UPGRegionId
   /**
    * Marks the canonical playbook for this region. Exactly one canonical per
@@ -32,7 +32,7 @@ export interface UPGPlaybook {
    */
   is_canonical?: boolean
   /**
-   * Optional — the framework this playbook is anchored on. References
+   * Optional: the framework this playbook is anchored on. References
    * `UPGFramework.id`. Specialised playbooks are typically framework-anchored;
    * the canonical playbook usually is not.
    */
@@ -43,7 +43,7 @@ export interface UPGPlaybook {
    */
   target_anchor_entity?: string
   /**
-   * Ordered creation sequence — typically one `DomainGuideStep` per atomic
+   * Ordered creation sequence, typically one `DomainGuideStep` per atomic
    * domain composed by the region, OR a framework-driven sequence when
    * `framework_id` is set.
    */
@@ -62,15 +62,15 @@ export interface PlaybookBinding {
   surface: SurfaceId
   /** Identifier the runtime maps to a component or handler */
   renderer: string
-  /** Per-step renderer overrides — keyed by `Step.order` */
+  /** Per-step renderer overrides, keyed by `Step.order` */
   step_renderers?: Record<number, string>
   /** Surface-specific step kinds the runtime handles beyond the canonical ones */
   custom_step_kinds?: readonly string[]
-  /** Lifecycle hook id — runtime-resolved, fires when a run starts */
+  /** Lifecycle hook id: runtime-resolved, fires when a run starts */
   on_start?: string
-  /** Lifecycle hook id — runtime-resolved, fires after each step */
+  /** Lifecycle hook id: runtime-resolved, fires after each step */
   on_step_complete?: string
-  /** Lifecycle hook id — runtime-resolved, fires when a run completes */
+  /** Lifecycle hook id: runtime-resolved, fires when a run completes */
   on_run_complete?: string
 }
 

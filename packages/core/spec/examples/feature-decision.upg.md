@@ -1,5 +1,5 @@
 ---
-title: "Decision — Ship Smart Search before Q3 Planning"
+title: "Decision: Ship Smart Search before Q3 Planning"
 upg_product: entopo
 upg_version: "0.4.0"
 entity_type: document
@@ -24,12 +24,12 @@ We're shipping [[+feature:smart-search|"Smart Search"]] in the v0.2.10 release w
 The rationale chain:
 
 - [[need:no-single-source-of-truth]] surfaces during planning (every quarter).
-- {{feature:smart-search → metric:weekly-actives|drives}} — we expect a 12% lift in weekly actives based on pilot interviews.
-- {{decision:ship-smart-search-q2 → feature:smart-search|approves}} — this decision authorises the work.
+- {{feature:smart-search → metric:weekly-actives|drives}}: we expect a 12% lift in weekly actives based on pilot interviews.
+- {{decision:ship-smart-search-q2 → feature:smart-search|approves}}: this decision authorises the work.
 
 ## Structural properties
 
-The decision record has properties that don't fit cleanly inline — stakeholders, alternatives considered, blast radius. We use a fenced block:
+The decision record has properties that don't fit cleanly inline (stakeholders, alternatives considered, blast radius). We use a fenced block:
 
 ```upg
 {

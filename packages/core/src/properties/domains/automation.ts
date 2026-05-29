@@ -35,6 +35,8 @@ export interface WorkflowTemplateProperties {
   checkpoint_enabled?: boolean
   /** Whether a human approval step is required */
   human_in_loop?: boolean
+  /** Version label for this workflow template (e.g. "2.1") */
+  version?: string
 }
 
 /** Workflow run.
@@ -100,6 +102,8 @@ export interface AgentDefinitionProperties {
   multimodal?: boolean
   /** Operational status of this agent definition */
   agent_status?: 'active' | 'disabled' | 'testing'
+  /** Version label for this agent definition (e.g. "1.4.2") */
+  version?: string
 }
 
 /** Agent session.

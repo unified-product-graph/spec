@@ -11,11 +11,11 @@ UPG lifecycles are **two-level**:
 - **Phases** are the universal vocabulary every consumer can rely on (e.g. `draft`, `review`, `published`). Phases are fixed by the spec for each lifecycle and surface on the entity's `status` property.
 - **States** (optional, finer-grained) are sub-positions within a phase, defined inline on `LifecyclePhase.core_states`. Tools may extend states locally via `lifecycle_extensions` on the document.
 
-`UPGLifecycle.terminal_phases` lists the phases that represent **completion**. Terminal phases may still declare `transitions_to` — these are **late-state moves** (reopen, revive, deprecate after approval) and are NOT forward progression. Consumers treating "terminal = done" should respect this distinction.
+`UPGLifecycle.terminal_phases` lists the phases that represent **completion**. Terminal phases may still declare `transitions_to`; these are **late-state moves** (reopen, revive, deprecate after approval) and are NOT forward progression. Consumers treating "terminal = done" should respect this distinction.
 
 **Templates** are reusable phase chains shared across many entity types. Six templates today: `PUBLISHING`, `OPERATIONAL`, `APPROVAL`, `WORK_ITEM`, `DISCOVERY`, `MATURITY`. A type generated from a template carries the template's id on `UPGLifecycle.template_id` so render and audit tooling can group, label, and link templates without re-detecting them structurally.
 
-`getLifecycleRenderShape(entityType)` returns a flattened, render-ready shape for any type — phase-level only, with transitions classified as `forward | backward | terminal | reopen`.
+`getLifecycleRenderShape(entityType)` returns a flattened, render-ready shape for any type (phase-level only), with transitions classified as `forward | backward | terminal | reopen`.
 
 ---
 
@@ -238,11 +238,11 @@ Reusable lifecycle patterns. Each entity type registered against a template inhe
 
 Phases:
 
-- `proposed` — Proposed. → `reviewing`
-- `reviewing` — Reviewing. → `approved`, `rejected`, `proposed`
-- `approved` [terminal] — Approved. → `deprecated`
-- `rejected` [terminal] — Rejected. → `proposed`
-- `deprecated` [terminal] — Deprecated. → _(end)_
+- `proposed`: Proposed. → `reviewing`
+- `reviewing`: Reviewing. → `approved`, `rejected`, `proposed`
+- `approved` [terminal]: Approved. → `deprecated`
+- `rejected` [terminal]: Rejected. → `proposed`
+- `deprecated` [terminal]: Deprecated. → _(end)_
 
 Applied to:
 
@@ -254,10 +254,10 @@ Applied to:
 
 Phases:
 
-- `open` — Open. → `exploring`
-- `exploring` — Exploring. → `resolved`, `parked`, `open`
-- `resolved` [terminal] — Resolved. → _(end)_
-- `parked` [terminal] — Parked. → `open`
+- `open`: Open. → `exploring`
+- `exploring`: Exploring. → `resolved`, `parked`, `open`
+- `resolved` [terminal]: Resolved. → _(end)_
+- `parked` [terminal]: Parked. → `open`
 
 Applied to:
 
@@ -269,10 +269,10 @@ Applied to:
 
 Phases:
 
-- `alpha` — Alpha. → `beta`
-- `beta` — Beta. → `ga`, `alpha`
-- `ga` — Generally Available. → `deprecated`
-- `deprecated` [terminal] — Deprecated. → _(end)_
+- `alpha`: Alpha. → `beta`
+- `beta`: Beta. → `ga`, `alpha`
+- `ga`: Generally Available. → `deprecated`
+- `deprecated` [terminal]: Deprecated. → _(end)_
 
 Applied to:
 
@@ -284,11 +284,11 @@ Applied to:
 
 Phases:
 
-- `planning` — Planning. → `active`
-- `active` — Active. → `paused`, `completed`, `sunset`
-- `paused` — Paused. → `active`, `sunset`
-- `completed` [terminal] — Completed. → _(end)_
-- `sunset` [terminal] — Sunset. → _(end)_
+- `planning`: Planning. → `active`
+- `active`: Active. → `paused`, `completed`, `sunset`
+- `paused`: Paused. → `active`, `sunset`
+- `completed` [terminal]: Completed. → _(end)_
+- `sunset` [terminal]: Sunset. → _(end)_
 
 Applied to:
 
@@ -300,10 +300,10 @@ Applied to:
 
 Phases:
 
-- `draft` — Draft. → `review`
-- `review` — In Review. → `draft`, `published`
-- `published` — Published. → `archived`, `draft`
-- `archived` [terminal] — Archived. → `draft`
+- `draft`: Draft. → `review`
+- `review`: In Review. → `draft`, `published`
+- `published`: Published. → `archived`, `draft`
+- `archived` [terminal]: Archived. → `draft`
 
 Applied to:
 
@@ -315,11 +315,11 @@ Applied to:
 
 Phases:
 
-- `identified` — Identified. → `assessed`
-- `assessed` — Assessed. → `mitigated`, `accepted`, `closed`
-- `mitigated` [terminal] — Mitigated. → _(end)_
-- `accepted` [terminal] — Accepted. → _(end)_
-- `closed` [terminal] — Closed. → `assessed`
+- `identified`: Identified. → `assessed`
+- `assessed`: Assessed. → `mitigated`, `accepted`, `closed`
+- `mitigated` [terminal]: Mitigated. → _(end)_
+- `accepted` [terminal]: Accepted. → _(end)_
+- `closed` [terminal]: Closed. → `assessed`
 
 Applied to:
 
@@ -331,11 +331,11 @@ Applied to:
 
 Phases:
 
-- `qualified` — Qualified. → `proposal`
-- `proposal` — Proposal. → `negotiation`, `closed_lost`
-- `negotiation` — Negotiation. → `closed_won`, `closed_lost`
-- `closed_won` [terminal] — Closed Won. → _(end)_
-- `closed_lost` [terminal] — Closed Lost. → _(end)_
+- `qualified`: Qualified. → `proposal`
+- `proposal`: Proposal. → `negotiation`, `closed_lost`
+- `negotiation`: Negotiation. → `closed_won`, `closed_lost`
+- `closed_won` [terminal]: Closed Won. → _(end)_
+- `closed_lost` [terminal]: Closed Lost. → _(end)_
 
 Applied to:
 
@@ -347,10 +347,10 @@ Applied to:
 
 Phases:
 
-- `todo` — To Do. → `in_progress`
-- `in_progress` — In Progress. → `in_review`, `todo`
-- `in_review` — In Review. → `done`, `in_progress`
-- `done` [terminal] — Done. → _(end)_
+- `todo`: To Do. → `in_progress`
+- `in_progress`: In Progress. → `in_review`, `todo`
+- `in_review`: In Review. → `done`, `in_progress`
+- `done` [terminal]: Done. → _(end)_
 
 Applied to:
 

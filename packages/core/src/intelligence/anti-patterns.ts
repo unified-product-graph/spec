@@ -1,13 +1,13 @@
 /**
- * UPG Curated Anti-Patterns — cross-domain reference set.
+ * UPG Curated Anti-Patterns: cross-domain reference set.
  *
  * Each entry pairs a memorable name with a machine-evaluable
  * `IntelligenceCondition`, the stages it fires in, a "why it matters" line,
  * and a remediation hint.
  *
  * Distinct from `UPGAntiPattern` in `domain-guides.ts`:
- * - `UPGAntiPattern` (per-domain) — guidance for MCP agents working *inside* a domain.
- * - `UPGCuratedAntiPattern` (this file) — cross-cutting patterns evaluated against the *whole* graph.
+ * - `UPGAntiPattern` (per-domain): guidance for MCP agents working *inside* a domain.
+ * - `UPGCuratedAntiPattern` (this file): cross-cutting patterns evaluated against the *whole* graph.
  *
  * Adding one: append to `UPG_ANTI_PATTERNS`. Integrity tests validate id
  * uniqueness, condition well-formedness, and stage/severity vocab. Cite
@@ -39,7 +39,7 @@ export type UPGAntiPatternSeverity = 'high' | 'medium' | 'low'
  * {
  *   id: 'features-without-hypotheses',
  *   name: 'Features without hypotheses',
- *   description: 'The graph has features but no hypotheses — work is being scoped without a stated belief about why it should work.',
+ *   description: 'The graph has features but no hypotheses. Work is being scoped without a stated belief about why it should work.',
  *   structured_condition: { operator: 'and', checks: [
  *     { check: { type: 'entity_count', entity_type: 'feature', comparison: 'nonzero' } },
  *     { check: { type: 'entity_count', entity_type: 'hypothesis', comparison: 'zero' } },
@@ -52,7 +52,7 @@ export type UPGAntiPatternSeverity = 'high' | 'medium' | 'low'
  */
 export interface UPGCuratedAntiPattern {
   /**
-   * Stable slug — kebab-case, unique within `UPG_ANTI_PATTERNS`.
+   * Stable slug: kebab-case, unique within `UPG_ANTI_PATTERNS`.
    * Surfaced as URL fragment on the `/intelligence` site page; never rename
    * once published (rename = breaking link surface).
    */
@@ -90,7 +90,7 @@ export interface UPGCuratedAntiPattern {
    */
   stages: readonly UPGProductStage[]
 
-  /** Severity tier — see `UPGAntiPatternSeverity`. */
+  /** Severity tier. See `UPGAntiPatternSeverity`. */
   severity: UPGAntiPatternSeverity
 
   /**
@@ -163,7 +163,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'For each persona, connect it into the user chain via at least one of: `persona_pursues_job`, `persona_experiences_need`, `persona_aspires_to_desired_outcome`, or `persona_incurs_switching_cost`. Use `/upg-persona` or the JTBD canvas workflow.',
     stages: ['concept', 'validation', 'build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'high',
-    source: { kind: 'practitioner', attribution: 'Clayton Christensen — Jobs to Be Done' },
+    source: { kind: 'practitioner', attribution: 'Clayton Christensen, Jobs to Be Done' },
   },
 
   {
@@ -219,7 +219,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'For each opportunity, connect it to the user chain via one of: `opportunity_addresses_need`, `opportunity_pursues_outcome`, `opportunity_contextualises_job`, or an `outcome_reveals_opportunity` edge from a parent outcome.',
     stages: ['validation', 'build', 'beta', 'launch'],
     severity: 'high',
-    source: { kind: 'practitioner', attribution: 'Teresa Torres — Continuous Discovery Habits' },
+    source: { kind: 'practitioner', attribution: 'Teresa Torres, Continuous Discovery Habits' },
   },
 
   // ── Validation layer ────────────────────────────────────────────────────
@@ -241,7 +241,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'For each in-flight feature, draft one `hypothesis` it tests; link via `feature_tests_hypothesis`.',
     stages: ['validation', 'build', 'beta', 'launch', 'growth'],
     severity: 'high',
-    source: { kind: 'book', citation: 'The Lean Startup — Eric Ries (2011)' },
+    source: { kind: 'book', citation: 'The Lean Startup, Eric Ries (2011)' },
   },
 
   {
@@ -264,7 +264,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'Promote at least one drafted `hypothesis` to `active` per planning cycle by pairing it with an `experiment_plan`.',
     stages: ['validation', 'build', 'beta', 'launch', 'growth'],
     severity: 'medium',
-    source: { kind: 'practitioner', attribution: 'David Bland — Testing Business Ideas' },
+    source: { kind: 'practitioner', attribution: 'David Bland, Testing Business Ideas' },
   },
 
   {
@@ -293,7 +293,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'For each completed `experiment_run`, capture one `learning` and link via `experiment_run_produces_learning`.',
     stages: ['validation', 'build', 'beta', 'launch', 'growth'],
     severity: 'high',
-    source: { kind: 'book', citation: 'The Lean Startup — Eric Ries (2011)' },
+    source: { kind: 'book', citation: 'The Lean Startup, Eric Ries (2011)' },
   },
 
   // ── Strategy / OKR layer ────────────────────────────────────────────────
@@ -323,7 +323,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'For each `objective`, define 2–4 `key_result` entities and link via `objective_achieved_through_key_result`. Use `/upg-okr` to author.',
     stages: ['validation', 'build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'high',
-    source: { kind: 'book', citation: 'Measure What Matters — John Doerr (2017)' },
+    source: { kind: 'book', citation: 'Measure What Matters, John Doerr (2017)' },
   },
 
   {
@@ -352,7 +352,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'For each feature, identify the `key_result` it drives and link via `feature_drives_key_result`.',
     stages: ['build', 'beta', 'launch', 'growth'],
     severity: 'high',
-    source: { kind: 'practitioner', attribution: 'John Cutler — Outcomes over Output' },
+    source: { kind: 'practitioner', attribution: 'John Cutler, Outcomes over Output' },
   },
 
   // ── Market intelligence layer ───────────────────────────────────────────
@@ -395,7 +395,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'Add personas representing the next 1–2 most distinct user segments. Use `/upg-persona`.',
     stages: ['validation', 'build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'medium',
-    source: { kind: 'practitioner', attribution: 'Alan Cooper — The Inmates Are Running the Asylum' },
+    source: { kind: 'practitioner', attribution: 'Alan Cooper, The Inmates Are Running the Asylum' },
   },
 
   // ── Cross-domain coverage ───────────────────────────────────────────────
@@ -417,7 +417,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'Spin up at least one `experiment_plan` or `hypothesis` per quarter\'s build batch. Use `/upg-discover` or `/upg-hypothesis`.',
     stages: ['build', 'beta', 'launch', 'growth'],
     severity: 'high',
-    source: { kind: 'practitioner', attribution: 'Marty Cagan — Inspired (continuous discovery)' },
+    source: { kind: 'practitioner', attribution: 'Marty Cagan, Inspired (continuous discovery)' },
   },
 
   {

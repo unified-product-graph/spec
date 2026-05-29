@@ -1,4 +1,4 @@
-# `playbooks/` — Guided Bootstrap Recipes
+# `playbooks/`: Guided Bootstrap Recipes
 
 Region-anchored bootstrap recipes. A `UPGPlaybook` describes how to populate a region of the graph from its anchor outward: which entities to create in which order, which domain guides to invoke, and which frameworks to apply along the way.
 

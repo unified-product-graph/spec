@@ -13,8 +13,8 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'vision', 'outcome', 'objective', 'metric', 'decision', 'constraint',
     // User
     'persona',
-    // Discovery — via outcome children
-    // Validation — via hypothesis children
+    // Discovery (via outcome children)
+    // Validation (via hypothesis children)
     // Market Intelligence
     'competitor', 'market_trend', 'market_segment', 'competitive_analysis',
     // User Research
@@ -37,7 +37,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'gtm_strategy',
     // Team & Organisation
     // `person` is containment-free (see UPG_CONTAINMENT_FREE_TYPES below)
-    // — referenced via edges, not nested under product.
+    // (referenced via edges, not nested under product)
     'team', 'stakeholder', 'department',
     // Data & Analytics
     'data_source', 'event_schema', 'dashboard', 'data_domain', 'glossary_term',
@@ -156,9 +156,9 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   ],
   observation: ['quote'],
   affinity_cluster: ['insight'],
-  // insight refines into insight — a raw insight can be distilled
+  // insight refines into insight; a raw insight can be distilled
   // into a more specific insight (refines_into chain).
-  // v0.5.8: insights own their evidencing quotes —
+  // v0.5.8: insights own their evidencing quotes;
   // parallel to `observation: ['quote']`. Research-synthesis canon.
   // Pairs with `insight_evidenced_by_quote` in the edge catalog.
 
@@ -166,13 +166,13 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   user_journey: ['journey_step', 'journey_phase'],
   journey_phase: ['journey_step'],
   journey_step: ['journey_action'],
-  // v0.5.8: insights own their evidencing quotes —
+  // v0.5.8: insights own their evidencing quotes;
   // parallel to `observation: ['quote']`. Research-synthesis canon
   // (insight ← quote evidencing) extends quote's hierarchy parents to
   // both observation (raw-capture parent) and insight (synthesis parent).
   // Pairs with `insight_evidenced_by_quote` in the edge catalog.
   insight: ['design_question', 'insight', 'quote'],
-  // v0.5.2: need anchors a Wardley value chain — capabilities
+  // v0.5.2: need anchors a Wardley value chain; capabilities
   // fulfil the need at the chain top. Cross-domain hierarchy (need ∈ Design,
   // capability ∈ Strategy) is intentional: Wardley analysis starts from a
   // user need and decomposes into the capabilities required to fulfil it.
@@ -207,7 +207,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'read_model', 'code_repository', 'integration_pattern', 'external_api',
     'data_flow',
     // v0.5.7: BCs publish api_contracts as their "published
-    // language" (DDD canon). api_contract has two valid hierarchy parents now —
+    // language" (DDD canon). api_contract has two valid hierarchy parents now:
     // service (per-service exposure) AND bounded_context (BC-level surface).
     'api_contract',
   ],
@@ -217,7 +217,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'library_dependency',
   ],
   // v0.5.1 ( C2): contracts contain their endpoints. Service still
-  // serves endpoints directly (legacy / non-contract endpoints) — both
+  // serves endpoints directly (legacy / non-contract endpoints); both
   // parent-child paths coexist.
   api_contract: ['api_endpoint'],
   decision: ['technical_debt_item'],
@@ -372,7 +372,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'beta_program',
   ],
   feature_request: ['feedback_vote'],
-  // v0.5.8: CABs convene as quarterly ceremonies — the
+  // v0.5.8: CABs convene as quarterly ceremonies;
   // CAB owns its meeting cadence (Stettler, Moore CAB playbook canon).
   // Pairs with `user_advisory_board_convenes_as_ceremony` in the edge
   // catalog. ceremony now has two valid hierarchy parents (team for sprint
@@ -404,7 +404,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   agent_definition: ['agent_session', 'agent_skill', 'agent_hook', 'workflow_template', 'agent_task'],
   // v0.5.8: review gates also vet research insights
   // (ResearchOps insight-review pattern). Pairs with `review_gate_vets_insight`
-  // in the edge catalog. The gate now owns two child types — approval records
+  // in the edge catalog. The gate now owns two child types: approval records
   // for workflow gates, insights for research-democratisation gates.
   review_gate: ['approval_record', 'insight'],
 
@@ -419,7 +419,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // portfolios can nest (multi-level investment structures).
   portfolio: ['product', 'portfolio'],
   // product_area is the organisational container for products and can
-  // nest (parent → sub-area). product_area also groups features — the
+  // nest (parent → sub-area). product_area also groups features; the
   // "Studio area owns 6 features" mental model.
   product_area: ['product', 'product_area', 'feature'],
 } as const
@@ -454,7 +454,7 @@ export function canBeChildOf(childType: string, parentType: string): boolean {
 }
 
 /**
- * Containment-free entity types — types that exist in the graph but are
+ * Containment-free entity types: types that exist in the graph but are
  * *referenced* by other nodes (via edges) rather than *contained* by
  * structural parents. They appear in no `UPG_VALID_CHILDREN` list and
  * have no hierarchy edges into them.
@@ -462,12 +462,12 @@ export function canBeChildOf(childType: string, parentType: string): boolean {
  * This is parallel to `UPG_LIFECYCLE_FREE_TYPES` in `grammar/lifecycles.ts`:
  * both describe what a type *does not have*. Lifecycle-free types lack a
  * status progression; containment-free types lack a structural parent.
- * A type may be one, both, or neither — `person` is both; `theme` is
+ * A type may be one, both, or neither: `person` is both; `theme` is
  * lifecycle-free but structurally contained; `feature` is neither.
  *
  * The G2b hierarchy audit treats absence from `UPG_VALID_CHILDREN` as a
  * defect *unless* the type is in this set. Use this category for types
- * that are orthogonal to product structure — identities, references,
+ * that are orthogonal to product structure: identities, references,
  * cross-cutting concerns that any node might point at.
  *
  * `person` is the first explicit member of the set. Additional candidates
@@ -485,7 +485,7 @@ export const UPG_CONTAINMENT_FREE_TYPES: ReadonlySet<string> = new Set<string>([
 ])
 
 /**
- * Returns `true` if `entityType` is containment-free — i.e. it deliberately
+ * Returns `true` if `entityType` is containment-free, i.e. it deliberately
  * has no structural parent in `UPG_VALID_CHILDREN`. See
  * `UPG_CONTAINMENT_FREE_TYPES` for the rationale and roster.
  */

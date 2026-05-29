@@ -28,7 +28,7 @@ export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
     // (task), but renamed the surviving statement half to the coined
     // `story_statement`. "User story" is the universally-recognised industry
     // term for exactly that artefact, and UPG's value is being the recognisable
-    // canonical vocabulary — so the statement is re-canonicalised under
+    // canonical vocabulary; the statement is re-canonicalised under
     // `user_story`. Lifecycle-free, same property surface (as_a / i_want_to /
     // so_that / text); no property migration required. The paired `task` and
     // the `task_implements_*` / `epic_specified_by_*` / `*_verified_by_*` /
@@ -36,18 +36,18 @@ export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
     {
       from: 'story_statement',
       to: 'user_story',
-      reason: 'story_statement re-canonicalised to user_story. The v0.2.7 Statement/Implementation split was sound — it extracted the lifecycle-bearing work into `task` — but the coined `story_statement` name raised the adoption barrier; "user story" is the industry-standard term for the templated promise. Lifecycle-free, identical property surface (as_a / i_want_to / so_that / text); no property migration needed.',
+      reason: 'story_statement re-canonicalised to user_story. The v0.2.7 Statement/Implementation split was sound (it extracted the lifecycle-bearing work into `task`), but the coined `story_statement` name raised the adoption barrier; "user story" is the industry-standard term for the templated promise. Lifecycle-free, identical property surface (as_a / i_want_to / so_that / text); no property migration needed.',
     },
   ],
 
   '0.4.0': [
     // (since v0.4.0) hypothesis_claim reverts to hypothesis (the simpler
-    // canonical name — "claim" is implied). hypothesis_evidence deprecated
+    // canonical name ("claim" is implied). hypothesis_evidence deprecated
     // in favour of canonical evidence entity.
     {
       from: 'hypothesis_claim',
       to: 'hypothesis',
-      reason: 'hypothesis_claim renamed back to hypothesis — the canonical name. The "claim" suffix was redundant; a hypothesis is a claim by definition. Properties (we_believe / will_result_in / we_know_when / risk_if_wrong / current_confidence) are identical; no property migration required.',
+      reason: 'hypothesis_claim renamed back to hypothesis, the canonical name. The "claim" suffix was redundant; a hypothesis is a claim by definition. Properties (we_believe / will_result_in / we_know_when / risk_if_wrong / current_confidence) are identical; no property migration required.',
     },
     {
       from: 'hypothesis_evidence',
@@ -204,7 +204,7 @@ export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
     },
   ],
 
-  // v0.2.6 — no 1→1 type renames. The experiment split
+  // v0.2.6: no 1→1 type renames. The experiment split
   // is purely additive in v0.2.6 (new entity types `experiment_plan` +
   // `experiment_run` and 4 new edges). The 1→N split rule for migrating
   // legacy `experiment` rows lives in UPG_SPLIT_MIGRATIONS['0.2.6'] below.
@@ -273,33 +273,33 @@ export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
     {
       from: 'channel_bm',
       to: 'distribution_channel',
-      reason: 'Removed _bm suffix. Renamed to distribution_channel — more descriptive than the abbreviation.',
+      reason: 'Removed _bm suffix. Renamed to distribution_channel, which is more descriptive than the abbreviation.',
     },
 
     // ── Growth domain: disambiguate generic names ──────────────────────────
     {
       from: 'campaign',
       to: 'growth_campaign',
-      reason: 'Too generic — conflicted with marketing_campaign_plan and nps_campaign. Prefixed with growth to clarify domain scope.',
+      reason: 'Too generic; conflicted with marketing_campaign_plan and nps_campaign. Prefixed with growth to clarify domain scope.',
     },
     {
       from: 'segment',
       to: 'behavioral_segment',
-      reason: 'Too generic — conflicted with market_segment and target_customer_segment. Renamed to behavioral_segment to clarify this is a behaviour-based user slice.',
+      reason: 'Too generic; conflicted with market_segment and target_customer_segment. Renamed to behavioral_segment to clarify this is a behaviour-based user slice.',
     },
 
     // ── Pricing consolidation ───────────────────────────────────────────
     {
       from: 'package',
       to: 'pricing_tier',
-      reason: 'Package and pricing_tier describe the same concept — the plan a customer buys. Consolidated into pricing_tier as the central pricing entity.',
+      reason: 'Package and pricing_tier describe the same concept (the plan a customer buys). Consolidated into pricing_tier as the central pricing entity.',
     },
 
     // ── GTM restructure ─────────────────────────────────────────────
     {
       from: 'target_customer_segment',
       to: 'market_segment',
-      reason: 'Target customer segment and market segment describe the same concept — a slice of the addressable market. Consolidated into market_segment.',
+      reason: 'Target customer segment and market segment describe the same concept, a slice of the addressable market. Consolidated into market_segment.',
     },
 
     // ── Content consolidation ───────────────────────────────────────
@@ -318,7 +318,7 @@ export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
  *
  * Returns a negative number if `a < b`, zero if `a === b`, positive if `a > b`.
  * Components are compared numerically (e.g. `0.2.11` is greater than `0.2.8`,
- * not less — naive string comparison gets this backwards because `'11' < '8'`
+ * not less; naive string comparison gets this backwards because `'11' < '8'`
  * lexicographically).
  *
  * Used by every range-filtered migration helper below
@@ -363,7 +363,7 @@ function versionInRange(version: string, fromVersion: string, toVersion: string)
  * Used by TYPE_ALIASES and .upg file readers.
  *
  * @example
- * // Upgrading from v0 (pre-UPG) to v0.2.0 — collect every type rename.
+ * // Upgrading from v0 (pre-UPG) to v0.2.0: collect every type rename.
  * const map = getMigrationMap('0.0.0', '0.2.0')
  * // map.pain_point === 'need'
  * // map.jtbd       === 'job'
@@ -389,7 +389,7 @@ export function getMigrationMap(
  * Apply migrations to a single node, converting its type and
  * merging default properties.
  *
- * `T` is the caller's node shape — typically `UPGBaseNode` or a narrower
+ * `T` is the caller's node shape, typically `UPGBaseNode` or a narrower
  * app-specific node type. The constraint (`{ type: string; properties?: ... }`)
  * keeps the function node-library-agnostic so adapters, CLI tools, and test
  * fixtures can all reuse it without coupling to `UPGBaseNode` directly.
@@ -403,7 +403,7 @@ export function getMigrationMap(
  * // migrated.properties.description === 'Onboarding is slow'  // original preserved
  *
  * @example
- * // Non-deprecated type passes through — return shape preserves T.
+ * // Non-deprecated type passes through; return shape preserves T.
  * const healthy = { id: 'n2', type: 'persona', properties: { is_primary: true } }
  * const same = migrateNode(healthy, '0.0.0', '0.1.0')
  * // same === healthy  (referentially unchanged)
@@ -462,14 +462,14 @@ export function getDeprecatedTypes(): Set<string> {
 
 // ─── Property migrations ──────────────────────────────────
 //
-// When a type's property surface shifts — drops, renames at the top level,
+// When a type's property surface shifts (drops, renames at the top level,
 // lifts from `properties` to top-level `UPGBaseNode` slots, or self-referential
-// cleanup — `UPGPropertyMigration` records the change so loaders can clean up
+// cleanup), `UPGPropertyMigration` records the change so loaders can clean up
 // existing data with one consistent contract instead of each consumer
 // inventing its own rules.
 //
 // History:
-// - (v0.2.2) split `metric` — 14 intra-`properties` drops.
+// - (v0.2.2) split `metric`: 14 intra-`properties` drops.
 // - (v0.2.8) drop `hypothesis.properties.we_test_by`.
 // - (v0.2.13) extended to a discriminated union covering top-level
 //   field drift surfaced by Wave 3 dogfood: `lifecycle_status → status`,
@@ -480,7 +480,7 @@ export function getDeprecatedTypes(): Set<string> {
 //
 // **Discriminated-union contract.** Each rule carries a `kind` discriminator
 // mirroring `UPGEdgeMigration`. The four kinds are
-// orthogonal — a rule does one thing. Compose multiple rules per (version,
+// orthogonal; a rule does one thing. Compose multiple rules per (version,
 // type) when more than one kind applies.
 
 /**
@@ -488,9 +488,9 @@ export function getDeprecatedTypes(): Set<string> {
  *
  * Discriminated by `kind`:
  *
- * - `'drop_props'` — remove keys from `node.properties`. The original
+ * - `'drop_props'`: remove keys from `node.properties`. The original
  *   shape; the existing v0.2.2 + v0.2.8 entries use this.
- * - `'rename_top_level'` — rename a top-level `UPGBaseNode` field to a
+ * - `'rename_top_level'`: rename a top-level `UPGBaseNode` field to a
  *   different top-level field, optionally remapping its value. Used when a
  *   pre-canonical custom field (e.g. `lifecycle_status`) shifts to its
  *   canonical slot (`status`).
@@ -498,7 +498,7 @@ export function getDeprecatedTypes(): Set<string> {
  *   top-level field, optionally remapping. Used when a slot that was
  *   pragmatically stuffed in `properties` graduates to a top-level
  *   `UPGBaseNode` slot (e.g. `properties.stage` → top-level `status`).
- * - `'drop_when_self_referential'` — drop top-level fields whose value
+ * - `'drop_when_self_referential'`: drop top-level fields whose value
  *   equals the node's own `id` or `type` (or another configured
  *   self-reference). Used to clean up redundant round-trip metadata that's
  *   only meaningful when pointing OUT of the node, not at itself.
@@ -562,16 +562,16 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
-  // ── v0.5.0 — deprecation hygiene pass ──────────────────────────
+  // ── v0.5.0: deprecation hygiene pass ───────────────────────────
   //
   // Properties tagged `@deprecated since="0.4.0" removeIn="0.5.0"` (and the
-  // sibling prose `since v0.4.0 — removed in v0.5.0` aliases) are removed
+  // sibling prose `since v0.4.0, removed in v0.5.0` aliases) are removed
   // from `UPG_PROPERTY_SCHEMA` in v0.5.0. This block migrates existing graphs
   // that still carry the values:
   //
   //   1. `*_status` lifecycle properties → lift to `UPGBaseNode.status` per
   //      `status-convention.md` Rule 1. Value maps preserve every legacy
-  //      lifecycle phase verbatim — the property and the canonical slot used
+  //      lifecycle phase verbatim; the property and the canonical slot used
   //      the same enum, so the lift is lossless.
   //   2. Free-text properties replaced by canonical edges (`winner`,
   //      `customer`, `consumers`, `recipients`, `metric`) → drop. The
@@ -710,7 +710,7 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
       kind: 'drop_props',
       type: 'root_cause',
       drop_props: ['confidence'],
-      reason: ' (v0.5.0). root_cause.confidence was `@deprecated removed in v0.5.0` since v0.4.0; renamed to `cause_confidence` to disambiguate from the spec-wide `UPGAssessment` confidence axis. Values are unchanged — authors that still carry the legacy key should copy the value to `cause_confidence` before applying this migration. The migration drops the residue.',
+      reason: ' (v0.5.0). root_cause.confidence was `@deprecated removed in v0.5.0` since v0.4.0; renamed to `cause_confidence` to disambiguate from the spec-wide `UPGAssessment` confidence axis. Values are unchanged; authors that still carry the legacy key should copy the value to `cause_confidence` before applying this migration. The migration drops the residue.',
     },
     {
       kind: 'drop_props',
@@ -739,7 +739,7 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
   ],
 
   '0.4.0': [
-    // deprecate task_status + bug_status — lift to UPGBaseNode.status.
+    // deprecate task_status + bug_status; lift to UPGBaseNode.status.
     // Values are identical to the canonical lifecycle phases; no value_map needed.
     {
       kind: 'lift_property_to_top_level',
@@ -752,7 +752,7 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
         in_review:   'in_review',
         done:        'done',
       },
-      reason: 'task_status duplicates UPGBaseNode.status. Canonical lifecycle field wins; property-level shadow deprecated. Values are identical — lift is lossless.',
+      reason: 'task_status duplicates UPGBaseNode.status. Canonical lifecycle field wins; property-level shadow deprecated. Values are identical; lift is lossless.',
     },
     {
       kind: 'lift_property_to_top_level',
@@ -766,7 +766,7 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
         verified:    'verified',
         wont_fix:    'wont_fix',
       },
-      reason: 'bug_status duplicates UPGBaseNode.status. Canonical lifecycle field wins; property-level shadow deprecated. Values are identical — lift is lossless.',
+      reason: 'bug_status duplicates UPGBaseNode.status. Canonical lifecycle field wins; property-level shadow deprecated. Values are identical; lift is lossless.',
     },
   ],
 
@@ -800,7 +800,7 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
         'quality_correlated', 'quality_actionable', 'quality_sensitive',
         'quality_comparative', 'quality_related', 'quality_score',
         'proxy_reason', 'proxy_confidence', 'proxy_alternatives',
-        // Out of canonical spec scope — tool runtime state belongs in
+        // Out of canonical spec scope; tool runtime state belongs in
         // tool-extension namespaces (e.g. extensions.entopo.metric_sync).
         'external_metric_id', 'external_query', 'last_synced_at',
         'sync_status', 'sync_error',
@@ -809,7 +809,7 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
     },
   ],
 
-  // ── — top-level field drift surfaced by Wave 3 dogfood ──────────
+  // ── top-level field drift surfaced by Wave 3 dogfood ──────────────
   // The two production graphs in this repo (`.upg/entopo.upg` and
   // `.upg/unified-product-graph.upg`) carry pre-canonical node shapes.
   // The four rules below close the drift catalog:
@@ -821,7 +821,7 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
   //   2. `product.lifecycle_status` (pre-canonical top-level field with
   //      "draft / active" values) → top-level `status` with the same
   //      `UPGProductStage` enum.
-  //   3. Self-referential `source_id` / `source_type` cleanup — these
+  //   3. Self-referential `source_id` / `source_type` cleanup; these
   //      fields are for round-trip from external imports (Notion / Linear);
   //      when they self-reference, they're redundant noise.
   //   4. `hypothesis_claim.properties.status` → top-level `status` with
@@ -870,19 +870,19 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
       },
       reason: '`lifecycle_status` was a pre-canonical top-level field; `UPGBaseNode.status` is the canonical lifecycle slot. Values remapped to UPGProductStage phases.',
     },
-    // 3. Drop self-referential source_id / source_type — universal cleanup.
+    // 3. Drop self-referential source_id / source_type (universal cleanup).
     {
       kind: 'drop_when_self_referential',
       type: '*',
       fields: ['source_id', 'source_type'],
-      reason: '`source_id` / `source_type` are round-trip metadata for entities imported from external systems (Notion, Linear). When they equal the node\'s own id/type, they\'re redundant self-references — drop with no information loss.',
+      reason: '`source_id` / `source_type` are round-trip metadata for entities imported from external systems (Notion, Linear). When they equal the node\'s own id/type, they\'re redundant self-references; drop with no information loss.',
     },
     // 4. Lift hypothesis_claim properties.status → top-level status with
     //    cross-lifecycle value remap. Pre-Wave-3
     //    hypothesis nodes carried lifecycle phase in `properties.status`
     //    using the old `untested → testing → resolved` enum. The Wave 3
     //    `migrate_type(hypothesis → hypothesis_claim)` pass renamed the
-    //    entity type but left the property bag untouched — so legacy
+    //    entity type but left the property bag untouched; legacy
     //    phase values now sit in the wrong slot AND need remapping to
     //    the new hypothesis_claim lifecycle. Value map mirrors the
     //    UPG_SPLIT_MIGRATIONS['0.2.8'] routing table for consistency
@@ -920,14 +920,14 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
     },
   ],
 
-  // ── v0.2.14 — widen `rename_top_level` to cover `outcome` ──────
+  // ── v0.2.14: widen `rename_top_level` to cover `outcome` ──────
   //
   // After running `migrate_properties` against unified-product-graph.upg
   // post-v0.2.13, 167 `outcome` nodes remained with a top-level
   // `lifecycle_status` field. The v0.2.13 `rename_top_level` rule was
   // scoped to `type: 'product'` only. The existing DSL stores `type` as a
   // plain string (no array variant), so a parallel rule for `outcome` is the
-  // minimum-viable fix — no engine or type changes required.
+  // minimum-viable fix; no engine or type changes required.
   '0.2.14': [
     {
       kind: 'rename_top_level',
@@ -935,14 +935,14 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
       from: 'lifecycle_status',
       to: 'status',
       value_map: {
-        // Same value map as the v0.2.13 `product` rule — pre-canonical
+        // Same value map as the v0.2.13 `product` rule; pre-canonical
         // lifecycle_status values from the v0.1 era.
         draft: 'concept',
         active: 'launch',
         archived: 'sunset',
         retired: 'sunset',
       },
-      reason: '`outcome` nodes carried the same pre-canonical `lifecycle_status` top-level field as `product` (v0.1 era). Widening to `outcome` closes the final 167 top_level_drift rows in unified-product-graph.upg. Parallel rule used because the DSL `type` field is a plain string — minimum-viable fix with no engine change.',
+      reason: '`outcome` nodes carried the same pre-canonical `lifecycle_status` top-level field as `product` (v0.1 era). Widening to `outcome` closes the final 167 top_level_drift rows in unified-product-graph.upg. Parallel rule used because the DSL `type` field is a plain string; minimum-viable fix with no engine change.',
     },
   ],
 }
@@ -1006,7 +1006,7 @@ export function migrateNodeProperties<
   toVersion: string,
 ): { node: T; changes: UPGPropertyMigrationChange[] } {
   const changes: UPGPropertyMigrationChange[] = []
-  // Mutable working copy — only realised back into the result when changes occur.
+  // Mutable working copy; only realised back into the result when changes occur.
   let workingNode: Record<string, unknown> = { ...node }
   let mutated = false
 
@@ -1045,7 +1045,7 @@ export function migrateNodeProperties<
           }
           // value_changed reflects actual value mutation, not whether the map
           // had an entry for the input. Identity entries (`'drafted' → 'drafted'`)
-          // surface as value_changed: false — the structural change (top-level
+          // surface as value_changed: false; the structural change (top-level
           // rename) is signalled by the change kind itself.
           const valueChanged = newValue !== oldValue
           workingNode[m.to] = newValue
@@ -1103,7 +1103,7 @@ export function migrateNodeProperties<
 }
 
 /**
- * Returns every property migration entry between two versions — useful for
+ * Returns every property migration entry between two versions; useful for
  * load-time warning generation and audit reports.
  */
 export function getPropertyMigrations(
@@ -1121,12 +1121,12 @@ export function getPropertyMigrations(
 
 // ─── 1→N split migrations ───────────────────────────────────
 //
-// When an entity type is **decomposed** into multiple canonical types — not
+// When an entity type is **decomposed** into multiple canonical types (not
 // renamed (1→1) and not just losing properties (UPG_PROPERTY_MIGRATIONS) but
-// genuinely split into N entities linked by canonical edges — `UPGSplitMigration`
+// genuinely split into N entities linked by canonical edges), `UPGSplitMigration`
 // records the rule. First use: experiment → experiment_plan + experiment_run.
 //
-// **Rule shape — status-routed split (the only `kind` defined today):**
+// **Rule shape: status-routed split (the only `kind` defined today):**
 //
 // ```
 // {
@@ -1184,7 +1184,7 @@ export interface UPGSplitTarget {
   defaults?: Record<string, unknown>
 }
 
-/** Per-target route plan — what to spawn and what overrides apply. */
+/** Per-target route plan: what to spawn and what overrides apply. */
 export interface UPGSplitRouteTarget {
   /** Route-specific defaults merged on top of UPGSplitTarget.defaults. */
   defaults?: Record<string, unknown>
@@ -1212,9 +1212,9 @@ export interface UPGSplitEdge {
   /**
    * When to emit the edge.
    *
-   * - `'both_spawned'` — only emit if both source_ref and target_ref were
+   * - `'both_spawned'`: only emit if both source_ref and target_ref were
    *   spawned by the routing rule.
-   * - `'always'` — emit unconditionally (rare; only valid if both refs
+   * - `'always'`: emit unconditionally (rare; only valid if both refs
    *   appear in every routing entry's `spawn`).
    */
   when: 'both_spawned' | 'always'
@@ -1230,7 +1230,7 @@ export interface UPGSplitMigration {
   status_property: string
   /** The N canonical types this rule produces. */
   produces: readonly UPGSplitTarget[]
-  /** Per-status routing — keys are values of source[status_property]. */
+  /** Per-status routing: keys are values of source[status_property]. */
   routing: Record<string, UPGSplitRoute>
   /** Edges to emit between spawned targets. */
   edges: readonly UPGSplitEdge[]
@@ -1290,14 +1290,14 @@ export const UPG_SPLIT_MIGRATIONS: Record<string, UPGSplitMigration[]> = {
         },
       ],
       reason:
-        'The legacy `experiment` type bundled plan-shape (method, projected reach, success criteria) with run-shape (actual lift, outcome, disposition). The seven status values divided into pre-run (draft/planned/cancelled — plan only), in-flight (running/analysing — plan + run), and terminal (done/aborted — plan + run with run terminal). The plan id keeps the source id so legacy references survive; the run gets a fresh id.',
+        'The legacy `experiment` type bundled plan-shape (method, projected reach, success criteria) with run-shape (actual lift, outcome, disposition). The seven status values divided into pre-run (draft/planned/cancelled, plan only), in-flight (running/analysing, plan + run), and terminal (done/aborted, plan + run with run terminal). The plan id keeps the source id so legacy references survive; the run gets a fresh id.',
     },
   ],
 
   '0.2.7': [
     // (split 2) user_story → story_statement + story_task.
     //
-    // Always-spawn-both shape (no status routing — every user_story
+    // Always-spawn-both shape (no status routing; every user_story
     // produces exactly one statement + one task linked by `implements`).
     // The statement carries the "as-a / i-want / so-that" templated
     // promise (lifecycle-free); the task carries the lifecycle and
@@ -1329,7 +1329,7 @@ export const UPG_SPLIT_MIGRATIONS: Record<string, UPGSplitMigration[]> = {
           ref: 'statement',
           type: 'story_statement',
           keep_props: [
-            // Statement-shape fields — the templated promise.
+            // Statement-shape fields (the templated promise).
             'as_a', 'i_want_to', 'so_that', 'text',
           ],
           defaults: {},
@@ -1362,10 +1362,10 @@ export const UPG_SPLIT_MIGRATIONS: Record<string, UPGSplitMigration[]> = {
     // **Always-spawn-claim, never-spawn-evidence-from-legacy** shape.
     // Legacy hypothesis rows only carried the belief properties
     // (we_believe / will_result_in / we_know_when / we_test_by); they
-    // never carried inline evidence — evidence was always external,
+    // never carried inline evidence; evidence was always external,
     // attached via the dropped `evidence_supports_hypothesis` edge from
     // `evidence` rows. So the migration is conceptually a 1→1 rename plus
-    // a property cleanup (drop we_test_by — it's about experimental
+    // a property cleanup (drop we_test_by, which is about experimental
     // method, which now lives on experiment_plan via
     // `hypothesis_claim_requires_experiment_plan`).
     //
@@ -1401,19 +1401,19 @@ export const UPG_SPLIT_MIGRATIONS: Record<string, UPGSplitMigration[]> = {
         // (loaders emit those as the status value).
         validated:   { spawn: ['claim'], claim: { defaults: { status: 'validated' } } },
         invalidated: { spawn: ['claim'], claim: { defaults: { status: 'invalidated' } } },
-        // Catch-all for `resolved` without a core_state — treat as active
+        // Catch-all for `resolved` without a core_state; treat as active
         // pending the resolver call to decide validated/invalidated.
         resolved:    { spawn: ['claim'], claim: { defaults: { status: 'active' } } },
       },
-      // No edges emitted — the supports/refutes/derived_from edges all
+      // No edges emitted; the supports/refutes/derived_from edges all
       // attach hypothesis_evidence rows that legacy hypothesis nodes did
       // NOT have. Evidence migration is consumer-driven (Entopo/MCP can
       // walk the dropped `evidence_supports_hypothesis` edges and spawn
-      // hypothesis_evidence rows — but that's adapter logic, not spec
+      // hypothesis_evidence rows; but that's adapter logic, not spec
       // migration data).
       edges: [],
       reason:
-        'Legacy hypothesis rows carry the belief properties; the claim preserves them byte-for-byte. The we_test_by property drops (it described experimental method, which now lives on the linked experiment_plan via hypothesis_claim_requires_experiment_plan). Evidence rows are not spawned from legacy hypothesis data — legacy hypothesis never carried inline evidence; consumers walking dropped `evidence_supports_hypothesis` edges may opt to spawn hypothesis_evidence rows post-migration, but that\'s out-of-band adapter logic.',
+        'Legacy hypothesis rows carry the belief properties; the claim preserves them byte-for-byte. The we_test_by property drops (it described experimental method, which now lives on the linked experiment_plan via hypothesis_claim_requires_experiment_plan). Evidence rows are not spawned from legacy hypothesis data; legacy hypothesis never carried inline evidence. Consumers walking dropped `evidence_supports_hypothesis` edges may opt to spawn hypothesis_evidence rows post-migration, but that\'s out-of-band adapter logic.',
     },
   ],
 }
@@ -1453,7 +1453,7 @@ export function getSplitMigrations(
 //
 //   1. Entity migration first via `migrateNode` (1→1 aliases) and/or
 //      `applySplit` (1→N rules).
-//   2. Edge migration second via `migrateEdge` —
+//   2. Edge migration second via `migrateEdge`;
 //      `requires_source_type` / `requires_target_type` guards check the
 //      *post-migration* endpoint types.
 //
@@ -1469,7 +1469,7 @@ export function getSplitMigrations(
  * `flip` is true) and may gate on endpoint identity via
  * `requires_source_type` / `requires_target_type`.
  *
- * `drop` removes the edge entirely (no replacement key) — used when a
+ * `drop` removes the edge entirely (no replacement key); used when a
  * legacy edge has been superseded by a structurally different canonical
  * edge whose endpoints don't match the legacy rule's `from`.
  */
@@ -1505,7 +1505,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
   '0.7.0': [
     // (since v0.7.0) story_statement → user_story re-canon. The four
     // canonical edges that touch the statement are renamed to the user_story
-    // form. Endpoint guards reference the POST-migration (user_story) types —
+    // form. Endpoint guards reference the POST-migration (user_story) types;
     // edge migration runs after node migration, so by the time these rules
     // apply the statement node has already been renamed story_statement →
     // user_story (UPG_MIGRATIONS['0.7.0']).
@@ -1520,7 +1520,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
     // Every edge that was renamed FROM hypothesis_* TO hypothesis_claim_* in
     // v0.2.8 is renamed back. The canonical entity name
     // reverts; "claim" was redundant. hypothesis_evidence_* edges are NOT
-    // renamed here — hypothesis_evidence is deprecated; use evidence +
+    // renamed here; hypothesis_evidence is deprecated; use evidence +
     // hypothesis_has_evidence instead.
     { kind: 'rename', from: 'solution_proposes_hypothesis_claim', to: 'solution_proposes_hypothesis', requires_source_type: 'solution', requires_target_type: 'hypothesis', reason: 'Reverse of the v0.2.8 rename. hypothesis_claim reverts to hypothesis.' },
     { kind: 'rename', from: 'hypothesis_claim_requires_experiment_plan', to: 'hypothesis_requires_experiment_plan', requires_source_type: 'hypothesis', requires_target_type: 'experiment_plan', reason: 'Reverse of the v0.2.8 rename. hypothesis_claim reverts to hypothesis.' },
@@ -1564,7 +1564,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
       to: 'persona_pursues_job',
       requires_source_type: 'persona',
       requires_target_type: 'job',
-      reason: 'Renamed alongside the jtbd→job entity rename and the _has_ → forward_verb sweep. The canonical edge changes verb from has→pursues — pursued_by reverses the relationship. Source remains persona; target migrates jtbd→job via UPG_MIGRATIONS["0.2.0"], so this rule fires after node migration completes.',
+      reason: 'Renamed alongside the jtbd→job entity rename and the _has_ → forward_verb sweep. The canonical edge changes verb from has→pursues; pursued_by reverses the relationship. Source remains persona; target migrates jtbd→job via UPG_MIGRATIONS["0.2.0"], so this rule fires after node migration completes.',
     },
     {
       kind: 'rename',
@@ -1572,7 +1572,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
       to: 'user_journey_addresses_job',
       requires_source_type: 'user_journey',
       requires_target_type: 'job',
-      reason: 'Renamed alongside the jtbd→job entity rename and the _has_ → forward_verb sweep. Source key prefix `journey` → `user_journey` matches the canonical entity name (no entity-type alias was needed because `journey` was never a registered type — it was an informal key prefix).',
+      reason: 'Renamed alongside the jtbd→job entity rename and the _has_ → forward_verb sweep. Source key prefix `journey` → `user_journey` matches the canonical entity name (no entity-type alias was needed because `journey` was never a registered type; it was an informal key prefix).',
     },
     {
       kind: 'rename',
@@ -1631,7 +1631,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
     // Pre-v0.2 graphs minted `product_contains_<entity>` edges to express
     // graph membership ("this entity belongs to this product"). v0.2 models
     // product membership through portfolio scope + the `upg_product`
-    // frontmatter / file association — NOT through typed edges. The
+    // frontmatter / file association, NOT through typed edges. The
     // `product_contains_*` family in the canonical catalog is intentionally
     // narrow: only `research_study` and `screen` (entities a product
     // structurally owns as artefacts). Everything else is graph-membership
@@ -1686,7 +1686,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
     // chain validation showed that assumption produces orphan analyses
     // for any single-product graph. The edge is back in `UPG_EDGE_CATALOG`
     // with `forward_verb: contains`, mirroring `product_contains_research_study`.
-    // The historical drop rule is intentionally omitted — keeping it would
+    // The historical drop rule is intentionally omitted; keeping it would
     // contradict the catalog and trip the `edge-migrations` invariant test
     // ("drop rule `from` keys are no longer in the canonical catalog").
     {
@@ -1722,7 +1722,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
     {
       kind: 'drop',
       from: 'hypothesis_contains_persona',
-      reason: 'Cleanup (since v0.2.0). Hypotheses do not contain personas — the relationship is the reverse (personas surface needs that ground hypotheses). Cross-graph audit: 5 edges.',
+      reason: 'Cleanup (since v0.2.0). Hypotheses do not contain personas; the relationship is the reverse (personas surface needs that ground hypotheses). Cross-graph audit: 5 edges.',
     },
     {
       kind: 'drop',
@@ -1742,7 +1742,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
     {
       kind: 'drop',
       from: 'related_to',
-      reason: 'Cleanup (since v0.2.0). Generic "related to" has no canonical pair semantics — every real relationship has a specific verb in UPG_EDGE_CATALOG. Cross-graph audit: 1 edge.',
+      reason: 'Cleanup (since v0.2.0). Generic "related to" has no canonical pair semantics; every real relationship has a specific verb in UPG_EDGE_CATALOG. Cross-graph audit: 1 edge.',
     },
 
     // ── v0.2.0 cleanup: informal-containment drops for v0.2.6+ children ─
@@ -1970,7 +1970,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
     {
       kind: 'drop',
       from: 'experiment_tests_hypothesis',
-      reason: 'Split 1 closure (since v0.2.7). Superseded by the canonical experiment_run_validates_hypothesis (causal) introduced in v0.2.6 — the run is what validates the hypothesis, not an abstract experiment. CHANGELOG v0.2.7: "Edge dropped: experiment_tests_hypothesis is removed — superseded by the canonical experiment_run_validates_hypothesis (causal) introduced in v0.2.6."',
+      reason: 'Split 1 closure (since v0.2.7). Superseded by the canonical experiment_run_validates_hypothesis (causal) introduced in v0.2.6; the run is what validates the hypothesis, not an abstract experiment. CHANGELOG v0.2.7: "Edge dropped: experiment_tests_hypothesis is removed; superseded by the canonical experiment_run_validates_hypothesis (causal) introduced in v0.2.6."',
     },
 
     // ── split 2: 5 user_story-edge retargets + 2 drops ─────────────
@@ -2002,7 +2002,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
       requires_target_type: 'story_statement',
       reason: 'Test cases cover the spec, not the work; retargets target to story_statement.',
     },
-    // user_story_broken_into_task drops — consolidated into the implements edge.
+    // user_story_broken_into_task drops; consolidated into the implements edge.
     {
       kind: 'drop',
       from: 'user_story_broken_into_task',
@@ -2024,7 +2024,7 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
     // target, occasionally both) to `hypothesis_claim`. The dropped edge
     // (`evidence_supports_hypothesis`) is structurally superseded by
     // `hypothesis_evidence_supports_hypothesis_claim` whose source is a
-    // *different* entity type (`hypothesis_evidence`) — so it cannot
+    // *different* entity type (`hypothesis_evidence`); so it cannot
     // round-trip via a flat rename and is registered as a drop.
     {
       kind: 'rename',
@@ -2127,15 +2127,15 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
     {
       kind: 'drop',
       from: 'evidence_supports_hypothesis',
-      reason: 'Superseded by the canonical hypothesis_evidence_supports_hypothesis_claim. The source type changes (evidence → hypothesis_evidence — the new dedicated P2 scored-assessment entity), so this is a structural drop rather than a key rename. Consumers walking dropped edges may opt to spawn hypothesis_evidence rows post-migration (out-of-band adapter logic). CHANGELOG v0.2.8: "Edge dropped: evidence_supports_hypothesis — superseded by the canonical hypothesis_evidence_supports_hypothesis_claim."',
+      reason: 'Superseded by the canonical hypothesis_evidence_supports_hypothesis_claim. The source type changes (evidence → hypothesis_evidence, the new dedicated P2 scored-assessment entity), so this is a structural drop rather than a key rename. Consumers walking dropped edges may opt to spawn hypothesis_evidence rows post-migration (out-of-band adapter logic). CHANGELOG v0.2.8: "Edge dropped: evidence_supports_hypothesis; superseded by the canonical hypothesis_evidence_supports_hypothesis_claim."',
     },
 
     // ── v0.2.8 closure: direction-flip rename ──────────────────────
     // Pre-v0.2 graphs minted `hypothesis_contains_feature` (source=hypothesis,
     // target=feature) to express "this hypothesis is tested by this feature".
-    // The canonical relationship runs the OTHER way — `feature_tests_hypothesis_claim`
+    // The canonical relationship runs the OTHER way: `feature_tests_hypothesis_claim`
     // (source=feature, target=hypothesis_claim, classification: cross-domain)
-    // — because a feature is what tests a claim, not the reverse. After
+    // because a feature is what tests a claim, not the reverse. After
     // node migration of hypothesis → hypothesis_claim, the legacy edge has
     // post-migration endpoints (source: hypothesis_claim, target: feature);
     // flipping endpoints + retyping produces the canonical edge.
@@ -2158,13 +2158,13 @@ export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
  * Get all edge migration rules between two versions, in version order.
  *
  * @example
- * // v0.2.0 backfill — six jtbd→job edge renames.
+ * // v0.2.0 backfill: six jtbd→job edge renames.
  * const rules = getUPGEdgeMigrations('0.0.0', '0.2.0')
  * rules.length // → 6
  * rules.every(r => r.kind === 'rename') // → true
  *
  * @example
- * // Full v0.2.x range — every rule from v0.2.0 + v0.2.7 + v0.2.8.
+ * // Full v0.2.x range: every rule from v0.2.0 + v0.2.7 + v0.2.8.
  * getUPGEdgeMigrations('0.0.0', '0.2.8').filter(r => r.kind === 'drop').length // → 4
  */
 export function getUPGEdgeMigrations(
@@ -2186,7 +2186,7 @@ export function getUPGEdgeMigrations(
  * Both `sourceType` and `targetType` should be the *post-migration* node
  * types (i.e. after `migrateNode` / `applySplit` has run on the endpoints).
  * When omitted, rules with `requires_source_type` / `requires_target_type`
- * guards are skipped (safer default — a guard that cannot be evaluated
+ * guards are skipped (safer default; a guard that cannot be evaluated
  * does not fire).
  */
 export interface UPGEdgeMigrationEndpoints {
@@ -2202,7 +2202,7 @@ export interface UPGEdgeMigrationEndpoints {
  * dead-ends.
  *
  * **Why this exists.** `UPG_EDGE_MIGRATIONS` accumulates rules across the
- * spec's history. A single edge can be renamed multiple times — and the
+ * spec's history. A single edge can be renamed multiple times, and the
  * direction can reverse (e.g. v0.2.8 renamed `solution_proposes_hypothesis`
  * → `solution_proposes_hypothesis_claim`, then v0.4.0 renamed the latter
  * back to the former). Naively picking "the first rule whose `from` matches"
@@ -2218,19 +2218,19 @@ export interface UPGEdgeMigrationEndpoints {
  * outcome rather than loop forever.
  *
  * **Return values.**
- *  - `{ kind: 'canonical', to }` — the walk landed on a key present in
+ *  - `{ kind: 'canonical', to }`: the walk landed on a key present in
  *    `UPG_EDGE_CATALOG`. Callers should suggest `to` as the migration target.
- *  - `{ kind: 'drop' }` — the walk encountered a `drop` rule. The edge has
+ *  - `{ kind: 'drop' }`: the walk encountered a `drop` rule. The edge has
  *    no canonical replacement.
- *  - `{ kind: 'dead_end', last }` — no rule matched and `last` is not in
+ *  - `{ kind: 'dead_end', last }`: no rule matched and `last` is not in
  *    `UPG_EDGE_CATALOG`. The edge is non-canonical with no known migration
  *    target.
- *  - `{ kind: 'cycle', visited }` — a cycle was detected. Returned so
+ *  - `{ kind: 'cycle', visited }`: a cycle was detected. Returned so
  *    callers can degrade gracefully. Should not happen in practice given
  *    the version-ordered structure of `UPG_EDGE_MIGRATIONS`.
  *
  * **Caller note.** Callers that already know `edge_type` is canonical
- * (i.e. `edge_type in UPG_EDGE_CATALOG`) should NOT call this helper —
+ * (i.e. `edge_type in UPG_EDGE_CATALOG`) should NOT call this helper;
  * there's nothing to suggest. The helper is for the case where the edge
  * type is deprecated and the caller needs to find its canonical successor.
  *
@@ -2245,7 +2245,7 @@ export interface UPGEdgeMigrationEndpoints {
  * // → { kind: 'drop' }
  *
  * @example
- * // Already-canonical edge type — returns dead_end because the helper is
+ * // Already-canonical edge type: returns dead_end because the helper is
  * // intended for non-canonical callers. The 'canonical' branch fires only
  * // when the chain ENDS on a catalog entry, not when it STARTS on one.
  * // (In practice the validator skips this case before calling.)
@@ -2261,7 +2261,7 @@ export function walkMigrationChainToCanonical(
   catalog: Readonly<Record<string, unknown>>,
 ): WalkMigrationChainResult {
   // Build a deduplicated `from → highest-version rule` map. Sorting versions
-  // ascending and overwriting ensures the latest rule wins per `from` key —
+  // ascending and overwriting ensures the latest rule wins per `from` key;
   // so a v0.4.0 rule beats a v0.2.8 rule for the same `from`.
   const latestRuleByFrom = new Map<string, UPGEdgeMigration>()
   const sortedVersions = Object.keys(UPG_EDGE_MIGRATIONS).sort(compareVersions)
@@ -2283,20 +2283,20 @@ export function walkMigrationChainToCanonical(
     }
     visited.add(current)
 
-    // Canonical: we've landed on something the catalog declares — stop.
+    // Canonical: we've landed on something the catalog declares; stop.
     if (current in catalog) {
       return { kind: 'canonical', to: current }
     }
 
     const rule = latestRuleByFrom.get(current)
     if (!rule) {
-      // No rule for the current key and it's not canonical — chain dead-ends.
+      // No rule for the current key and it's not canonical; chain dead-ends.
       return { kind: 'dead_end', last: current }
     }
     if (rule.kind === 'drop') {
       return { kind: 'drop' }
     }
-    // rename — hop to the next key. Endpoint guards are intentionally
+    // rename: hop to the next key. Endpoint guards are intentionally
     // ignored here: the walker resolves the *type chain*, not whether a
     // specific edge instance can apply the rule. The caller (validator
     // edge_drift logic) only needs the final canonical name to suggest.
@@ -2312,20 +2312,20 @@ export function walkMigrationChainToCanonical(
  *   - the original edge (un-shaped, referentially equal) if no rule matched;
  *   - a new edge with retyped `type` (and possibly swapped `source`/`target`
  *     when the rule sets `flip: true`) if a `rename` rule matched;
- *   - `null` if a `drop` rule matched — caller should remove the edge.
+ *   - `null` if a `drop` rule matched; caller should remove the edge.
  *
  * Endpoint guards (`requires_source_type` / `requires_target_type`) check
  * the *post-migration* endpoint types provided via `endpoints`. When
- * `endpoints` is omitted, guarded rules are skipped — callers running edge
+ * `endpoints` is omitted, guarded rules are skipped; callers running edge
  * migration in isolation (without endpoint type context) get only the
  * un-guarded rules.
  *
- * `T` is the caller's edge shape — only `type` is required; `source` and
+ * `T` is the caller's edge shape; only `type` is required. `source` and
  * `target` are touched only when `flip: true` and are otherwise preserved
  * verbatim.
  *
  * @example
- * // No rule matches — edge passes through unchanged.
+ * // No rule matches; edge passes through unchanged.
  * const edge = { id: 'e1', type: 'persona_pursues_job' }
  * migrateEdge(edge, '0.2.0', '0.2.8') === edge // → true
  *
@@ -2336,7 +2336,7 @@ export function walkMigrationChainToCanonical(
  * migrated?.type // → 'persona_pursues_job'
  *
  * @example
- * // Drop rule matches — null signals "remove this edge".
+ * // Drop rule matches; null signals "remove this edge".
  * const dropped = { id: 'e3', type: 'experiment_tests_hypothesis' }
  * migrateEdge(dropped, '0.0.0', '0.2.7') // → null
  */
@@ -2350,7 +2350,7 @@ export function migrateEdge<T extends { type: string; source?: unknown; target?:
   for (const rule of rules) {
     if (rule.from !== edge.type) continue
     if (rule.kind === 'drop') return null
-    // rename — evaluate endpoint guards.
+    // rename: evaluate endpoint guards.
     if (rule.requires_source_type !== undefined) {
       if (endpoints?.sourceType !== rule.requires_source_type) continue
     }

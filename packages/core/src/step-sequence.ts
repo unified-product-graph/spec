@@ -33,7 +33,7 @@ interface StepBase {
   phase: string
   /** Human-readable label for this step */
   name?: string
-  /** Optional prompt shown to the user at this step. Structure only — no UI hints. */
+  /** Optional prompt shown to the user at this step. Structure only, no UI hints. */
   prompt_hint?: string
   /** Machine-evaluable condition that must hold before advancing to the next step */
   transition_condition?: IntelligenceCondition
@@ -51,7 +51,7 @@ export interface DomainGuideStep extends StepBase {
 /** Step that applies a named framework. */
 export interface FrameworkInvocationStep extends StepBase {
   kind: 'framework'
-  /** ID of the framework to apply — matches an entry in UPG_FRAMEWORKS */
+  /** ID of the framework to apply (matches an entry in UPG_FRAMEWORKS) */
   framework_id: string
 }
 
@@ -65,7 +65,7 @@ export interface EntitySequenceStep extends StepBase {
 /** Step that chains into a nested playbook or technique. */
 export interface SubSequenceStep extends StepBase {
   kind: 'sub_sequence'
-  /** ID of the nested sequence — `playbook:*` or `technique:*` */
+  /** ID of the nested sequence: `playbook:*` or `technique:*` */
   sub_sequence_id: string
 }
 

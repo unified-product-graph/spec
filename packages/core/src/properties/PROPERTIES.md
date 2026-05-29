@@ -1,4 +1,4 @@
-# Property Shapes — Canonical Reference
+# Property Shapes: Canonical Reference
 
 Authoritative guide to which property keys have a canonical shape across the spec and which ones legitimately vary by domain. The spec uses **surgical canonicalisation**: shared base interfaces are not extracted; instead, canonical shapes are named and used consistently.
 
@@ -10,16 +10,16 @@ Defined once in `primitives.ts`, re-used everywhere. These are the only primitiv
 
 | Type | Shape | Use for |
 |---|---|---|
-| `ISODate` | `string` alias — `"2026-06-01"` | Calendar dates without a time component |
-| `ISODateTime` | `string` alias — `"2026-06-01T09:00:00Z"` | Timestamps with timezone |
+| `ISODate` | `string` alias (`"2026-06-01"`) | Calendar dates without a time component |
+| `ISODateTime` | `string` alias (`"2026-06-01T09:00:00Z"`) | Timestamps with timezone |
 | `Priority` | `'urgent' \| 'high' \| 'medium' \| 'low' \| 'none'` | Any prioritisation field |
 | `HealthStatus` | `'on_track' \| 'at_risk' \| 'off_track'` | Traffic-light delivery/initiative status |
 | `Confidence` | `'high' \| 'medium' \| 'low'` | Subjective "how confident am I" reads |
 | `UPGAssessment` | object with `score`, `confidence`, `rationale` | Structured scored judgements with attribution |
 
-`UPGAssessment` is re-exported from `grammar/scales.ts` through `primitives.ts` — domain files import it from `primitives.ts` to keep the dependency direction clean.
+`UPGAssessment` is re-exported from `grammar/scales.ts` through `primitives.ts`. Domain files import it from `primitives.ts` to keep the dependency direction clean.
 
-## Cross-cutting keys — canonical shapes
+## Cross-cutting keys: canonical shapes
 
 These keys appear in 3+ interfaces and always mean the same thing. They MUST use the canonical shape:
 
@@ -37,16 +37,16 @@ These keys appear in 3+ interfaces and always mean the same thing. They MUST use
 | `confidence` (structured scoring) | `UPGAssessment` | 3 interfaces |
 | `severity`, `impact`, `effort`, `likelihood`, `risk_level`, etc. (scored judgement) | `UPGAssessment` | 15+ instances |
 
-### `confidence` — a word, two meanings
+### `confidence`: a word, two meanings
 
 `confidence` splits by intent:
 
-- **Subjective read** — "how confident am I in this, on a rough scale?" Use `Confidence` (enum high/medium/low). Lightweight.
-- **Structured judgement** — "what's my scored assessment plus rationale?" Use `UPGAssessment`. Provides score + confidence band + rationale.
+- **Subjective read**: "how confident am I in this, on a rough scale?" Use `Confidence` (enum high/medium/low). Lightweight.
+- **Structured judgement**: "what's my scored assessment plus rationale?" Use `UPGAssessment`. Provides score + confidence band + rationale.
 
 Both are valid. The domain interface should pick one and document why. Do not use a free-form string for either.
 
-If your field describes "is this proposition real yet?" that is **validation state**, not confidence — name it `validation_state` with domain-specific enum values (see `ValuePropositionProperties` for the canonical example).
+If your field describes "is this proposition real yet?" that is **validation state**, not confidence. Name it `validation_state` with domain-specific enum values (see `ValuePropositionProperties` for the canonical example).
 
 ## Keys that legitimately vary per domain
 
@@ -66,7 +66,7 @@ When declaring one of these fields in a new interface, write a JSDoc that descri
 ## When adding a new property
 
 1. If it matches a canonical key, use the canonical type. Don't redeclare the shape.
-2. If it's date-like, always use `ISODate` (calendar) or `ISODateTime` (timestamp) — never raw `string`.
+2. If it's date-like, always use `ISODate` (calendar) or `ISODateTime` (timestamp), never raw `string`.
 3. If it's prioritisation, always use `Priority`.
 4. If it's a subjective confidence, use `Confidence`.
 5. If it's a scored judgement with rationale, use `UPGAssessment`.
@@ -81,6 +81,6 @@ When declaring one of these fields in a new interface, write a JSDoc that descri
 
 ## Related
 
-- `primitives.ts` — the type definitions
-- `../grammar/scales.ts` — the canonical `UPGAssessment` shape
-- `../ARCHITECTURE.md` — architectural context
+- `primitives.ts`: the type definitions
+- `../grammar/scales.ts`: the canonical `UPGAssessment` shape
+- `../ARCHITECTURE.md`: architectural context

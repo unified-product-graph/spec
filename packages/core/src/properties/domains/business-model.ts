@@ -6,7 +6,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Cadence, Duration, Priority, UPGAssessment } from '../primitives.js'
+import type { Cadence, Duration, ISODate, Priority, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // BUSINESS MODEL LAYER
@@ -184,6 +184,8 @@ export interface PartnershipProperties {
   risk_level?: UPGAssessment
   /** Internal owner */
   owner?: string
+  /** Date the partnership became effective (ISO 8601) */
+  start_date?: ISODate
 }
 
 /** KeyResource.

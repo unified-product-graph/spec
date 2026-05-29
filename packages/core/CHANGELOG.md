@@ -11,6 +11,64 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.7.3] — 2026-05-29
+
+**Em dash removal across the published spec.** All em dashes in JSDoc and
+descriptions (frameworks, properties, grammar, intelligence, catalog,
+presentation, playbooks, approaches, registry, regions, shapes, plus
+`ARCHITECTURE.md`, `README.md`, `spec/*.md`, and `spec/examples/*`) were
+replaced with context-appropriate punctuation, meaning preserved. Load-bearing
+string tokens (type / edge / entity IDs, enum values, union members) were left
+untouched. Description-only; no spec semantics or structure changed.
+
+**Field adoption (partial).** Additive, backward-compatible (optional
+fields only, no migration):
+
+- `version?: string` added to `agent_definition` and `workflow_template` (they
+  carry a release/version label but had no field for it).
+- `start_date?: ISODate` added to `partnership`.
+
+Scoped down from the original sweep after re-deriving against 0.7.2:
+
+- `owner` promotion to `UPGBaseNode` was **dropped**. Ownership is already
+  modelled by the polymorphic `node_owned_by_{person,team,role,stakeholder,department}`
+  edges, the graph-native and queryable path; a free-text base field would
+  duplicate that weakly.
+- `severity` / `confidence` / `priority` adoption **deferred**. Fixture usage
+  is inconsistent across types (number vs enum vs vocab), so each needs a
+  per-type modelling decision rather than a mechanical add.
+- `library_dependency` (`dep_version`) and `prompt_version` (`version_number`)
+  already carry a version field under a clearer name; the plain-`version` key
+  seen in fixtures is a fixture-alignment item, not a spec gap. `dependency`
+  (a work/blocking dependency) does not warrant a version field.
+
+---
+
+## [0.7.2] — 2026-05-29
+
+**Patch.** Region edge-completeness ( §1). Adds 8 canonical edge types to
+`UPG_EDGE_CATALOG` so previously-isolated region members connect to a sibling
+within their super-domain region. No renames, drops, or property changes —
+purely additive, backward-compatible (no migration required). Catalogue version
+`UPG_VERSION` → `'0.7.2'`.
+
+New edges:
+- `competitor_competes_in_territory` (market_competitive — connects `territory`)
+- `forecast_projects_metric` (analytics_data — connects `forecast`)
+- `deployment_triggers_incident` (operations_quality — connects `deployment`)
+- `monitor_measures_service_level_indicator` (operations_quality — connects `monitor`)
+- `participant_represents_persona` (users_needs — connects `participant`)
+- `content_theme_organizes_content_piece` (experience_design_brand — connects `content_theme` + `content_piece`)
+- `attribution_model_credits_acquisition_channel` (business_gtm_growth — connects `attribution_model`)
+- `growth_loop_fuels_acquisition_channel` (business_gtm_growth — connects `growth_loop`)
+
+Region isolation: 10 isolated members → 1. The sole remaining unconnected member,
+`document` (experience_design_brand), is **intentional**: it is a cross-cutting
+"describes" hub whose canonical targets all lie outside its home region; no
+in-region edge is forced on it. Edge type count 938 → 946.
+
+---
+
 ## [0.7.1] — 2026-05-28
 
 **Patch.** Metadata fix: `UPG_VERSION` was `'0.6.0'` in the published 0.7.0 — it

@@ -1,4 +1,4 @@
-# `intelligence/` — Graph Health & Guidance
+# `intelligence/` Graph Health & Guidance
 
 Analytics, construction guidance, and the anti-pattern catalog. This is where the spec expresses *what good looks like* for a UPG graph at a given product stage, and what configurations to avoid.
 

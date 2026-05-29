@@ -50,12 +50,12 @@ export const UPG_EDGE_CATALOG = {
 
   // 1.1 User Domain
   // product → persona is the most fundamental relationship in the
-  // user domain — "who is this product for?" — and was the only way to
+  // user domain ("who is this product for?") and was the only way to
   // anchor a fresh persona to its product before this edge existed. Without
   // it, the natural agent path through `/upg-persona` produced an orphan
   // persona only attached laterally via `ideal_customer_profile_maps_to_persona`
   // or `positioning_resonates_with_persona`. Semantic, not hierarchy: a
-  // product doesn't "contain" personas — it targets them.
+  // product doesn't "contain" personas; it targets them.
   product_targets_persona: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'semantic', source_type: 'product', target_type: 'persona' },
   persona_pursues_job: { forward_verb: 'pursues', reverse_verb: 'pursued_by', classification: 'semantic', source_type: 'persona', target_type: 'job' },
   persona_experiences_need: { forward_verb: 'experiences', reverse_verb: 'experienced_by', classification: 'semantic', source_type: 'persona', target_type: 'need' },
@@ -80,7 +80,7 @@ export const UPG_EDGE_CATALOG = {
   solution_proposes_hypothesis: { forward_verb: 'proposes', reverse_verb: 'tests', classification: 'causal', source_type: 'solution', target_type: 'hypothesis' },
   solution_materialises_as_prototype: { forward_verb: 'materialises_as', reverse_verb: 'materialises', classification: 'hierarchy', source_type: 'solution', target_type: 'prototype' },
   // v0.5.4: the explicit graduation moment in Teresa Torres' Solution
-  // Tree — a solution that has been validated and committed to delivery becomes
+  // Tree: a solution that has been validated and committed to delivery becomes
   // a feature. UPG already has `opportunity_drives_solution` and
   // `solution_proposes_hypothesis`; this edge closes the chain to the feature.
   // `becomes` captures the state transition (exploration → delivery commitment),
@@ -97,7 +97,7 @@ export const UPG_EDGE_CATALOG = {
   // `experiment_tested_via_experiment` (line 116) + `experiment_tests_experiment`
   // (line 862) is consolidated into a single canonical run-to-run edge.
   // Multi-armed iterations and replications now express as `tested_via` from
-  // one experiment_run to another — preserving the semantic without the
+  // one experiment_run to another, preserving the semantic without the
   // ambiguity of two near-identical edges.
   experiment_run_tested_via_experiment_run: { forward_verb: 'tested_via', reverse_verb: 'tests_within', classification: 'hierarchy', source_type: 'experiment_run', target_type: 'experiment_run' },
   learning_updates_hypothesis: { forward_verb: 'updates', reverse_verb: 'updated_by', classification: 'causal', source_type: 'learning', target_type: 'hypothesis' },
@@ -146,7 +146,7 @@ export const UPG_EDGE_CATALOG = {
   // product → competitive_analysis closes the parallel gap to
   // product → persona. competitive_analysis is the anchor of the
   // market_intelligence domain (per DomainUsageGuide), and a fresh analysis
-  // had no canonical edge home — it was reachable only laterally via
+  // had no canonical edge home; it was reachable only laterally via
   // `competitor_competes_for_persona` + `positioning_differentiates_from_competitor`.
   // Hierarchy: a competitive_analysis is owned by / contained in one product,
   // mirroring `product_contains_research_study` for the research_study anchor.
@@ -161,24 +161,26 @@ export const UPG_EDGE_CATALOG = {
   market_trend_creates_opportunity: { forward_verb: 'creates', reverse_verb: 'created_by', classification: 'cross-domain', source_type: 'market_trend', target_type: 'opportunity' },
   competitor_feature_inspires_solution: { forward_verb: 'inspires', reverse_verb: 'inspired_by', classification: 'cross-domain', source_type: 'competitor_feature', target_type: 'solution' },
   competitor_competes_for_persona: { forward_verb: 'competes_for', reverse_verb: 'contested_by', classification: 'cross-domain', source_type: 'competitor', target_type: 'persona' },
+  // v0.7.2 ( §1): competitors hold geographic/market territory; connects the isolated `territory` member to the region anchor.
+  competitor_competes_in_territory: { forward_verb: 'competes_in', reverse_verb: 'contested_by', classification: 'cross-domain', source_type: 'competitor', target_type: 'territory' },
   // direct competitor → learning edge (insight surfaced without a formal research study)
   competitor_yields_learning: { forward_verb: 'yields', reverse_verb: 'yielded_by', classification: 'cross-domain', source_type: 'competitor', target_type: 'learning' },
   // v0.5.2: competitors offer capabilities, not just packaged
   // competitor_features. Wardley analysis tracks competitor positions across
-  // the same value-chain spine the home team maps — same `capability` nodes,
+  // the same value-chain spine the home team maps: same `capability` nodes,
   // different offerings. Cross-domain (market_intelligence → strategy) so the
   // competitor side of a Wardley map shares one structural vocabulary with
   // the team's own capability decomposition.
   competitor_offers_capability: { forward_verb: 'offers', reverse_verb: 'offered_by', classification: 'cross-domain', source_type: 'competitor', target_type: 'capability' },
 
-  // — Classification taxonomy
+  // Classification taxonomy
   //
   // classification_axis hosts classification_value (hierarchy lives in
   // UPG_VALID_CHILDREN). The semantically interesting edges are *occupancy*
   // (a competitor sits on a value) and *anti-fit* (a persona should NOT
   // pick a value / product / competitor). Three anti_fit_for entries match
-  // the catalog's singular-source/target grammar — polymorphic targets
-  // would be a separate catalog-mechanic change.
+  // the catalog's singular-source/target grammar (polymorphic targets
+  // would be a separate catalog-mechanic change).
   competitive_analysis_dimensioned_by_classification_axis: { forward_verb: 'dimensioned_by', reverse_verb: 'dimensions', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'classification_axis' },
   classification_axis_includes_classification_value: { forward_verb: 'includes', reverse_verb: 'value_of', classification: 'hierarchy', source_type: 'classification_axis', target_type: 'classification_value' },
   competitor_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'competitor', target_type: 'classification_value' },
@@ -186,7 +188,7 @@ export const UPG_EDGE_CATALOG = {
   persona_anti_fit_for_product: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'product' },
   persona_anti_fit_for_competitor: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'competitor' },
 
-  // — Classification value genealogy
+  // Classification value genealogy
   //
   // Six typed edges between classification_value nodes for taxonomy-internal
   // genealogy. Rescoped from the original "relationship_kind enum on
@@ -196,7 +198,7 @@ export const UPG_EDGE_CATALOG = {
   //
   // Directional (causal): evolves_from, derives_from.
   // Symmetric (semantic): opposite_of, sibling_of, compatible_with,
-  // incompatible_with — forward_verb == reverse_verb per the catalog's
+  // incompatible_with: forward_verb == reverse_verb per the catalog's
   // symmetric convention (see `product_shares_persona_with_product`,
   // `root_cause_shares_cause_with_root_cause`).
   classification_value_evolves_from_classification_value: { forward_verb: 'evolves_from', reverse_verb: 'predecessor_of', classification: 'causal', source_type: 'classification_value', target_type: 'classification_value' },
@@ -206,9 +208,9 @@ export const UPG_EDGE_CATALOG = {
   classification_value_compatible_with_classification_value: { forward_verb: 'compatible_with', reverse_verb: 'compatible_with', classification: 'semantic', source_type: 'classification_value', target_type: 'classification_value' },
   classification_value_incompatible_with_classification_value: { forward_verb: 'incompatible_with', reverse_verb: 'incompatible_with', classification: 'semantic', source_type: 'classification_value', target_type: 'classification_value' },
 
-  // — Persona pursues classification_value
+  // Persona pursues classification_value
   //
-  // Persona pursues a paradigm/classification — e.g. "Modern web dev
+  // Persona pursues a paradigm/classification; e.g. "Modern web dev
   // persona pursues Composable Structured-Content Platform paradigm".
   // Mirrors `persona_pursues_job` (same source, same verb pair).
   //
@@ -277,7 +279,7 @@ export const UPG_EDGE_CATALOG = {
   // make them measurable. Direct link means a dashboard can surface KRs next
   // to the theme without traversing objective.
   //
-  // `objective_rolls_up_to_strategic_theme`: the OKR containment edge —
+  // `objective_rolls_up_to_strategic_theme`: the OKR containment edge.
   // an objective is the specific quarterly bet *within* a theme. strategic_theme
   // is the broader multi-quarter focus area; objective is subordinate.
   // Direction: strategic_theme → objective (parent → child, per UPG hierarchy
@@ -301,7 +303,7 @@ export const UPG_EDGE_CATALOG = {
   //
   // Hierarchy classification for all three: capabilities structurally
   // decompose into sub-capabilities, fulfil specific needs, and are
-  // realised by concrete features — these are containment relationships,
+  // realised by concrete features; these are containment relationships,
   // not lateral associations.
   //
   // `capability_depends_on_capability` is a same-type edge. The v0.5.0
@@ -336,12 +338,12 @@ export const UPG_EDGE_CATALOG = {
   // is specified by epics; the paired `task` carries the lifecycle and the
   // implementation work, and implements the statement. (v0.2.7 split extracted
   // the work into `task`; v0.7.0/ re-canonicalised the statement
-  // story_statement → user_story — see UPG_EDGE_MIGRATIONS['0.7.0'].)
+  // story_statement → user_story; see UPG_EDGE_MIGRATIONS['0.7.0'].)
   epic_specified_by_user_story: { forward_verb: 'specified_by', reverse_verb: 'specifies', classification: 'hierarchy', source_type: 'epic', target_type: 'user_story' },
   user_story_verified_by_acceptance_criterion: { forward_verb: 'verified_by', reverse_verb: 'verifies', classification: 'hierarchy', source_type: 'user_story', target_type: 'acceptance_criterion' },
   task_implements_user_story: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'cross-domain', source_type: 'task', target_type: 'user_story' },
   feature_affected_by_bug: { forward_verb: 'affected_by', reverse_verb: 'affects', classification: 'hierarchy', source_type: 'feature', target_type: 'bug' },
-  // release containment edges — used by the GitHub adapter when
+  // release containment edges, used by the GitHub adapter when
   // importing milestone→issue relationships. resolveContainmentEdge('release',
   // 'feature') / ('release', 'bug') now return canonical keys instead of
   // falling back to node_informs_node with mapping_confidence: 'low'.
@@ -352,11 +354,11 @@ export const UPG_EDGE_CATALOG = {
   roadmap_categorised_by_theme: { forward_verb: 'categorised_by', reverse_verb: 'categorises', classification: 'hierarchy', source_type: 'roadmap', target_type: 'theme' },
   roadmap_schedules_release: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'hierarchy', source_type: 'roadmap', target_type: 'release' },
   theme_groups_feature: { forward_verb: 'groups', reverse_verb: 'grouped_in', classification: 'hierarchy', source_type: 'theme', target_type: 'feature' },
-  // feature_area is not contained by theme — themes span multiple
+  // feature_area is not contained by theme; themes span multiple
   // areas cross-cuttingly. Containment path: product → feature_area.
   theme_spans_feature_area: { forward_verb: 'spans', reverse_verb: 'spanned_by', classification: 'semantic', source_type: 'theme', target_type: 'feature_area' },
   // The legacy `story_task` collapsed into `task` (v0.4.0), so the implements
-  // relationship is the canonical `task_implements_user_story` above — there is
+  // relationship is the canonical `task_implements_user_story` above; there is
   // no separate story_task edge. (v0.2.7 introduced the Statement/Implementation
   // split; v0.7.0/ re-canonicalised the statement to user_story.)
   bug_affects_feature: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'bug', target_type: 'feature' },
@@ -461,11 +463,13 @@ export const UPG_EDGE_CATALOG = {
   service_carries_technical_debt_item: { forward_verb: 'carries', reverse_verb: 'carried_by', classification: 'hierarchy', source_type: 'service', target_type: 'technical_debt_item' },
   service_toggles_feature_flag: { forward_verb: 'toggles', reverse_verb: 'toggled_by', classification: 'hierarchy', source_type: 'service', target_type: 'feature_flag' },
   service_deployed_as_deployment: { forward_verb: 'deployed_as', reverse_verb: 'deploys', classification: 'hierarchy', source_type: 'service', target_type: 'deployment' },
+  // v0.7.2 ( §1): change is the leading cause of incidents (DORA/SRE); connects the isolated `deployment` member to the ops anchor.
+  deployment_triggers_incident: { forward_verb: 'triggers', reverse_verb: 'triggered_by', classification: 'causal', source_type: 'deployment', target_type: 'incident' },
   service_serves_api_endpoint: { forward_verb: 'serves', reverse_verb: 'served_by', classification: 'hierarchy', source_type: 'service', target_type: 'api_endpoint' },
   // v0.5.1 ( C2): api_contract and api_endpoint both anchored from
   // service as siblings, leaving the natural parent-child wiring absent. A
   // contract groups endpoints by version/protocol; endpoints belong to a
-  // specific contract. Hierarchy classification is correct here — endpoints
+  // specific contract. Hierarchy classification is correct here: endpoints
   // are structurally contained by their contract, not merely associated.
   api_contract_contains_api_endpoint: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'api_contract', target_type: 'api_endpoint' },
   service_persisted_in_database_schema: { forward_verb: 'persisted_in', reverse_verb: 'persists', classification: 'hierarchy', source_type: 'service', target_type: 'database_schema' },
@@ -494,11 +498,11 @@ export const UPG_EDGE_CATALOG = {
   //                                              the event is the cause of
   //                                              the read-model update)
   //
-  // All three are classified 'causal' rather than 'hierarchy' — the relations
+  // All three are classified 'causal' rather than 'hierarchy': the relations
   // are temporal cause-and-effect, not containment. The same domain_event is
   // both produced_by a command AND emitted_by an aggregate; that polysemy is
   // intentional and matches DDD/CQRS literature: a command is the trigger, the
-  // aggregate is the source. Composes cleanly with self-loop refusal —
+  // aggregate is the source. Composes cleanly with self-loop refusal;
   // none of these are same-type edges.
   aggregate_emits_domain_event: { forward_verb: 'emits', reverse_verb: 'emitted_by', classification: 'causal', source_type: 'aggregate', target_type: 'domain_event' },
   command_produces_domain_event: { forward_verb: 'produces', reverse_verb: 'produced_by', classification: 'causal', source_type: 'command', target_type: 'domain_event' },
@@ -560,6 +564,8 @@ export const UPG_EDGE_CATALOG = {
   incident_caused_by_root_cause: { forward_verb: 'caused_by', reverse_verb: 'causes', classification: 'cross-domain', source_type: 'incident', target_type: 'root_cause' },
   incident_exploits_vulnerability: { forward_verb: 'exploits', reverse_verb: 'exploited_by', classification: 'cross-domain', source_type: 'incident', target_type: 'vulnerability' },
   monitor_watches_service: { forward_verb: 'watches', reverse_verb: 'watched_by', classification: 'cross-domain', source_type: 'monitor', target_type: 'service' },
+  // v0.7.2 ( §1): an SLI is by definition what monitoring measures (Google SRE); connects the isolated `monitor` member to its sibling SLI.
+  monitor_measures_service_level_indicator: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'semantic', source_type: 'monitor', target_type: 'service_level_indicator' },
   ci_pipeline_deploys_service: { forward_verb: 'deploys', reverse_verb: 'deployed_by', classification: 'cross-domain', source_type: 'ci_pipeline', target_type: 'service' },
   alert_rule_triggers_runbook: { forward_verb: 'triggers', reverse_verb: 'triggered_by', classification: 'cross-domain', source_type: 'alert_rule', target_type: 'runbook' },
   runbook_mitigates_incident: { forward_verb: 'mitigates', reverse_verb: 'mitigated_by', classification: 'cross-domain', source_type: 'runbook', target_type: 'incident' },
@@ -570,7 +576,7 @@ export const UPG_EDGE_CATALOG = {
   // (monitor → symptom → incident → postmortem → root_cause) broke at hop
   // 4. Causal: postmortems analyse incidents and identify causes.
   postmortem_identifies_root_cause: { forward_verb: 'identifies', reverse_verb: 'identified_by', classification: 'causal', source_type: 'postmortem', target_type: 'root_cause' },
-  // v0.5.1 ( C3): real ops practice — postmortems generate runbook
+  // v0.5.1 ( C3): real ops practice; postmortems generate runbook
   // updates as action items. Previously no path between the two existed in
   // the catalog. Causal: the postmortem produces (or updates) the runbook.
   postmortem_produces_runbook: { forward_verb: 'produces', reverse_verb: 'produced_by', classification: 'causal', source_type: 'postmortem', target_type: 'runbook' },
@@ -682,6 +688,8 @@ export const UPG_EDGE_CATALOG = {
   product_segments_into_behavioral_segment: { forward_verb: 'segments_into', reverse_verb: 'segmented_for', classification: 'hierarchy', source_type: 'product', target_type: 'behavioral_segment' },
   product_grows_via_growth_loop: { forward_verb: 'grows_via', reverse_verb: 'grows', classification: 'hierarchy', source_type: 'product', target_type: 'growth_loop' },
   product_attributed_via_attribution_model: { forward_verb: 'attributed_via', reverse_verb: 'attributes', classification: 'hierarchy', source_type: 'product', target_type: 'attribution_model' },
+  // v0.7.2 ( §1): attribution = distributing credit across channels (the definition); connects the isolated `attribution_model` member to the acquisition_channel hub.
+  attribution_model_credits_acquisition_channel: { forward_verb: 'credits', reverse_verb: 'credited_by', classification: 'semantic', source_type: 'attribution_model', target_type: 'acquisition_channel' },
   product_guided_by_metric: { forward_verb: 'guided_by', reverse_verb: 'guides', classification: 'hierarchy', source_type: 'product', target_type: 'metric' },
   funnel_contains_funnel_step: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'funnel', target_type: 'funnel_step' },
   acquisition_channel_runs_growth_campaign: { forward_verb: 'runs', reverse_verb: 'run_by', classification: 'hierarchy', source_type: 'acquisition_channel', target_type: 'growth_campaign' },
@@ -701,6 +709,8 @@ export const UPG_EDGE_CATALOG = {
   acquisition_channel_drives_outcome: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'acquisition_channel', target_type: 'outcome' },
   growth_campaign_targets_behavioral_segment: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'growth_campaign', target_type: 'behavioral_segment' },
   growth_loop_drives_metric: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'growth_loop', target_type: 'metric' },
+  // v0.7.2 ( §1): growth loops are the engine behind sustainable channels (Reforge); connects the isolated `growth_loop` member to the acquisition_channel hub.
+  growth_loop_fuels_acquisition_channel: { forward_verb: 'fuels', reverse_verb: 'fueled_by', classification: 'semantic', source_type: 'growth_loop', target_type: 'acquisition_channel' },
   variant_tests_hypothesis: { forward_verb: 'tests', reverse_verb: 'tested_by', classification: 'cross-domain', source_type: 'variant', target_type: 'hypothesis' },
   experiment_plan_targets_behavioral_segment: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'experiment_plan', target_type: 'behavioral_segment' },
   funnel_maps_persona: { forward_verb: 'maps', reverse_verb: 'mapped_by', classification: 'cross-domain', source_type: 'funnel', target_type: 'persona' },
@@ -723,7 +733,7 @@ export const UPG_EDGE_CATALOG = {
   business_model_distributes_via_distribution_channel: { forward_verb: 'distributes_via', reverse_verb: 'distributes_for', classification: 'hierarchy', source_type: 'business_model', target_type: 'distribution_channel' },
   revenue_stream_tiered_as_pricing_tier: { forward_verb: 'tiered_as', reverse_verb: 'tiers', classification: 'hierarchy', source_type: 'revenue_stream', target_type: 'pricing_tier' },
   // metric isn't contained by revenue_stream / cost_structure.
-  // These are measurement relationships — semantic, not containment.
+  // These are measurement relationships: semantic, not containment.
   revenue_stream_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'semantic', source_type: 'revenue_stream', target_type: 'metric' },
   cost_structure_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'semantic', source_type: 'cost_structure', target_type: 'metric' },
   value_proposition_targets_persona: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'value_proposition', target_type: 'persona' },
@@ -751,7 +761,7 @@ export const UPG_EDGE_CATALOG = {
   program_implements_initiative: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'cross-domain', source_type: 'program', target_type: 'initiative' },
   playbook_triggered_by_customer_health_score: { forward_verb: 'triggered_by', reverse_verb: 'triggers', classification: 'cross-domain', source_type: 'playbook', target_type: 'customer_health_score' },
 
-  // edges — replacing deleted string properties with proper edges
+  // edges replacing deleted string properties with proper edges
   partnership_with_integration_partner: { forward_verb: 'with', reverse_verb: 'partners_with', classification: 'cross-domain', source_type: 'partnership', target_type: 'integration_partner' },
   market_segment_includes_persona: { forward_verb: 'includes', reverse_verb: 'included_in', classification: 'cross-domain', source_type: 'market_segment', target_type: 'persona' },
   // inverse direction so resolve_edge_for_pair(persona, market_segment) resolves
@@ -795,7 +805,7 @@ export const UPG_EDGE_CATALOG = {
   competitor_feature_inspires_feature: { forward_verb: 'inspires', reverse_verb: 'inspired_by', classification: 'cross-domain', source_type: 'competitor_feature', target_type: 'feature' },
   territory_maps_to_behavioral_segment: { forward_verb: 'maps_to', reverse_verb: 'mapped_by', classification: 'cross-domain', source_type: 'territory', target_type: 'behavioral_segment' },
 
-  // GTM restructure — new structural + provenance edges
+  // GTM restructure: new structural and provenance edges
   positioning_differentiates_via_value_proposition: { forward_verb: 'differentiates_via', reverse_verb: 'differentiates_for', classification: 'cross-domain', source_type: 'positioning', target_type: 'value_proposition' },
   positioning_within_market_segment: { forward_verb: 'within', reverse_verb: 'positioned_by', classification: 'cross-domain', source_type: 'positioning', target_type: 'market_segment' },
   ideal_customer_profile_targets_market_segment: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'ideal_customer_profile', target_type: 'market_segment' },
@@ -842,6 +852,8 @@ export const UPG_EDGE_CATALOG = {
   lead_becomes_account: { forward_verb: 'becomes', reverse_verb: 'originated_as', classification: 'causal', source_type: 'lead', target_type: 'account' },
   subscription_drives_revenue_stream: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'subscription', target_type: 'revenue_stream' },
   forecast_predicts_revenue_stream: { forward_verb: 'predicts', reverse_verb: 'predicted_by', classification: 'cross-domain', source_type: 'forecast', target_type: 'revenue_stream' },
+  // v0.7.2 ( §1): a forecast is the forward projection of a metric; connects the isolated `forecast` member to the analytics anchor.
+  forecast_projects_metric: { forward_verb: 'projects', reverse_verb: 'projected_by', classification: 'cross-domain', source_type: 'forecast', target_type: 'metric' },
 
   // 4.6 Marketing & Communications Domain
   product_markets_through_marketing_strategy: { forward_verb: 'markets_through', reverse_verb: 'markets', classification: 'hierarchy', source_type: 'product', target_type: 'marketing_strategy' },
@@ -925,6 +937,8 @@ export const UPG_EDGE_CATALOG = {
   changelog_documents_release: { forward_verb: 'documents', reverse_verb: 'documented_in', classification: 'cross-domain', source_type: 'changelog', target_type: 'release' },
   prompt_template_powers_feature: { forward_verb: 'powers', reverse_verb: 'powered_by', classification: 'cross-domain', source_type: 'prompt_template', target_type: 'feature' },
   content_theme_targets_persona: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'content_theme', target_type: 'persona' },
+  // v0.7.2 ( §1): topic-cluster / content-pillar model; themes organize pieces. Connects the isolated `content_theme` AND `content_piece` members.
+  content_theme_organizes_content_piece: { forward_verb: 'organizes', reverse_verb: 'organized_under', classification: 'semantic', source_type: 'content_theme', target_type: 'content_piece' },
   // Document Provenance Edges
   document_describes_feature: { forward_verb: 'describes', reverse_verb: 'described_by', classification: 'semantic', source_type: 'document', target_type: 'feature' },
   document_describes_vision: { forward_verb: 'describes', reverse_verb: 'described_by', classification: 'semantic', source_type: 'document', target_type: 'vision' },
@@ -967,7 +981,7 @@ export const UPG_EDGE_CATALOG = {
   // UPG_CONTAINMENT_FREE_TYPES in grammar/hierarchy.ts). It is referenced
   // by other nodes via `node_owned_by_person` but is not structurally
   // contained by product / department / team. Hierarchy edges for person
-  // are deliberately omitted — adding them only to satisfy a hierarchy
+  // are deliberately omitted; adding them only to satisfy a hierarchy
   // audit would invert the orthogonality the type was introduced to express.
   team_staffed_with_role: { forward_verb: 'staffed_with', reverse_verb: 'staffed_in', classification: 'hierarchy', source_type: 'team', target_type: 'role' },
   team_targets_team_okr: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'hierarchy', source_type: 'team', target_type: 'team_okr' },
@@ -1070,7 +1084,7 @@ export const UPG_EDGE_CATALOG = {
   dashboard_contains_experiment_run: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'dashboard', target_type: 'experiment_run' },
   metric_measures_metric: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'metric', target_type: 'metric' },
   metric_measures_metric_cross_domain: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'metric', target_type: 'metric' },
-  // `experiment_tests_hypothesis` dropped — superseded by
+  // `experiment_tests_hypothesis` dropped, superseded by
   // the canonical `experiment_run_validates_hypothesis` (causal) introduced
   // in v0.2.6. Authors expressing "this experiment tests this hypothesis"
   // should use the validates edge from the run side.
@@ -1148,7 +1162,7 @@ export const UPG_EDGE_CATALOG = {
   decision_affects_design_component: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'decision', target_type: 'design_component' },
   decision_affects_screen: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'decision', target_type: 'screen' },
   decision_informs_decision: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'decision', target_type: 'decision' },
-  // Constraint edges — typed source = a `constraint` entity. The
+  // Constraint edges: typed source = a `constraint` entity. The
   // pre-existing polymorphic `node_constrains_node` (line above) stays for
   // arbitrary constrain-relationships between any entities; these typed
   // edges are what authors and renderers reach for when the source is a
@@ -1188,7 +1202,7 @@ export const UPG_EDGE_CATALOG = {
   learning_validates_job: { forward_verb: 'validates', reverse_verb: 'validated_by', classification: 'cross-domain', source_type: 'learning', target_type: 'job' },
   learning_informs_feature: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'learning', target_type: 'feature' },
   evidence_supports_opportunity: { forward_verb: 'supports', reverse_verb: 'supported_by', classification: 'cross-domain', source_type: 'evidence', target_type: 'opportunity' },
-  // `evidence_supports_hypothesis` dropped — superseded by
+  // `evidence_supports_hypothesis` dropped, superseded by
   // the canonical `hypothesis_evidence_supports_hypothesis_claim` edge.
   // The legacy generic `evidence` entity remains valid for non-hypothesis
   // evidence trails (e.g. learning → evidence chains in experiment runs);
@@ -1309,22 +1323,22 @@ export const UPG_EDGE_CATALOG = {
   /** Replaces `ServiceLevelAgreementProperties.customer: string`. Links an SLA to the account it covers (the existing JSDoc already hinted this was the canonical shape). */
   service_level_agreement_covers_account: { forward_verb: 'covers', reverse_verb: 'covered_by_sla', classification: 'cross-domain', source_type: 'service_level_agreement', target_type: 'account' },
 
-  // ── v0.4.1 — Cross-domain edge clusters ───────────────────────────────────
+  // ── v0.4.1: Cross-domain edge clusters ───────────────────────────────────
   //
   // Added 2026-05-16 after Wave 4 stress-test against a saturated Notion
   // workspace surfaced 9 genuinely-missing cross-domain bridges. Clusters E
   // and F flagged in the same stress-test were already complete in v0.4.0
-  // — those rejections were Entopo runtime-snapshot drift, not spec gaps.
+  // those rejections were Entopo runtime-snapshot drift, not spec gaps.
 
-  // Cluster A — Testing → Bug.
+  // Cluster A: Testing to Bug.
   // test_suite_covers_feature / qa_session_targets_feature /
   // eval_benchmark_measures_feature / test_case_validates_acceptance_criterion
   // / test_*_produces_test_result already exist (v0.3.x). The one outstanding
-  // hop was regression-test ↔ bug — regression tests are written to guard
+  // hop was regression-test ↔ bug; regression tests are written to guard
   // against a specific known bug, distinct from `release_contains_bug`.
   regression_test_addresses_bug: { forward_verb: 'addresses', reverse_verb: 'addressed_by', classification: 'cross-domain', source_type: 'regression_test', target_type: 'bug' },
 
-  // Cluster B — DevOps cross-domain.
+  // Cluster B: DevOps cross-domain.
   // service_level_objective_tracks_metric / monitor_watches_service /
   // ci_pipeline_deploys_service / runbook_mitigates_incident /
   // infrastructure_component_covered_by_on_call_rotation already exist.
@@ -1334,17 +1348,19 @@ export const UPG_EDGE_CATALOG = {
   incident_affects_feature: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'incident', target_type: 'feature' },
   release_strategy_used_by_deployment: { forward_verb: 'used_by', reverse_verb: 'uses', classification: 'cross-domain', source_type: 'release_strategy', target_type: 'deployment' },
 
-  // Cluster C — User Research linkage matrix.
+  // Cluster C: User Research linkage matrix.
   // research_study → {participant, research_question, survey_response,
   // interview_guide} containment edges already exist (49/49 in Wave 4).
   // Missing: the lateral bridges from atoms collected during the study to
   // the discovery-domain entities they evidence.
   participant_voiced_quote: { forward_verb: 'voiced', reverse_verb: 'voiced_by', classification: 'cross-domain', source_type: 'participant', target_type: 'quote' },
+  // v0.7.2 ( §1): personas are evidence-based abstractions of real participants; connects the isolated `participant` member to the users anchor.
+  participant_represents_persona: { forward_verb: 'represents', reverse_verb: 'represented_by', classification: 'cross-domain', source_type: 'participant', target_type: 'persona' },
   research_question_addressed_by_insight: { forward_verb: 'addressed_by', reverse_verb: 'addresses', classification: 'cross-domain', source_type: 'research_question', target_type: 'insight' },
   survey_response_evidences_insight: { forward_verb: 'evidences', reverse_verb: 'evidenced_by', classification: 'cross-domain', source_type: 'survey_response', target_type: 'insight' },
 
-  // Cluster D — Engineering finishing touches.
-  // feature_flag had only `service_toggles_feature_flag` — the user-visible
+  // Cluster D: Engineering finishing touches.
+  // feature_flag had only `service_toggles_feature_flag`; the user-visible
   // gating relationship was missing. data_model ↔ database_schema is the
   // logical-to-physical mapping (data_model is bounded-context-level;
   // database_schema is the persisted shape). read_model → aggregate is the
@@ -1357,7 +1373,7 @@ export const UPG_EDGE_CATALOG = {
   // ─── v0.5.5: business-/GTM-canvas wiring ─────────────────
   // The Part 1 slot-connectivity audit (Agent O2) surfaced 240 missing ordered
   // pairs across 5 Tier-1 business/GTM canvases. Most are artifacts of the
-  // canvas declaring too many slot types — but ~29 represent real, named
+  // canvas declaring too many slot types, but ~29 represent real, named
   // relationships from the canonical source literature (Osterwalder's BMC,
   // Maurya's Lean Canvas, Patton's Opportunity Canvas, Strategyzer's Test
   // Card + Learning Card, and GTM Playbook practice). Added here.
@@ -1366,7 +1382,7 @@ export const UPG_EDGE_CATALOG = {
   // metric → solution, all hierarchy-reverse edges already covered by reverse
   // traversal) are NOT added. See Part 2a report for the full rationale.
 
-  // Business Model Canvas — canonical Osterwalder relationships
+  // Business Model Canvas: canonical Osterwalder relationships
   // (the 9-block canvas has explicit named flows: VP ↔ segments, channels
   // ↔ segments, activities/resources/partners produce VP, costs driven by
   // activities/resources). These 15 edges close the BMC structural spine.
@@ -1386,22 +1402,22 @@ export const UPG_EDGE_CATALOG = {
   // MEDIUM-confidence (verb-naming): relationships and partnerships *support*
   // a VP but the "support" verb is one of several plausible choices
   // (could be 'contributes_to' or 'shapes'). REVIEW: medium-confidence;
-  // surfaced by — verify naming.
+  // surfaced by; verify naming.
   customer_relationship_supports_value_proposition: { forward_verb: 'supports', reverse_verb: 'supported_by', classification: 'cross-domain', source_type: 'customer_relationship', target_type: 'value_proposition' },
   partnership_supports_value_proposition: { forward_verb: 'supports', reverse_verb: 'supported_by', classification: 'cross-domain', source_type: 'partnership', target_type: 'value_proposition' },
 
-  // Lean Canvas — Maurya's problem-solution-customer triangle. The catalog
+  // Lean Canvas: Maurya's problem-solution-customer triangle. The catalog
   // already has `opportunity_drives_solution` and `value_proposition_solves_
   // need`, but the *direct* solution → need link (problem-solution fit) and
   // capability → VP (the "unfair advantage" capability) are canonical Lean
   // Startup vocabulary that should resolve in one hop.
   solution_addresses_need: { forward_verb: 'addresses', reverse_verb: 'addressed_by', classification: 'causal', source_type: 'solution', target_type: 'need' },
   capability_enables_value_proposition: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'causal', source_type: 'capability', target_type: 'value_proposition' },
-  // Competitor → need closes the "Existing Alternatives" lean-canvas slot —
+  // Competitor → need closes the "Existing Alternatives" lean-canvas slot:
   // a competitor exists *because* it addresses the same underlying need.
   competitor_addresses_need: { forward_verb: 'addresses', reverse_verb: 'addressed_by', classification: 'cross-domain', source_type: 'competitor', target_type: 'need' },
 
-  // GTM Playbook — the canonical flow (ICP → positioning → messaging → launch
+  // GTM Playbook: the canonical flow (ICP → positioning → messaging → launch
   // → sales). gtm_strategy already fans out to all six children. What's
   // missing is the *lateral* dependencies: different ICPs need different
   // positionings, messaging, and sales motions; messaging is the artifact
@@ -1412,7 +1428,7 @@ export const UPG_EDGE_CATALOG = {
   messaging_used_in_launch: { forward_verb: 'used_in', reverse_verb: 'uses', classification: 'cross-domain', source_type: 'messaging', target_type: 'launch' },
   messaging_enables_sales_motion: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'cross-domain', source_type: 'messaging', target_type: 'sales_motion' },
 
-  // Test Card + Learning Card (Strategyzer) — canonical validation flow
+  // Test Card + Learning Card (Strategyzer): canonical validation flow
   // hypothesis → test_plan → experiment_run → evidence → learning → decision.
   // The catalog already had the hypothesis → test_plan and experiment_run →
   // {hypothesis, evidence, learning, decision} edges. Missing: the
@@ -1423,14 +1439,14 @@ export const UPG_EDGE_CATALOG = {
   evidence_interpreted_as_learning: { forward_verb: 'interpreted_as', reverse_verb: 'interpreted_from', classification: 'causal', source_type: 'evidence', target_type: 'learning' },
   learning_informs_decision: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'causal', source_type: 'learning', target_type: 'decision' },
 
-  // Opportunity Canvas — Patton's "Assumptions" slot is meant to capture the
+  // Opportunity Canvas: Patton's "Assumptions" slot is meant to capture the
   // riskiest beliefs about each of the other slots (problem, users, solution).
   // The catalog already has `assumption_becomes_hypothesis` (the test-to-validate
   // flow) and `initiative_assumes_assumption` (the owner side). Missing: the
-  // *subject* of the assumption — what is the assumption about?
+  // *subject* of the assumption: what is the assumption about?
   // MEDIUM-confidence (verb-naming): "concerns" is one of several plausible
   // verbs (could be 'about', 'applies_to', 'targets'). REVIEW: medium-confidence;
-  // surfaced by — verify naming.
+  // surfaced by; verify naming.
   assumption_concerns_need: { forward_verb: 'concerns', reverse_verb: 'has_assumption', classification: 'semantic', source_type: 'assumption', target_type: 'need' },
   assumption_concerns_persona: { forward_verb: 'concerns', reverse_verb: 'has_assumption', classification: 'semantic', source_type: 'assumption', target_type: 'persona' },
   assumption_concerns_solution: { forward_verb: 'concerns', reverse_verb: 'has_assumption', classification: 'semantic', source_type: 'assumption', target_type: 'solution' },
@@ -1438,16 +1454,16 @@ export const UPG_EDGE_CATALOG = {
   // ─── v0.5.6: design/UX canvas wiring ─────────────────────
   // The Part 1 audit (Agent O2) also surfaced 75 missing ordered slot pairs
   // across three Tier-1 design/UX canvases:
-  //   - Lean UX Canvas (Gothelf — 8 slots, 42 pairs, 36 null)
-  //   - Persona Canvas (Cooper/Pichler — 6 slots, 30 pairs, 20 null)
-  //   - Design Sprint (Knapp/GV — 5 slots, 20 pairs, 19 null)
+  //   - Lean UX Canvas (Gothelf, 8 slots, 42 pairs, 36 null)
+  //   - Persona Canvas (Cooper/Pichler, 6 slots, 30 pairs, 20 null)
+  //   - Design Sprint (Knapp/GV, 5 slots, 20 pairs, 19 null)
   // Of those 75, ~50 are slot-pair artifacts (no canonical relationship in the
-  // source literature — e.g., `outcome → persona`, `quote → desired_outcome`)
+  // source literature (e.g. `outcome → persona`, `quote → desired_outcome`)
   // or hierarchy-reverses already covered by reverse traversal of an existing
   // edge. Part 2b adds 13 HIGH-confidence + 2 MEDIUM-confidence edges that map
   // to explicitly-named relationships in the source literature.
 
-  // Lean UX Canvas — Gothelf's hypothesis template explicitly binds
+  // Lean UX Canvas: Gothelf's hypothesis template explicitly binds
   // hypothesis → feature → persona → outcome ("We believe [feature] for
   // [persona] will result in [outcome]"). The catalog already had
   // `feature_tests_hypothesis` (the experiment-side reverse) and
@@ -1457,17 +1473,17 @@ export const UPG_EDGE_CATALOG = {
   hypothesis_concerns_persona: { forward_verb: 'concerns', reverse_verb: 'has_hypothesis', classification: 'semantic', source_type: 'hypothesis', target_type: 'persona' },
   // Lean UX block 5 (Solutions) is paired with block 1 (Business Problem,
   // expressed as `need`). Features address needs. Parallel to the existing
-  // `feature_addresses_job` — features address both jobs and needs.
+  // `feature_addresses_job`; features address both jobs and needs.
   feature_addresses_need: { forward_verb: 'addresses', reverse_verb: 'addressed_by', classification: 'cross-domain', source_type: 'feature', target_type: 'need' },
   // Lean UX block 2 (Business Outcomes) and block 8 (Experiments) form the
-  // measurement loop. Parallel to `experiment_run_measures_metric` — outcomes
+  // measurement loop. Parallel to `experiment_run_measures_metric`; outcomes
   // are the higher-level business measure that experiments target.
   experiment_run_measures_outcome: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'experiment_run', target_type: 'outcome' },
   // Persona pursues business/user outcome. The catalog has
   // `persona_aspires_to_desired_outcome` (for the JTBD `desired_outcome`
   // subtype) and `product_pursues_outcome`. Lean UX block 4 (User Outcomes
   // & Benefits) directly ties persona to outcome. Use `pursues` to mirror
-  // `persona_pursues_job` — same verb, lateral within the user domain.
+  // `persona_pursues_job`; same verb, lateral within the user domain.
   persona_pursues_outcome: { forward_verb: 'pursues', reverse_verb: 'pursued_by', classification: 'semantic', source_type: 'persona', target_type: 'outcome' },
   // Completes the assumption-subject pattern from Part 2a (assumption concerns
   // need / persona / solution). Lean UX block 7 (Assumptions) and Opportunity
@@ -1477,7 +1493,7 @@ export const UPG_EDGE_CATALOG = {
   assumption_concerns_outcome: { forward_verb: 'concerns', reverse_verb: 'has_assumption', classification: 'semantic', source_type: 'assumption', target_type: 'outcome' },
   assumption_concerns_feature: { forward_verb: 'concerns', reverse_verb: 'has_assumption', classification: 'semantic', source_type: 'assumption', target_type: 'feature' },
 
-  // Persona Canvas — Pichler/Cooper. The canvas has explicit slots for
+  // Persona Canvas (Pichler/Cooper). The canvas has explicit slots for
   // {persona, desired_outcome, need, observation, job, quote}. Most relationships
   // were already in the catalog (`persona_pursues_job`, `persona_experiences_need`,
   // `persona_aspires_to_desired_outcome`, `job_motivates_desired_outcome`,
@@ -1486,50 +1502,50 @@ export const UPG_EDGE_CATALOG = {
   // direction from the persona's mouth, the Ulwick need ↔ desired_outcome link,
   // and the parallel "observation reveals job" edge.
   //
-  // Quotes voice personas — Persona Canvas's Quotes slot is explicitly
+  // Quotes voice personas: Persona Canvas's Quotes slot is explicitly
   // "what the persona says". Parallel to `observation_characterises_persona`
   // but for verbal evidence. Cross-domain because quotes are research artifacts
   // and persona is a user-domain entity.
   quote_voices_persona: { forward_verb: 'voices', reverse_verb: 'voiced_by', classification: 'cross-domain', source_type: 'quote', target_type: 'persona' },
-  // Need ↔ desired_outcome — Ulwick's outcome-driven innovation: a need is
+  // Need ↔ desired_outcome: Ulwick's outcome-driven innovation. A need is
   // measured by the desired outcomes that quantify its satisfaction. Causal
   // because the need creates the outcome's existence as a measurable target.
   // Reverse traversal closes `desired_outcome → need` via this single edge.
   need_measured_by_desired_outcome: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'causal', source_type: 'need', target_type: 'desired_outcome' },
-  // Observation reveals job — parallel to `observation_reveals_need` (already
+  // Observation reveals job: parallel to `observation_reveals_need` (already
   // in catalog). Persona Canvas's Behaviours slot (observations) explicitly
   // surfaces jobs the persona performs. Same `reveals` verb maintains
   // observation's surfacing-verb family (reveals_need, reveals_job, characterises_persona).
   observation_reveals_job: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'cross-domain', source_type: 'observation', target_type: 'job' },
 
-  // Design Sprint — Knapp/GV. The five-day flow is
+  // Design Sprint (Knapp/GV). The five-day flow is
   // design_question → design_concept → decision → user_flow → observation.
   // The catalog already had `design_question_answered_by_design_concept`
   // (Day 1 → Day 2). Missing: Days 3-5 closure.
   //
-  // Day 3 Decide — the design question gets a resolution. Parallel to
+  // Day 3 Decide: the design question gets a resolution. Parallel to
   // `design_question_answered_by_design_concept` but at the commitment level:
   // a sprint exits with one decision per HMW question.
   design_question_resolved_by_decision: { forward_verb: 'resolved_by', reverse_verb: 'resolves', classification: 'causal', source_type: 'design_question', target_type: 'decision' },
   // Day 3 Decide picks the winning design_concept. Parallel structure to
   // `decision_selects_*` family (no existing siblings in the catalog yet, but
-  // the verb is the sprint's canonical action — "Decide" = pick the sketch).
+  // the verb is the sprint's canonical action: "Decide" = pick the sketch).
   decision_selects_design_concept: { forward_verb: 'selects', reverse_verb: 'selected_by', classification: 'causal', source_type: 'decision', target_type: 'design_concept' },
-  // Day 5 Test — observations validate (or invalidate) the prototype's
+  // Day 5 Test: observations validate (or invalidate) the prototype's
   // user_flow. Causal because the test produces the observations. Parallel
-  // to `experiment_run_validates_hypothesis` — observation is to user_flow
+  // to `experiment_run_validates_hypothesis`; observation is to user_flow
   // what experiment_run is to hypothesis in the sprint world.
   user_flow_validated_by_observation: { forward_verb: 'validated_by', reverse_verb: 'validates', classification: 'causal', source_type: 'user_flow', target_type: 'observation' },
   // MEDIUM-confidence (polysemy with prototype): in a Design Sprint the
   // prototype is often expressed as a user_flow, and `design_concept_realised_as_prototype`
   // already exists. Adding `design_concept_realised_as_user_flow` widens the
-  // grammar — concepts can be prototypes OR flows depending on the sprint
+  // grammar; concepts can be prototypes OR flows depending on the sprint
   // (low-fidelity flows are valid prototypes). REVIEW: medium-confidence;
   // could be argued as redundant with prototype edge.
   design_concept_realised_as_user_flow: { forward_verb: 'realised_as', reverse_verb: 'realises', classification: 'causal', source_type: 'design_concept', target_type: 'user_flow' },
   // MEDIUM-confidence (subsumed by learning?): `learning_informs_decision`
   // (Part 2a) already covers the synthesised-insight path. This adds the more
-  // direct observation → decision link — useful when a sprint observation
+  // direct observation → decision link, useful when a sprint observation
   // immediately changes a follow-up commitment without intermediate learning
   // synthesis. REVIEW: medium-confidence; potential duplication with
   // learning_informs_decision through the synthesis layer.
@@ -1538,23 +1554,23 @@ export const UPG_EDGE_CATALOG = {
   // ─── v0.5.7: engineering + AI canvas wiring ──────────────
   // The Part 1 audit (Agent O2) surfaced missing ordered slot pairs across
   // four Tier-1 engineering + AI canvases:
-  //   - Bounded Context Canvas (Nick Tune / DDD Crew — 6 slots, 30 pairs, 24 null)
-  //   - LLM Evaluation Framework (NLP community — 6 slots, 30 pairs, 26 null)
-  //   - API Design First (OpenAPI Initiative — 5 unique slot types, 20 pairs, 19 null)
-  //   - Multi-Agent Orchestration (AutoGen/CrewAI/LangGraph — 6 slots, 30 pairs, 25 null)
-  // Many of these pairs were closed in v0.5.3 (Agent S — DDD/CQRS event chain)
+  //   - Bounded Context Canvas (Nick Tune / DDD Crew, 6 slots, 30 pairs, 24 null)
+  //   - LLM Evaluation Framework (NLP community, 6 slots, 30 pairs, 26 null)
+  //   - API Design First (OpenAPI Initiative, 5 unique slot types, 20 pairs, 19 null)
+  //   - Multi-Agent Orchestration (AutoGen/CrewAI/LangGraph, 6 slots, 30 pairs, 25 null)
+  // Many of these pairs were closed in v0.5.3 (Agent S: DDD/CQRS event chain)
   // and earlier waves. The remaining gaps fall into two camps: real canonical
   // relationships in the source literature (added here, 11 HIGH-confidence)
   // versus slot-pair artifacts, hierarchy reverses, or paths mediated through
-  // another entity (NOT added — see Part 2c handoff report).
+  // another entity (NOT added; see Part 2c handoff report).
 
-  // Bounded Context Canvas — Tune's "Business Decisions" slot maps to
+  // Bounded Context Canvas: Tune's "Business Decisions" slot maps to
   // `api_contract` (the loose framework mapping treats published contracts as
   // the decisions a BC publishes). The contract level relationship exists in
   // DDD literature ("published language") above the per-service exposure
   // already in the catalog (`service_exposes_api_contract`). Adding the BC-
   // level structural parent gives the contract two valid hierarchy parents
-  // (service AND bounded_context), matching DDD canon — a context's published
+  // (service AND bounded_context), matching DDD canon: a context's published
   // language is the union of its services' contracts.
   bounded_context_publishes_api_contract: { forward_verb: 'publishes', reverse_verb: 'published_by', classification: 'hierarchy', source_type: 'bounded_context', target_type: 'api_contract' },
   // CQRS saga / process-manager pattern (Vernon, Young). An event handler can
@@ -1565,13 +1581,13 @@ export const UPG_EDGE_CATALOG = {
   // arrival is the trigger; the issued command is the effect.
   domain_event_triggers_command: { forward_verb: 'triggers', reverse_verb: 'triggered_by', classification: 'causal', source_type: 'domain_event', target_type: 'command' },
 
-  // LLM Evaluation Framework — the canvas presents Latency as `metric` and
+  // LLM Evaluation Framework: the canvas presents Latency as `metric` and
   // wires Accuracy (eval_benchmark), Coherence (eval_run), Cost
   // (ai_cost_tracker), Safety (ai_guardrail) as the other dimensions.
   // The existing chain covers ai_model → eval_benchmark → eval_run, plus
   // ai_model → metric mediated through outcome. Missing: the direct outputs.
   //
-  // Eval runs produce metric values — every benchmark execution writes a
+  // Eval runs produce metric values: every benchmark execution writes a
   // result row of (metric, value, timestamp) per (model, benchmark) pair.
   // Causal because the run is what creates the metric reading; the metric
   // exists as a definition before the run, but the value is produced.
@@ -1579,11 +1595,11 @@ export const UPG_EDGE_CATALOG = {
   // Benchmarks define their metric set. HELM, MLPerf, BIG-bench all specify
   // which metrics constitute the benchmark (accuracy, BLEU, F1, latency).
   // Hierarchy mirrors `data_source_defines_metric` (same verb pattern). Adds
-  // eval_benchmark as a valid hierarchy parent of metric — metric already has
+  // eval_benchmark as a valid hierarchy parent of metric; metric already has
   // many parents (outcome, objective, key_result, solution, data_source).
   eval_benchmark_defines_metric: { forward_verb: 'defines', reverse_verb: 'defined_by', classification: 'hierarchy', source_type: 'eval_benchmark', target_type: 'metric' },
 
-  // API Design First — the canvas threads contract → endpoint → review
+  // API Design First: the canvas threads contract → endpoint → review
   // (decision) → mock (domain_entity) → implementation (data_flow). The
   // existing chain covers api_contract → api_endpoint via Agent S's
   // v0.5.1 work. Missing: the typed-payload edges and the design-decision
@@ -1591,7 +1607,7 @@ export const UPG_EDGE_CATALOG = {
   //
   // Endpoints reference domain entities as request/response payloads.
   // Semantic (not hierarchy) because endpoints don't contain entity
-  // definitions — they bind to them by name. Within engineering domain.
+  // definitions; they bind to them by name. Within engineering domain.
   api_endpoint_references_domain_entity: { forward_verb: 'references', reverse_verb: 'referenced_by', classification: 'semantic', source_type: 'api_endpoint', target_type: 'domain_entity' },
   // API design decisions (auth scheme, versioning policy, REST vs gRPC,
   // pagination) are recorded against the contract during review. Cross-domain
@@ -1599,18 +1615,18 @@ export const UPG_EDGE_CATALOG = {
   // in engineering. Parallel to `bounded_context_decided_via_decision` but at
   // the contract grain.
   api_contract_records_decision: { forward_verb: 'records', reverse_verb: 'recorded_in', classification: 'cross-domain', source_type: 'api_contract', target_type: 'decision' },
-  // Data flows transport domain entities — DFD canonical. The arrow on a
+  // Data flows transport domain entities (DFD canonical). The arrow on a
   // data-flow diagram carries a named payload. Causal because the flow
   // moves the entity from one process node to another; without the flow
   // the entity is local. Same engineering domain.
   data_flow_transports_domain_entity: { forward_verb: 'transports', reverse_verb: 'transported_by', classification: 'causal', source_type: 'data_flow', target_type: 'domain_entity' },
-  // Endpoints participate in data flows — DFD nodes that emit/consume flows.
+  // Endpoints participate in data flows (DFD nodes that emit/consume flows).
   // Semantic because participation is associational membership, not
   // containment (a flow is composed of many node-participations, not owned
   // by one endpoint).
   api_endpoint_participates_in_data_flow: { forward_verb: 'participates_in', reverse_verb: 'involves', classification: 'semantic', source_type: 'api_endpoint', target_type: 'data_flow' },
 
-  // Multi-Agent Orchestration — the canvas wires agent_definition →
+  // Multi-Agent Orchestration: the canvas wires agent_definition →
   // workflow_template → workflow_run → workflow_artifact with agent_hook and
   // review_gate as cross-cutting concerns. The existing catalog covers the
   // template-level structure (orchestrates / executed_as / gated_by). Missing:
@@ -1618,7 +1634,7 @@ export const UPG_EDGE_CATALOG = {
   // and "Aggregation".
   //
   // Agents produce artifacts as their direct output. Polysemic with
-  // `workflow_run_produces_workflow_artifact` (already in catalog) — both are
+  // `workflow_run_produces_workflow_artifact` (already in catalog); both are
   // canonical: the artifact has a structural run-producer AND a logical
   // agent-producer. Mirrors `aggregate_emits_domain_event` +
   // `command_produces_domain_event` polysemy.
@@ -1630,29 +1646,29 @@ export const UPG_EDGE_CATALOG = {
   agent_hook_fires_during_workflow_run: { forward_verb: 'fires_during', reverse_verb: 'fires_via', classification: 'causal', source_type: 'agent_hook', target_type: 'workflow_run' },
   // Runs pass through review gates. The catalog has the template-level
   // `workflow_template_gated_by_review_gate` (the gate is declared on the
-  // template). This adds the run-level traversal — the gate is a checkpoint
+  // template). This adds the run-level traversal: the gate is a checkpoint
   // the run actually traverses. Distinct enough from the template-level
   // declaration to warrant its own edge: queries asking "which runs blocked
   // on this gate?" need the run-level link.
   workflow_run_passes_through_review_gate: { forward_verb: 'passes_through', reverse_verb: 'gates_run', classification: 'causal', source_type: 'workflow_run', target_type: 'review_gate' },
 
   // ─── v0.5.8: strategy + research + feedback canvas wiring ─
-  // The Part 1 audit (Agent O2) — re-run on Agent W's v0.5.7 base — surfaced
+  // The Part 1 audit (Agent O2), re-run on Agent W's v0.5.7 base, surfaced
   // missing slot pairs across eight Tier-1 strategy / research / feedback
   // canvases:
-  //   - McKinsey 7S (Peters & Waterman — 6 unique types, 30 pairs, 29 null)
-  //   - Strategy Diamond (Hambrick & Fredrickson — 5 types, 20 pairs, 15 null)
-  //   - Research Democratisation (ResearchOps — 5 types, 20 pairs, 20 null)
-  //   - Research Ops Framework (ResearchOps Community — 5 types, 20 pairs, 19 null)
-  //   - Usability Test Plan (Nielsen — 5 types, 20 pairs, 19 null)
-  //   - Behavioural Cohort Analysis (Amplitude/Mixpanel — 5 types, 20 pairs, 19 null)
-  //   - Customer Advisory Board (B2B canon — 5 types, 20 pairs, 19 null)
-  //   - Customer Effort Score (Dixon/Toman/DeLisi — 5 types, 20 pairs, 19 null)
+  //   - McKinsey 7S (Peters & Waterman, 6 unique types, 30 pairs, 29 null)
+  //   - Strategy Diamond (Hambrick & Fredrickson, 5 types, 20 pairs, 15 null)
+  //   - Research Democratisation (ResearchOps, 5 types, 20 pairs, 20 null)
+  //   - Research Ops Framework (ResearchOps Community, 5 types, 20 pairs, 19 null)
+  //   - Usability Test Plan (Nielsen, 5 types, 20 pairs, 19 null)
+  //   - Behavioural Cohort Analysis (Amplitude/Mixpanel, 5 types, 20 pairs, 19 null)
+  //   - Customer Advisory Board (B2B canon, 5 types, 20 pairs, 19 null)
+  //   - Customer Effort Score (Dixon/Toman/DeLisi, 5 types, 20 pairs, 19 null)
   // Part 2d adds HIGH-confidence edges that map to explicitly-named
   // relationships in the source literature. Most remaining pairs are LOW-
   // confidence: slot-pair artifacts (the 7S model is a "they all interact"
   // diagram with no directional verbs), hierarchy reverses (the catalog has
-  // the forward edge — reverse traversal covers them), or mediated paths
+  // the forward edge, reverse traversal covers them), or mediated paths
   // (e.g. participant → insight via observation/quote). Continues Part 2a/2b/2c
   // discipline: quality of the catalog over score on the audit.
 
@@ -1664,18 +1680,18 @@ export const UPG_EDGE_CATALOG = {
   // Vision → strategic_theme: the standard strategy cascade
   // (vision → mission → strategic_theme → objective). The catalog already has
   // `vision_realised_through_mission` and `vision_guides_objective`. This
-  // closes the missing link between vision and themes — "the vision guides
+  // closes the missing link between vision and themes: "the vision guides
   // which themes we pursue this year". Causal because the vision shapes
   // theme selection; mirrors `vision_guides_objective` verb family.
   vision_guides_strategic_theme: { forward_verb: 'guides', reverse_verb: 'guided_by', classification: 'causal', source_type: 'vision', target_type: 'strategic_theme' },
-  // Strategic_theme → capability: SAFe canon — themes require investment
+  // Strategic_theme → capability: SAFe canon. Themes require investment
   // capabilities. Pairs with the existing `strategic_pillar → capability`
   // hierarchy (pillars contain capabilities) and `capability_enables_value_stream`.
   // Causal: themes drive capability investment decisions. Verb "requires"
   // mirrors the well-used catalog family
   // (hypothesis_requires_experiment_plan, business_model_requires_key_resource).
   strategic_theme_requires_capability: { forward_verb: 'requires', reverse_verb: 'required_by', classification: 'causal', source_type: 'strategic_theme', target_type: 'capability' },
-  // Strategic_theme → value_stream: SAFe canon — themes flow through value
+  // Strategic_theme → value_stream: SAFe canon. Themes flow through value
   // streams to delivery. Parallel to `strategic_pillar_delivers_value_stream`
   // (hierarchy) at the pillar level; this is the theme-level lateral.
   // Semantic because themes don't OWN value streams (the value stream is
@@ -1686,15 +1702,15 @@ export const UPG_EDGE_CATALOG = {
   // ── Strategy Diamond (4 HIGH) ─────────────────────────────────────────────
   // Hambrick & Fredrickson's diamond names five elements (Arenas, Vehicles,
   // Differentiators, Staging, Economic Logic) but explicitly says they must
-  // be "internally consistent" — no directional verbs in the source. Edges
+  // be "internally consistent"; no directional verbs in the source. Edges
   // added here come from the adjacent BMC + market-entry literature where
   // the verb pair IS named. Several other null pairs from the audit are
   // already covered by reverse traversal (market_segment → distribution_channel
-  // via `distribution_channel_reaches_market_segment`, etc.) — explicitly
+  // via `distribution_channel_reaches_market_segment`, etc.), explicitly
   // NOT re-added in the forward direction.
   //
   // Initiative → market_segment: "staging" maps to initiatives; initiatives
-  // enter market segments (market-entry canon — Lafley/Martin, A.G. Ricci).
+  // enter market segments (market-entry canon per Lafley/Martin, A.G. Ricci).
   // Distinct from `product_addresses_market_segment` (product-level): the
   // initiative is the unit of market entry. Cross-domain because initiative
   // sits in Strategy and market_segment in Market Intelligence.
@@ -1704,18 +1720,18 @@ export const UPG_EDGE_CATALOG = {
   // to `solution_becomes_feature` (v0.5.4) but at the initiative level.
   // Causal because the initiative's execution is what makes the VP real
   // for customers. The reverse-direction `value_proposition → initiative`
-  // would be wrong — VPs don't launch initiatives; initiatives realise VPs.
+  // would be wrong: VPs don't launch initiatives; initiatives realise VPs.
   initiative_realises_value_proposition: { forward_verb: 'realises', reverse_verb: 'realised_by', classification: 'causal', source_type: 'initiative', target_type: 'value_proposition' },
   // Initiative → revenue_stream: initiatives unlock revenue streams. The
   // diamond's "Economic Logic" facet wires initiatives to the revenue they
   // generate. Causal because the initiative's success produces the revenue
-  // stream's growth (or its existence — net-new revenue streams). Distinct
+  // stream's growth (or its existence, net-new revenue streams). Distinct
   // from `business_model_earns_via_revenue_stream` (hierarchical model →
   // stream) and `subscription_drives_revenue_stream` (subscription product).
   initiative_unlocks_revenue_stream: { forward_verb: 'unlocks', reverse_verb: 'unlocked_by', classification: 'causal', source_type: 'initiative', target_type: 'revenue_stream' },
-  // Distribution_channel → revenue_stream: BMC canon — Osterwalder's
+  // Distribution_channel → revenue_stream: BMC canon (Osterwalder's
   // "How does each Channel result in revenue?" question is the direct
-  // channel-to-revenue link. Channels MONETISE the value proposition; the
+  // channel-to-revenue link). Channels MONETISE the value proposition; the
   // revenue stream is the monetisation. Causal because the channel's
   // operation is what produces revenue. Distinct from
   // `revenue_stream_captured_from_market_segment` (revenue ← market).
@@ -1727,7 +1743,7 @@ export const UPG_EDGE_CATALOG = {
   // in the literature. Most slot pairs are NOT canonical relationships.
   // The single ResearchOps-named relationship is the insight-review gate.
   //
-  // Review_gate → insight: ResearchOps canon — insights pass through a
+  // Review_gate → insight: ResearchOps canon. Insights pass through a
   // review gate before publication to the insight repository
   // (Hilliard, Tucker, ResearchOps Community guides). Hierarchy because
   // the gate's job is to approve/reject the insight (gate OWNS the
@@ -1740,15 +1756,15 @@ export const UPG_EDGE_CATALOG = {
   // ReOps Community's 8 pillars are conceptual groupings, not verb-linked.
   // Two pairs ARE named in the source literature:
   //
-  // Research_plan → participant: ResearchOps governance — the plan defines
+  // Research_plan → participant: ResearchOps governance. The plan defines
   // recruitment criteria. The existing `research_study_enrolls_participant`
   // is at the study (execution) level. This adds the plan (governance)
-  // level — research plans DECIDE who to recruit before the study runs.
+  // level; research plans DECIDE who to recruit before the study runs.
   // Causal because the plan's recruitment criteria produce the participant
   // pool. Distinct from the enrollment edge: a plan can recruit and never
   // run; a study only enrolls participants the plan recruited.
   research_plan_recruits_participant: { forward_verb: 'recruits', reverse_verb: 'recruited_into', classification: 'causal', source_type: 'research_plan', target_type: 'participant' },
-  // Insight → design_guideline: standard research-to-design handoff — the
+  // Insight → design_guideline: standard research-to-design handoff. The
   // insight informs the guideline. Parallel to `insight_inspires_design_concept`,
   // `insight_inspires_design_question` (existing). Cross-domain because
   // insight is in User Research and design_guideline is in Design System.
@@ -1759,15 +1775,15 @@ export const UPG_EDGE_CATALOG = {
   // ── Usability Test Plan (1 HIGH) ──────────────────────────────────────────
   // NN/G's test plan format flows: question → recruit → tasks/scenarios →
   // findings. Most pairs are mediated through research_study (which
-  // enrolls participants, captures observations, produces insights — all
+  // enrolls participants, captures observations, produces insights, all
   // existing). The one direct, named edge is question → task.
   //
-  // Research_question → task: the question DRIVES task design — in NN/G
+  // Research_question → task: the question DRIVES task design. In NN/G
   // methodology "the research questions generate the tasks we ask participants
   // to perform". Causal because the question is what produces the task.
   // Distinct from `research_question_addressed_by_insight` (existing,
   // question ← insight closure). The task uses the canonical `task` entity
-  // (sprint-task / user-task share semantics — "thing to do").
+  // (sprint-task / user-task share semantics: "thing to do").
   research_question_generates_task: { forward_verb: 'generates', reverse_verb: 'generated_by', classification: 'causal', source_type: 'research_question', target_type: 'task' },
 
   // ── Behavioural Cohort Analysis (3 HIGH) ──────────────────────────────────
@@ -1781,7 +1797,7 @@ export const UPG_EDGE_CATALOG = {
   // metrics); behavioral_segment is the qualifying behavior. Semantic
   // because the behavior doesn't CAUSE the cohort (the analyst selects it);
   // it DEFINES which users qualify. Parallel to `cohort_represents_persona`
-  // (existing) — both express "what this cohort is".
+  // (existing); both express "what this cohort is".
   cohort_defined_by_behavioral_segment: { forward_verb: 'defined_by', reverse_verb: 'defines', classification: 'semantic', source_type: 'cohort', target_type: 'behavioral_segment' },
   // Cohort → metric: cohort outcomes ARE metrics (retention_day_7,
   // retention_day_30 are explicit properties on the cohort entity). The
@@ -1816,10 +1832,10 @@ export const UPG_EDGE_CATALOG = {
   // "surfaces" mirrors `insight_surfaces_opportunity`.
   user_advisory_board_surfaces_research_question: { forward_verb: 'surfaces', reverse_verb: 'surfaced_by', classification: 'cross-domain', source_type: 'user_advisory_board', target_type: 'research_question' },
   // User_advisory_board → initiative: CAB outputs are commitments and
-  // direction for product initiatives — the explicit "outcomes" of any
+  // direction for product initiatives, the explicit "outcomes" of any
   // well-run CAB (Stettler, Moore). Cross-domain because CAB is in
   // Feedback/VoC and initiative is in Strategy. Verb "shapes" captures
-  // the influence-not-ownership semantic — CABs don't OWN initiatives,
+  // the influence-not-ownership semantic: CABs don't OWN initiatives,
   // they shape them.
   user_advisory_board_shapes_initiative: { forward_verb: 'shapes', reverse_verb: 'shaped_by', classification: 'cross-domain', source_type: 'user_advisory_board', target_type: 'initiative' },
 
@@ -1836,14 +1852,14 @@ export const UPG_EDGE_CATALOG = {
   // metric is the recorded value).
   feedback_program_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'causal', source_type: 'feedback_program', target_type: 'metric' },
   // Metric → behavioral_segment: parallel to existing
-  // `metric_segmented_by_persona` (cross-domain) — a metric's distribution
+  // `metric_segmented_by_persona` (cross-domain): a metric's distribution
   // segments users into behavioral groups (high-effort vs low-effort in
   // CES; promoters/passives/detractors in NPS). Cross-domain because
   // metric is in Strategy/Analytics and behavioral_segment is in Growth.
   metric_segmented_by_behavioral_segment: { forward_verb: 'segmented_by', reverse_verb: 'segments', classification: 'cross-domain', source_type: 'metric', target_type: 'behavioral_segment' },
   // Feedback_theme → insight: themes aggregate raw feedback into patterns;
   // patterns ARE insights. Parallel to `observation_yields_insight` and
-  // `affinity_cluster_synthesises_insight` — feedback_theme is the
+  // `affinity_cluster_synthesises_insight`; feedback_theme is the
   // feedback-domain analogue. Cross-domain because feedback_theme is in
   // Feedback/VoC and insight is in UX Research.
   feedback_theme_surfaces_insight: { forward_verb: 'surfaces', reverse_verb: 'surfaced_by', classification: 'cross-domain', source_type: 'feedback_theme', target_type: 'insight' },
@@ -1852,7 +1868,7 @@ export const UPG_EDGE_CATALOG = {
   // Agent V (Part 2b) flagged research-discovery edges as broadly useful
   // beyond any single framework. Two qualify here:
   //
-  // Insight → quote: standard research synthesis canon — insights are
+  // Insight → quote: standard research synthesis canon. Insights are
   // EVIDENCED by quotes. The catalog has `observation_evidenced_by_quote`
   // (observation ← quote) but not the insight ← quote evidencing pattern.
   // Hierarchy because the quote is structurally subordinate (the insight
@@ -1860,11 +1876,11 @@ export const UPG_EDGE_CATALOG = {
   // research-democratisation, research-ops-framework, and any future
   // research-synthesis pipeline.
   insight_evidenced_by_quote: { forward_verb: 'evidenced_by', reverse_verb: 'evidences', classification: 'hierarchy', source_type: 'insight', target_type: 'quote' },
-  // Journey_step → observation: CX research canon — journey steps are
+  // Journey_step → observation: CX research canon. Journey steps are
   // INSTRUMENTED with observations (think-aloud notes, behavioural events,
   // pain-point captures at each step). Cross-domain because journey_step
   // is in Experience Design and observation is in UX Research. Parallel
-  // to `journey_step_reveals_need` (existing) — both express "what
+  // to `journey_step_reveals_need` (existing); both express "what
   // research surfaces at this step". Useful for any journey-based
   // research method (CX mapping, service blueprint, behavioural cohort).
   journey_step_yields_observation: { forward_verb: 'yields', reverse_verb: 'yielded_in', classification: 'cross-domain', source_type: 'journey_step', target_type: 'observation' },
@@ -1883,17 +1899,17 @@ type _UPGEdgeTypeLocal = keyof typeof UPG_EDGE_CATALOG
  *
  * Three semantic families are sanctioned:
  *
- * 1. **Universal semantic verbs** — any node can inform / constrain / inspire
+ * 1. **Universal semantic verbs**: any node can inform / constrain / inspire
  *    any other node. The meaning is deliberately abstract; consumers render
  *    them as plain relational signals.
- * 2. **Decision-to-anything** — a decision can influence, be constrained by,
+ * 2. **Decision-to-anything**: a decision can influence, be constrained by,
  *    or produce any kind of node. Decisions cut across domains; binding the
  *    target would force a combinatorial explosion.
- * 3. **Universal ownership** — any node can be owned by a team, role,
+ * 3. **Universal ownership**: any node can be owned by a team, role,
  *    stakeholder, department, or person. Ownership is not per-entity-type.
  *
  * Adding a new polymorphic edge requires extending this array AND the
- * spec-integrity regression test — that forces a conscious decision and
+ * spec-integrity regression test, which forces a conscious decision and
  * keeps consumers (MCP, Entopo, audit tools) able to enumerate the full set.
  */
 export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
@@ -1919,7 +1935,7 @@ const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)
 
 /**
  * True if the edge uses the `'node'` wildcard at either endpoint. Derived
- * dynamically from `source_type`/`target_type` — not from the allow-list —
+ * dynamically from `source_type`/`target_type`, not from the allow-list,
  * so an accidentally-added polymorphic edge still returns true and surfaces
  * via the invariant test rather than silently passing.
  *

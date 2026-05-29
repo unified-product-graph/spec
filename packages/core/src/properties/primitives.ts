@@ -22,10 +22,10 @@ export type ISODateTime = string
  *
  * Format: `PnYnMnDTnHnMnS` (year/month/day prefix P, time prefix T).
  * Common examples:
- *   `P14D`     — 14 days
- *   `P3M`      — 3 months
- *   `PT2H30M`  — 2 hours 30 minutes
- *   `P1Y6M`    — 1 year 6 months
+ *   `P14D`     : 14 days
+ *   `P3M`      : 3 months
+ *   `PT2H30M`  : 2 hours 30 minutes
+ *   `P1Y6M`    : 1 year 6 months
  *
  * Used for retention periods, notice periods, agreement terms, lead times,
  * lookback windows, sprint durations, and any other measured time span.
@@ -39,9 +39,9 @@ export type Duration = string
  * Extended 6-field form: `second minute hour day-of-month month day-of-week`
  *
  * Examples:
- *   `'0 9 * * 1'`       — every Monday at 09:00
- *   `'0 0 1 * *'`       — first day of every month at midnight
- *   `'*\/15 * * * *'`   — every 15 minutes
+ *   `'0 9 * * 1'`       : every Monday at 09:00
+ *   `'0 0 1 * *'`       : first day of every month at midnight
+ *   `'*\/15 * * * *'`   : every 15 minutes
  *
  * Used for scheduled data pipelines, recurring jobs, and automation triggers.
  */
@@ -50,12 +50,12 @@ export type Cron = string
 /**
  * Flexible, human-readable timeframe label.
  *
- * Accepted forms (not exhaustive — this is an open-shape string):
- *   `'Q1 2026'`          — calendar quarter
- *   `'2026-H1'`          — calendar half-year
- *   `'FY2027 Q2'`        — fiscal quarter
- *   `'12-18 months'`     — relative range
- *   `'now'` / `'ongoing'` — open-ended
+ * Accepted forms (not exhaustive; this is an open-shape string):
+ *   `'Q1 2026'`          : calendar quarter
+ *   `'2026-H1'`          : calendar half-year
+ *   `'FY2027 Q2'`        : fiscal quarter
+ *   `'12-18 months'`     : relative range
+ *   `'now'` / `'ongoing'` : open-ended
  *
  * Used to unify `timeline`, `time_horizon`, `timeframe`, `period`, and
  * `report_period` properties that share the same human-calendar semantics
@@ -71,7 +71,7 @@ export type Timeframe = string
  * Examples: `'USD'`, `'EUR'`, `'GBP'`, `'JPY'`.
  * All characters must be ASCII uppercase letters (A–Z).
  *
- * Used wherever a property JSDoc says "ISO 4217" — pricing tiers, contracts,
+ * Used wherever a property JSDoc says "ISO 4217": pricing tiers, contracts,
  * sales quotes, growth campaigns, and localisation settings.
  */
 export type ISO4217 = string
@@ -154,18 +154,18 @@ export type SignalSentiment = 'positive' | 'neutral' | 'negative' | 'mixed'
  * provides the canonical closed set for migration.
  *
  * Members:
- *   `'analytics_event'` — first-party product analytics event (PostHog, Amplitude, etc.)
- *   `'community'`       — forum, Discord, Slack community, etc.
- *   `'email'`           — direct email or newsletter reply
- *   `'in_app'`          — in-product feedback widget, NPS prompt, or beta-feedback panel
- *   `'interview'`       — user or sales interview
- *   `'other'`           — catch-all for unlisted channels
- *   `'review'`          — app store or G2/Capterra review
- *   `'sales_call'`      — sales demo or discovery call
- *   `'social'`          — social media mention or DM
- *   `'support_ticket'`  — helpdesk or in-app support ticket
- *   `'survey'`          — NPS, CSAT, or custom survey
- *   `'usage_session'`   — observed product session (telemetry-derived friction signal)
+ *   `'analytics_event'` : first-party product analytics event (PostHog, Amplitude, etc.)
+ *   `'community'`       : forum, Discord, Slack community, etc.
+ *   `'email'`           : direct email or newsletter reply
+ *   `'in_app'`          : in-product feedback widget, NPS prompt, or beta-feedback panel
+ *   `'interview'`       : user or sales interview
+ *   `'other'`           : catch-all for unlisted channels
+ *   `'review'`          : app store or G2/Capterra review
+ *   `'sales_call'`      : sales demo or discovery call
+ *   `'social'`          : social media mention or DM
+ *   `'support_ticket'`  : helpdesk or in-app support ticket
+ *   `'survey'`          : NPS, CSAT, or custom survey
+ *   `'usage_session'`   : observed product session (telemetry-derived friction signal)
  */
 export type SignalChannel =
   | 'analytics_event'
@@ -193,15 +193,15 @@ export type SignalChannel =
  * rather than a labelled tier.
  *
  * Members (coarse → fine):
- *   `'continuous'` — always running / no discrete recurrence
- *   `'hourly'`     — recurs every hour
- *   `'daily'`      — recurs every day
- *   `'weekly'`     — recurs every week
- *   `'monthly'`    — recurs every month
- *   `'quarterly'`  — recurs every calendar quarter
- *   `'yearly'`     — recurs every year
- *   `'on_demand'`  — triggered by event, not schedule
- *   `'other'`      — recurs on a cadence not captured by the above tiers
+ *   `'continuous'` : always running, no discrete recurrence
+ *   `'hourly'`     : recurs every hour
+ *   `'daily'`      : recurs every day
+ *   `'weekly'`     : recurs every week
+ *   `'monthly'`    : recurs every month
+ *   `'quarterly'`  : recurs every calendar quarter
+ *   `'yearly'`     : recurs every year
+ *   `'on_demand'`  : triggered by event, not schedule
+ *   `'other'`      : recurs on a cadence not captured by the above tiers
  *
  * Introduced in v0.4.0 as the canonical replacement for ad-hoc
  * `frequency?: string` and `*cadence?: string` properties (Concern 2 axis
@@ -233,17 +233,17 @@ export type Cadence =
  * will normalise casing in a follow-up pass.
  *
  * Members (alphabetical):
- *   `'asyncapi'`  — AsyncAPI / event-driven API spec
- *   `'event'`     — generic event/message bus
- *   `'file'`      — file-based transfer (SFTP, S3, etc.)
- *   `'graphql'`   — GraphQL over HTTP
- *   `'grpc'`      — gRPC / Protocol Buffers
- *   `'mqtt'`      — MQTT (IoT / lightweight pub-sub)
- *   `'other'`     — unlisted protocol
- *   `'rest'`      — REST over HTTP
- *   `'soap'`      — SOAP / XML web services
- *   `'webhook'`   — HTTP webhook (push callback)
- *   `'websocket'` — WebSocket bidirectional stream
+ *   `'asyncapi'`  : AsyncAPI / event-driven API spec
+ *   `'event'`     : generic event/message bus
+ *   `'file'`      : file-based transfer (SFTP, S3, etc.)
+ *   `'graphql'`   : GraphQL over HTTP
+ *   `'grpc'`      : gRPC / Protocol Buffers
+ *   `'mqtt'`      : MQTT (IoT / lightweight pub-sub)
+ *   `'other'`     : unlisted protocol
+ *   `'rest'`      : REST over HTTP
+ *   `'soap'`      : SOAP / XML web services
+ *   `'webhook'`   : HTTP webhook (push callback)
+ *   `'websocket'` : WebSocket bidirectional stream
  */
 export type Protocol =
   | 'asyncapi'
@@ -270,18 +270,18 @@ export type Protocol =
  * This primitive is the alphabetical superset of both.
  *
  * Members:
- *   `'discord'`   — Discord community / server
- *   `'email'`     — newsletter / email marketing platform
- *   `'google'`    — Google Ads / Search / Display
- *   `'instagram'` — Instagram organic or paid
- *   `'linkedin'`  — LinkedIn organic or paid
- *   `'meta'`      — Meta Ads (Facebook/Instagram ad platform)
- *   `'other'`     — unlisted platform
- *   `'podcast'`   — podcast advertising or distribution
- *   `'reddit'`    — Reddit organic or paid
- *   `'tiktok'`    — TikTok organic or paid
- *   `'twitter'`   — Twitter / X organic or paid
- *   `'youtube'`   — YouTube organic or paid
+ *   `'discord'`   : Discord community / server
+ *   `'email'`     : newsletter / email marketing platform
+ *   `'google'`    : Google Ads / Search / Display
+ *   `'instagram'` : Instagram organic or paid
+ *   `'linkedin'`  : LinkedIn organic or paid
+ *   `'meta'`      : Meta Ads (Facebook/Instagram ad platform)
+ *   `'other'`     : unlisted platform
+ *   `'podcast'`   : podcast advertising or distribution
+ *   `'reddit'`    : Reddit organic or paid
+ *   `'tiktok'`    : TikTok organic or paid
+ *   `'twitter'`   : Twitter / X organic or paid
+ *   `'youtube'`   : YouTube organic or paid
  */
 export type MarketingPlatform =
   | 'discord'

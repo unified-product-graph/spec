@@ -73,9 +73,9 @@ export interface AntiPatternInputs {
   orphanCount: number
 
   /**
-   * Active product stage — used to filter `UPG_ANTI_PATTERNS[i].stages[]`.
+   * Active product stage. Used to filter `UPG_ANTI_PATTERNS[i].stages[]`.
    * If undefined, the evaluator runs all patterns regardless of stage gating
-   * (safer default — surface everything when stage is unknown).
+   * (safer default: surface everything when stage is unknown).
    */
   productStage?: UPGProductStage
 }
@@ -93,7 +93,7 @@ export interface AntiPatternViolation {
   anti_pattern_id: string
   name: string
   severity: UPGAntiPatternSeverity
-  /** Entity-type strings the catalog references. Phase 1 — types, not ids. */
+  /** Entity-type strings the catalog references. Phase 1: types, not ids. */
   target_entities: string[]
   description: string
   why_it_matters: string
@@ -124,7 +124,7 @@ const SEVERITY_ORDER: Record<UPGAntiPatternSeverity, number> = {
  * Evaluate the curated anti-pattern catalog against a graph's pre-computed
  * stats. Returns the violations, sorted high → medium → low, then by id asc.
  *
- * @param inputs The pre-computed graph stats — see `AntiPatternInputs`.
+ * @param inputs The pre-computed graph stats (see `AntiPatternInputs`).
  * @param options Optional filters: `severity`, `anti_pattern_ids` subset.
  *
  * @example
@@ -148,7 +148,7 @@ export function evaluateAntiPatterns(
     if (severityFilter && ap.severity !== severityFilter) continue
     if (idFilter && !idFilter.has(ap.id)) continue
     // Stage gating: when productStage is provided, skip patterns that don't
-    // declare it. When undefined, run all (safer default — see docstring).
+    // declare it. When undefined, run all (safer default, see docstring).
     if (
       inputs.productStage &&
       !ap.stages.includes(inputs.productStage)
@@ -321,7 +321,7 @@ function evaluateBenchmark(
   check: BenchmarkCheck,
   inputs: AntiPatternInputs,
 ): boolean {
-  // Without a productStage, the benchmark range is undefined — treat as
+  // Without a productStage, the benchmark range is undefined. Treat as
   // 'no benchmark applicable here, no fire'. The catalog's stages[] gating
   // would normally suppress this anyway; the guard keeps the evaluator pure.
   if (!inputs.productStage) return false
@@ -373,7 +373,7 @@ function evaluateDomainPopulation(
       return populated
     case 'gt':
     case 'lt':
-      // Phase 1 ships boolean population only — none of the 12 curated
+      // Phase 1 ships boolean population only. None of the 12 curated
       // anti-patterns use gt/lt against domain_population.
       return false
     default:
@@ -424,7 +424,7 @@ function collectTargetEntities(cond: IntelligenceCondition): string[] {
         types.add(leaf.target_type as string)
       }
       // total_entity_count / domain_count / domain_population / orphan_count
-      // don't reference a specific entity type — leave them out.
+      // don't reference a specific entity type; leave them out.
       return
     }
     for (const child of c.checks) walk(child)
