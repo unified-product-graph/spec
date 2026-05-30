@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODate, ISODateTime, UPGAssessment, RuleStrength } from '../primitives.js'
+import type { Cadence, DataSensitivity, ISODate, ISODateTime, UPGAssessment, RuleStrength } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // SECURITY
@@ -125,12 +125,14 @@ export interface VulnerabilityProperties {
   cvss_score?: number
   /**
    * Categorical severity derived from CVSS.
-   * `critical` = 9.0–10.0. `high` = 7.0–8.9. `medium` = 4.0–6.9.
-   * `low` = 0.1–3.9. `informational` = 0.0.
-   * Score alone is insufficient for triage; severity drives filtering and prioritisation.
-   * @example "critical" for a remotely exploitable, no-auth-required vulnerability
+   * Impact severity (UPGAssessment on the `severity_5` scale). Score alone is
+   * insufficient for triage; severity drives filtering and prioritisation.
+   * Migrated from the inline `critical|high|medium|low|informational` enum
+   * ( Option C): map `critical` -> 5, `high` -> 4, `medium` -> 3,
+   * `low` -> 2, `informational` -> 1; carry the old word in `label`.
+   * @example value 5, label 'Critical', scale_id 'severity_5' (a remotely exploitable, no-auth vuln)
    */
-  severity?: 'critical' | 'high' | 'medium' | 'low' | 'informational'
+  severity?: UPGAssessment
   /**
    * CVSS scoring version. v3.1 and v4.0 differ significantly for the same vulnerability.
    * @example "v4.0" for vulnerabilities scored after the v4.0 release in 2023
@@ -215,8 +217,8 @@ export interface SecurityControlProperties {
 export interface SecurityPolicyProperties {
   /** Systems or processes covered */
   scope?: string
-  /** Review cadence (e.g. "annually", "quarterly") */
-  review_cadence?: string
+  /** Review cadence (e.g. `yearly`, `quarterly`). Uses the shared `Cadence` scale. */
+  review_cadence?: Cadence
   /** Version */
   version?: string
   /** ISO effective date */
@@ -288,7 +290,7 @@ export interface SecurityReviewProperties {
  */
 export interface DataClassificationProperties {
   /** Sensitivity level */
-  level?: 'public' | 'internal' | 'confidential' | 'restricted'
+  level?: DataSensitivity
   /** Handling rules */
   handling_requirements?: string
   /** Example data covered */

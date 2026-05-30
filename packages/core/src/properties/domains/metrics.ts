@@ -52,7 +52,10 @@ export type MetricSegmentType = 'persona' | 'cohort' | 'channel' | 'geography' |
 /** Why a metric is used as a proxy */
 export type ProxyReason = 'qualitative' | 'no_direct_measure' | 'not_yet_instrumented' | 'too_expensive'
 
-/** How strongly a proxy metric predicts the direct measure */
+/**
+ * How strongly a proxy metric predicts the direct measure. Pairs with
+ * `UPG_ENUM_SCALES.ProxyConfidence` for per-value labels and descriptions.
+ */
 export type ProxyConfidence = 'strong' | 'moderate' | 'weak'
 
 // ─── Metric data point ──────────────────────────────────────────────────────

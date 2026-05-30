@@ -4,7 +4,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODate, Priority, RuleStrength } from '../primitives.js'
+import type { ConformanceLevel, ISODate, Priority, RuleStrength, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // ACCESSIBILITY
@@ -23,7 +23,7 @@ export interface A11yStandardProperties {
   /** Version of the standard (e.g. "2.1", "2.2") */
   version?: string
   /** Target conformance level */
-  conformance_level?: 'A' | 'AA' | 'AAA'
+  conformance_level?: ConformanceLevel
 }
 
 /** Accessibility guideline.
@@ -41,7 +41,7 @@ export interface A11yGuidelineProperties {
   /** Guideline reference number (e.g. "1.1", "2.4") */
   guideline_number?: string
   /** WCAG conformance level required */
-  level?: 'A' | 'AA' | 'AAA'
+  level?: ConformanceLevel
   /** Imperative force of this guideline. */
   rule_strength?: RuleStrength
 }
@@ -91,13 +91,12 @@ export interface A11yAuditProperties {
  */
 export interface A11yIssueProperties {
   /**
-   * Severity. Aligned to axe-core's 4-level impact scale (industry standard):
-   * 'minor' < 'moderate' < 'serious' < 'critical'.
-   *
-   * Migration: the previous 3-level scale ('critical' | 'major' | 'minor')
-   * maps to ('critical' | 'serious' | 'minor') respectively.
+   * Impact severity (UPGAssessment on the `severity_5` scale). Migrated from
+   * the inline axe-core 4-level enum (`minor|moderate|serious|critical`)
+   * ( Option C): map `critical` -> 5, `serious` -> 4, `moderate` -> 3,
+   * `minor` -> 2; carry the old word in `label`.
    */
-  severity?: 'minor' | 'moderate' | 'serious' | 'critical'
+  severity?: UPGAssessment
   /** WCAG success criterion violated (e.g. "1.1.1", "2.4.7") */
   wcag_criterion?: string
   /** Identifier of the rule that flagged the issue */

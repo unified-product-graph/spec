@@ -97,8 +97,8 @@ export interface DealProperties {
  * }
  */
 export interface PipelineSalesProperties {
-  /** Classification of the pipeline (e.g. "new business", "expansion") */
-  pipeline_type?: string
+  /** Classification of the pipeline ( Option B). */
+  pipeline_type?: 'new_business' | 'expansion' | 'renewal' | 'partner' | 'other'
   /** Average days from opportunity creation to close */
   avg_cycle_days?: number
 }

@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODate } from '../primitives.js'
+import type { DifficultyLevel, ISODate } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // CUSTOMER EDUCATION
@@ -36,7 +36,7 @@ export interface TutorialProperties {
   /** Delivery format of the tutorial */
   tutorial_format?: 'written' | 'video' | 'interactive' | 'code_along'
   /** Skill level required to follow the tutorial */
-  difficulty?: 'beginner' | 'intermediate' | 'advanced'
+  difficulty?: DifficultyLevel
   /** Estimated time to complete in minutes */
   duration_minutes?: number
   /** Percentage of users who complete the tutorial */
@@ -136,7 +136,7 @@ export interface HelpVideoProperties {
  */
 export interface LearningPathProperties {
   /** Overall difficulty level of the learning path */
-  path_difficulty?: 'beginner' | 'intermediate' | 'advanced'
+  path_difficulty?: DifficultyLevel
   /** Number of items (tutorials, videos, etc.) in the path */
   item_count?: number
   /** Estimated total hours to complete the path */

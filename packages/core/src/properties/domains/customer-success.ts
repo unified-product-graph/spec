@@ -6,7 +6,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Duration, ISODate, UPGAssessment } from '../primitives.js'
+import type { Duration, FrequencyRating, ISODate, SignalSentiment, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // CUSTOMER SUCCESS
@@ -31,7 +31,7 @@ export interface SupportTicketProperties {
   /** Where the ticket originated (e.g. "email", "in-app", "chat") */
   source?: string
   /** Detected sentiment of the customer's message */
-  signal_sentiment?: 'positive' | 'negative' | 'neutral' | 'mixed'
+  signal_sentiment?: SignalSentiment
   /** Channel through which the signal was received */
   signal_channel?: string
   /** Perceived urgency of the customer's request */
@@ -51,11 +51,11 @@ export interface CustomerFeedbackProperties {
   /** How the feedback was collected */
   feedback_type?: 'survey' | 'interview' | 'review' | 'nps'
   /** Overall sentiment of the feedback */
-  sentiment?: 'positive' | 'neutral' | 'negative'
+  sentiment?: SignalSentiment
   /** Exact words from the customer */
   verbatim?: string
   /** Detected sentiment of the underlying signal */
-  signal_sentiment?: 'positive' | 'negative' | 'neutral' | 'mixed'
+  signal_sentiment?: SignalSentiment
   /** Channel through which the signal was received */
   signal_channel?: string
   /** Perceived urgency of the feedback */
@@ -80,11 +80,11 @@ export interface ChurnReasonProperties {
   /** The recurrence period the count is measured over (ISO-8601 `Duration`, e.g. `'P30D'`) */
   frequency_period?: Duration
   /** Qualitative frequency tier when an exact count is not known */
-  frequency_rating?: 'rare' | 'occasional' | 'regular' | 'constant' | 'other'
+  frequency_rating?: FrequencyRating
   /** Other factors that contributed to the churn */
   contributing_factors?: string[]
   /** Detected sentiment of the churn signal */
-  signal_sentiment?: 'positive' | 'negative' | 'neutral' | 'mixed'
+  signal_sentiment?: SignalSentiment
   /** Channel through which the churn signal was received */
   signal_channel?: string
   /** Urgency of the churn risk */

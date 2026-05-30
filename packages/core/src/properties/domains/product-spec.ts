@@ -6,7 +6,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Confidence, HealthStatus, ISODate, Priority, UPGAssessment } from '../primitives.js'
+import type { HealthStatus, ISODate, Priority, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // STRATEGY METRICS (live alongside product spec)
@@ -47,10 +47,11 @@ export interface OutcomeProperties {
   /** Confidence this is the right outcome to pursue */
   confidence?: UPGAssessment
   /**
-   * Current lifecycle phase. Free-form until an outcome lifecycle is defined
-   * in `grammar/lifecycles.ts`.
+   * Current lifecycle phase, mirroring the `outcome` lifecycle in
+   * `grammar/lifecycles.ts` ( Option B): `identified` -> `measuring` ->
+   * `achieved` | `abandoned`.
    */
-  outcome_status?: string
+  outcome_status?: 'identified' | 'measuring' | 'achieved' | 'abandoned'
 }
 
 /** A high-level strategic goal. The O in OKR.
@@ -217,18 +218,14 @@ export interface UserStoryProperties {
 
 /**
  * @deprecated since v0.4.0. Use `TaskProperties`. `story_task` collapsed into
- * canonical `task`. `estimate` absorbed; `task_implements_user_story`
- * edge expresses the story relationship.
- * Migration: `UPG_MIGRATIONS['0.4.0']` renames story_task nodes to task.
+ * canonical `task`. `task_implements_user_story` edge expresses the story
+ * relationship. The former `estimate` / `effort` / `priority` fields were
+ * removed in v0.8.0; their values live on the canonical `task`
+ * (`TaskProperties.estimate` / `.effort` / `.priority`).
+ * Migration: `UPG_MIGRATIONS['0.4.0']` renames story_task nodes to task;
+ * `UPG_PROPERTY_MIGRATIONS['0.8.0']` drops the removed property residue.
  */
-export interface StoryTaskProperties {
-  /** @deprecated Use TaskProperties.estimate */
-  estimate?: string
-  /** @deprecated Use TaskProperties.effort (string form) */
-  effort?: number
-  /** @deprecated Use TaskProperties.priority */
-  priority?: Priority
-}
+export type StoryTaskProperties = Record<string, never>
 
 /** Acceptance criterion on a story or feature.
  *
@@ -272,18 +269,11 @@ export interface ReleaseProperties {
  *
  * @example
  * const properties: TaskProperties = {
- *   task_status: 'todo',
  *   assignee: 'sam.patel@arkheiev.com',
  *   effort: '3 person-weeks',
  * }
  */
 export interface TaskProperties {
-  /**
-   * @deprecated since v0.4.0. Use top-level `UPGBaseNode.status`.
-   * Values map identically: todo | in_progress | in_review | done.
-   * Migration: `UPG_PROPERTY_MIGRATIONS['0.4.0']` lifts this to `status`.
-   */
-  task_status?: 'todo' | 'in_progress' | 'in_review' | 'done'
   /** Assigned person */
   assignee?: string
   /** Effort estimate (e.g. "2h", "1d", "3 points"). Use a consistent unit within your team. */
@@ -306,23 +296,19 @@ export interface TaskProperties {
  *
  * @example
  * const properties: BugProperties = {
- *   bug_severity: 'critical',
- *   bug_status: 'open',
+ *   bug_severity: { value: 5, scale: 'severity_5', label: 'critical' },
  *   steps_to_reproduce: 'steps to reproduce',
  * }
  */
 export interface BugProperties {
   /**
-   * Impact severity. Independent of priority (which governs when it gets fixed).
-   * `critical` = data loss or complete feature failure. `trivial` = cosmetic only.
+   * Impact severity (UPGAssessment on the `severity_5` scale). Independent of
+   * priority (which governs when it gets fixed). Migrated from the inline
+   * `critical|major|minor|trivial` enum ( Option C): map
+   * `critical` -> 5, `major` -> 4, `minor` -> 2, `trivial` -> 1; carry the old
+   * word in `label`.
    */
-  bug_severity?: 'critical' | 'major' | 'minor' | 'trivial'
-  /**
-   * @deprecated since v0.4.0. Use top-level `UPGBaseNode.status`.
-   * Values map identically: open | in_progress | fixed | verified | wont_fix.
-   * Migration: `UPG_PROPERTY_MIGRATIONS['0.4.0']` lifts this to `status`.
-   */
-  bug_status?: 'open' | 'in_progress' | 'fixed' | 'verified' | 'wont_fix'
+  bug_severity?: UPGAssessment
   /** Step-by-step reproduction */
   steps_to_reproduce?: string
   /** Observed environment (e.g. "prod", "staging", "iOS 17.4") */
@@ -373,8 +359,8 @@ export interface RoadmapItemProperties {
   priority?: Priority
   /** Status. `deferred` = explicitly pushed to a later period. */
   item_status?: 'planned' | 'in_progress' | 'shipped' | 'deferred'
-  /** Delivery confidence within the planned period. */
-  confidence?: Confidence
+  /** Delivery confidence within the planned period (UPGAssessment on `confidence_5`). */
+  confidence?: UPGAssessment
   /** ISO date work begins. More precise than `quarter` for continuous planning. */
   start_date?: ISODate
   /** ISO date completion is expected. For shipped items, the actual completion date. */

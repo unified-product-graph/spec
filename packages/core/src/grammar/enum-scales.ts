@@ -143,6 +143,183 @@ export const UPG_ENUM_SCALES: Record<string, UPGEnumScaleDefinition> = {
     ],
   },
 
+  // ── ProxyConfidence ─────────────────────────────────────────────────
+
+  ProxyConfidence: {
+    id: 'ProxyConfidence',
+    label: 'Proxy confidence',
+    description: 'How strongly a proxy metric predicts the direct measure it stands in for.',
+    tone_direction: 'high-is-good',
+    values: [
+      { value: 'strong',   label: 'Strong',   description: 'Tracks the direct measure closely; a reliable stand-in.' },
+      { value: 'moderate', label: 'Moderate', description: 'Correlates with the direct measure but with meaningful slippage.' },
+      { value: 'weak',     label: 'Weak',     description: 'Loosely related; use with caution and corroborate.' },
+    ],
+  },
+
+  // ── CauseConfidence ─────────────────────────────────────────────────
+
+  CauseConfidence: {
+    id: 'CauseConfidence',
+    label: 'Cause confidence',
+    description: 'Maturity of a root-cause determination during incident debugging: how far a proposed cause has been validated.',
+    tone_direction: 'high-is-good',
+    values: [
+      { value: 'hypothesised', label: 'Hypothesised', description: 'A proposed cause, not yet tested against evidence.' },
+      { value: 'likely',       label: 'Likely',       description: 'Supported by evidence but not conclusively proven.' },
+      { value: 'confirmed',    label: 'Confirmed',    description: 'Verified as the cause; reproduced or otherwise established.' },
+    ],
+  },
+
+  // ── ComfortLevel ────────────────────────────────────────────────────
+
+  ComfortLevel: {
+    id: 'ComfortLevel',
+    label: 'Comfort level',
+    description: 'A person\'s comfort with a tool, technology, or practice. Closed set so personas compare on the same axis across products.',
+    tone_direction: 'high-is-good',
+    values: [
+      { value: 'low',    label: 'Low',    description: 'Little or no familiarity; needs guidance to proceed.' },
+      { value: 'medium', label: 'Medium', description: 'Functional, everyday competence.' },
+      { value: 'high',   label: 'High',   description: 'Confident, fluent use without assistance.' },
+      { value: 'expert', label: 'Expert', description: 'Deep mastery; can teach others or extend the tool.' },
+      { value: 'other',  label: 'Other',  description: 'A comfort profile not captured by the above tiers.' },
+    ],
+  },
+
+  // ── LogLevel ────────────────────────────────────────────────────────
+
+  LogLevel: {
+    id: 'LogLevel',
+    label: 'Log level',
+    description: 'Operational verbosity of a monitor or alert signal. How loud the signal should be, not how bad an outcome is for the user (kept distinct from severity_5).',
+    tone_direction: 'low-is-good',
+    values: [
+      { value: 'critical', label: 'Critical', description: 'Page immediately; the signal is service-affecting.' },
+      { value: 'warning',  label: 'Warning',  description: 'Needs attention soon; not yet service-affecting.' },
+      { value: 'info',     label: 'Info',     description: 'Informational; no action required.' },
+    ],
+  },
+
+  // ── IncidentSeverity ────────────────────────────────────────────────
+
+  IncidentSeverity: {
+    id: 'IncidentSeverity',
+    label: 'Incident severity',
+    description: 'Paging-tier classification of an incident, driving escalation and response process. Distinct from user-impact severity_5 and from LogLevel.',
+    tone_direction: 'low-is-good',
+    values: [
+      { value: 'sev1', label: 'SEV1', description: 'Critical outage; full response, executive-visible.' },
+      { value: 'sev2', label: 'SEV2', description: 'Major degradation; urgent response.' },
+      { value: 'sev3', label: 'SEV3', description: 'Minor or partial impact; handled within hours.' },
+      { value: 'sev4', label: 'SEV4', description: 'Negligible impact; routine handling.' },
+    ],
+  },
+
+  // ── SignalSentiment ─────────────────────────────────────────────────
+
+  SignalSentiment: {
+    id: 'SignalSentiment',
+    label: 'Signal sentiment',
+    description: 'Sentiment polarity of an inbound signal (feedback, support, customer).',
+    tone_direction: 'high-is-good',
+    values: [
+      { value: 'positive', label: 'Positive', description: 'Favourable signal; satisfaction or advocacy.' },
+      { value: 'neutral',  label: 'Neutral',  description: 'No clear positive or negative lean.' },
+      { value: 'negative', label: 'Negative', description: 'Unfavourable signal; dissatisfaction or risk.' },
+      { value: 'mixed',    label: 'Mixed',    description: 'Contains both positive and negative elements.' },
+    ],
+  },
+
+  // ── MaturityLevel ───────────────────────────────────────────────────
+
+  MaturityLevel: {
+    id: 'MaturityLevel',
+    label: 'Maturity level',
+    description: 'Capability or process maturity on the CMMI ladder.',
+    tone_direction: 'high-is-good',
+    values: [
+      { value: 'initial',    label: 'Initial',    description: 'Ad hoc and unpredictable; little process.' },
+      { value: 'developing', label: 'Developing', description: 'Basic process emerging but inconsistent.' },
+      { value: 'defined',    label: 'Defined',    description: 'Documented, standardised process in place.' },
+      { value: 'managed',    label: 'Managed',    description: 'Measured and controlled against objectives.' },
+      { value: 'optimizing', label: 'Optimizing', description: 'Continuous, data-driven improvement.' },
+    ],
+  },
+
+  // ── ConformanceLevel ────────────────────────────────────────────────
+
+  ConformanceLevel: {
+    id: 'ConformanceLevel',
+    label: 'Conformance level',
+    description: 'WCAG accessibility conformance level.',
+    tone_direction: 'high-is-good',
+    values: [
+      { value: 'A',   label: 'A',   description: 'Minimum conformance; essential barriers removed.' },
+      { value: 'AA',  label: 'AA',  description: 'Addresses the most common barriers; the usual legal target.' },
+      { value: 'AAA', label: 'AAA', description: 'Highest level; not achievable for all content.' },
+    ],
+  },
+
+  // ── DataSensitivity ─────────────────────────────────────────────────
+
+  DataSensitivity: {
+    id: 'DataSensitivity',
+    label: 'Data sensitivity',
+    description: 'Data classification tier governing handling and access.',
+    tone_direction: 'neutral',
+    values: [
+      { value: 'public',       label: 'Public',       description: 'No restriction; safe to disclose openly.' },
+      { value: 'internal',     label: 'Internal',     description: 'For internal use; not for external release.' },
+      { value: 'confidential', label: 'Confidential', description: 'Sensitive; restricted to a need-to-know basis.' },
+      { value: 'restricted',   label: 'Restricted',   description: 'Highly sensitive; strict controls and auditing.' },
+    ],
+  },
+
+  // ── DifficultyLevel ─────────────────────────────────────────────────
+
+  DifficultyLevel: {
+    id: 'DifficultyLevel',
+    label: 'Difficulty level',
+    description: 'Learner difficulty tier for educational content.',
+    tone_direction: 'neutral',
+    values: [
+      { value: 'beginner',     label: 'Beginner',     description: 'No prior knowledge assumed.' },
+      { value: 'intermediate', label: 'Intermediate', description: 'Assumes working familiarity with the basics.' },
+      { value: 'advanced',     label: 'Advanced',     description: 'Assumes deep, expert-level background.' },
+    ],
+  },
+
+  // ── FrequencyRating ─────────────────────────────────────────────────
+
+  FrequencyRating: {
+    id: 'FrequencyRating',
+    label: 'Frequency rating',
+    description: 'Qualitative how-often rating. Distinct from the numeric frequency_5 scale and from Cadence calendar tiers.',
+    tone_direction: 'neutral',
+    values: [
+      { value: 'constant',   label: 'Constant',   description: 'Effectively always; continuous occurrence.' },
+      { value: 'regular',    label: 'Regular',    description: 'Happens on a predictable, recurring basis.' },
+      { value: 'occasional', label: 'Occasional', description: 'Happens sometimes, without a fixed pattern.' },
+      { value: 'rare',       label: 'Rare',       description: 'Happens infrequently.' },
+      { value: 'other',      label: 'Other',      description: 'A frequency not captured by the above tiers.' },
+    ],
+  },
+
+  // ── EvidenceDirection ───────────────────────────────────────────────
+
+  EvidenceDirection: {
+    id: 'EvidenceDirection',
+    label: 'Evidence direction',
+    description: 'Direction of evidence relative to a claim. Distinct from confidence_impact (strengthens/weakens) per the polysemy verdicts.',
+    tone_direction: 'neutral',
+    values: [
+      { value: 'supports', label: 'Supports', description: 'The evidence backs the claim.' },
+      { value: 'refutes',  label: 'Refutes',  description: 'The evidence contradicts the claim.' },
+      { value: 'neutral',  label: 'Neutral',  description: 'The evidence is inconclusive either way.' },
+    ],
+  },
+
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

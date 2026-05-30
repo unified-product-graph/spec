@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Confidence, HealthStatus, ISODate, ISODateTime, RuleStrength, UPGAssessment } from '../primitives.js'
+import type { HealthStatus, ISODate, ISODateTime, MaturityLevel, RuleStrength, UPGAssessment } from '../primitives.js'
 import type { UPGProductStage } from '../../shapes/document.js'
 
 // ---------------------------------------------------------------------------
@@ -142,9 +142,9 @@ export interface InitiativeProperties {
  */
 export interface CapabilityProperties {
   /** Current maturity */
-  maturity_level?: 'initial' | 'developing' | 'defined' | 'managed' | 'optimizing'
+  maturity_level?: MaturityLevel
   /** Target maturity */
-  target_maturity?: 'initial' | 'developing' | 'defined' | 'managed' | 'optimizing'
+  target_maturity?: MaturityLevel
   /** Gap between current and target */
   gap?: string
   /**
@@ -178,8 +178,8 @@ export interface CapabilityProperties {
  * }
  */
 export interface ValueStreamProperties {
-  /** Current stage in the value delivery pipeline */
-  stream_stage?: string
+  /** Current stage in the value delivery pipeline ( Option B). */
+  stream_stage?: 'discovery' | 'definition' | 'build' | 'delivery' | 'operation' | 'other'
   /**
    * End-to-end lead time.
    * @example "2 weeks"
@@ -228,8 +228,8 @@ export interface StrategicPillarProperties {
  * }
  */
 export interface AssumptionProperties {
-  /** Confidence before testing. Independent of whether the assumption is validated (tracked in lifecycle). */
-  confidence?: Confidence
+  /** Confidence before testing (UPGAssessment on `confidence_5`). Independent of whether the assumption is validated (tracked in lifecycle). */
+  confidence?: UPGAssessment
   /** Validation method, planned or used */
   validation_method?: string
   /** Exposure if the assumption turns out wrong */

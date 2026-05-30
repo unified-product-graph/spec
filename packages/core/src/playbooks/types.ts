@@ -38,6 +38,14 @@ export interface UPGPlaybook {
    */
   framework_id?: string
   /**
+   * Optional: frameworks relevant to this playbook's region, surfaced as
+   * "related reading" without implying they are invoked as steps (unlike
+   * `framework_id` / framework-kind steps). Each references a `UPGFramework.id`.
+   * Lets consumers show a region's signature frameworks even when the
+   * creation sequence is pure `entity_sequence`. ( / Riker's note.)
+   */
+  related_framework_ids?: readonly string[]
+  /**
    * The single named outcome entity this playbook produces. Defaults to the
    * region's anchor entity if omitted.
    */

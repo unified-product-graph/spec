@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Cadence, Duration, ISODateTime } from '../primitives.js'
+import type { Cadence, Duration, FrequencyRating, ISODateTime } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // CONTENT & KNOWLEDGE
@@ -165,7 +165,7 @@ export interface ContentCalendarProperties {
   /** Recurrence period (ISO-8601 `Duration`, e.g. `'P7D'`) */
   frequency_period?: Duration
   /** Qualitative rate tier when an exact rate is unknown */
-  frequency_rating?: 'rare' | 'occasional' | 'regular' | 'constant' | 'other'
+  frequency_rating?: FrequencyRating
 }
 
 /** Content theme.

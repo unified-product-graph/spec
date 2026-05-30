@@ -107,8 +107,8 @@ export interface ChangeRequestProperties {
  * }
  */
 export interface DeliverableProperties {
-  /** Kind of deliverable (e.g. "document", "prototype", "release") */
-  deliverable_type?: string
+  /** Kind of deliverable ( Option B). */
+  deliverable_type?: 'document' | 'prototype' | 'release' | 'design' | 'report' | 'other'
   /** Due date for the deliverable (ISO format) */
   due_date?: ISODate
   /** Current progress status */

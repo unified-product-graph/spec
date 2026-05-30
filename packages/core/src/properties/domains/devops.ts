@@ -6,7 +6,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODateTime } from '../primitives.js'
+import type { IncidentSeverity, ISODateTime, LogLevel, SignalUrgency } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // DEVOPS & PLATFORM
@@ -146,16 +146,18 @@ export interface IncidentProperties {
    */
   incident_type?: 'operational' | 'security' | 'data_breach' | 'performance' | 'dependency' | 'other'
   /**
-   * Severity. `sev1` = critical/system down. `sev2` = major impact.
-   * `sev3` = minor impact. `sev4` = minimal impact.
+   * Incident severity tier (paging classification). `sev1` = critical/system
+   * down. `sev2` = major impact. `sev3` = minor impact. `sev4` = minimal.
+   * Uses the `IncidentSeverity` scale; distinct from user-impact `severity_5`.
    * @example "sev1" for complete service unavailability
    */
-  severity_level?: 'sev1' | 'sev2' | 'sev3' | 'sev4'
+  severity_level?: IncidentSeverity
   /**
-   * Notification urgency. Independent of severity.
-   * `high` triggers phone calls. `low` sends a message.
+   * Notification urgency. Independent of severity. Uses the shared
+   * `SignalUrgency` scale (`low` | `medium` | `high` | `critical`);
+   * higher tiers escalate the notification channel.
    */
-  urgency?: 'high' | 'low'
+  urgency?: SignalUrgency
   /** ISO timestamp the incident started or was first detected. */
   started_at?: ISODateTime
   /** ISO timestamp first acknowledged by a responder. Used to compute time-to-acknowledge. */
@@ -292,10 +294,11 @@ export interface AlertRuleProperties {
    */
   condition?: string
   /**
-   * Routes notification and escalation.
+   * Routes notification and escalation. Uses the `LogLevel` scale (operational
+   * verbosity, distinct from user-impact `severity_5`).
    * `critical` = page immediately. `warning` = notify, don't page. `info` = log only.
    */
-  severity?: 'critical' | 'warning' | 'info'
+  severity?: LogLevel
   /**
    * Notification destination.
    * @example "pagerduty:sev1-rotation", "slack:#alerts-low"

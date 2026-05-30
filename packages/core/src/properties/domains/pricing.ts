@@ -9,6 +9,8 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
+import type { Cadence } from '../primitives.js'
+
 // ---------------------------------------------------------------------------
 // PRICING & PACKAGING
 // ---------------------------------------------------------------------------
@@ -25,8 +27,8 @@
 export interface PricingStrategyProperties {
   /** Pricing methodology used */
   strategy_type?: 'value_based' | 'cost_plus' | 'competitor_based' | 'penetration' | 'freemium'
-  /** How often pricing is reviewed */
-  review_cadence?: string
+  /** How often pricing is reviewed. Uses the shared `Cadence` scale. */
+  review_cadence?: Cadence
   /** Date of the last pricing change (ISO format) */
   last_change?: string
 }

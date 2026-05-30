@@ -255,7 +255,7 @@ export function getScale(scaleId: string): UPGScaleDefinition | undefined {
  * Sources: all `UPGAssessment`-typed properties across
  * `packages/upg-spec/src/properties/domains/` (audited at v0.4.0).
  */
-const PROPERTY_SCALE_MAP: Record<string, string> = {
+export const PROPERTY_SCALE_MAP: Record<string, string> = {
   // ── Reach ────────────────────────────────────────────────────────────────
   reach:            'reach_5',       // discovery, users
   projected_reach:  'reach_5',       // validation/experiment_plan
@@ -264,29 +264,50 @@ const PROPERTY_SCALE_MAP: Record<string, string> = {
   frequency:        'frequency_5',   // discovery, users, feedback
 
   // ── Severity ─────────────────────────────────────────────────────────────
-  severity:         'severity_5',    // users, engineering, ai, gtm, customer-success
+  severity:         'severity_5',    // users, engineering, ai, gtm, customer-success, security, accessibility
   severity_of_finding: 'severity_5', // validation/experiment_run
+  bug_severity:     'severity_5',    // product-spec/bug ( Option C collapse)
+  risk_level:       'severity_5',    // compliance/risk ( Option B)
+  scarcity_risk:    'severity_5',    // market-intelligence ( Option B)
 
   // ── Pain ─────────────────────────────────────────────────────────────────
   pain:             'pain_5',        // discovery
+  pain_score:       'pain_5',        // user ( Option B)
+  friction_score:   'pain_5',        // growth/ux ( Option B)
 
   // ── Impact ───────────────────────────────────────────────────────────────
   impact:           'impact_5',      // discovery, market, security, compliance
   projected_impact: 'impact_5',      // validation/experiment_plan
+  revenue_impact:   'impact_5',      // sales/business-model ( Option B)
+  effectiveness:    'impact_5',      // security/marketing ( Option B)
+  opportunity_score: 'impact_5',     // discovery/opportunity ( Option B)
 
   // ── Confidence ───────────────────────────────────────────────────────────
   confidence:       'confidence_5',  // discovery, validation, sales, product-spec
+  current_confidence: 'confidence_5', // validation/hypothesis ( Option B)
+  likelihood:       'confidence_5',  // market/risk ( Option B)
+  probability:      'confidence_5',  // sales/forecast ( Option B)
 
   // ── Effort ───────────────────────────────────────────────────────────────
   effort:           'effort_5',      // discovery
   effort_estimate:  'effort_5',      // feedback
   effort_to_fix:    'effort_5',      // engineering
+  cost_estimate:    'effort_5',      // validation/experiment_plan ( Option B)
 
   // ── Importance ───────────────────────────────────────────────────────────
   importance:       'importance_5',  // users
+  influence:        'importance_5',  // team-org/stakeholder ( Option B)
+  interest:         'importance_5',  // team-org/stakeholder ( Option B)
+  relevance:        'importance_5',  // market/content ( Option B)
+  weight:           'importance_5',  // validation/evidence ( Option B)
 
   // ── Satisfaction ─────────────────────────────────────────────────────────
   current_satisfaction: 'satisfaction_5', // users
+  emotion_score:    'satisfaction_5', // ux-design/customer-success journey ( Option B)
+
+  // Intentionally NOT mapped (resolve to the generic scale_5):
+  //   rarity   : VRIO distinctiveness; no canonical named scale fits.
+  //   strength : deprecated (validation/evidence; superseded by weight).
 }
 
 /**
@@ -323,4 +344,21 @@ export function getPropertyDefaultScale(
   propertyName: string,
 ): string {
   return PROPERTY_SCALE_MAP[propertyName] ?? DEFAULT_SCALE_ID
+}
+
+/**
+ * Inverse of `PROPERTY_SCALE_MAP`: the canonical property names that default to
+ * a given scale, in declaration order. Useful for documentation surfaces that
+ * want to show "where is this scale used".
+ *
+ * Returns an empty array for scales no property defaults to (e.g. the generic
+ * `'scale_5'` fallback, which is never an explicit entry).
+ *
+ * @example
+ * getPropertiesForScale('effort_5') // → ['effort', 'effort_estimate', 'effort_to_fix']
+ */
+export function getPropertiesForScale(scaleId: string): string[] {
+  return Object.entries(PROPERTY_SCALE_MAP)
+    .filter(([, id]) => id === scaleId)
+    .map(([property]) => property)
 }

@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { UPGAssessment, Confidence, Priority } from '../primitives.js'
+import type { UPGAssessment, Priority } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // EXPERIENCE DESIGN
@@ -182,8 +182,8 @@ export interface DesignQuestionProperties {
   framing?: 'how_might_we' | 'what_if' | 'why_do' | 'how_do' | 'what_prevents' | 'other'
   /** Importance against other backlog questions */
   priority?: Priority
-  /** Confidence the question is well-framed. Distinct from confidence in any answer. */
-  confidence?: Confidence
+  /** Confidence the question is well-framed (UPGAssessment on `confidence_5`). Distinct from confidence in any answer. */
+  confidence?: UPGAssessment
   /** Underlying assumptions. Surfaced explicitly so they can be challenged or validated. */
   assumptions?: string[]
   /** Primary validation method */

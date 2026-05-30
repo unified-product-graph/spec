@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODate, UPGAssessment } from '../primitives.js'
+import type { Cadence, FrequencyRating, ISODate, SignalSentiment, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // FEEDBACK & VoC
@@ -41,7 +41,7 @@ export interface FeatureRequestProperties {
   /** Number of votes or upvotes from users */
   vote_count?: number
   /** Detected sentiment of the request */
-  signal_sentiment?: 'positive' | 'negative' | 'neutral' | 'mixed'
+  signal_sentiment?: SignalSentiment
   /** Channel through which the request was received */
   signal_channel?: string
   /** Perceived urgency of the request */
@@ -109,8 +109,8 @@ export interface NpsCampaignProperties {
 export interface UserAdvisoryBoardProperties {
   /** Number of members on the board */
   member_count?: number
-  /** How often the board meets (e.g. "monthly", "quarterly") */
-  meeting_cadence?: string
+  /** How often the board meets. Uses the shared `Cadence` scale. */
+  meeting_cadence?: Cadence
   /** Primary topic or area the board advises on */
   board_focus?: string
 }
@@ -142,7 +142,7 @@ export interface BetaProgramProperties {
 export interface FeedbackThemeProperties {
   /** Display name of the theme */
   /** Overall sentiment across mentions */
-  sentiment?: 'positive' | 'neutral' | 'negative' | 'mixed'
+  sentiment?: SignalSentiment
   /** Whether this theme can be acted upon */
   actionable?: boolean
   /** How often the theme is mentioned (1-5) */

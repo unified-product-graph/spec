@@ -6,7 +6,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Cadence, Duration, ISODate, Priority, UPGAssessment } from '../primitives.js'
+import type { Cadence, Duration, FrequencyRating, ISODate, Priority, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // BUSINESS MODEL LAYER
@@ -233,7 +233,7 @@ export interface KeyActivityProperties {
   /** Recurrence period (ISO-8601 `Duration`, e.g. `'P7D'`) */
   frequency_period?: Duration
   /** Qualitative tier. Use when an exact rate is unknown. */
-  frequency_rating?: 'rare' | 'occasional' | 'regular' | 'constant' | 'other'
+  frequency_rating?: FrequencyRating
   /** Operationally accountable team or individual */
   operational_owner?: string
   /** Bottleneck or scaling constraint */

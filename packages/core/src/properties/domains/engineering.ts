@@ -6,7 +6,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Confidence, Duration, ISODate, ISODateTime, UPGAssessment } from '../primitives.js'
+import type { CauseConfidence, Confidence, Duration, FrequencyRating, ISODate, ISODateTime, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // ENGINEERING LAYER
@@ -567,7 +567,7 @@ export interface RootCauseProperties {
    * `UPGAssessment`-typed epistemic confidence used elsewhere. The 3-tier shape
    * stays as a discrete RCA-lifecycle marker.
    */
-  cause_confidence?: 'hypothesised' | 'likely' | 'confirmed'
+  cause_confidence?: CauseConfidence
   /** One-paragraph evidence summary. Log lines, traces, repro steps. Detailed artefacts go on linked `evidence` nodes. */
   evidence_summary?: string
   /** Legacy free-form category. Retained for v0.2 baseline; new graphs prefer `cause_category`. */
@@ -625,7 +625,7 @@ export interface SymptomProperties {
    * Migration: `once → rare`, `sporadic → occasional`,
    * `frequent → regular`, `constant → constant`.
    */
-  frequency_rating?: 'rare' | 'occasional' | 'regular' | 'constant' | 'other'
+  frequency_rating?: FrequencyRating
   /** Approximate count of users affected. Snapshot estimate. */
   affected_users_estimate?: number
   /** Reproduction reliability */

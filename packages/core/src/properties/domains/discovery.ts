@@ -8,7 +8,7 @@
  * License: MIT
  */
 
-import type { UPGAssessment, Confidence } from '../primitives.js'
+import type { UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // DISCOVERY
@@ -79,8 +79,8 @@ export interface FeasibilityStudyProperties {
   study_type?: 'technical' | 'business' | 'market' | 'resource'
   /** Outcome conclusion of the study */
   conclusion?: 'feasible' | 'not_feasible' | 'conditional' | 'needs_more_data'
-  /** Confidence in the conclusion */
-  confidence?: Confidence
+  /** Confidence in the conclusion (UPGAssessment on `confidence_5`). */
+  confidence?: UPGAssessment
 }
 
 /** DesignSprint entity.

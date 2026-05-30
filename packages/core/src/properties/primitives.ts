@@ -114,18 +114,86 @@ export type HealthStatus = 'on_track' | 'at_risk' | 'off_track'
  */
 export type RuleStrength = 'must' | 'must_not' | 'exception' | 'warning' | 'guideline'
 
-/** Confidence level for assumptions, evidence, and feasibility */
+/**
+ * Confidence level for assumptions, evidence, and feasibility.
+ *
+ * @deprecated since v0.8.0. Confidence is now expressed as a structured
+ * `UPGAssessment` on the numeric `confidence_5` scale ( Option C), so
+ * the qualitative label and a computable/comparable value travel together.
+ * Migrate `confidence: Confidence` to `confidence: UPGAssessment` with
+ * `scale_id: 'confidence_5'` (suggested value map: `high` -> 5, `medium` -> 3,
+ * `low` -> 1). The enum is retained only for back-compat reads.
+ */
 export type Confidence = 'high' | 'medium' | 'low'
 
 /**
  * Three-point ordinal scale: low / medium / high.
  *
- * Intentional alias of `Confidence`. The value set is identical.
- * Use `LowMedHigh` when the property semantics are clearly about magnitude
- * or degree (e.g. `substitutability`, `magnitude`) rather than epistemic
- * confidence. Both types accept the same runtime strings.
+ * @deprecated since v0.8.0. Alias of the deprecated `Confidence`; was used by
+ * zero properties. For magnitude/degree judgments use a named enum scale or a
+ * `UPGAssessment`. Retained only for back-compat.
  */
 export type LowMedHigh = Confidence
+
+/**
+ * Maturity of a root-cause determination during incident debugging.
+ *
+ * Used by `engineering.ts` (`root_cause.cause_confidence`). An epistemic
+ * *maturity ladder*, distinct from `Confidence`'s level vocabulary. Pairs
+ * with `UPG_ENUM_SCALES.CauseConfidence` for per-value labels.
+ *
+ * Members (tentative → certain):
+ *   `'hypothesised'` : a proposed cause, not yet tested
+ *   `'likely'`       : supported by evidence but not conclusively proven
+ *   `'confirmed'`    : verified as the cause
+ */
+export type CauseConfidence = 'hypothesised' | 'likely' | 'confirmed'
+
+/**
+ * A person's comfort level with a tool, technology, or practice.
+ *
+ * Used by `users.ts` (`persona.tech_comfort`). Pairs with
+ * `UPG_ENUM_SCALES.ComfortLevel` for per-value labels and descriptions.
+ *
+ * Members (low → expert, plus an escape hatch):
+ *   `'low'`    : little or no familiarity
+ *   `'medium'` : functional, everyday competence
+ *   `'high'`   : confident, fluent use
+ *   `'expert'` : deep mastery; can teach or extend
+ *   `'other'`  : a comfort profile not captured by the above tiers
+ */
+export type ComfortLevel = 'low' | 'medium' | 'high' | 'expert' | 'other'
+
+/**
+ * Operational log / alert verbosity level. Distinct from user-impact
+ * `severity_5` ( Option 0): this classifies how loud a signal should
+ * be, not how bad an outcome is for the user.
+ *
+ * Used by `devops.ts` (`monitor.severity`). Pairs with
+ * `UPG_ENUM_SCALES.LogLevel` for per-value labels and descriptions.
+ *
+ * Members (loudest → quietest):
+ *   `'critical'` : page someone now; service-affecting
+ *   `'warning'`  : needs attention soon, not yet service-affecting
+ *   `'info'`     : informational; no action required
+ */
+export type LogLevel = 'critical' | 'warning' | 'info'
+
+/**
+ * Incident severity tier (paging classification). Distinct from user-impact
+ * `severity_5` and from `LogLevel` ( Option 0): this is the ops-side
+ * blast-radius tier used to drive escalation and response process.
+ *
+ * Used by `devops.ts` (`incident.severity_level`). Pairs with
+ * `UPG_ENUM_SCALES.IncidentSeverity` for per-value labels and descriptions.
+ *
+ * Members (most severe -> least):
+ *   `'sev1'` : critical outage; full response, exec-visible
+ *   `'sev2'` : major degradation; urgent response
+ *   `'sev3'` : minor/partial impact; handled in hours
+ *   `'sev4'` : negligible impact; routine handling
+ */
+export type IncidentSeverity = 'sev1' | 'sev2' | 'sev3' | 'sev4'
 
 // ─── Signal triplet primitives ────────────────────────────────────────────────
 
@@ -146,6 +214,50 @@ export type SignalUrgency = 'low' | 'medium' | 'high' | 'critical'
  * negative → mixed (valence-first).
  */
 export type SignalSentiment = 'positive' | 'neutral' | 'negative' | 'mixed'
+
+// ─── Shared recurring enum vocabularies ( Option B promotions) ─────────
+// Each is used by 2+ properties and earns a UPG_ENUM_SCALES entry; single-use
+// inline enums deliberately stay inline (see the scale-coverage ADR).
+
+/**
+ * Capability/process maturity on the CMMI ladder. Used by `strategy.ts`
+ * (`maturity_level`, `target_maturity`). Pairs with `UPG_ENUM_SCALES.MaturityLevel`.
+ */
+export type MaturityLevel = 'initial' | 'developing' | 'defined' | 'managed' | 'optimizing'
+
+/**
+ * WCAG conformance level. Used by `accessibility.ts` (`conformance_level`,
+ * `level`). Pairs with `UPG_ENUM_SCALES.ConformanceLevel`.
+ */
+export type ConformanceLevel = 'A' | 'AA' | 'AAA'
+
+/**
+ * Data classification / sensitivity tier. Used by `data.ts` (`sensitivity`)
+ * and `security.ts` (`level`). Pairs with `UPG_ENUM_SCALES.DataSensitivity`.
+ */
+export type DataSensitivity = 'public' | 'internal' | 'confidential' | 'restricted'
+
+/**
+ * Learning difficulty tier. Used by `education.ts` (`difficulty`,
+ * `path_difficulty`). Pairs with `UPG_ENUM_SCALES.DifficultyLevel`.
+ */
+export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced'
+
+/**
+ * Qualitative frequency rating (distinct from the numeric `frequency_5` scale
+ * and from `Cadence`'s calendar tiers). Used by `frequency_rating` across
+ * gtm/business-model/engineering/content/customer-success. Pairs with
+ * `UPG_ENUM_SCALES.FrequencyRating`.
+ */
+export type FrequencyRating = 'constant' | 'regular' | 'occasional' | 'rare' | 'other'
+
+/**
+ * Direction of evidence relative to a claim (supports / refutes / neutral).
+ * Distinct from `confidence_impact` (strengthens/weakens) per the
+ * polysemy verdicts. Used by `validation.ts` (`direction`, `result_direction`).
+ * Pairs with `UPG_ENUM_SCALES.EvidenceDirection`.
+ */
+export type EvidenceDirection = 'supports' | 'refutes' | 'neutral'
 
 /**
  * Channel through which an inbound signal was received.

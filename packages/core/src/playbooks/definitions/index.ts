@@ -76,6 +76,7 @@ export const STRATEGY_OUTCOMES_PLAYBOOK: UPGPlaybook = {
     'Cascade vision through themes, outcomes, objectives, key results, and the bets you are making to get there.',
   region: 'strategy_outcomes',
   is_canonical: true,
+  related_framework_ids: ['okr-framework', 'three-horizons', 'north-star-metric', 'metrics-tree', 'wardley-map'],
   target_anchor_entity: 'objective',
   creation_sequence: [
     seqStep(1, 'Vision & Mission',
@@ -120,6 +121,7 @@ export const USERS_NEEDS_PLAYBOOK: UPGPlaybook = {
     'Bootstrap personas, jobs, needs, and desired outcomes: the user side of every product graph.',
   region: 'users_needs',
   is_canonical: true,
+  related_framework_ids: ['persona-canvas', 'empathy-map', 'value-proposition-canvas', 'kano-model'],
   target_anchor_entity: 'persona',
   creation_sequence: [
     seqStep(
@@ -179,6 +181,7 @@ export const DISCOVERY_RESEARCH_VALIDATION_PLAYBOOK: UPGPlaybook = {
     'Evidence-first discovery sequence: plan → recruit → observe → synthesize → insight → opportunity → hypothesis → test.',
   region: 'discovery_research_validation',
   is_canonical: true,
+  related_framework_ids: ['double-diamond', 'opportunity-solution-tree', 'build-measure-learn', 'hypothesis-board'],
   target_anchor_entity: 'opportunity',
   creation_sequence: [
     seqStep(1, 'Plan',
@@ -239,6 +242,7 @@ export const MARKET_COMPETITIVE_PLAYBOOK: UPGPlaybook = {
     'Map the competitive landscape: define the market, name the alternatives, read trends, find moves.',
   region: 'market_competitive',
   is_canonical: true,
+  related_framework_ids: ['porter-five-forces', 'swot-analysis', 'value-chain-analysis', 'wardley-map', 'bullseye-framework'],
   target_anchor_entity: 'competitor',
   creation_sequence: [
     seqStep(1, 'Market',
@@ -274,6 +278,7 @@ export const EXPERIENCE_DESIGN_BRAND_PLAYBOOK: UPGPlaybook = {
     'Journey-first design sequence: research → personas → journeys → define → ideate → prototype → test → design system.',
   region: 'experience_design_brand',
   is_canonical: true,
+  related_framework_ids: ['double-diamond', 'atomic-design', 'story-map'],
   target_anchor_entity: 'user_journey',
   creation_sequence: [
     seqStep(1, 'Research',
@@ -369,6 +374,7 @@ export const PRODUCT_DELIVERY_PLAYBOOK: UPGPlaybook = {
     'Shape what gets built: features, epics, user stories, releases, milestones, and the dependencies between them.',
   region: 'product_delivery',
   is_canonical: true,
+  related_framework_ids: ['story-map', 'rice-scoring', 'moscow', 'now-next-later', 'shape-up', 'kano-model'],
   target_anchor_entity: 'feature',
   creation_sequence: [
     seqStep(1, 'Features',
@@ -422,6 +428,7 @@ export const ENGINEERING_PLATFORM_PLAYBOOK: UPGPlaybook = {
     'Architecture-first engineering sequence: architecture → services → data → build → test → deploy → monitor → security.',
   region: 'engineering_platform',
   is_canonical: true,
+  related_framework_ids: ['c4-model', 'adr-log', 'dora-metrics'],
   target_anchor_entity: 'service',
   creation_sequence: [
     seqStep(1, 'Architecture',
@@ -480,6 +487,7 @@ export const BUSINESS_GTM_GROWTH_PLAYBOOK: UPGPlaybook = {
     'Viability-first business sequence: value prop → customer → revenue → costs → unit economics → GTM → competitive advantage.',
   region: 'business_gtm_growth',
   is_canonical: true,
+  related_framework_ids: ['business-model-canvas', 'pirate-metrics-aarrr', 'north-star-metric', 'product-led-growth-framework', 'marketing-mix-4ps'],
   target_anchor_entity: 'value_proposition',
   creation_sequence: [
     seqStep(1, 'Value Proposition',
@@ -654,6 +662,7 @@ export const ANALYTICS_DATA_PLAYBOOK: UPGPlaybook = {
     'Bootstrap the measurement plane: sources, schemas, pipelines, metrics, dashboards, and the rules that keep them honest.',
   region: 'analytics_data',
   is_canonical: true,
+  related_framework_ids: ['metrics-tree', 'north-star-metric', 'pirate-metrics-aarrr', 'dora-metrics'],
   target_anchor_entity: 'metric',
   creation_sequence: [
     seqStep(1, 'Data Sources',
@@ -689,6 +698,7 @@ export const OPERATIONS_QUALITY_PLAYBOOK: UPGPlaybook = {
     'The operational backbone: pipelines, monitoring, incident response, security, quality gates, compliance, support. Specialised playbooks cover team rituals.',
   region: 'operations_quality',
   is_canonical: true,
+  related_framework_ids: ['raci-matrix', 'retrospective', 'team-health-check', 'raid-log'],
   target_anchor_entity: 'incident',
   creation_sequence: [
     seqStep(1, 'DevOps Backbone',

@@ -12,12 +12,18 @@ describe('getPropertyDefaultScale', () => {
     expect(getPropertyDefaultScale('feature', '')).toBe('scale_5')
   })
 
-  it('returns scale_5 for a property that uses generic 1-5 (risk_level)', () => {
-    expect(getPropertyDefaultScale('risk', 'risk_level')).toBe('scale_5')
+  // Option B: risk_level and influence are now mapped to canonical
+  // scales (previously fell through to the generic scale_5).
+  it('maps risk_level to severity_5 ( Option B)', () => {
+    expect(getPropertyDefaultScale('risk', 'risk_level')).toBe('severity_5')
   })
 
-  it('returns scale_5 for influence (team domain)', () => {
-    expect(getPropertyDefaultScale('stakeholder', 'influence')).toBe('scale_5')
+  it('maps influence to importance_5 ( Option B)', () => {
+    expect(getPropertyDefaultScale('stakeholder', 'influence')).toBe('importance_5')
+  })
+
+  it('still returns scale_5 for an intentionally-unmapped assessment (rarity)', () => {
+    expect(getPropertyDefaultScale('competitor', 'rarity')).toBe('scale_5')
   })
 
   // ── Reach overrides ───────────────────────────────────────────────────────

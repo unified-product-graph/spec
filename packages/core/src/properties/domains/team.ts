@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODate, Priority, UPGAssessment } from '../primitives.js'
+import type { Cadence, ISODate, Priority, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // TEAM & ORGANISATION
@@ -203,8 +203,8 @@ export interface DepartmentProperties {
  * }
  */
 export interface SkillProperties {
-  /** Category of the skill (e.g. "technical", "leadership", "design") */
-  skill_category?: string
+  /** Category of the skill ( Option B). */
+  skill_category?: 'technical' | 'leadership' | 'design' | 'product' | 'business' | 'operations' | 'other'
   /** Description of proficiency levels for this skill */
   proficiency_levels?: string[]
   /** Problem domain the skill applies to (e.g. "payments", "accessibility") */
@@ -227,8 +227,8 @@ export interface SkillProperties {
 export interface CeremonyProperties {
   /** Kind of recurring meeting */
   ceremony_type?: 'standup' | 'planning' | 'review' | 'retro' | 'sync' | 'demo' | 'other'
-  /** How often the ceremony occurs (e.g. "daily", "biweekly") */
-  cadence?: string
+  /** How often the ceremony occurs. Uses the shared `Cadence` scale. */
+  cadence?: Cadence
   /** Typical duration of the meeting in minutes */
   duration_minutes?: number
   /** People or roles who attend */

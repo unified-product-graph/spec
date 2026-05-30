@@ -4,7 +4,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Confidence, ISODate } from '../primitives.js'
+import type { Confidence, EvidenceDirection, ISODate } from '../primitives.js'
 import type { UPGAssessment } from '../../grammar/scales.js'
 
 // ---------------------------------------------------------------------------
@@ -29,7 +29,7 @@ import type { UPGAssessment } from '../../grammar/scales.js'
  *   will_result_in: 'will result in higher decision confidence',
  *   we_know_when: 'we know when 60% of decisions cite evidence',
  *   risk_if_wrong: 'Wasted dev cycles wiring evidence panels users ignore',
- *   current_confidence: { value: 3, scale: 'confidence_5pt', label: 'Medium' },
+ *   current_confidence: { value: 3, scale: 'confidence_5', label: 'Medium' },
  * }
  */
 export interface HypothesisProperties {
@@ -74,8 +74,8 @@ export interface HypothesisEvidenceProperties {
    * longer type-check. Migration: `confirms → supports`, `disconfirms → refutes`,
    * `inconclusive → neutral`.
    */
-  direction?: 'supports' | 'refutes' | 'neutral'
-  /** Strength of the evidence (UPGAssessment, scale `weight_5pt`). */
+  direction?: EvidenceDirection
+  /** Strength of the evidence (UPGAssessment, scale `scale_5`). */
   weight?: UPGAssessment
   /** Plain-English summary of what the evidence shows. */
   summary?: string
@@ -133,8 +133,8 @@ export interface ExperimentProperties {
  *   method: 'a_b_test',
  *   success_criteria: 'Day-7 activation rate +5% lift, p<0.05',
  *   target_metric_id: 'mtr_day7_activation',
- *   projected_reach: { value: 4, scale: 'reach_5pt', evidence: 'Cohort sizing' },
- *   confidence: { value: 3, scale: 'confidence_5pt' },
+ *   projected_reach: { value: 4, scale: 'reach_5', evidence: 'Cohort sizing' },
+ *   confidence: { value: 3, scale: 'confidence_5' },
  *   planned_start_date: '2026-05-01',
  *   planned_end_date: '2026-05-21',
  * }
@@ -152,7 +152,7 @@ export interface ExperimentPlanProperties {
   projected_reach?: UPGAssessment
   /** Projected impact on the target metric (UPGAssessment) */
   projected_impact?: UPGAssessment
-  /** Team confidence at plan-time (UPGAssessment, scale `confidence_5pt`) */
+  /** Team confidence at plan-time (UPGAssessment, scale `confidence_5`) */
   confidence?: UPGAssessment
   /** Cost estimate at plan-time (UPGAssessment) */
   cost_estimate?: UPGAssessment
@@ -178,7 +178,7 @@ export interface ExperimentPlanProperties {
  *   actual_end_date: '2026-05-22',
  *   actual_reach: 12450,
  *   outcome_summary: 'Variant B uplift +6.3% on day-7 activation, p=0.03.',
- *   severity_of_finding: { value: 4, scale: 'severity_5pt' },
+ *   severity_of_finding: { value: 4, scale: 'severity_5' },
  *   learning: 'Onboarding tooltip placement materially shifts activation; productize.',
  *   disposition: 'confirmed',
  * }
@@ -230,7 +230,7 @@ export interface LearningProperties {
    * `Evidence.direction` and `HypothesisEvidence.direction`. Migration:
    * `positive → supports`, `negative → refutes`, `neutral → neutral`.
    */
-  result_direction?: 'supports' | 'refutes' | 'neutral'
+  result_direction?: EvidenceDirection
   /** Confidence impact on the parent hypothesis */
   confidence_impact?: 'strengthens' | 'weakens' | 'neutral'
 }
@@ -300,7 +300,7 @@ export interface ResearchPlanProperties {
  *   evidence_rigor: 'quantitative',
  *   evidence_source: 'experiment_run',
  *   direction: 'supports',
- *   weight: { value: 4, scale: 'weight_5pt', label: 'Strong' },
+ *   weight: { value: 4, scale: 'scale_5', label: 'Strong' },
  *   summary: 'Variant B uplift +6.3% on day-7 activation, p=0.03 across n=12,450.',
  *   observed_at: '2026-05-22',
  * }
@@ -314,8 +314,8 @@ export interface EvidenceProperties {
    */
   evidence_source?: 'experiment_run' | 'observation' | 'quote' | 'metric_change' | 'market_data' | 'interview'
   /** Direction relative to the parent hypothesis. */
-  direction?: 'supports' | 'refutes' | 'neutral'
-  /** Strength (UPGAssessment, scale `weight_5pt`). */
+  direction?: EvidenceDirection
+  /** Strength (UPGAssessment, scale `scale_5`). */
   weight?: UPGAssessment
   /** Plain-English summary. */
   summary?: string
@@ -323,9 +323,4 @@ export interface EvidenceProperties {
   observed_at?: ISODate
   /** Free-text provenance note */
   source?: string
-  /**
-   * @deprecated since v0.4.0. Use `weight: UPGAssessment`.
-   * Simple enum replaced by structured assessment to align with UPG scoring patterns.
-   */
-  strength?: 'strong' | 'moderate' | 'weak'
 }

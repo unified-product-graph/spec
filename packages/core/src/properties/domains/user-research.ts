@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { Confidence, ISODate, Priority } from '../primitives.js'
+import type { ISODate, Priority, SignalSentiment, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // USER RESEARCH
@@ -82,7 +82,7 @@ export interface ObservationProperties {
    * Structured sentiment. Tools like Dovetail and EnjoyHQ converge on these
    * four values. More precise than `highlight_tag` for aggregation.
    */
-  sentiment?: 'positive' | 'negative' | 'neutral' | 'mixed'
+  sentiment?: SignalSentiment
 }
 
 /** Verbatim quote from a participant.
@@ -119,8 +119,8 @@ export interface InsightProperties {
    * `strategic` = finding that affects product direction.
    */
   insight_level?: 'pattern' | 'finding' | 'actionable' | 'strategic'
-  /** Confidence. Reflects the strength and diversity of supporting evidence. */
-  confidence?: Confidence
+  /** Confidence (UPGAssessment on `confidence_5`). Reflects the strength and diversity of supporting evidence. */
+  confidence?: UPGAssessment
   /** Supporting observations, quotes, or evidence items. Higher counts increase confidence. */
   evidence_count?: number
   /**
@@ -165,8 +165,8 @@ export interface AffinityClusterProperties {
   theme?: string
   /** Observations in this cluster */
   child_observation_count?: number
-  /** Confidence in the theme's validity */
-  confidence?: Confidence
+  /** Confidence in the theme's validity (UPGAssessment on `confidence_5`). */
+  confidence?: UPGAssessment
 }
 
 /** Research question guiding a study.

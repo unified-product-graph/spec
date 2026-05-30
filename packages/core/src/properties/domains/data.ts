@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODate } from '../primitives.js'
+import type { Cadence, DataSensitivity, ISODate } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // DATA & ANALYTICS
@@ -25,8 +25,8 @@ export interface DataSourceProperties {
   source_type?: 'database' | 'api' | 'event_stream' | 'warehouse'
   /** Current connection health */
   connection_status?: 'connected' | 'disconnected' | 'error'
-  /** How often the data is refreshed (e.g. "hourly", "daily") */
-  refresh_cadence?: string
+  /** How often the data is refreshed. Uses the shared `Cadence` scale. */
+  refresh_cadence?: Cadence
 }
 
 /** EventSchema entity.
@@ -65,8 +65,8 @@ export interface DashboardProperties {
   audience?: string
   /** Number of widgets or panels on the dashboard */
   element_count?: number
-  /** How often the dashboard data refreshes */
-  refresh_cadence?: string
+  /** How often the dashboard data refreshes. Uses the shared `Cadence` scale. */
+  refresh_cadence?: Cadence
   /** Number of user-configurable filters */
   filter_count?: number
 }
@@ -137,8 +137,8 @@ export interface DataQualityRuleProperties {
  * }
  */
 export interface DataProductProperties {
-  /** Classification of the data product (e.g. "report", "dataset", "stream") */
-  data_product_type?: string
+  /** Classification of the data product ( Option B). */
+  data_product_type?: 'report' | 'dataset' | 'stream' | 'api' | 'ml_feature' | 'other'
   /** Freshness SLA commitment (e.g. "< 1 hour") */
   sla_freshness?: string
 }
@@ -223,7 +223,7 @@ export interface DataDomainProperties {
    */
   domain_type?: 'master' | 'operational' | 'analytical' | 'reference'
   /** Sensitivity band applied across the domain */
-  sensitivity?: 'public' | 'internal' | 'confidential' | 'restricted'
+  sensitivity?: DataSensitivity
 }
 
 /** Report entity.

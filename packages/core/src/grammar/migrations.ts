@@ -562,6 +562,42 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.8.0: deprecated-property removal pass ───────────────────
+  //
+  // The seven properties tagged `@deprecated since v0.4.0` that survived the
+  // v0.5.0 hygiene pass are removed from the spec in v0.8.0 (a breaking
+  // release). Five of the seven already carry a migration:
+  //   - `task.task_status` / `bug.bug_status` lift to `UPGBaseNode.status`
+  //     (see `UPG_PROPERTY_MIGRATIONS['0.4.0']`, values identical).
+  //   - `learning.metric` drops in favour of the `learning_observed_on_metric`
+  //     edge (see `UPG_PROPERTY_MIGRATIONS['0.5.0']`).
+  // The two remaining property surfaces are migrated here:
+  //   - `evidence.strength` (simple `strong | moderate | weak` enum) is
+  //     dropped in favour of `weight: UPGAssessment` (scale `weight_5pt`).
+  //     Authors carrying the legacy key should copy the value to `weight`
+  //     before applying this migration: `strong → 5`, `moderate → 3`,
+  //     `weak → 1`, with the old word preserved in `weight.label`.
+  //   - `story_task.estimate` / `.effort` / `.priority` drop. `story_task`
+  //     itself is deprecated (`UPG_MIGRATIONS['0.4.0']` renames it to the
+  //     canonical `task`); the type rename copies every property verbatim,
+  //     so the values survive on `task` (`TaskProperties.estimate` /
+  //     `.effort` / `.priority`, all live). This rule removes the residue
+  //     from any node still typed `story_task` at migration time.
+  '0.8.0': [
+    {
+      kind: 'drop_props',
+      type: 'evidence',
+      drop_props: ['strength'],
+      reason: ' (v0.8.0). evidence.strength was `@deprecated since v0.4.0`; the structured `weight: UPGAssessment` (scale `weight_5pt`) replaces the `strong | moderate | weak` enum to align with the spec-wide scoring pattern. Authors should copy the value to `weight` before applying this migration (strong -> 5, moderate -> 3, weak -> 1; carry the old word in `weight.label`). The migration drops the residue.',
+    },
+    {
+      kind: 'drop_props',
+      type: 'story_task',
+      drop_props: ['estimate', 'effort', 'priority'],
+      reason: ' (v0.8.0). story_task.estimate / .effort / .priority were `@deprecated since v0.4.0`; story_task itself is deprecated (UPG_MIGRATIONS["0.4.0"] renames it to canonical `task`, copying all properties verbatim), so the values survive on TaskProperties.estimate / .effort / .priority (all live). This rule removes the residue from any node still typed `story_task` at migration time.',
+    },
+  ],
+
   // ── v0.5.0: deprecation hygiene pass ───────────────────────────
   //
   // Properties tagged `@deprecated since="0.4.0" removeIn="0.5.0"` (and the

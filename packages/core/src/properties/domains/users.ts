@@ -4,7 +4,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { UPGAssessment } from '../primitives.js'
+import type { ComfortLevel, UPGAssessment } from '../primitives.js'
 
 /** User archetype representing a distinct group of users.
  *
@@ -30,7 +30,7 @@ export interface PersonaProperties {
    * Tech comfort. Closed set so personas across products compare on the same axis.
    * Free-text colour belongs in `context` or `motivation`.
    */
-  tech_comfort?: 'low' | 'medium' | 'high' | 'expert' | 'other'
+  tech_comfort?: ComfortLevel
   /** Industry or domain knowledge this persona brings
    *  @example "10+ years SaaS experience", "New to healthcare IT" */
   domain_expertise?: string
