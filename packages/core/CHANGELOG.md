@@ -9,6 +9,39 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-05-30
+
+### Added — canonical `.upg` serialisation (`upg fmt`) + `$upg` header
+
+**Additive patch release.** The new serialiser, header types, and read path are purely additive
+over 0.7.4 — no exports removed, no breaking changes — so this ships as `0.7.5`. The breaking
+`0.8.0` is reserved for the deprecated-property removal. `UPG_VERSION` (catalogue version)
+stays `'0.7.3'`; the on-disk `format_version` is `'1.0.0'`.
+A single shared serialiser in core, `serializeCanonical(doc) → string`, so the same logical graph
+always produces byte-identical output regardless of which tool wrote it — git then diffs *meaning*,
+not formatting. Anchored on RFC 8785 (JSON Canonicalization Scheme) for object-internal rules, with
+two deliberate deviations for the review lifecycle: pretty-print (2-space, one element per line, LF)
+and semantic sorting of the set-like arrays (`nodes`, `edges`, `cross_edges`, `tags`; `aliases`
+order preserved as append-only history).
+
+New exports from `@unified-product-graph/core`: `serializeCanonical`, `parseUpg`,
+`normalizeDocument`, `formatUpgText`, `isCanonical`, `computeBodyChecksum`,
+`UPG_CANONICAL_FORMAT_VERSION` (`'1.0.0'`), plus the `$upg` header types.
+
+- **Single-product** files adopt the canonical `$upg`-header envelope: consolidated metadata
+  (`format_version`, `spec_version`, product summary, counts, provenance, body integrity) in one
+  leading object; `product`/`nodes`/`edges` stay top-level.
+- **Portfolio** files also adopt the canonical `$upg` envelope (`$upg.kind: "portfolio"`);
+  organisation + collections stay top-level. The portfolio store (and every MCP portfolio tool
+  through it) reads via `normalizeDocument`, accepting both `$upg` and legacy flat portfolios.
+- **Drift repair:** double-encoded JSON in `properties`/`tags` (found in real dogfood graphs) is
+  restructured on serialise, or rejected with a precise error.
+- **Read path:** `parseUpg`/`normalizeDocument` accept both the `$upg` and legacy flat envelopes →
+  the flat in-memory `UPGDocument`. Wired into the SDK store (load/save/merge), workspace create,
+  the MCP server init writes, and the CLI `init`/`import` writers, so every writer is co-canonical.
+- **New CLI command:** `upg fmt [files...]` rewrites to canonical form; `upg fmt --check` is a CI gate.
+- Backward-compatible reads; no catalogue/schema/API removals. `UPG_VERSION` unchanged.
+
 ---
 
 ## [0.7.4] - 2026-05-29

@@ -73,6 +73,13 @@ export interface FrameworkPropertyRequirement {
   default_value?: unknown
   /** Valid values when type is 'enum' */
   enum_values?: string[]
+  /**
+   * The assessment scale this property is rated on (only when type is
+   * 'assessment'). References a scale id in `UPG_SCALES` (e.g. 'reach_5',
+   * 'impact_5'). Lets renderers show the scale's points (1=Minimal … 5=Massive)
+   * and formulas compute on a known range. See `grammar/scales.ts`.
+   */
+  scale_id?: string
   /** Human-readable label for the property (shown in UI) */
   label?: string
   /** Explanation of what this property represents */

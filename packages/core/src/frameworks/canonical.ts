@@ -7,11 +7,10 @@
  * taught in product education.
  *
  * The fuller research catalog (~182 additional definitions) lives in the
- * private `@unified-product-graph/frameworks` workspace package and is
- * promoted into this canonical set incrementally as each framework is
- * reviewed and validated.
+ * `definitions/` directory and is promoted into this canonical set
+ * incrementally as each framework is reviewed and validated.
  *
- * THIS FILE IS GENERATED. See scripts/regen-canonical-frameworks.mjs.
+ * THIS FILE IS GENERATED. See scripts/regen-canonical-frameworks.ts.
  */
 
 import type { UPGFramework } from './types.js'
@@ -1244,26 +1243,6 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Items to score",
         "entityTypeId": "feature",
         "description": "Features, opportunities, or solutions being evaluated"
-      },
-      {
-        "label": "Reach",
-        "entityTypeId": "feature",
-        "description": "How many users does this affect per quarter?"
-      },
-      {
-        "label": "Impact",
-        "entityTypeId": "feature",
-        "description": "How much does this move the target outcome?"
-      },
-      {
-        "label": "Confidence",
-        "entityTypeId": "feature",
-        "description": "How sure are we about these estimates?"
-      },
-      {
-        "label": "Effort",
-        "entityTypeId": "feature",
-        "description": "How many person-months to build?"
       }
     ],
     "data": {
@@ -1277,31 +1256,35 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "feature": [
           {
             "property": "reach",
-            "type": "number",
+            "type": "assessment",
+            "scale_id": "reach_5",
             "required": true,
             "label": "Reach",
             "description": "How many users will this impact per quarter?"
           },
           {
             "property": "impact",
-            "type": "number",
+            "type": "assessment",
+            "scale_id": "impact_5",
             "required": true,
             "label": "Impact",
-            "description": "How much will this impact each user? (1=minimal, 2=low, 3=medium, 4=high, 5=massive)"
+            "description": "How much will this impact each user, on the impact scale?"
           },
           {
             "property": "confidence",
-            "type": "number",
+            "type": "assessment",
+            "scale_id": "confidence_5",
             "required": true,
             "label": "Confidence",
-            "description": "How confident are you in the estimates? (0.5=low, 0.8=medium, 1.0=high)"
+            "description": "How confident are you in the reach, impact, and effort estimates?"
           },
           {
             "property": "effort",
-            "type": "number",
+            "type": "assessment",
+            "scale_id": "effort_5",
             "required": true,
             "label": "Effort",
-            "description": "Person-months of effort required"
+            "description": "How much work is required to build and ship this, on the effort scale?"
           }
         ]
       },
@@ -1495,7 +1478,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Performance",
         "entityTypeId": "feature",
-        "description": "More is better, with linear satisfaction increase"
+        "description": "More is better: linear satisfaction increase"
       },
       {
         "label": "Delighters",
@@ -1744,24 +1727,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "slots": [
       {
-        "label": "Must Have",
+        "label": "Requirements to categorise",
         "entityTypeId": "feature",
-        "description": "Non-negotiable requirements for this release"
-      },
-      {
-        "label": "Should Have",
-        "entityTypeId": "feature",
-        "description": "Important but not critical; a workaround exists"
-      },
-      {
-        "label": "Could Have",
-        "entityTypeId": "feature",
-        "description": "Nice to have; include if time permits"
-      },
-      {
-        "label": "Won't Have",
-        "entityTypeId": "feature",
-        "description": "Explicitly out of scope for now"
+        "description": "Features or requirements sorted into the four MoSCoW buckets"
       }
     ],
     "data": {
@@ -1771,7 +1739,23 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "scored_item"
         }
       ],
-      "required_properties": {},
+      "required_properties": {
+        "feature": [
+          {
+            "property": "moscow",
+            "type": "enum",
+            "required": true,
+            "label": "MoSCoW priority",
+            "description": "Which scope bucket this requirement falls into for the current release",
+            "enum_values": [
+              "must",
+              "should",
+              "could",
+              "wont"
+            ]
+          }
+        ]
+      },
       "computed_properties": [
         {
           "property": "must_have_ratio",
@@ -1791,28 +1775,19 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "columns": [
           {
             "property": "title",
-            "label": "Must Have",
+            "label": "Requirement",
             "sortable": true
           },
           {
-            "property": "title",
-            "label": "Should Have",
-            "sortable": true
-          },
-          {
-            "property": "title",
-            "label": "Could Have",
-            "sortable": true
-          },
-          {
-            "property": "title",
-            "label": "Won't Have",
-            "sortable": true
+            "property": "moscow",
+            "label": "Priority",
+            "sortable": true,
+            "format": "badge"
           }
         ]
       },
       "sort_by": {
-        "property": "title",
+        "property": "moscow",
         "direction": "asc"
       },
       "colour_by": "type",
@@ -2363,24 +2338,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "slots": [
       {
-        "label": "Deployment Frequency",
+        "label": "Delivery metric",
         "entityTypeId": "metric",
-        "description": "How often you deploy to production"
-      },
-      {
-        "label": "Lead Time for Changes",
-        "entityTypeId": "metric",
-        "description": "Time from commit to production"
-      },
-      {
-        "label": "Change Failure Rate",
-        "entityTypeId": "metric",
-        "description": "Percentage of deployments causing failures"
-      },
-      {
-        "label": "Time to Restore",
-        "entityTypeId": "metric",
-        "description": "How long to recover from a failure"
+        "description": "One of the four DORA software-delivery performance metrics"
       }
     ],
     "data": {
@@ -2390,7 +2350,36 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         }
       ],
-      "required_properties": {},
+      "required_properties": {
+        "metric": [
+          {
+            "property": "dora_metric",
+            "type": "enum",
+            "required": true,
+            "label": "DORA metric",
+            "description": "Which of the four DORA metrics this measures",
+            "enum_values": [
+              "deployment_frequency",
+              "lead_time_for_changes",
+              "change_failure_rate",
+              "time_to_restore"
+            ]
+          },
+          {
+            "property": "performance_tier",
+            "type": "enum",
+            "required": false,
+            "label": "Performance tier",
+            "description": "Where this metric sits on the DORA elite-to-low benchmark",
+            "enum_values": [
+              "elite",
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        ]
+      },
       "computed_properties": [
         {
           "property": "stability_index",
@@ -2546,29 +2535,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "slots": [
       {
-        "label": "Acquisition",
+        "label": "Lifecycle metric",
         "entityTypeId": "metric",
-        "description": "How do users find you?"
-      },
-      {
-        "label": "Activation",
-        "entityTypeId": "metric",
-        "description": "Do users have a great first experience?"
-      },
-      {
-        "label": "Retention",
-        "entityTypeId": "metric",
-        "description": "Do users come back?"
-      },
-      {
-        "label": "Revenue",
-        "entityTypeId": "metric",
-        "description": "Can you monetise the behaviour?"
-      },
-      {
-        "label": "Referral",
-        "entityTypeId": "metric",
-        "description": "Do users tell others?"
+        "description": "A metric tracking one stage of the customer lifecycle funnel"
       }
     ],
     "data": {
@@ -2578,7 +2547,24 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         }
       ],
-      "required_properties": {},
+      "required_properties": {
+        "metric": [
+          {
+            "property": "lifecycle_stage",
+            "type": "enum",
+            "required": true,
+            "label": "Lifecycle stage",
+            "description": "Which AARRR funnel stage this metric measures",
+            "enum_values": [
+              "acquisition",
+              "activation",
+              "retention",
+              "revenue",
+              "referral"
+            ]
+          }
+        ]
+      },
       "computed_properties": [
         {
           "property": "conversion_rate",
@@ -2590,7 +2576,39 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       ]
     },
     "structure": {
-      "pattern": "funnel"
+      "pattern": "funnel",
+      "stages": [
+        {
+          "id": "acquisition",
+          "label": "Acquisition",
+          "order": 0,
+          "entity_type": "metric"
+        },
+        {
+          "id": "activation",
+          "label": "Activation",
+          "order": 1,
+          "entity_type": "metric"
+        },
+        {
+          "id": "retention",
+          "label": "Retention",
+          "order": 2,
+          "entity_type": "metric"
+        },
+        {
+          "id": "revenue",
+          "label": "Revenue",
+          "order": 3,
+          "entity_type": "metric"
+        },
+        {
+          "id": "referral",
+          "label": "Referral",
+          "order": 4,
+          "entity_type": "metric"
+        }
+      ]
     },
     "presentation": {
       "layout": {
@@ -2637,24 +2655,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "slots": [
       {
-        "label": "North Star",
+        "label": "Metric",
         "entityTypeId": "metric",
-        "description": "The single metric reflecting core value delivered"
-      },
-      {
-        "label": "Input Metric 1",
-        "entityTypeId": "metric",
-        "description": "A driver metric you can directly influence"
-      },
-      {
-        "label": "Input Metric 2",
-        "entityTypeId": "metric",
-        "description": "A driver metric you can directly influence"
-      },
-      {
-        "label": "Input Metric 3",
-        "entityTypeId": "metric",
-        "description": "A driver metric you can directly influence"
+        "description": "The North Star metric or one of its 3-5 input (driver) metrics"
       }
     ],
     "data": {
@@ -2664,7 +2667,28 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         }
       ],
-      "required_properties": {},
+      "required_properties": {
+        "metric": [
+          {
+            "property": "metric_role",
+            "type": "enum",
+            "required": true,
+            "label": "Metric role",
+            "description": "Whether this is the single North Star or a driver that feeds it",
+            "enum_values": [
+              "north_star",
+              "input"
+            ]
+          },
+          {
+            "property": "leverage",
+            "type": "number",
+            "required": false,
+            "label": "Leverage",
+            "description": "How strongly this input metric moves the North Star (input metrics only)"
+          }
+        ]
+      },
       "computed_properties": [
         {
           "property": "nsm_impact",
@@ -2964,7 +2988,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       ]
     },
     "education": {
-      "purpose": "Design the product itself as the primary growth driver (free tier, self-serve onboarding, in-product virality), reducing dependence on sales-led acquisition.",
+      "purpose": "Design the product itself as the primary growth driver (free tier, self-serve onboarding, in-product virality) to reduce dependence on sales-led acquisition.",
       "core_question": "Can our product acquire, activate, and expand users without human intervention, and where in the loop do we still need sales?",
       "when_to_use": [
         "You are launching a new product, feature, or entering a new market",
@@ -3374,7 +3398,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Team",
         "entityTypeId": "team",
-        "description": "Team conducting the health check: all members vote anonymously on each dimension"
+        "description": "Team conducting the health check; all members vote anonymously on each dimension"
       },
       {
         "label": "Retrospective",
@@ -3463,7 +3487,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     },
     "education": {
       "purpose": "Regularly assess team health across dimensions (psychological safety, autonomy, mission clarity, fun, speed, learning) to catch problems early and celebrate strengths.",
-      "core_question": "How is the team really doing? Where do they feel strong, where do they feel stuck, and what has changed since last check?",
+      "core_question": "How is the team really doing: where do they feel strong, where do they feel stuck, and what has changed since last check?",
       "when_to_use": [
         "You need to improve team collaboration, clarity, or effectiveness",
         "Roles and responsibilities are unclear or causing friction",
@@ -3479,7 +3503,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "id": "raid-log",
     "name": "RAID Log",
     "version": "1.0.0",
-    "description": "A project management register tracking Risks, Assumptions, Issues, and Dependencies: the four categories most likely to derail a project if left unmanaged.",
+    "description": "A project management register tracking Risks, Assumptions, Issues, and Dependencies, the four categories most likely to derail a project if left unmanaged.",
     "category": "program_mgmt",
     "origin": {
       "type": "practitioner",
