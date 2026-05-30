@@ -1,14 +1,12 @@
 /**
  * Canonical playbook definitions.
  *
- * 23 playbooks across 10 regions:
+ * 12 playbooks across 10 regions:
  * - 10 canonical (one per region; W1 invariant).
- * - 13 specialised (alternative entry paths, often framework-anchored).
+ * - 2 specialised (business-growth-metric-driven, business-marketing-audience-first).
  *
- * 3 specialised playbooks ship with `framework_id` set per Q.D:
- *   business-model-bmc      → business-model-canvas
- *   business-growth-funnel  → pirate-metrics-aarrr
- *   discovery-validation-hypothesis-cycle → build-measure-learn
+ *: no playbook is framework-anchored anymore; framework anchors now
+ * live on the canonical playbooks' related_framework_ids.
  *
  * Every existing v0.2.x workflow maps here; cross-region lens workflows
  * (`product-journey`, `full-product-journey`) were dropped; their content
@@ -100,7 +98,7 @@ export const STRATEGY_OUTCOMES_PLAYBOOK: UPGPlaybook = {
     seqStep(7, 'Assumptions & Decisions',
       ['assumption', 'decision'],
       'Capture the bets you are making (assumptions) and the choices you have ratified (decisions). These guard the work against silent drift.',
-      { next_sequence_on_gap: 'playbook:discovery-validation-hypothesis-cycle' }),
+      { next_sequence_on_gap: 'playbook:discovery-research-validation' }),
   ],
 }
 
@@ -211,25 +209,6 @@ export const DISCOVERY_RESEARCH_VALIDATION_PLAYBOOK: UPGPlaybook = {
   ],
 }
 
-export const DISCOVERY_VALIDATION_HYPOTHESIS_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:discovery-validation-hypothesis-cycle',
-  name: 'Hypothesis Validation',
-  version: '0.1.0',
-  description:
-    'Tight hypothesis → experiment → evidence → learning loop. Run after research has surfaced an opportunity.',
-  region: 'discovery_research_validation',
-  framework_id: 'build-measure-learn',
-  target_anchor_entity: 'hypothesis',
-  creation_sequence: [
-    domainGuideStep(
-      'validation',
-      'Validation',
-      'Frame & test',
-      'Run the validation creation sequence: hypothesis, experiment, evidence, learning.',
-    ),
-  ],
-}
-
 // ════════════════════════════════════════════════════════════════════════════
 // Region 4 - market_competitive (anchor `competitor`)
 // ════════════════════════════════════════════════════════════════════════════
@@ -308,60 +287,6 @@ export const EXPERIENCE_DESIGN_BRAND_PLAYBOOK: UPGPlaybook = {
   ],
 }
 
-export const EXPERIENCE_UX_DOMAIN_ONLY_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:experience-ux-domain-only',
-  name: 'UX Design (compact)',
-  version: '0.1.0',
-  description:
-    'Compact UX-only path. Quick when research and design system are managed separately.',
-  region: 'experience_design_brand',
-  target_anchor_entity: 'user_journey',
-  creation_sequence: [
-    domainGuideStep(
-      'ux_design',
-      'UX',
-      'Journey to screen',
-      'Run the ux_design creation sequence: journey, steps, screens, flows, wireframes, prototypes.',
-    ),
-  ],
-}
-
-export const EXPERIENCE_DESIGN_SYSTEM_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:experience-design-system',
-  name: 'Design System',
-  version: '0.1.0',
-  description:
-    'Codify the shared design language: tokens, components, patterns, guidelines.',
-  region: 'experience_design_brand',
-  creation_sequence: [
-    domainGuideStep(
-      'design_system',
-      'Design System',
-      'System foundations',
-      'Run the design_system creation sequence: tokens, components, patterns, guidelines.',
-      { next_sequence_on_gap: 'playbook:experience-ux-domain-only' },
-    ),
-  ],
-}
-
-export const EXPERIENCE_CONTENT_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:experience-content',
-  name: 'Content Strategy',
-  version: '0.1.0',
-  description:
-    'Plan what to publish: strategy, themes, calendar, individual pieces tied to audience and channels.',
-  region: 'experience_design_brand',
-  creation_sequence: [
-    domainGuideStep(
-      'content',
-      'Content',
-      'Content plan',
-      'Run the content creation sequence: strategy, themes, calendar, pieces.',
-      { next_sequence_on_gap: 'playbook:business-growth-funnel' },
-    ),
-  ],
-}
-
 // ════════════════════════════════════════════════════════════════════════════
 // Region 6 - product_delivery (anchor `feature`)
 // ════════════════════════════════════════════════════════════════════════════
@@ -395,24 +320,6 @@ export const PRODUCT_DELIVERY_PLAYBOOK: UPGPlaybook = {
     seqStep(6, 'Themes & Changelog',
       ['theme', 'changelog'],
       'Group releases into strategic themes. Maintain a changelog the team and customers can read together.'),
-  ],
-}
-
-export const PRODUCT_FEEDBACK_SYNTHESIS_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:product-feedback-synthesis',
-  name: 'Feedback Synthesis',
-  version: '0.1.0',
-  description:
-    'Capture and cluster qualitative signal: feedback items, themes, NPS, support tickets.',
-  region: 'product_delivery',
-  creation_sequence: [
-    domainGuideStep(
-      'feedback',
-      'Feedback',
-      'Signal capture',
-      'Run the feedback creation sequence: items, themes, NPS, support data.',
-      { next_sequence_on_gap: 'playbook:discovery-validation-hypothesis-cycle' },
-    ),
   ],
 }
 
@@ -458,23 +365,6 @@ export const ENGINEERING_PLATFORM_PLAYBOOK: UPGPlaybook = {
   ],
 }
 
-export const ENGINEERING_ARCHITECTURE_ONLY_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:engineering-architecture-only',
-  name: 'Architecture (compact)',
-  version: '0.1.0',
-  description:
-    'Compact architecture-only path. Quick when build/deploy/security are managed separately.',
-  region: 'engineering_platform',
-  creation_sequence: [
-    domainGuideStep(
-      'engineering',
-      'Engineering',
-      'System shape',
-      'Run the engineering creation sequence: bounded contexts, services, data, decisions.',
-    ),
-  ],
-}
-
 // ════════════════════════════════════════════════════════════════════════════
 // Region 8 - business_gtm_growth (anchor `value_proposition`)
 // ════════════════════════════════════════════════════════════════════════════
@@ -511,78 +401,6 @@ export const BUSINESS_GTM_GROWTH_PLAYBOOK: UPGPlaybook = {
     seqStep(7, 'Competitive Advantage',
       ['competitor', 'competitive_analysis', 'market_trend', 'partnership'],
       'Understand the landscape: competitors, differentiation, moats.'),
-  ],
-}
-
-export const BUSINESS_MODEL_BMC_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:business-model-bmc',
-  name: 'Business Model (BMC)',
-  version: '0.1.0',
-  description:
-    'Design the business model with Business Model Canvas: value props, customer segments, revenue streams, cost structure.',
-  region: 'business_gtm_growth',
-  framework_id: 'business-model-canvas',
-  creation_sequence: [
-    domainGuideStep(
-      'business_model',
-      'Business',
-      'Model canvas',
-      'Run the business_model creation sequence: value props, segments, revenue, costs.',
-      { next_sequence_on_gap: 'playbook:business-pricing' },
-    ),
-  ],
-}
-
-export const BUSINESS_PRICING_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:business-pricing',
-  name: 'Pricing',
-  version: '0.1.0',
-  description:
-    'Design the revenue engine: pricing strategy, tiers, trials, paywalls, discounts.',
-  region: 'business_gtm_growth',
-  creation_sequence: [
-    domainGuideStep(
-      'pricing',
-      'Revenue',
-      'Pricing model',
-      'Run the pricing creation sequence: strategy, tiers, discounts, trial, paywall.',
-    ),
-  ],
-}
-
-export const BUSINESS_GROWTH_FUNNEL_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:business-growth-funnel',
-  name: 'Growth Funnel (AARRR)',
-  version: '0.1.0',
-  description:
-    'Map the growth engine using Pirate Metrics: funnels, channels, campaigns, loops, cohorts.',
-  region: 'business_gtm_growth',
-  framework_id: 'pirate-metrics-aarrr',
-  creation_sequence: [
-    domainGuideStep(
-      'growth',
-      'Growth',
-      'Funnel model',
-      'Run the growth creation sequence: funnel, channels, campaigns, cohorts.',
-    ),
-  ],
-}
-
-export const BUSINESS_MARKETING_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:business-marketing',
-  name: 'Marketing',
-  version: '0.1.0',
-  description:
-    'Shape the demand engine: positioning, messaging, SEO keywords, campaigns, channels.',
-  region: 'business_gtm_growth',
-  creation_sequence: [
-    domainGuideStep(
-      'marketing',
-      'Marketing',
-      'Demand engine',
-      'Run the marketing creation sequence: positioning, messaging, SEO keywords, campaigns, channels.',
-      { next_sequence_on_gap: 'playbook:experience-content' },
-    ),
   ],
 }
 
@@ -725,23 +543,6 @@ export const OPERATIONS_QUALITY_PLAYBOOK: UPGPlaybook = {
   ],
 }
 
-export const OPERATIONS_TEAM_RITUALS_PLAYBOOK: UPGPlaybook = {
-  id: 'playbook:operations-team-rituals',
-  name: 'Team & Rituals',
-  version: '0.1.0',
-  description:
-    'Capture how the team works: retrospectives, roles, rituals, working agreements, decisions.',
-  region: 'operations_quality',
-  creation_sequence: [
-    domainGuideStep(
-      'team_org',
-      'Team',
-      'Team rhythm',
-      'Run the team_org creation sequence: retrospectives, roles, rituals, working agreements.',
-    ),
-  ],
-}
-
 // ─── Aggregate ──────────────────────────────────────────────────────────────
 
 /**
@@ -760,31 +561,20 @@ export const UPG_PLAYBOOKS: readonly UPGPlaybook[] = [
   USERS_NEEDS_PLAYBOOK,
   // Region 3 - discovery_research_validation
   DISCOVERY_RESEARCH_VALIDATION_PLAYBOOK,
-  DISCOVERY_VALIDATION_HYPOTHESIS_PLAYBOOK,
   // Region 4 - market_competitive
   MARKET_COMPETITIVE_PLAYBOOK,
   // Region 5 - experience_design_brand
   EXPERIENCE_DESIGN_BRAND_PLAYBOOK,
-  EXPERIENCE_UX_DOMAIN_ONLY_PLAYBOOK,
-  EXPERIENCE_DESIGN_SYSTEM_PLAYBOOK,
-  EXPERIENCE_CONTENT_PLAYBOOK,
   // Region 6 - product_delivery
   PRODUCT_DELIVERY_PLAYBOOK,
-  PRODUCT_FEEDBACK_SYNTHESIS_PLAYBOOK,
   // Region 7 - engineering_platform
   ENGINEERING_PLATFORM_PLAYBOOK,
-  ENGINEERING_ARCHITECTURE_ONLY_PLAYBOOK,
   // Region 8 - business_gtm_growth
   BUSINESS_GTM_GROWTH_PLAYBOOK,
-  BUSINESS_MODEL_BMC_PLAYBOOK,
-  BUSINESS_PRICING_PLAYBOOK,
-  BUSINESS_GROWTH_FUNNEL_PLAYBOOK,
-  BUSINESS_MARKETING_PLAYBOOK,
   BUSINESS_GROWTH_METRIC_DRIVEN_PLAYBOOK,
   BUSINESS_MARKETING_AUDIENCE_FIRST_PLAYBOOK,
   // Region 9 - analytics_data
   ANALYTICS_DATA_PLAYBOOK,
   // Region 10 - operations_quality
   OPERATIONS_QUALITY_PLAYBOOK,
-  OPERATIONS_TEAM_RITUALS_PLAYBOOK,
 ]

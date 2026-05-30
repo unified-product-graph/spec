@@ -22,8 +22,8 @@ import {
 import { UPG_FRAMEWORKS_BY_ID } from '../frameworks/index.js'
 
 describe('UPG_PLAYBOOKS — W1 (restated) invariant', () => {
-  it('ships 23 playbooks at v0.3.0', () => {
-    expect(UPG_PLAYBOOKS).toHaveLength(23)
+  it('ships 12 playbooks at v0.3.0', () => {
+    expect(UPG_PLAYBOOKS).toHaveLength(12)
   })
 
   it('every region has at least one playbook (coverage)', () => {
@@ -95,18 +95,15 @@ describe('UPG_PLAYBOOKS — counts (settled per §3.7 / §6.6)', () => {
     expect(canonicals).toHaveLength(10)
   })
 
-  it('13 specialised playbooks', () => {
+  it('2 specialised playbooks', () => {
     const specialised = UPG_PLAYBOOKS.filter((p) => p.is_canonical !== true)
-    expect(specialised).toHaveLength(13)
+    expect(specialised).toHaveLength(2)
   })
 
-  it('3 playbooks carry a framework_id (BMC, AARRR, build-measure-learn)', () => {
+  //: no playbook is framework-anchored anymore; anchors live on related_framework_ids.
+  it('no playbook carries a framework_id', () => {
     const anchored = UPG_PLAYBOOKS.filter((p) => p.framework_id)
-    expect(anchored).toHaveLength(3)
-    const ids = anchored.map((p) => p.framework_id).sort()
-    expect(ids).toEqual(
-      ['build-measure-learn', 'business-model-canvas', 'pirate-metrics-aarrr'].sort(),
-    )
+    expect(anchored).toHaveLength(0)
   })
 })
 
@@ -130,8 +127,8 @@ describe('Playbook accessors', () => {
 
   it('getPlaybooksForRegion returns canonical + specialised', () => {
     const list = getPlaybooksForRegion('business_gtm_growth')
-    // Region 8 ships 7 playbooks per the audit (1 canonical + 6 specialised).
-    expect(list).toHaveLength(7)
+    //: Region 8 ships 3 playbooks (1 canonical + 2 specialised).
+    expect(list).toHaveLength(3)
     const canonical = list.filter((p) => p.is_canonical === true)
     expect(canonical).toHaveLength(1)
   })

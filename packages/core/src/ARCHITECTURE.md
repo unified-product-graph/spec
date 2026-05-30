@@ -126,11 +126,11 @@ Region-anchored bootstrap recipes. One canonical playbook per region, plus optio
 | File | What it is | What it contains |
 |------|-----------|-----------------|
 | **types.ts** | Playbook primitive | `UPGPlaybook` (`region: UPGRegionId`, `is_canonical?`, `framework_id?`, `target_anchor_entity?`, `creation_sequence: Step[]`), `PlaybookBinding`, `PlaybookRuntime` (`listPlaybooks`, `getPlaybook`, `getCanonicalPlaybookForRegion`, `getPlaybooksForRegion`, `startRun`, `recordStep`), `PlaybookRun`, `PlaybookFilter`. |
-| **definitions/index.ts** | Canonical and specialised playbooks | One canonical per region; specialised playbooks anchored on frameworks (BMC, AARRR, build-measure-learn). Accessors: `getPlaybookById`, `getCanonicalPlaybookForRegion`, `getPlaybooksForRegion`. Re-exports `UPG_PLAYBOOKS` and shared step machinery from `../step-sequence.ts`. |
+| **definitions/index.ts** | Canonical and specialised playbooks | One canonical per region (10) plus 2 specialised business playbooks; framework anchors live on each playbook's `related_framework_ids`. Accessors: `getPlaybookById`, `getCanonicalPlaybookForRegion`, `getPlaybooksForRegion`. Re-exports `UPG_PLAYBOOKS` and shared step machinery from `../step-sequence.ts`. |
 
 **Mental model:** the guided journey to populate a region from its anchor outward.
 
-**Chaining.** A step's `next_sequence_on_gap` names the next playbook (or approach) to run when a gap is detected. Example: `playbook:business-model-bmc` → `playbook:business-pricing`.
+**Chaining.** A step's `next_sequence_on_gap` names the next playbook (or approach) to run when a gap is detected. Example: `playbook:strategy-outcomes` → `playbook:discovery-research-validation`.
 
 ## Layer 5b: `approaches/`: Cognitive Engagement Categories
 

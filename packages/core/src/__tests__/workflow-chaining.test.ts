@@ -46,12 +46,7 @@ describe('Playbook chaining (next_sequence_on_gap)', () => {
  })
 
  it.each([
- ['playbook:strategy-outcomes', 'playbook:discovery-validation-hypothesis-cycle'],
- ['playbook:business-model-bmc', 'playbook:business-pricing'],
- ['playbook:experience-content', 'playbook:business-growth-funnel'],
- ['playbook:product-feedback-synthesis', 'playbook:discovery-validation-hypothesis-cycle'],
- ['playbook:experience-design-system', 'playbook:experience-ux-domain-only'],
- ['playbook:business-marketing', 'playbook:experience-content'],
+ ['playbook:strategy-outcomes', 'playbook:discovery-research-validation'],
  ])('%s chains to %s', (sourceId, expectedTarget) => {
  const p = getPlaybookById(sourceId)
  expect(p, `playbook "${sourceId}" not found`).toBeDefined()

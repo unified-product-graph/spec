@@ -25,7 +25,7 @@ import {
 | File | Role |
 |------|------|
 | `types.ts` | `UPGPlaybook` shape (`region`, `is_canonical?`, `framework_id?`, `target_anchor_entity?`, `creation_sequence: Step[]`), plus the `PlaybookRuntime` contract and supporting types. |
-| `definitions/index.ts` | The canonical and specialised playbook records. One canonical playbook per region. Multiple specialised playbooks per region permitted, often anchored on a framework (for example, business-model-canvas, AARRR, build-measure-learn). Re-exports `UPG_PLAYBOOKS` and the shared step machinery from `../step-sequence.ts`. |
+| `definitions/index.ts` | The canonical and specialised playbook records. One canonical playbook per region (10) plus 2 specialised business playbooks. Framework anchors live on each playbook's `related_framework_ids`; no playbook is framework-anchored via `framework_id`. Re-exports `UPG_PLAYBOOKS` and the shared step machinery from `../step-sequence.ts`. |
 
 ## Mental model
 
@@ -33,7 +33,7 @@ Playbooks answer *"given everything below this layer, what is the guided journey
 
 ## Chaining
 
-A step's `next_sequence_on_gap` declares the next playbook (or approach) to run when a gap is detected. For example, `playbook:business-model-bmc` → `playbook:business-pricing`. Playbook-to-playbook composition without hard-coded chains.
+A step's `next_sequence_on_gap` declares the next playbook (or approach) to run when a gap is detected. For example, `playbook:strategy-outcomes` → `playbook:discovery-research-validation`. Playbook-to-playbook composition without hard-coded chains.
 
 ## Companion
 
