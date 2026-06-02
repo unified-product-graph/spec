@@ -424,3 +424,56 @@ describe('Framework Shape Audit — negative tests (detector self-check)', () =>
     expect(blockers).toEqual([])
   })
 })
+
+describe('Framework Shape Audit — 0.8.6 scoring-target broadening', () => {
+  // RICE/ICE now score feature + opportunity + need; cost-of-delay/WSJF score
+  // feature + opportunity. The declared targets are read from
+  // computed_properties[].entity_type (the SDK's frameworkTargetTypes order), so
+  // a broadened framework MUST carry, for every target type: a computed_property,
+  // a matching required_properties[type] of framework-scoped inputs, an
+  // entity_types entry, and a slot. This pins all four against regression.
+  const BROADENED: Record<string, string[]> = {
+    'rice-scoring': ['feature', 'opportunity', 'need'],
+    'ice-scoring': ['feature', 'opportunity', 'need'],
+    'cost-of-delay': ['feature', 'opportunity'],
+    wsjf: ['feature', 'opportunity'],
+  }
+
+  for (const [id, targets] of Object.entries(BROADENED)) {
+    it(`${id} scores exactly [${targets.join(', ')}] across all four layers`, () => {
+      const fw = UPG_FRAMEWORKS_BY_ID[id]
+      expect(fw, `${id} missing from canonical UPG_FRAMEWORKS`).toBeDefined()
+
+      const computedTypes = new Set(
+        (fw.data?.computed_properties ?? []).map((c) => c.entity_type),
+      )
+      const reqKeys = new Set(Object.keys(fw.data?.required_properties ?? {}))
+      const dataTypes = new Set((fw.data?.entity_types ?? []).map((e) => e.type))
+      const slotTypes = new Set((fw.slots ?? []).map((s) => s.entityTypeId))
+
+      for (const t of targets) {
+        expect(computedTypes.has(t), `${id}: missing computed_property for ${t}`).toBe(true)
+        expect(reqKeys.has(t), `${id}: missing required_properties[${t}]`).toBe(true)
+        expect(dataTypes.has(t), `${id}: missing entity_types entry for ${t}`).toBe(true)
+        expect(slotTypes.has(t), `${id}: missing slot for ${t}`).toBe(true)
+        // every input on a target type is a framework-scoped scoring input
+        for (const p of fw.data!.required_properties![t]) {
+          expect(p.scope, `${id}.${t}.${p.property} must be scope:'framework'`).toBe('framework')
+        }
+      }
+      // computed targets must not exceed the declared broadened set
+      expect([...computedTypes].sort()).toEqual([...targets].sort())
+    })
+  }
+
+  it('the broadened set stays clean in the audited research catalog too', () => {
+    // The internal definitions/ copy is what runFrameworkShapeAudit() audits.
+    // Broadening it must introduce zero new blockers for these frameworks.
+    const result = runFrameworkShapeAudit()
+    const byId = new Map(result.reports.map((r) => [r.framework_id, r]))
+    for (const id of Object.keys(BROADENED)) {
+      const blockers = (byId.get(id)?.issues ?? []).filter((i) => i.severity === 'blocker')
+      expect(blockers, `${id} blockers:\n${blockers.map((b) => `  - [${b.kind}] ${b.location}`).join('\n')}`).toEqual([])
+    }
+  })
+})

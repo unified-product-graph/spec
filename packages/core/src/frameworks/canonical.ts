@@ -1269,6 +1269,16 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Items to score",
         "entityTypeId": "feature",
         "description": "Features, opportunities, or solutions being evaluated"
+      },
+      {
+        "label": "Opportunities to score",
+        "entityTypeId": "opportunity",
+        "description": "Opportunities scored on the same RICE Scoring inputs as features."
+      },
+      {
+        "label": "Needs to score",
+        "entityTypeId": "need",
+        "description": "Needs scored on the same RICE Scoring inputs as features."
       }
     ],
     "data": {
@@ -1276,10 +1286,94 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         {
           "type": "feature",
           "role": "scored_item"
+        },
+        {
+          "type": "opportunity",
+          "role": "scored_item"
+        },
+        {
+          "type": "need",
+          "role": "scored_item"
         }
       ],
       "required_properties": {
         "feature": [
+          {
+            "property": "reach",
+            "type": "assessment",
+            "scale_id": "reach_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Reach",
+            "description": "How many users will this impact per quarter?"
+          },
+          {
+            "property": "impact",
+            "type": "assessment",
+            "scale_id": "impact_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "How much will this impact each user, on the impact scale?"
+          },
+          {
+            "property": "confidence",
+            "type": "assessment",
+            "scale_id": "confidence_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "How confident are you in the reach, impact, and effort estimates?"
+          },
+          {
+            "property": "effort",
+            "type": "assessment",
+            "scale_id": "effort_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Effort",
+            "description": "How much work is required to build and ship this, on the effort scale?"
+          }
+        ],
+        "opportunity": [
+          {
+            "property": "reach",
+            "type": "assessment",
+            "scale_id": "reach_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Reach",
+            "description": "How many users will this impact per quarter?"
+          },
+          {
+            "property": "impact",
+            "type": "assessment",
+            "scale_id": "impact_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "How much will this impact each user, on the impact scale?"
+          },
+          {
+            "property": "confidence",
+            "type": "assessment",
+            "scale_id": "confidence_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "How confident are you in the reach, impact, and effort estimates?"
+          },
+          {
+            "property": "effort",
+            "type": "assessment",
+            "scale_id": "effort_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Effort",
+            "description": "How much work is required to build and ship this, on the effort scale?"
+          }
+        ],
+        "need": [
           {
             "property": "reach",
             "type": "assessment",
@@ -1323,6 +1417,20 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "property": "rice_score",
           "expression": "(reach * impact * confidence) / effort",
           "entity_type": "feature",
+          "label": "RICE Score",
+          "format": "number"
+        },
+        {
+          "property": "rice_score",
+          "expression": "(reach * impact * confidence) / effort",
+          "entity_type": "opportunity",
+          "label": "RICE Score",
+          "format": "number"
+        },
+        {
+          "property": "rice_score",
+          "expression": "(reach * impact * confidence) / effort",
+          "entity_type": "need",
           "label": "RICE Score",
           "format": "number"
         }
@@ -3708,6 +3816,16 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Ease",
         "entityTypeId": "feature",
         "description": "How easy is this to implement?"
+      },
+      {
+        "label": "Opportunities to score",
+        "entityTypeId": "opportunity",
+        "description": "Opportunities scored on the same ICE Scoring inputs as features."
+      },
+      {
+        "label": "Needs to score",
+        "entityTypeId": "need",
+        "description": "Needs scored on the same ICE Scoring inputs as features."
       }
     ],
     "data": {
@@ -3723,10 +3841,70 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         {
           "type": "assumption",
           "role": "item"
+        },
+        {
+          "type": "opportunity",
+          "role": "scored_item"
+        },
+        {
+          "type": "need",
+          "role": "scored_item"
         }
       ],
       "required_properties": {
         "feature": [
+          {
+            "property": "impact",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "Expected impact on the target metric (1-10)"
+          },
+          {
+            "property": "confidence",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "Confidence in the impact estimate (1-10)"
+          },
+          {
+            "property": "ease",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Ease",
+            "description": "Ease of implementation (1-10)"
+          }
+        ],
+        "opportunity": [
+          {
+            "property": "impact",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "Expected impact on the target metric (1-10)"
+          },
+          {
+            "property": "confidence",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "Confidence in the impact estimate (1-10)"
+          },
+          {
+            "property": "ease",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Ease",
+            "description": "Ease of implementation (1-10)"
+          }
+        ],
+        "need": [
           {
             "property": "impact",
             "type": "number",
@@ -3758,6 +3936,20 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "property": "ice_score",
           "expression": "impact * confidence * ease",
           "entity_type": "feature",
+          "label": "ICE Score",
+          "format": "number"
+        },
+        {
+          "property": "ice_score",
+          "expression": "impact * confidence * ease",
+          "entity_type": "opportunity",
+          "label": "ICE Score",
+          "format": "number"
+        },
+        {
+          "property": "ice_score",
+          "expression": "impact * confidence * ease",
+          "entity_type": "need",
           "label": "ICE Score",
           "format": "number"
         }
@@ -3863,6 +4055,11 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Job Size",
         "entityTypeId": "metric",
         "description": "Estimated effort (story points, t-shirt size, or person-weeks)"
+      },
+      {
+        "label": "Opportunities to score",
+        "entityTypeId": "opportunity",
+        "description": "Opportunities scored on the same WSJF (Weighted Shortest Job First) inputs as features."
       }
     ],
     "data": {
@@ -3874,10 +4071,48 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         {
           "type": "metric",
           "role": "item"
+        },
+        {
+          "type": "opportunity",
+          "role": "scored_item"
         }
       ],
       "required_properties": {
         "feature": [
+          {
+            "property": "user_value",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "User/Business Value",
+            "description": "Relative value to users and the business if delivered"
+          },
+          {
+            "property": "time_criticality",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Time Criticality",
+            "description": "How much value decays if delivery is delayed (deadlines, competition, seasonal windows)"
+          },
+          {
+            "property": "risk_reduction",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Risk Reduction / Opportunity Enablement",
+            "description": "Value from reducing risk or enabling future opportunities"
+          },
+          {
+            "property": "job_size",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Job Size",
+            "description": "Estimated effort (story points, t-shirt size, or person-weeks)"
+          }
+        ],
+        "opportunity": [
           {
             "property": "user_value",
             "type": "number",
@@ -3917,6 +4152,13 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "property": "wsjf_score",
           "expression": "(user_value + time_criticality + risk_reduction) / job_size",
           "entity_type": "feature",
+          "label": "WSJF Score",
+          "format": "number"
+        },
+        {
+          "property": "wsjf_score",
+          "expression": "(user_value + time_criticality + risk_reduction) / job_size",
+          "entity_type": "opportunity",
           "label": "WSJF Score",
           "format": "number"
         }
@@ -4026,6 +4268,11 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Risk Reduction",
         "entityTypeId": "risk",
         "description": "What risk does this mitigate?"
+      },
+      {
+        "label": "Opportunities to score",
+        "entityTypeId": "opportunity",
+        "description": "Opportunities scored on the same Cost of Delay inputs as features."
       }
     ],
     "data": {
@@ -4045,10 +4292,32 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         {
           "type": "risk",
           "role": "item"
+        },
+        {
+          "type": "opportunity",
+          "role": "scored_item"
         }
       ],
       "required_properties": {
         "feature": [
+          {
+            "property": "cost_of_delay",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Cost of Delay",
+            "description": "Weekly revenue impact of not shipping"
+          },
+          {
+            "property": "job_size",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Job Size",
+            "description": "Weeks of development effort"
+          }
+        ],
+        "opportunity": [
           {
             "property": "cost_of_delay",
             "type": "number",
@@ -4072,6 +4341,13 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "property": "wsjf_score",
           "expression": "cost_of_delay / job_size",
           "entity_type": "feature",
+          "label": "WSJF Score",
+          "format": "number"
+        },
+        {
+          "property": "wsjf_score",
+          "expression": "cost_of_delay / job_size",
+          "entity_type": "opportunity",
           "label": "WSJF Score",
           "format": "number"
         }
