@@ -7,6 +7,10 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.5] - 2026-06-02
+
+Co-version with the @unified-product-graph/* 0.8.5 fast-follow (skill_audit source resolution, CLI/docs consistency, npx-cache fix, exercise-aware prioritise hint). No spec/catalogue change; `UPG_VERSION` stays `0.8.4`.
+
 ## [0.8.4] - 2026-06-02
 
 Framework exercises. `UPG_VERSION` is now `0.8.4` (catalogue change). Folds the 0.8.3 patch train (CLI/MCP wiring fixes; no catalogue change).
