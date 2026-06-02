@@ -15,7 +15,48 @@
  * "approach" naming. Read that before touching this file.
  */
 
-import type { UPGApproach } from '../types.js'
+import type { UPGApproach, UPGApproachId } from '../types.js'
+import { UPG_FRAMEWORKS } from '../../frameworks/canonical.js'
+
+// ─── Single source of truth: framework.approach_ids ───────────────────────────
+//
+// Seam 3 (DT-SEAM-1): `approach.framework_id_examples` and
+// `framework.approach_ids` used to be two hand-kept lists that disagreed — the
+// examples advertised framework ids (ice-scoring, wsjf, cost-of-delay, the five
+// reflect classics) that are authored in the full research catalog but are NOT
+// in the canonical public surface, so `get_framework(id)` returned "Unknown
+// framework id" for them. The contract (`get_approach` → `get_framework`) was
+// broken end to end.
+//
+// The fix makes ONE mapping authoritative: `UPGFramework.approach_ids` on each
+// CANONICAL framework. `framework_id_examples` is now DERIVED by inverting that
+// map over `UPG_FRAMEWORKS` (the 34-framework public surface), so every id a
+// skill reads back from `framework_id_examples` is guaranteed to resolve in
+// `get_framework`. The two lists can no longer drift because there is only one.
+//
+// `framework.approach_ids` references `okr-framework` (not the legacy bare
+// `okrs`) — see /upg-new-okr fix.
+
+/** approachId → ordered framework ids, inverted from `framework.approach_ids`. */
+function deriveFrameworkExamples(): Record<UPGApproachId, string[]> {
+  const byApproach: Record<UPGApproachId, string[]> = {
+    plan: [],
+    inspect: [],
+    prioritise: [],
+    trace: [],
+    reflect: [],
+  }
+  for (const fw of UPG_FRAMEWORKS) {
+    for (const approachId of fw.approach_ids ?? []) {
+      if (approachId in byApproach) {
+        byApproach[approachId as UPGApproachId].push(fw.id)
+      }
+    }
+  }
+  return byApproach
+}
+
+const FRAMEWORK_EXAMPLES = deriveFrameworkExamples()
 
 // ─── Plan ───────────────────────────────────────────────────────────────────
 
@@ -26,13 +67,7 @@ const PLAN: UPGApproach = {
     'The path of arrival to "what should I build next?". Plan engages a region by surveying its entity coverage against canonical expectations and surfacing the missing scaffolding: the entities a healthy region carries that this graph does not. Cartographic sense: you are walking the coastline of a region and noting where the contour is incomplete, not deciding a strategy. Frameworks like Now/Next/Later, MoSCoW, and Wardley Mapping live within Plan as the named techniques for organising the gap-filling sequence.',
   question_answered: "what should I build next?",
   signature_hint: '({ region?: UPGRegionId }) → { missing_entities, coverage_score }',
-  framework_id_examples: [
-    'now-next-later',
-    'moscow',
-    'wardley-map',
-    'okr-framework',
-    'three-horizons',
-  ],
+  framework_id_examples: FRAMEWORK_EXAMPLES.plan,
 }
 
 // ─── Inspect ────────────────────────────────────────────────────────────────
@@ -45,13 +80,7 @@ const INSPECT: UPGApproach = {
   question_answered: "what's broken?",
   signature_hint:
     '({ region?: UPGRegionId, entities?: entity_ids[] }) → { violations: [{ severity, kind, entity_id, description, fix_hint }] }',
-  framework_id_examples: [
-    'heuristic-evaluation',
-    'tech-debt-tracker',
-    'accessibility-maturity-model',
-    'cognitive-walkthrough',
-    'blameless-postmortem',
-  ],
+  framework_id_examples: FRAMEWORK_EXAMPLES.inspect,
 }
 
 // ─── Prioritise ─────────────────────────────────────────────────────────────
@@ -60,18 +89,11 @@ const PRIORITISE: UPGApproach = {
   id: 'prioritise',
   label: 'Prioritise',
   description:
-    'The path of arrival to "what\'s most important?". Prioritise engages an explicit candidate set (entity ids the caller passes in) and ranks it by an explicit framework: RICE, ICE, Kano, Cost of Delay. The framework_id is required because prioritisation without a declared scoring lens is incoherent. Cartographic sense: you have a set of charted destinations and you are computing the order of arrival from a chosen vantage. Different frameworks weight the same candidate set differently; the approach delegates the actual ranking math to the named technique (the framework definition).',
+    'The path of arrival to "what\'s most important?". Prioritise engages an explicit candidate set (entity ids the caller passes in) and ranks it by an explicit framework: RICE, Kano, MoSCoW. The framework_id is required because prioritisation without a declared scoring lens is incoherent. Cartographic sense: you have a set of charted destinations and you are computing the order of arrival from a chosen vantage. Different frameworks weight the same candidate set differently; the approach delegates the actual ranking math to the named technique (the framework definition).',
   question_answered: "what's most important?",
   signature_hint:
     '({ candidates: entity_ids[], framework_id }) → { ranked: [{ entity_id, score, rationale }], framework_used }',
-  framework_id_examples: [
-    'rice-scoring',
-    'ice-scoring',
-    'kano-model',
-    'cost-of-delay',
-    'moscow',
-    'wsjf',
-  ],
+  framework_id_examples: FRAMEWORK_EXAMPLES.prioritise,
 }
 
 // ─── Trace ──────────────────────────────────────────────────────────────────
@@ -84,14 +106,7 @@ const TRACE: UPGApproach = {
   question_answered: "walk a meaningful path through existing graph",
   signature_hint:
     '({ anchor: entity_id, path: UPGEntityType[], edges_override?: (string | null)[] }) → { trail: [{ depth, entity_id, edge_type_in }], reached: entity_id[] }',
-  framework_id_examples: [
-    'opportunity-solution-tree',
-    'strategic-cascade',
-    'metrics-tree',
-    'user-journey-map',
-    'impact-map',
-    'dependency-map',
-  ],
+  framework_id_examples: FRAMEWORK_EXAMPLES.trace,
 }
 
 // ─── Reflect ────────────────────────────────────────────────────────────────
@@ -100,23 +115,11 @@ const REFLECT: UPGApproach = {
   id: 'reflect',
   label: 'Reflect',
   description:
-    'The path of arrival to "what should I be questioning?". Reflect engages an optional scope (region, entity, or `null` for the whole graph) and emits structured prompts a thinker should consider: assumptions to test, alternatives to weigh, blind-spots to surface, load-bearing claims to verify. Mode is optional; absence is open reflection. Cartographic sense: before approaching the coastline, you are asking which features of your chart you have not actually verified; the prompts mark the parts of the map that may be conjecture. Five Whys, Pre-mortem, Red Team, and Devil\'s Advocate are the named techniques inside this approach.',
+    'The path of arrival to "what should I be questioning?". Reflect engages an optional scope (region, entity, or `null` for the whole graph) and emits structured prompts a thinker should consider: assumptions to test, alternatives to weigh, blind-spots to surface, load-bearing claims to verify. Mode is optional; absence is open reflection. Cartographic sense: before approaching the coastline, you are asking which features of your chart you have not actually verified; the prompts mark the parts of the map that may be conjecture. Retrospective and Build-Measure-Learn are the named reflective techniques in the canonical surface.',
   question_answered: "what should I be questioning?",
   signature_hint:
     "({ scope?: UPGRegionId | entity_id | null, mode?: 'assumptions' | 'alternatives' | 'blind-spots' | 'load-bearing' }) → { prompts: [{ kind, question, target_entities? }] }",
-  framework_id_examples: [
-    // Reflection classics: the five canonical reflect frameworks.
-    'five-whys',
-    'pre-mortem',
-    'red-team',
-    'devils-advocate',
-    'second-order-thinking',
-    // Reflective ceremonies + reflective JTBD lens already in the catalog.
-    'retrospective',
-    'four-forces-of-progress',
-    'assumption-canvas',
-    'win-loss-analysis',
-  ],
+  framework_id_examples: FRAMEWORK_EXAMPLES.reflect,
 }
 
 // ─── Catalog ────────────────────────────────────────────────────────────────

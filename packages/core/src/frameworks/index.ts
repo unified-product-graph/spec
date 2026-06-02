@@ -1,9 +1,9 @@
 /**
  * frameworks/: Layer 4c: Framework Library.
  *
- * The public surface ships only the **34 canonical frameworks** in
+ * The public surface ships the **canonical frameworks** in
  * `canonical.ts`: famous, universally-taught product frameworks curated
- * for editorial confidence.
+ * for editorial confidence (42 at present; promoted one at a time).
  *
  * The full research catalog (~182 additional definitions) lives in
  * `definitions/` and is used by internal consumers (label vocabulary,

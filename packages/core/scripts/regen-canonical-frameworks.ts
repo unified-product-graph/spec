@@ -54,7 +54,7 @@ if (missing.length > 0) {
 const header = `/**
  * Canonical Framework Library: v1 public surface.
  *
- * The 34 famous, battle-tested product frameworks that anchor the public
+ * The famous, battle-tested product frameworks that anchor the public
  * Unified Product Graph framework catalog. Curated for editorial confidence
  * over breadth: every name here is universally recognised and actively
  * taught in product education.

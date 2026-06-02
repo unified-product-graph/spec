@@ -98,9 +98,9 @@ This is the **brains**. The playbook says "walk `market_intelligence`". The guid
 
 ### File 3: the surface
 
-`packages/upg-mcp-server/skills/upg-explore/SKILL.md`:
+`packages/upg-mcp-server/skills/upg-walk-region/SKILL.md`:
 
-This is what the agent surface loads when the user types `/upg-explore market`. It is a Markdown prompt that tells the agent:
+This is what the agent surface loads when the user types `/upg-walk-region market`. It is a Markdown prompt that tells the agent:
 
 1. Resolve the requested region to its canonical playbook.
 2. Iterate the playbook's `creation_sequence`.
@@ -114,13 +114,13 @@ Three files, three layers: playbook (pointer), domain guide (sequence), and skil
 
 ---
 
-## What fires when the user types `/upg-explore market`
+## What fires when the user types `/upg-walk-region market`
 
 This is the part that's usually invisible. Walk through it once and the rest of UPG starts to feel solid.
 
 ### Step 0: the agent loads the skill
 
-The agent reads the `SKILL.md` into context. Nothing has run yet. This is a system prompt extension that says "you are now operating as `/upg-explore`."
+The agent reads the `SKILL.md` into context. Nothing has run yet. This is a system prompt extension that says "you are now operating as `/upg-walk-region`."
 
 ### Step 1: resolve `market` to a playbook
 
@@ -214,7 +214,7 @@ The session continues or ends.
 
 The skill prompt's "What's Next" section runs: the agent looks at the graph, finds the biggest gap, and recommends one skill:
 
-> *Based on what you built, your biggest gap is positioning. You now have 5 competitors but no `positioning_statement` connected. Try `/upg-launch` next.*
+> *Based on what you built, your biggest gap is positioning. You now have 5 competitors but no `positioning_statement` connected. Try `/upg-new-launch` next.*
 
 ---
 

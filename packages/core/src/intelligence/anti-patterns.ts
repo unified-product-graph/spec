@@ -160,7 +160,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     why_it_matters:
       'Without any chain link, every downstream artefact (need, opportunity, feature) loses its anchor. Features end up addressing demographics instead of struggles.',
     remediation:
-      'For each persona, connect it into the user chain via at least one of: `persona_pursues_job`, `persona_experiences_need`, `persona_aspires_to_desired_outcome`, or `persona_incurs_switching_cost`. Use `/upg-persona` or the JTBD canvas workflow.',
+      'For each persona, connect it into the user chain via at least one of: `persona_pursues_job`, `persona_experiences_need`, `persona_aspires_to_desired_outcome`, or `persona_incurs_switching_cost`. Use `/upg-new-persona` or the JTBD canvas workflow.',
     stages: ['concept', 'validation', 'build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'high',
     source: { kind: 'practitioner', attribution: 'Clayton Christensen, Jobs to Be Done' },
@@ -320,7 +320,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     why_it_matters:
       'OKRs without measurable key results cannot be tracked, debated, or learned from. The graph carries intent but not accountability.',
     remediation:
-      'For each `objective`, define 2–4 `key_result` entities and link via `objective_achieved_through_key_result`. Use `/upg-okr` to author.',
+      'For each `objective`, define 2–4 `key_result` entities and link via `objective_achieved_through_key_result`. Use `/upg-new-okr` to author.',
     stages: ['validation', 'build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'high',
     source: { kind: 'book', citation: 'Measure What Matters, John Doerr (2017)' },
@@ -392,7 +392,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     why_it_matters:
       'A graph with one persona past validation is usually carrying an unexamined "everyone is the same user" assumption.',
     remediation:
-      'Add personas representing the next 1–2 most distinct user segments. Use `/upg-persona`.',
+      'Add personas representing the next 1–2 most distinct user segments. Use `/upg-new-persona`.',
     stages: ['validation', 'build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'medium',
     source: { kind: 'practitioner', attribution: 'Alan Cooper, The Inmates Are Running the Asylum' },
@@ -414,7 +414,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     why_it_matters:
       'Build-only graphs commit the team to delivery without a learning loop. Every shipped feature becomes a permanent assumption.',
     remediation:
-      'Spin up at least one `experiment_plan` or `hypothesis` per quarter\'s build batch. Use `/upg-discover` or `/upg-hypothesis`.',
+      'Spin up at least one `experiment_plan` or `hypothesis` per quarter\'s build batch. Use `/upg-new-discovery` or `/upg-new-hypothesis`.',
     stages: ['build', 'beta', 'launch', 'growth'],
     severity: 'high',
     source: { kind: 'practitioner', attribution: 'Marty Cagan, Inspired (continuous discovery)' },

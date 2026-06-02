@@ -52,7 +52,7 @@ export const UPG_EDGE_CATALOG = {
   // product → persona is the most fundamental relationship in the
   // user domain ("who is this product for?") and was the only way to
   // anchor a fresh persona to its product before this edge existed. Without
-  // it, the natural agent path through `/upg-persona` produced an orphan
+  // it, the natural agent path through `/upg-new-persona` produced an orphan
   // persona only attached laterally via `ideal_customer_profile_maps_to_persona`
   // or `positioning_resonates_with_persona`. Semantic, not hierarchy: a
   // product doesn't "contain" personas; it targets them.
@@ -1347,6 +1347,13 @@ export const UPG_EDGE_CATALOG = {
   // release strategy to the concrete deployments it governs.
   incident_affects_feature: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'incident', target_type: 'feature' },
   release_strategy_used_by_deployment: { forward_verb: 'used_by', reverse_verb: 'uses', classification: 'cross-domain', source_type: 'release_strategy', target_type: 'deployment' },
+  // v0.8.2: ITIL/ITSM incident management explicitly links an incident
+  // to the customer-facing support tickets/cases it spawns — when a service
+  // breaks, customers raise tickets; the incident is the cause, the ticket the
+  // effect. Closes the otherwise-unmediated "Customer Support" island in
+  // `playbook:operations-quality`, binding `support_ticket` to the incident/ops
+  // spine. Source: ITIL v4 incident management; DORA/SRE customer-facing impact.
+  incident_generates_support_ticket: { forward_verb: 'generates', reverse_verb: 'generated_by', classification: 'cross-domain', source_type: 'incident', target_type: 'support_ticket' },
 
   // Cluster C: User Research linkage matrix.
   // research_study → {participant, research_question, survey_response,

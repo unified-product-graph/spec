@@ -72,7 +72,7 @@ A playbook can mix step kinds freely. A simple playbook might be a single `frame
 
 **Canonical vs specialised:**
 
-- **Canonical** (`is_canonical: true`): the default "start here" path for the region. Exactly one per region. Surfaced in `/upg-explore <region>` and equivalent skill paths.
+- **Canonical** (`is_canonical: true`): the default "start here" path for the region. Exactly one per region. Surfaced in `/upg-walk-region <region>` and equivalent skill paths.
 - **Specialised:** alternative entry path, often anchored on a framework via `framework_id`. Multiple permitted per region.
 
 **Where it lives:** `src/playbooks/definitions/index.ts`
@@ -116,20 +116,20 @@ The five approaches operate on existing graph state and surface insight, ranking
 
 ### 4. Skill: the invocation surface
 
-A **Skill** is what the user types in an agent surface: `/upg-persona`, `/upg-discover`, `/upg-explore market`. It is a `SKILL.md` file that the agent loads as a slash command.
+A **Skill** is what the user types in an agent surface: `/upg-new-persona`, `/upg-new-discovery`, `/upg-walk-region market`. It is a `SKILL.md` file that the agent loads as a slash command.
 
 **Where they live:** `packages/upg-mcp-server/skills/<skill-name>/SKILL.md`
 
 **Example:**
 
-> The user types `/upg-explore market`. The agent finds the matching skill (or the generic `/upg-explore` skill, which dispatches by domain). The skill resolves to a playbook bound to that region. The playbook walks its steps. A framework step invokes the framework's slot definitions, which tell the system what entity types to create. Entities land in the `.upg` graph.
+> The user types `/upg-walk-region market`. The agent finds the matching skill (or the generic `/upg-walk-region` skill, which dispatches by domain). The skill resolves to a playbook bound to that region. The playbook walks its steps. A framework step invokes the framework's slot definitions, which tell the system what entity types to create. Entities land in the `.upg` graph.
 
 ---
 
 ## The full chain, end to end
 
 ```
-User types         /upg-explore market
+User types         /upg-walk-region market
                           │
                           ▼
 SKILL              upg-explore (generic dispatcher)
@@ -174,13 +174,13 @@ Asymmetry is the answer.
 ### As an end user in an agent surface
 
 ```
-/upg-init                         → start a new product graph
-/upg-persona                      → premium workshop, bespoke UX
-/upg-explore <region>             → dispatch to the right playbook
-/upg-status                       → dashboard
-/upg-gaps                         → action punch list
-/upg-impact <entity>              → forward causal: "if I fix X, what unblocks?"
-/upg-impact <entity> --upstream   → backward causal: "what blocks X?"
+/upg-new-graph                         → start a new product graph
+/upg-new-persona                      → premium workshop, bespoke UX
+/upg-walk-region <region>             → dispatch to the right playbook
+/upg-show-status                       → dashboard
+/upg-check-gaps                         → action punch list
+/upg-show-impact <entity>              → forward causal: "if I fix X, what unblocks?"
+/upg-show-impact <entity> --upstream   → backward causal: "what blocks X?"
 ```
 
 ### As a spec contributor
@@ -189,7 +189,7 @@ To add a new **Framework**: create a `UPGFramework` record in the appropriate `s
 
 To add a new **Playbook**: add a `UPGPlaybook` record in `src/playbooks/definitions/index.ts`. Set `region` (required), `is_canonical` (only if you're replacing the region's canonical), and optionally `framework_id` if the playbook is framework-anchored. Run `npm run audit:playbook-coverage` to verify the canonical invariant. Watch the rule: exactly one canonical per region.
 
-To add a new **Skill**: create `packages/upg-mcp-server/skills/<name>/SKILL.md`. If it's a region bootstrap, prefer collapsing into a `UPGPlaybook` and invoking via `/upg-run <playbook-id>` rather than authoring a bespoke skill.
+To add a new **Skill**: create `packages/upg-mcp-server/skills/<name>/SKILL.md`. If it's a region bootstrap, prefer collapsing into a `UPGPlaybook` and invoking via `/upg-walk-playbook <playbook-id>` rather than authoring a bespoke skill.
 
 ### As a tool author
 

@@ -26,7 +26,7 @@ export * from './frameworks/index.js'
 export * from './format/index.js'
 
 /** The current spec version implemented by this package */
-export const UPG_VERSION = '0.8.0' as const
+export const UPG_VERSION = '0.8.2' as const
 
 /**
  * The `.upg` JSON document format version. Written to the `upg_version` field.
@@ -232,8 +232,33 @@ export function resolveContainmentEdge(
 }
 
 // ─── Counts (computed) ────────────────────────────────────────────────────────
+//
+// Two entity-type counts exist and they intentionally differ; each states its
+// filter so consumers (and introspection tools) can never conflate them
+// (DT-SPEC-2):
+//
+//   UPG_ENTITY_COUNT — ACTIVE, NON-DEPRECATED types only. Computed from
+//     `getTypes()` over `UPG_DOMAINS` (every type is assigned to exactly one
+//     domain; deprecated aliases are not). This is what `get_spec_version`,
+//     `list_type_labels`, and any "how many types can I create?" surface should
+//     report. Currently 312.
+//
+//   UPG_META_COUNT — EVERY entry in the meta registry, INCLUDING deprecated
+//     aliases (kpi, jtbd, pain_point, user_need, research_insight,
+//     hypothesis_claim, hypothesis_evidence, …). This is what `list_entity_types`
+//     reports because it must surface deprecated types so migrations can
+//     resolve them. Currently 349.
+//
+// The numbers are correct as-is; the difference (349 − 312) is exactly the
+// deprecated-alias set. Do NOT "reconcile" them to a single number — they
+// answer two different questions.
 
-/** Total number of active entity types */
+/**
+ * Total number of ACTIVE (non-deprecated) entity types.
+ * Filter: types present in `UPG_DOMAINS` via `getTypes()`. Excludes deprecated
+ * aliases. This is the canonical "creatable types" count (`get_spec_version`,
+ * `list_type_labels`).
+ */
 export const UPG_ENTITY_COUNT = UPG_TYPES.length
 
 /** Total number of semantic domains */
@@ -242,5 +267,10 @@ export const UPG_DOMAIN_COUNT = UPG_DOMAINS.length
 /** Total number of edge types */
 export const UPG_EDGE_COUNT = UPG_EDGE_TYPES.length
 
-/** Total number of entity type entries in the meta registry (including deprecated) */
+/**
+ * Total number of entity-type entries in the meta registry, INCLUDING
+ * deprecated aliases. Filter: every `UPG_ENTITY_META` row, no exclusions. This
+ * is the `list_entity_types` count and is strictly ≥ `UPG_ENTITY_COUNT`; the
+ * gap is the deprecated-alias set.
+ */
 export const UPG_META_COUNT = UPG_ENTITY_META.length

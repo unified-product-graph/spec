@@ -15,8 +15,12 @@ import {
   REFLECT_MODES,
   type UPGApproachId,
 } from '../approaches/index.js'
-// Approach test asserts wiring against the full research catalog, not the
-// public canonical surface — same pattern as the tier-1 wiring tests.
+// `framework_id_examples` is now DERIVED from `framework.approach_ids` over the
+// CANONICAL public surface (what `get_framework` serves), so the examples MUST
+// resolve against canonical — the DT-SEAM-1 contract. The wider approach-tagging
+// assertions (reflection classics live in the full catalog) still read the full
+// research catalog.
+import { UPG_FRAMEWORKS_BY_ID as CANONICAL_FRAMEWORKS_BY_ID } from '../frameworks/canonical.js'
 import { UPG_FRAMEWORKS_BY_ID } from '../frameworks/definitions/index.js'
 
 describe('UPG_APPROACHES — five canonical approaches at v0.3.0', () => {
@@ -47,14 +51,27 @@ describe('UPG_APPROACHES — five canonical approaches at v0.3.0', () => {
     }
   })
 
-  it('every framework_id_example resolves to an entry in UPG_FRAMEWORKS', () => {
+  it('every framework_id_example resolves in the CANONICAL surface (DT-SEAM-1 contract)', () => {
+    // DT-SEAM-1: `framework_id_examples` is consumed programmatically by skills
+    // that then call get_framework(id) — which serves the canonical surface. An
+    // example that resolves only in the full research catalog (e.g. five-whys,
+    // ice-scoring) is a broken contract. Every example must resolve in CANONICAL.
     for (const a of UPG_APPROACHES) {
       for (const fwId of a.framework_id_examples ?? []) {
         expect(
-          UPG_FRAMEWORKS_BY_ID[fwId],
-          `approach ${a.id} references missing framework_id ${fwId}`,
+          CANONICAL_FRAMEWORKS_BY_ID[fwId],
+          `approach ${a.id} references framework_id ${fwId} that does not resolve in get_framework (canonical surface)`,
         ).toBeDefined()
       }
+    }
+  })
+
+  it('every approach has at least one framework_id_example (derived from approach_ids)', () => {
+    for (const a of UPG_APPROACHES) {
+      expect(
+        (a.framework_id_examples ?? []).length,
+        `approach ${a.id} has no resolving framework_id_examples — inspect was previously empty/dead`,
+      ).toBeGreaterThan(0)
     }
   })
 
@@ -90,6 +107,60 @@ describe('UPG_APPROACHES — five canonical approaches at v0.3.0', () => {
       'blind-spots',
       'load-bearing',
     ])
+  })
+})
+
+describe(' — 8 frameworks promoted into canonical (get_framework resolves)', () => {
+  const PROMOTED = [
+    // prioritise scoring frameworks (framework-scoped inputs per)
+    'ice-scoring',
+    'wsjf',
+    'cost-of-delay',
+    // reflect reasoning classics (no entity props)
+    'five-whys',
+    'pre-mortem',
+    'red-team',
+    'devils-advocate',
+    'second-order-thinking',
+  ] as const
+
+  it('all 8 promoted ids resolve in the canonical surface (get_framework)', () => {
+    for (const id of PROMOTED) {
+      expect(
+        CANONICAL_FRAMEWORKS_BY_ID[id],
+        `${id} was promoted but does not resolve in get_framework (canonical surface)`,
+      ).toBeDefined()
+    }
+  })
+
+  it("prioritise's framework_id_examples include ice-scoring/wsjf/cost-of-delay and all resolve (target 8/8)", () => {
+    const prioritise = UPG_APPROACHES_BY_ID['prioritise']
+    const examples = prioritise.framework_id_examples ?? []
+    for (const id of ['ice-scoring', 'wsjf', 'cost-of-delay']) {
+      expect(examples, `prioritise examples missing ${id}`).toContain(id)
+    }
+    // Every prioritise example must resolve in get_framework — 8/8.
+    expect(examples.length).toBeGreaterThan(0)
+    for (const id of examples) {
+      expect(
+        CANONICAL_FRAMEWORKS_BY_ID[id],
+        `prioritise example ${id} does not resolve in get_framework`,
+      ).toBeDefined()
+    }
+  })
+
+  it("reflect's framework_id_examples include all 5 classics and all resolve (target 5/5)", () => {
+    const reflect = UPG_APPROACHES_BY_ID['reflect']
+    const examples = reflect.framework_id_examples ?? []
+    for (const id of ['five-whys', 'pre-mortem', 'red-team', 'devils-advocate', 'second-order-thinking']) {
+      expect(examples, `reflect examples missing ${id}`).toContain(id)
+    }
+    for (const id of examples) {
+      expect(
+        CANONICAL_FRAMEWORKS_BY_ID[id],
+        `reflect example ${id} does not resolve in get_framework`,
+      ).toBeDefined()
+    }
   })
 })
 
@@ -153,21 +224,27 @@ describe('UPGFramework.approach_ids — partial tagging coverage', () => {
     }
   })
 
-  it('Reflect.framework_id_examples surfaces all five reflection classics', () => {
+  it('Reflect.framework_id_examples is derived from canonical reflect-tagged frameworks (DT-SEAM-1)', () => {
+    // The five reflection classics (five-whys, pre-mortem, …) live in the full
+    // research catalog and are tagged `reflect` there, but they are NOT in the
+    // canonical public surface. Since framework_id_examples is now derived from
+    // approach_ids over CANONICAL (so it can't advertise non-resolving ids), the
+    // examples are exactly the canonical frameworks tagged `reflect`. Every one
+    // must resolve in get_framework. (The classics are surfaced via the
+    // approach_ids tagging assertion above, to be promoted into canonical later.)
     const reflect = UPG_APPROACHES_BY_ID['reflect']
     expect(reflect).toBeDefined()
     const examples = reflect.framework_id_examples ?? []
-    for (const id of [
-      'five-whys',
-      'pre-mortem',
-      'red-team',
-      'devils-advocate',
-      'second-order-thinking',
-    ]) {
+    expect(examples.length).toBeGreaterThan(0)
+    const expected = Object.values(CANONICAL_FRAMEWORKS_BY_ID)
+      .filter((fw) => (fw.approach_ids ?? []).includes('reflect'))
+      .map((fw) => fw.id)
+    expect([...examples].sort()).toEqual([...expected].sort())
+    for (const id of examples) {
       expect(
-        examples,
-        `Reflect.framework_id_examples missing canonical reflection classic ${id}`,
-      ).toContain(id)
+        CANONICAL_FRAMEWORKS_BY_ID[id],
+        `Reflect example ${id} must resolve in the canonical surface`,
+      ).toBeDefined()
     }
   })
 })

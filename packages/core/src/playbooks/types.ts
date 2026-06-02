@@ -42,7 +42,7 @@ export interface UPGPlaybook {
    * "related reading" without implying they are invoked as steps (unlike
    * `framework_id` / framework-kind steps). Each references a `UPGFramework.id`.
    * Lets consumers show a region's signature frameworks even when the
-   * creation sequence is pure `entity_sequence`. ( / Riker's note.)
+   * creation sequence is pure `entity_sequence`. (.)
    */
   related_framework_ids?: readonly string[]
   /**

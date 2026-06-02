@@ -75,7 +75,10 @@ export const STRATEGY_OUTCOMES_PLAYBOOK: UPGPlaybook = {
   region: 'strategy_outcomes',
   is_canonical: true,
   related_framework_ids: ['okr-framework', 'three-horizons', 'north-star-metric', 'metrics-tree', 'wardley-map'],
-  target_anchor_entity: 'objective',
+  // DT-PB-3: anchor is `outcome`, not `objective`. The creation_sequence
+  // creates outcome (step 3) before objective (step 4), and outcome is the
+  // strategy region's gravitational centre (objectives translate outcomes).
+  target_anchor_entity: 'outcome',
   creation_sequence: [
     seqStep(1, 'Vision & Mission',
       ['vision', 'mission'],
@@ -204,8 +207,12 @@ export const DISCOVERY_RESEARCH_VALIDATION_PLAYBOOK: UPGPlaybook = {
       ['hypothesis', 'assumption'],
       'Frame testable hypotheses from research. What assumptions need validation?'),
     seqStep(8, 'Test',
-      ['experiment', 'test_plan', 'evidence'],
-      'Validate with targeted experiments. Close the loop between research and action.'),
+      // DT-PB-1: was `experiment` — which resolves to NO canonical edge with
+      // hypothesis or test_plan, forcing an orphan. `experiment_run` is the
+      // hypothesis-linked test unit (experiment_run_validates_hypothesis,
+      // test_plan_ran_as_experiment_run, experiment_run_yields_evidence).
+      ['experiment_run', 'test_plan', 'evidence'],
+      'Validate with targeted experiment runs. Close the loop between research and action.'),
   ],
 }
 
@@ -240,8 +247,8 @@ export const MARKET_COMPETITIVE_PLAYBOOK: UPGPlaybook = {
       ['competitive_analysis'],
       'Synthesize into structured comparisons: feature parity matrices, win/loss patterns, positioning maps.'),
     seqStep(6, 'Moves',
-      ['partnership'],
-      'Look where competitors are weak and trends are strong. That intersection is where your moves live, including who to partner with.'),
+      ['competitive_battle_card'],
+      'Look where competitors are weak and trends are strong. That intersection is where your moves live: arm the team with battle cards that turn each competitor weakness into a position you can win. (Partnership moves belong in the business & GTM playbook, where `partnership` connects.)'),
   ],
 }
 
@@ -532,8 +539,8 @@ export const OPERATIONS_QUALITY_PLAYBOOK: UPGPlaybook = {
       ['threat_model', 'threat', 'vulnerability', 'security_control', 'access_policy'],
       'Model what could go wrong. Catalog known threats. Wire controls and access policies that actually constrain risk.'),
     seqStep(5, 'Quality Gates',
-      ['test_suite', 'test_case', 'regression_test', 'qa_session'],
-      'Establish what does not ship until tests pass. Define the test pyramid: unit, integration, end-to-end.'),
+      ['test_suite', 'test_case', 'regression_test', 'qa_session', 'feature', 'bug'],
+      'Establish what does not ship until tests pass. Define the test pyramid: unit, integration, end-to-end. Quality is a delivery concern: gates guard the features they cover and the bugs they catch, which is also where incidents trace back (a shipped defect becomes a production incident).'),
     seqStep(6, 'Compliance & Accessibility',
       ['compliance_framework', 'a11y_audit', 'security_policy'],
       'Map the frameworks you must comply with: SOC 2, GDPR, HIPAA, WCAG. Surface controls and audit cadence.'),

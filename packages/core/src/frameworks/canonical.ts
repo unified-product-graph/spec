@@ -210,6 +210,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "value-proposition-canvas",
+    "approach_ids": [
+      "trace"
+    ],
     "name": "Value Proposition Canvas",
     "version": "1.0.0",
     "description": "Map customer jobs, pains, and gains on one side, then align product features, pain relievers, and gain creators on the other to achieve product-market fit.",
@@ -314,6 +317,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "persona-canvas",
+    "approach_ids": [
+      "trace"
+    ],
     "name": "Persona Canvas",
     "version": "1.0.0",
     "description": "Demographics, goals, frustrations, JTBD: a structured template for creating research-backed personas.",
@@ -426,6 +432,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "empathy-map",
+    "approach_ids": [
+      "trace"
+    ],
     "name": "Empathy Map",
     "version": "1.0.0",
     "description": "Visualise what a user says, thinks, does, and feels to build deeper empathy and uncover hidden needs.",
@@ -586,6 +595,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "evolution_stage",
             "type": "enum",
             "required": true,
+            "scope": "framework",
             "label": "Evolution Stage",
             "description": "Where this component sits on the evolution axis",
             "enum_values": [
@@ -599,6 +609,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "visibility",
             "type": "number",
             "required": true,
+            "scope": "framework",
             "label": "Visibility",
             "description": "Y-axis position (0=infrastructure, 1=anchor/user)"
           }
@@ -608,6 +619,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "evolution_stage",
             "type": "enum",
             "required": true,
+            "scope": "framework",
             "label": "Evolution Stage",
             "description": "Where this component sits on the evolution axis",
             "enum_values": [
@@ -621,6 +633,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "visibility",
             "type": "number",
             "required": true,
+            "scope": "framework",
             "label": "Visibility",
             "description": "Y-axis position (0=infrastructure, 1=anchor/user)"
           }
@@ -630,6 +643,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "evolution_stage",
             "type": "enum",
             "required": true,
+            "scope": "framework",
             "label": "Evolution Stage",
             "description": "Where this component sits on the evolution axis",
             "enum_values": [
@@ -643,6 +657,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "visibility",
             "type": "number",
             "required": true,
+            "scope": "framework",
             "label": "Visibility",
             "description": "Y-axis position (0=infrastructure, 1=anchor/user)"
           }
@@ -652,6 +667,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "evolution_stage",
             "type": "enum",
             "required": true,
+            "scope": "framework",
             "label": "Evolution Stage",
             "description": "Where this component sits on the evolution axis (need anchor is usually at \"product\" or \"commodity\")",
             "enum_values": [
@@ -665,6 +681,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "visibility",
             "type": "number",
             "required": true,
+            "scope": "framework",
             "label": "Visibility",
             "description": "Y-axis position (0=infrastructure, 1=anchor/user); needs sit at 1.0"
           }
@@ -705,6 +722,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "business-model-canvas",
+    "approach_ids": [
+      "plan"
+    ],
     "name": "Business Model Canvas",
     "version": "1.0.0",
     "description": "Nine building blocks that describe how an organisation creates, delivers, and captures value.",
@@ -844,6 +864,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "porter-five-forces",
+    "approach_ids": [
+      "inspect"
+    ],
     "name": "Porter Five Forces",
     "version": "1.0.0",
     "description": "Analyse industry competitiveness through five forces: rivalry, new entrants, substitutes, buyer power, and supplier power.",
@@ -933,6 +956,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "swot-analysis",
+    "approach_ids": [
+      "inspect"
+    ],
     "name": "SWOT Analysis",
     "version": "1.0.0",
     "description": "Map Strengths, Weaknesses, Opportunities, and Threats in a 2x2 grid. Internal vs external, helpful vs harmful.",
@@ -1259,6 +1285,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "type": "assessment",
             "scale_id": "reach_5",
             "required": true,
+            "scope": "framework",
             "label": "Reach",
             "description": "How many users will this impact per quarter?"
           },
@@ -1267,6 +1294,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "type": "assessment",
             "scale_id": "impact_5",
             "required": true,
+            "scope": "framework",
             "label": "Impact",
             "description": "How much will this impact each user, on the impact scale?"
           },
@@ -1275,6 +1303,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "type": "assessment",
             "scale_id": "confidence_5",
             "required": true,
+            "scope": "framework",
             "label": "Confidence",
             "description": "How confident are you in the reach, impact, and effort estimates?"
           },
@@ -1283,6 +1312,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "type": "assessment",
             "scale_id": "effort_5",
             "required": true,
+            "scope": "framework",
             "label": "Effort",
             "description": "How much work is required to build and ship this, on the effort scale?"
           }
@@ -1369,6 +1399,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "build-measure-learn",
+    "approach_ids": [
+      "reflect"
+    ],
     "name": "Build-Measure-Learn",
     "version": "1.0.0",
     "description": "The core Lean Startup feedback loop: build a minimum viable product, measure its impact with actionable metrics, and learn whether to pivot or persevere.",
@@ -1504,6 +1537,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "functional_response",
             "type": "enum",
             "required": true,
+            "scope": "framework",
             "label": "Functional Response",
             "description": "How users feel when the feature IS present",
             "enum_values": [
@@ -1518,6 +1552,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "dysfunctional_response",
             "type": "enum",
             "required": true,
+            "scope": "framework",
             "label": "Dysfunctional Response",
             "description": "How users feel when the feature IS NOT present",
             "enum_values": [
@@ -1532,6 +1567,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "delighter_count",
             "type": "number",
             "required": false,
+            "scope": "framework",
             "label": "Delighter classifications",
             "description": "Count of survey responses classifying this feature as a delighter (attractive)"
           },
@@ -1539,6 +1575,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "performance_count",
             "type": "number",
             "required": false,
+            "scope": "framework",
             "label": "Performance classifications",
             "description": "Count of survey responses classifying this feature as performance (one-dimensional)"
           },
@@ -1546,6 +1583,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "must_be_count",
             "type": "number",
             "required": false,
+            "scope": "framework",
             "label": "Must-be classifications",
             "description": "Count of survey responses classifying this feature as must-be (basic)"
           },
@@ -1553,6 +1591,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "indifferent_count",
             "type": "number",
             "required": false,
+            "scope": "framework",
             "label": "Indifferent classifications",
             "description": "Count of survey responses classifying this feature as indifferent"
           }
@@ -1745,6 +1784,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "moscow",
             "type": "enum",
             "required": true,
+            "scope": "framework",
             "label": "MoSCoW priority",
             "description": "Which scope bucket this requirement falls into for the current release",
             "enum_values": [
@@ -1755,16 +1795,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             ]
           }
         ]
-      },
-      "computed_properties": [
-        {
-          "property": "must_have_ratio",
-          "expression": "must_count / total_count",
-          "entity_type": "feature",
-          "label": "Must-have Ratio",
-          "format": "percentage"
-        }
-      ]
+      }
     },
     "structure": {
       "pattern": "table"
@@ -1928,6 +1959,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "c4-model",
+    "approach_ids": [
+      "trace"
+    ],
     "name": "C4 Model",
     "version": "1.0.0",
     "description": "Visualise software architecture at four levels of abstraction: System Context, Container, Component, and Code. Each level zooms in to reveal more detail.",
@@ -2020,6 +2054,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "adr-log",
+    "approach_ids": [
+      "inspect"
+    ],
     "name": "ADR Log",
     "version": "1.0.0",
     "description": "Architecture Decision Records: log decisions with context, options, and rationale.",
@@ -2133,6 +2170,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "atomic-design",
+    "approach_ids": [
+      "trace"
+    ],
     "name": "Atomic Design",
     "version": "1.0.0",
     "description": "Atoms, Molecules, Organisms, Templates, Pages: a methodology for creating design systems from the smallest elements up.",
@@ -2230,6 +2270,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "double-diamond",
+    "approach_ids": [
+      "plan"
+    ],
     "name": "Double Diamond",
     "version": "1.0.0",
     "description": "Discover, Define, Develop, Deliver: a four-phase divergent/convergent design process.",
@@ -2320,6 +2363,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "dora-metrics",
+    "approach_ids": [
+      "inspect"
+    ],
     "name": "DORA Metrics",
     "version": "1.0.0",
     "description": "Four key metrics for software delivery performance: deployment frequency, lead time, change failure rate, and time to restore.",
@@ -2379,16 +2425,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             ]
           }
         ]
-      },
-      "computed_properties": [
-        {
-          "property": "stability_index",
-          "expression": "change_failure_rate * mean_time_to_recovery",
-          "entity_type": "metric",
-          "label": "Stability Index",
-          "format": "number"
-        }
-      ]
+      }
     },
     "structure": {
       "pattern": "collection"
@@ -2517,6 +2554,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "pirate-metrics-aarrr",
+    "approach_ids": [
+      "trace"
+    ],
     "name": "Pirate Metrics AARRR",
     "version": "1.0.0",
     "description": "Track user lifecycle across five stages: Acquisition, Activation, Retention, Revenue, and Referral.",
@@ -2550,7 +2590,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "required_properties": {
         "metric": [
           {
-            "property": "lifecycle_stage",
+            "property": "metric_category",
             "type": "enum",
             "required": true,
             "label": "Lifecycle stage",
@@ -2564,16 +2604,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             ]
           }
         ]
-      },
-      "computed_properties": [
-        {
-          "property": "conversion_rate",
-          "expression": "(stage_exits / stage_entries) * 100",
-          "entity_type": "metric",
-          "label": "Stage Conversion",
-          "format": "percentage"
-        }
-      ]
+      }
     },
     "structure": {
       "pattern": "funnel",
@@ -2637,6 +2668,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "north-star-metric",
+    "approach_ids": [
+      "plan"
+    ],
     "name": "North Star Metric",
     "version": "1.0.0",
     "description": "One metric that best captures the core value you deliver. Supported by 3-5 input metrics that drive it.",
@@ -2670,7 +2704,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "required_properties": {
         "metric": [
           {
-            "property": "metric_role",
+            "property": "designation",
             "type": "enum",
             "required": true,
             "label": "Metric role",
@@ -2688,16 +2722,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "description": "How strongly this input metric moves the North Star (input metrics only)"
           }
         ]
-      },
-      "computed_properties": [
-        {
-          "property": "nsm_impact",
-          "expression": "input_metric_value * leverage",
-          "entity_type": "metric",
-          "label": "NSM Impact",
-          "format": "number"
-        }
-      ]
+      }
     },
     "structure": {
       "pattern": "collection"
@@ -2733,6 +2758,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "marketing-mix-4ps",
+    "approach_ids": [
+      "plan"
+    ],
     "name": "Marketing Mix 4Ps",
     "version": "1.0.0",
     "description": "The foundational marketing framework. Every marketing strategy must address four decisions: what to sell (Product), what to charge (Price), where to sell (Place), and how to promote (Promotion).",
@@ -2826,6 +2854,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "bullseye-framework",
+    "approach_ids": [
+      "plan"
+    ],
     "name": "Bullseye Framework",
     "version": "1.0.0",
     "description": "Test 19 traction channels systematically. Start with the outer ring (what's possible), narrow to the middle ring (what's probable), then focus on the inner ring (what's working). Run cheap tests across all channels to find your bullseye.",
@@ -2912,6 +2943,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "product-led-growth-framework",
+    "approach_ids": [
+      "plan"
+    ],
     "name": "PLG Framework",
     "version": "1.0.0",
     "description": "Product-led go-to-market motion. Free entry gives users access, the aha moment hooks them, they expand usage within their team, and monetisation captures value from power users.",
@@ -3094,6 +3128,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "raci-matrix",
+    "approach_ids": [
+      "inspect"
+    ],
     "name": "RACI Matrix",
     "version": "1.0.0",
     "description": "Assign roles: Responsible, Accountable, Consulted, Informed for each activity.",
@@ -3145,16 +3182,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         }
       ],
-      "required_properties": {},
-      "computed_properties": [
-        {
-          "property": "coverage_score",
-          "expression": "assigned_count / total_activities",
-          "entity_type": "team",
-          "label": "RACI Coverage",
-          "format": "percentage"
-        }
-      ]
+      "required_properties": {}
     },
     "structure": {
       "pattern": "matrix"
@@ -3378,6 +3406,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "team-health-check",
+    "approach_ids": [
+      "inspect"
+    ],
     "name": "Team Health Check",
     "version": "1.0.0",
     "description": "A facilitated team self-assessment across dimensions like mission, fun, learning, speed, and support, using traffic-light voting to surface strengths and improvement areas in a safe format.",
@@ -3435,16 +3466,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         }
       ],
-      "required_properties": {},
-      "computed_properties": [
-        {
-          "property": "health_index",
-          "expression": "(green_count - red_count) / total_indicators",
-          "entity_type": "team",
-          "label": "Health Index",
-          "format": "number"
-        }
-      ]
+      "required_properties": {}
     },
     "structure": {
       "pattern": "table"
@@ -3501,6 +3523,9 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
   },
   {
     "id": "raid-log",
+    "approach_ids": [
+      "inspect"
+    ],
     "name": "RAID Log",
     "version": "1.0.0",
     "description": "A project management register tracking Risks, Assumptions, Issues, and Dependencies, the four categories most likely to derail a project if left unmanaged.",
@@ -3519,6 +3544,11 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Risk Register",
         "entityTypeId": "risk_register",
         "description": "Risk or assumption logged with likelihood, impact, owner, and mitigation strategy"
+      },
+      {
+        "label": "Risk",
+        "entityTypeId": "risk",
+        "description": "Individual risk scored by probability and impact; severity = probability * impact"
       },
       {
         "label": "Dependency",
@@ -3543,6 +3573,10 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         },
         {
+          "type": "risk",
+          "role": "scored_item"
+        },
+        {
           "type": "dependency",
           "role": "item"
         },
@@ -3555,7 +3589,24 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         }
       ],
-      "required_properties": {},
+      "required_properties": {
+        "risk": [
+          {
+            "property": "probability",
+            "type": "number",
+            "required": true,
+            "label": "Probability",
+            "description": "Likelihood the risk materialises (risk.probability assessment)"
+          },
+          {
+            "property": "impact",
+            "type": "number",
+            "required": true,
+            "label": "Impact",
+            "description": "Consequence severity if the risk materialises (risk.impact assessment)"
+          }
+        ]
+      },
       "computed_properties": [
         {
           "property": "severity",
@@ -3614,6 +3665,908 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "when_not_to_use": [
         "The project is small enough for a single team to manage",
         "Formal programme management would create overhead without value"
+      ]
+    }
+  },
+  {
+    "id": "ice-scoring",
+    "approach_ids": [
+      "prioritise"
+    ],
+    "name": "ICE Scoring",
+    "version": "1.0.0",
+    "description": "Rate ideas by Impact, Confidence, and Ease on a 1-10 scale. Multiply for a composite score. Fast and lightweight.",
+    "category": "prioritization",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Sean Ellis",
+      "description": "Created by Sean Ellis as a lightweight growth experiment scoring method. Widely adopted in growth teams.",
+      "year": 2010,
+      "license": "open_attribution"
+    },
+    "tags": [
+      "prioritization",
+      "table"
+    ],
+    "slots": [
+      {
+        "label": "Items to score",
+        "entityTypeId": "feature",
+        "description": "Features or experiments being evaluated"
+      },
+      {
+        "label": "Impact",
+        "entityTypeId": "outcome",
+        "description": "How much will this move the needle?"
+      },
+      {
+        "label": "Confidence",
+        "entityTypeId": "assumption",
+        "description": "How sure are we about the impact?"
+      },
+      {
+        "label": "Ease",
+        "entityTypeId": "feature",
+        "description": "How easy is this to implement?"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "feature",
+          "role": "scored_item"
+        },
+        {
+          "type": "outcome",
+          "role": "item"
+        },
+        {
+          "type": "assumption",
+          "role": "item"
+        }
+      ],
+      "required_properties": {
+        "feature": [
+          {
+            "property": "impact",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "Expected impact on the target metric (1-10)"
+          },
+          {
+            "property": "confidence",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "Confidence in the impact estimate (1-10)"
+          },
+          {
+            "property": "ease",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Ease",
+            "description": "Ease of implementation (1-10)"
+          }
+        ]
+      },
+      "computed_properties": [
+        {
+          "property": "ice_score",
+          "expression": "impact * confidence * ease",
+          "entity_type": "feature",
+          "label": "ICE Score",
+          "format": "number"
+        }
+      ]
+    },
+    "structure": {
+      "pattern": "table"
+    },
+    "presentation": {
+      "layout": {
+        "type": "table",
+        "columns": [
+          {
+            "property": "title",
+            "label": "Items to score",
+            "sortable": true
+          },
+          {
+            "property": "impact",
+            "label": "Impact",
+            "sortable": true
+          },
+          {
+            "property": "confidence",
+            "label": "Confidence",
+            "sortable": true
+          },
+          {
+            "property": "ease",
+            "label": "Ease",
+            "sortable": true
+          }
+        ]
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "type",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Provide a lightweight scoring model for early-stage ideas when detailed effort estimates are unavailable. Faster than RICE and useful for brainstorm triage.",
+      "core_question": "Which ideas should we investigate further based on their potential impact, confidence in our assumptions, and implementation ease?",
+      "when_to_use": [
+        "You have more ideas or features than capacity to build them",
+        "Stakeholders disagree on what to build next",
+        "You need a transparent, defensible prioritisation process"
+      ],
+      "when_not_to_use": [
+        "You have a single obvious next step with no contention",
+        "The backlog is small enough to sequence intuitively"
+      ]
+    }
+  },
+  {
+    "id": "wsjf",
+    "approach_ids": [
+      "prioritise"
+    ],
+    "name": "WSJF (Weighted Shortest Job First)",
+    "version": "1.0.0",
+    "description": "Prioritise work by dividing Cost of Delay (user value + time criticality + risk reduction) by job duration to maximise economic throughput.",
+    "category": "planning",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Reinertsen / SAFe",
+      "description": "Developed by Don Reinertsen and adopted as a core practice in the Scaled Agile Framework (SAFe). Combines urgency (Cost of Delay) with job size to produce an economic prioritisation sequence.",
+      "url": "https://www.scaledagileframework.com/wsjf/",
+      "year": 2011,
+      "license": "open_attribution"
+    },
+    "tags": [
+      "planning",
+      "table"
+    ],
+    "slots": [
+      {
+        "label": "Backlog Items",
+        "entityTypeId": "feature",
+        "description": "Backlog Items: feature entries to evaluate"
+      },
+      {
+        "label": "User/Business Value",
+        "entityTypeId": "metric",
+        "description": "User/Business Value: metric entries to evaluate"
+      },
+      {
+        "label": "Time Criticality",
+        "entityTypeId": "metric",
+        "description": "How much value decays if delivery is delayed (deadlines, competition, seasonal windows)"
+      },
+      {
+        "label": "Risk Reduction / Opportunity Enablement",
+        "entityTypeId": "metric",
+        "description": "Risk Reduction / Opportunity Enablement: metric entries to evaluate"
+      },
+      {
+        "label": "Job Size",
+        "entityTypeId": "metric",
+        "description": "Estimated effort (story points, t-shirt size, or person-weeks)"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "feature",
+          "role": "scored_item"
+        },
+        {
+          "type": "metric",
+          "role": "item"
+        }
+      ],
+      "required_properties": {
+        "feature": [
+          {
+            "property": "user_value",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "User/Business Value",
+            "description": "Relative value to users and the business if delivered"
+          },
+          {
+            "property": "time_criticality",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Time Criticality",
+            "description": "How much value decays if delivery is delayed (deadlines, competition, seasonal windows)"
+          },
+          {
+            "property": "risk_reduction",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Risk Reduction / Opportunity Enablement",
+            "description": "Value from reducing risk or enabling future opportunities"
+          },
+          {
+            "property": "job_size",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Job Size",
+            "description": "Estimated effort (story points, t-shirt size, or person-weeks)"
+          }
+        ]
+      },
+      "computed_properties": [
+        {
+          "property": "wsjf_score",
+          "expression": "(user_value + time_criticality + risk_reduction) / job_size",
+          "entity_type": "feature",
+          "label": "WSJF Score",
+          "format": "number"
+        }
+      ]
+    },
+    "structure": {
+      "pattern": "table"
+    },
+    "presentation": {
+      "layout": {
+        "type": "table",
+        "columns": [
+          {
+            "property": "title",
+            "label": "Backlog Items",
+            "sortable": true
+          },
+          {
+            "property": "user_value",
+            "label": "User/Business Value",
+            "sortable": true
+          },
+          {
+            "property": "time_criticality",
+            "label": "Time Criticality",
+            "sortable": true
+          },
+          {
+            "property": "risk_reduction",
+            "label": "Risk Reduction / Opportunity Enablement",
+            "sortable": true
+          },
+          {
+            "property": "job_size",
+            "label": "Job Size",
+            "sortable": true
+          },
+          {
+            "property": "wsjf_score",
+            "label": "WSJF Score",
+            "sortable": true
+          }
+        ]
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "type",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Prioritise work by dividing the Cost of Delay by job duration, ensuring the most time-sensitive, valuable items are done first.",
+      "core_question": "Considering the cost of waiting, which items should we start now to maximise economic benefit?",
+      "when_to_use": [
+        "You need to coordinate work across multiple teams or time horizons",
+        "Stakeholders need visibility into what is coming and when",
+        "You want to balance commitments with flexibility"
+      ],
+      "when_not_to_use": [
+        "The team is small enough that informal coordination works",
+        "Plans would create false precision about uncertain outcomes"
+      ]
+    }
+  },
+  {
+    "id": "cost-of-delay",
+    "approach_ids": [
+      "prioritise"
+    ],
+    "name": "Cost of Delay",
+    "version": "1.0.0",
+    "description": "Quantify the economic cost of not shipping a feature to drive priority decisions. Combines urgency with value.",
+    "category": "prioritization",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Don Reinertsen",
+      "description": "Formalised in The Principles of Product Development Flow (Celeritas Publishing). Foundational to lean product economics.",
+      "year": 2009,
+      "license": "public_domain"
+    },
+    "tags": [
+      "prioritization",
+      "table"
+    ],
+    "slots": [
+      {
+        "label": "Items to evaluate",
+        "entityTypeId": "feature",
+        "description": "Features or initiatives being assessed"
+      },
+      {
+        "label": "User-Business Value",
+        "entityTypeId": "outcome",
+        "description": "Revenue, retention, or strategic value"
+      },
+      {
+        "label": "Time Criticality",
+        "entityTypeId": "metric",
+        "description": "How much value decays with delay"
+      },
+      {
+        "label": "Risk Reduction",
+        "entityTypeId": "risk",
+        "description": "What risk does this mitigate?"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "feature",
+          "role": "scored_item"
+        },
+        {
+          "type": "metric",
+          "role": "item"
+        },
+        {
+          "type": "outcome",
+          "role": "item"
+        },
+        {
+          "type": "risk",
+          "role": "item"
+        }
+      ],
+      "required_properties": {
+        "feature": [
+          {
+            "property": "cost_of_delay",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Cost of Delay",
+            "description": "Weekly revenue impact of not shipping"
+          },
+          {
+            "property": "job_size",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Job Size",
+            "description": "Weeks of development effort"
+          }
+        ]
+      },
+      "computed_properties": [
+        {
+          "property": "wsjf_score",
+          "expression": "cost_of_delay / job_size",
+          "entity_type": "feature",
+          "label": "WSJF Score",
+          "format": "number"
+        }
+      ]
+    },
+    "structure": {
+      "pattern": "table"
+    },
+    "presentation": {
+      "layout": {
+        "type": "table",
+        "columns": [
+          {
+            "property": "title",
+            "label": "Items to evaluate",
+            "sortable": true
+          },
+          {
+            "property": "cost_of_delay",
+            "label": "User-Business Value",
+            "sortable": true
+          },
+          {
+            "property": "job_size",
+            "label": "Job Size",
+            "sortable": true
+          },
+          {
+            "property": "wsjf_score",
+            "label": "CoD Score",
+            "sortable": true
+          }
+        ]
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "type",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Quantify the economic impact of not delivering a feature by a given date, making urgency visible and enabling time-sensitive prioritisation.",
+      "core_question": "How much value are we losing every week this feature is not in production, and does that urgency justify fast-tracking it?",
+      "when_to_use": [
+        "You have more ideas or features than capacity to build them",
+        "Stakeholders disagree on what to build next",
+        "You need a transparent, defensible prioritisation process"
+      ],
+      "when_not_to_use": [
+        "You have a single obvious next step with no contention",
+        "The backlog is small enough to sequence intuitively"
+      ]
+    }
+  },
+  {
+    "id": "five-whys",
+    "approach_ids": [
+      "reflect",
+      "inspect"
+    ],
+    "name": "Five Whys",
+    "version": "1.0.0",
+    "description": "Iteratively ask \"why?\", typically five times, starting from a symptom; each answer becomes the subject of the next question. The chain of answers reveals the underlying root cause behind the surface problem.",
+    "category": "team_process",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Sakichi Toyoda / Toyota Production System",
+      "description": "Developed within the Toyota Production System as a root-cause analysis technique. Popularised through Lean and Six Sigma practice; now a widely used incident-review and design-debug staple.",
+      "year": 1930,
+      "license": "public_domain"
+    },
+    "tags": [
+      "team_process",
+      "reflection",
+      "root_cause",
+      "tree"
+    ],
+    "slots": [
+      {
+        "label": "Symptom",
+        "entityTypeId": "need",
+        "description": "The observed problem the analysis starts from."
+      },
+      {
+        "label": "Why chain",
+        "entityTypeId": "insight",
+        "description": "Each \"why?\" answer along the chain, typically five iterations deep."
+      },
+      {
+        "label": "Root cause",
+        "entityTypeId": "insight",
+        "description": "The terminal answer at the bottom of the chain: the underlying cause to address."
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "need",
+          "role": "root"
+        },
+        {
+          "type": "insight",
+          "role": "branch"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "tree"
+    },
+    "presentation": {
+      "layout": {
+        "type": "tree",
+        "direction": "TB"
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Move past surface symptoms by chaining \"why?\" questions until the underlying root cause surfaces, so fixes target the real driver rather than a downstream effect.",
+      "core_question": "Why is this happening, and why is THAT happening, until we reach a cause we can act on?",
+      "when_to_use": [
+        "A problem keeps recurring after surface fixes",
+        "Post-incident review where the obvious cause feels too obvious",
+        "Designing a fix and you want to confirm you understand the actual driver"
+      ],
+      "when_not_to_use": [
+        "The problem has multiple independent root causes (use a fishbone or richer RCA tool)",
+        "You need quantitative attribution rather than a single-thread narrative",
+        "Five linear \"whys\" oversimplify a systems problem with feedback loops"
+      ]
+    }
+  },
+  {
+    "id": "pre-mortem",
+    "approach_ids": [
+      "reflect"
+    ],
+    "name": "Pre-mortem",
+    "version": "1.0.0",
+    "description": "Imagine the project has already failed; work backward listing the plausible causes of the failure. Produce a risk register and matching mitigations before the work starts.",
+    "category": "team_process",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Gary Klein",
+      "description": "Popularised by Gary Klein in Harvard Business Review (2007) as a prospective-hindsight technique. Inverts the post-mortem: imagine failure first, then list causes, while there is still time to act.",
+      "url": "https://hbr.org/2007/09/performing-a-project-premortem",
+      "year": 2007,
+      "license": "published_methodology"
+    },
+    "tags": [
+      "team_process",
+      "reflection",
+      "risk",
+      "collection"
+    ],
+    "slots": [
+      {
+        "label": "Imagined failures",
+        "entityTypeId": "risk",
+        "description": "Plausible failure modes named as if they had already occurred."
+      },
+      {
+        "label": "Causes",
+        "entityTypeId": "insight",
+        "description": "For each imagined failure, the contributing causes the team can foresee."
+      },
+      {
+        "label": "Mitigations",
+        "entityTypeId": "initiative",
+        "description": "Mitigation actions the team will take before failure can occur."
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "risk",
+          "role": "bucket"
+        },
+        {
+          "type": "insight",
+          "role": "bucket"
+        },
+        {
+          "type": "initiative",
+          "role": "bucket"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "collection"
+    },
+    "presentation": {
+      "layout": {
+        "type": "grid",
+        "groupBy": "type"
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Surface project risks early by inverting hindsight: imagine the project has already failed and ask why, while there is still time to mitigate.",
+      "core_question": "It is six months from now and the project has failed catastrophically. What happened, and why?",
+      "when_to_use": [
+        "Kicking off a project with significant downside or irreversible commitment",
+        "A plan looks too clean and the team senses unspoken concerns",
+        "Stakeholders disagree on risk; the exercise externalises and ranks them"
+      ],
+      "when_not_to_use": [
+        "The work is small, reversible, and cheap to course-correct",
+        "The team is in execution mode and reflective ceremonies will derail momentum",
+        "Risk surfacing has become performative: the team names risks but never mitigates them"
+      ]
+    }
+  },
+  {
+    "id": "red-team",
+    "approach_ids": [
+      "reflect",
+      "inspect"
+    ],
+    "name": "Red Team",
+    "version": "1.0.0",
+    "description": "Structured adversarial review. A designated group is assigned to attack a plan, design, or proposal from an outside-in stance, surfacing weaknesses the inside-out builders cannot see.",
+    "category": "team_process",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "US Department of Defense (Cold War era); broadened by security and intelligence practice",
+      "description": "Originated in Cold War-era military strategic exercises (\"red\" team takes the adversary role against the \"blue\" team's defence). Adopted by cybersecurity, intelligence analysis, and product teams as a structured contrarian-review practice.",
+      "year": 1960,
+      "license": "public_domain"
+    },
+    "tags": [
+      "team_process",
+      "reflection",
+      "adversarial",
+      "collection"
+    ],
+    "slots": [
+      {
+        "label": "Target",
+        "entityTypeId": "initiative",
+        "description": "The plan, design, or proposal under adversarial review."
+      },
+      {
+        "label": "Attack vectors",
+        "entityTypeId": "risk",
+        "description": "The angles the red team uses to probe weaknesses."
+      },
+      {
+        "label": "Findings",
+        "entityTypeId": "insight",
+        "description": "Weaknesses, blind spots, or unstated assumptions surfaced by the review."
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "initiative",
+          "role": "root"
+        },
+        {
+          "type": "risk",
+          "role": "bucket"
+        },
+        {
+          "type": "insight",
+          "role": "bucket"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "collection"
+    },
+    "presentation": {
+      "layout": {
+        "type": "grid",
+        "groupBy": "type"
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Stress-test a plan against an explicit adversary by assigning reviewers to attack rather than agree, so weaknesses surface before reality finds them.",
+      "core_question": "If a competent adversary wanted this to fail, where would they push first, and would we hold?",
+      "when_to_use": [
+        "A high-stakes decision, launch, or security posture needs hardening",
+        "Inside-out thinking is dominant and dissent has gone quiet",
+        "Risk register is suspiciously short for the size of the bet"
+      ],
+      "when_not_to_use": [
+        "Early-stage exploration where adversarial framing would crush a fragile idea prematurely",
+        "Team trust is too low: red-teaming will read as personal attack rather than role-play",
+        "The work is small enough that a lightweight devil's-advocate pass is sufficient"
+      ]
+    }
+  },
+  {
+    "id": "devils-advocate",
+    "approach_ids": [
+      "reflect"
+    ],
+    "name": "Devil's Advocate",
+    "version": "1.0.0",
+    "description": "Designate one reviewer to formally take the opposing position regardless of personal view. The assigned-role contrarian defangs groupthink by making dissent legitimate and structured.",
+    "category": "team_process",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Roman Catholic Church (advocatus diaboli); broadened by decision-quality practice",
+      "description": "Originated in 16th-century canonisation proceedings as the advocatus diaboli, an official assigned to argue against canonising a candidate. Adopted by decision-science and product-team practice as a structured antidote to groupthink.",
+      "year": 1587,
+      "license": "public_domain"
+    },
+    "tags": [
+      "team_process",
+      "reflection",
+      "decision_quality",
+      "collection"
+    ],
+    "slots": [
+      {
+        "label": "Proposal",
+        "entityTypeId": "initiative",
+        "description": "The plan or recommendation under consideration."
+      },
+      {
+        "label": "Opposing arguments",
+        "entityTypeId": "insight",
+        "description": "The case against the proposal, voiced by the assigned contrarian regardless of personal view."
+      },
+      {
+        "label": "Counter-evidence",
+        "entityTypeId": "evidence",
+        "description": "Data points the contrarian raises that the proposal does not yet account for."
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "initiative",
+          "role": "root"
+        },
+        {
+          "type": "insight",
+          "role": "bucket"
+        },
+        {
+          "type": "evidence",
+          "role": "bucket"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "collection"
+    },
+    "presentation": {
+      "layout": {
+        "type": "grid",
+        "groupBy": "type"
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Make dissent a legitimate role rather than a personal stance. Assigning one reviewer to argue against the proposal forces the team to confront the strongest counter-case.",
+      "core_question": "If we had to argue against this proposal (not because we believe it, but because the role demands it) what is the strongest case?",
+      "when_to_use": [
+        "A decision is heading toward consensus and you suspect groupthink",
+        "Stakes are high and the team has not heard a serious counter-argument",
+        "Cultural norms make raw dissent costly; assigning the role lowers the social cost"
+      ],
+      "when_not_to_use": [
+        "Genuine disagreement already exists in the room (let it surface; do not theatricalise it)",
+        "The decision is small enough that the ceremony costs more than the insight returned",
+        "The assigned contrarian will be punished socially for the role; set the norms first or skip"
+      ]
+    }
+  },
+  {
+    "id": "second-order-thinking",
+    "approach_ids": [
+      "reflect"
+    ],
+    "name": "Second-order Thinking",
+    "version": "1.0.0",
+    "description": "After deciding a move, ask \"and then what?\" repeatedly. Trace second-, third-, and higher-order consequences to surface downstream effects that first-order reasoning misses.",
+    "category": "team_process",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Howard Marks / Charlie Munger",
+      "description": "Howard Marks distinguished first-order vs second-order thinking in The Most Important Thing (2011) as the essential discipline of consequential decision-making. Charlie Munger's \"and then what?\" framing is the practical heuristic.",
+      "url": "https://www.oaktreecapital.com/insights/memo/dare-to-be-great-ii",
+      "year": 2011,
+      "license": "published_methodology"
+    },
+    "tags": [
+      "team_process",
+      "reflection",
+      "consequences",
+      "tree"
+    ],
+    "slots": [
+      {
+        "label": "First-order move",
+        "entityTypeId": "decision",
+        "description": "The decision or move under consideration."
+      },
+      {
+        "label": "Second-order consequences",
+        "entityTypeId": "insight",
+        "description": "Downstream effects that follow from the first-order move."
+      },
+      {
+        "label": "Higher-order consequences",
+        "entityTypeId": "insight",
+        "description": "Third-, fourth-, fifth-order ripples: second-order consequences of the second-order consequences."
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "decision",
+          "role": "root"
+        },
+        {
+          "type": "insight",
+          "role": "branch"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "tree"
+    },
+    "presentation": {
+      "layout": {
+        "type": "tree",
+        "direction": "TB"
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Resist first-order reasoning by chaining \"and then what?\" until non-obvious downstream consequences come into view.",
+      "core_question": "If we make this move and it works, what does the world look like next, and is that the world we want?",
+      "when_to_use": [
+        "A decision has feedback loops, market reactions, or behavioural ripples",
+        "The first-order case is compelling, which is exactly when downstream effects bite",
+        "Considering an irreversible or large-scale commitment"
+      ],
+      "when_not_to_use": [
+        "Routine, reversible, low-blast-radius decisions where deliberation costs more than mistakes",
+        "Higher-order branches diverge into pure speculation with no anchor in evidence",
+        "Time pressure makes a deeper trace expensive and the first-order call is good enough"
       ]
     }
   }

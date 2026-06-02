@@ -7,6 +7,18 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.2] - 2026-06-02
+
+Co-version with the @unified-product-graph/* 0.8.2 release train.
+
+### Added
+- Eight additional frameworks promoted to the canonical set (34 -> 42), with full scoring-input and approach coverage.
+
+### Changed
+- Framework scoring inputs are now marked with an explicit `framework` scope, keeping entity properties intrinsic (scoring criteria belong to the framework, not the entity).
+- Framework input renames and closure fixes for internal consistency.
+- `UPG_VERSION` -> `0.8.2`.
+
 ## [Unreleased]
 
 ## [0.7.5] - 2026-05-30

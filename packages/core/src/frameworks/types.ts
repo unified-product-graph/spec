@@ -69,6 +69,30 @@ export interface FrameworkPropertyRequirement {
   type: 'number' | 'string' | 'enum' | 'boolean' | 'assessment'
   /** Whether the property must be filled for the framework to function */
   required: boolean
+  /**
+   * Where this property lives (Captain-ratified).
+   *
+   * - `'entity'` (default): the property is intrinsic to the entity type and
+   *   MUST exist in `UPG_PROPERTY_SCHEMA[<entity_type>]`. The framework-shape
+   *   audit gates this: an `'entity'`-scoped requirement that the entity schema
+   *   does not define is a real referential-integrity bug.
+   * - `'framework'`: the property is a **framework-scoped scoring input**. It is
+   *   declared BY the framework FOR the framework (RICE's reach/impact/
+   *   confidence/effort; ICE's impact/confidence/ease; WSJF's cost-of-delay/
+   *   job-size; MoSCoW's `moscow` bucket; Kano's functional/dysfunctional
+   *   response; Wardley's evolution_stage/visibility). It is NOT asserted as an
+   *   intrinsic entity property, so the spec stays noise-free and the audit
+   *   exempts it from the entity-schema check by design.
+   *
+   * A saved score does NOT live on an entity property — it would live on a
+   * framework-application edge / instance (a persistent annotation store, which
+   * is deferred). At call time, `executePrioritise` sources these inputs from
+   * `node.properties` directly and returns clean `type_mismatch` /
+   * `missing_properties` hints; it never depends on the entity schema.
+   *
+   * @default 'entity'
+   */
+  scope?: 'entity' | 'framework'
   /** Default value to use when the property is not set */
   default_value?: unknown
   /** Valid values when type is 'enum' */
@@ -146,17 +170,23 @@ export interface FrameworkDataSpec {
   /**
    * Properties required on each entity type, keyed by entity type string.
    *
-   * **Framework-introduced properties.** A framework may declare
-   * property keys that do NOT appear in `UPG_PROPERTY_SCHEMA` for the target
-   * entity type. This is by design: frameworks are lenses that layer
-   * domain-specific fields on top of canonical entities (RICE adds
-   * `reach`/`impact`/`confidence`/`effort` to a feature; Kano adds
-   * `functional_response`/`dysfunctional_response`). These fields are NOT
-   * universal to the entity; they live inside the framework context.
+   * **Two scopes.** Each requirement carries a `scope`:
+   * - `scope: 'entity'` (default) — an intrinsic property of the entity type.
+   *   It MUST exist in `UPG_PROPERTY_SCHEMA[<entity_type>]`; the framework-shape
+   *   audit treats an entity-scoped requirement absent from the schema as a
+   *   referential-integrity bug.
+   * - `scope: 'framework'` — a **framework-scoped scoring input**. The framework
+   *   declares it FOR itself (RICE's `reach`/`impact`/`confidence`/`effort`,
+   *   ICE's `impact`/`confidence`/`ease`, WSJF's `cost_of_delay`/`job_size`,
+   *   MoSCoW's `moscow`, Kano's `functional_response`/`dysfunctional_response`,
+   *   Wardley's `evolution_stage`/`visibility`). It is NOT asserted as an
+   *   intrinsic entity property, so the entity schema stays noise-free. The
+   *   audit exempts it from the entity-schema check by design.
    *
-   * Consumers must read framework-introduced properties from this spec, not
-   * from `UPG_PROPERTY_SCHEMA`. Renderers merge both when displaying an
-   * entity under a framework. See `src/ARCHITECTURE.md`,
+   * Consumers must read framework-scoped inputs from this spec, not from
+   * `UPG_PROPERTY_SCHEMA`. Renderers merge both when displaying an entity under
+   * a framework. A saved score lives on a framework-application edge/instance,
+   * never on the entity (annotation store deferred). See `src/ARCHITECTURE.md`,
    * "Framework Properties: Lens-Scoped Fields".
    */
   required_properties: Record<string, FrameworkPropertyRequirement[]>

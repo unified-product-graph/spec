@@ -13,6 +13,7 @@
 
 import { UPG_FRAMEWORKS } from './definitions/index.js'
 import { UPG_ENTITY_META } from '../registry/entity-meta.js'
+import { getPropertySchema } from '../properties/property-schema.js'
 import type { UPGFramework } from './types.js'
 
 // ── Issue kinds ─────────────────────────────────────────────────────────────
@@ -23,6 +24,7 @@ export type FrameworkIssueKind =
   | 'COMPUTED_EXPRESSION_UNDEFINED_VARIABLE'
   | 'SLOT_DATA_DRIFT'
   | 'WHEN_TO_USE_BOILERPLATE'
+  | 'REQUIRED_PROPERTY_NOT_ON_ENTITY'
 
 export type FrameworkIssueSeverity = 'blocker' | 'warning'
 
@@ -171,6 +173,43 @@ function auditFramework(fw: UPGFramework): FrameworkIssue[] {
     }
   }
 
+  // ── Issue 2b: entity-scoped required_property ⊆ entity schema ───
+  // A framework `required_properties[type].prop` is either:
+  //   - `scope: 'entity'` (default) — an INTRINSIC property of the entity type.
+  //     It MUST be a real key in UPG_PROPERTY_SCHEMA[type]; if not, that is a
+  //     referential-integrity bug (a typo, a stale rename, or a property that
+  //     should be reframed as a framework-scoped input). Reported here.
+  //   - `scope: 'framework'` — a FRAMEWORK-SCOPED SCORING INPUT. It is declared
+  //     by the framework for the framework (RICE's reach/impact/confidence/
+  //     effort, ICE's impact/confidence/ease, WSJF's cost_of_delay/job_size,
+  //     MoSCoW's moscow, Kano's functional/dysfunctional responses, Wardley's
+  //     evolution_stage/visibility). It is NOT an intrinsic entity property, so
+  //     it is exempt from the entity-schema check BY DESIGN — not by an
+  //     allow-list exception. A saved score lives on a framework-application
+  //     edge/instance, never on the entity (annotation store deferred).
+  //
+  // With scoping real, the audit now PASSES BY DESIGN: every entity-scoped
+  // required_property resolves against the schema, and framework-scoped inputs
+  // are exempt because they're framework-local. Severity stays `warning` so the
+  // wider catalog's pre-existing entity-scoped gaps remain visible without
+  // failing the build; the showcase frameworks are gated separately in the test.
+  for (const [entityType, props] of Object.entries(requiredProps)) {
+    const schema = getPropertySchema(entityType)
+    const known = new Set(schema ? Object.keys(schema) : [])
+    for (const prop of props) {
+      if (UNIVERSAL_NODE_FIELDS.has(prop.property)) continue
+      if (known.has(prop.property)) continue
+      // Framework-scoped scoring inputs are framework-local; not entity props.
+      if (prop.scope === 'framework') continue
+      issues.push({
+        kind: 'REQUIRED_PROPERTY_NOT_ON_ENTITY',
+        severity: 'warning',
+        location: `data.required_properties.${entityType}[].property="${prop.property}"`,
+        detail: `Framework requires entity-scoped property "${prop.property}" on entity "${entityType}", but it is not a property of that entity (not in UPG_PROPERTY_SCHEMA["${entityType}"]). Point the framework at the real property name, add it to the entity schema, or mark it scope:'framework' if it is a framework-scoped scoring input.`,
+      })
+    }
+  }
+
   // ── Issue 3: Slot ↔ data.entity_types consistency ────────────────────────
   const slotEntityTypes = new Set((fw.slots ?? []).map((s) => s.entityTypeId))
   for (const slotType of slotEntityTypes) {
@@ -272,6 +311,7 @@ export function runFrameworkShapeAudit(
     COMPUTED_EXPRESSION_UNDEFINED_VARIABLE: 0,
     SLOT_DATA_DRIFT: 0,
     WHEN_TO_USE_BOILERPLATE: 0,
+    REQUIRED_PROPERTY_NOT_ON_ENTITY: 0,
   }
   const by_severity: Record<FrameworkIssueSeverity, number> = {
     blocker: 0,

@@ -202,7 +202,7 @@ export interface ApprovalRecordProperties {
  *
  * @example
  * const properties: AgentSkillProperties = {
- *   skill_trigger: '/upg-research',
+ *   skill_trigger: '/upg-new-research',
  *   skill_description: 'Turns a transcript into a ranked list of opportunities.',
  *   invocation_count: 42,
  * }
