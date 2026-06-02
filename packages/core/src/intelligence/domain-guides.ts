@@ -964,7 +964,7 @@ const PORTFOLIO_GUIDE: UPGDomainUsageGuide = {
 const WORKSPACE_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'workspace',
   anchor_entity: 'workspace',
-  creation_sequence: ['workspace'],
+  creation_sequence: ['workspace', 'framework_exercise'],
   patterns: [],
   required_bridges: [],
   anti_patterns: [

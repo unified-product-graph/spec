@@ -61,3 +61,34 @@ export interface WorkspaceProperties {
   /** Display icon (emoji or icon name) */
   icon?: string
 }
+
+/** Framework exercise: one run of a framework over a set of entities.
+ *
+ * A framework_exercise is a structured workspace — applying a single framework
+ * (MoSCoW, RICE, Kano, …) to a chosen set of entities. It is the persistent
+ * home for that run's answers: each entity it scores is linked by a
+ * `framework_exercise_includes_node` edge whose `properties` carry the result
+ * for that entity (a MoSCoW bucket, a RICE score, a canvas slot, a funnel
+ * stage). Because the value lives on the edge, the same entity can appear in
+ * many exercises with different results, and any entity type can be scored —
+ * not just `feature`. See ADR 2026-06-02-framework-exercises.
+ *
+ * `title` (the exercise's human label) and `status` (draft / active /
+ * archived) are base-node fields; the fields below are its own intrinsic data.
+ *
+ * @example
+ * const properties: FrameworkExerciseProperties = {
+ *   framework_id: 'moscow',
+ * }
+ */
+export interface FrameworkExerciseProperties {
+  /** Which framework this exercise runs: a framework id (e.g. 'moscow',
+   *  'rice-scoring', 'kano-model'). Resolves against the framework catalog. */
+  framework_id: string
+  /**
+   * Optional frozen copy of the framework's input spec at apply time, so a
+   * historical exercise still renders correctly if the framework definition
+   * later evolves (inputs added, removed, or rescaled).
+   */
+  inputs_snapshot?: Record<string, unknown>
+}

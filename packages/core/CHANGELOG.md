@@ -7,6 +7,15 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.4] - 2026-06-02
+
+Framework exercises. `UPG_VERSION` is now `0.8.4` (catalogue change). Folds the 0.8.3 patch train (CLI/MCP wiring fixes; no catalogue change).
+
+### Added
+- `framework_exercise` entity type (Workspace domain): one run of a framework over a set of entities. Containment-free, with a draft/active/archived lifecycle and `framework_id` + `inputs_snapshot` properties.
+- `framework_exercise_includes_node` edge (`includes` / `included_in`, polymorphic target): links an exercise to each entity it scores and carries the framework's per-entity result (a MoSCoW bucket, a RICE score, a canvas slot, a funnel stage) as edge properties.
+- Gated edge properties: `UPGEdge.properties` plus a `carries_properties` capability flag on edge definitions. Only edges that opt in may carry a payload; the canonical serializer round-trips it byte-stably. New `edgeCarriesProperties(type)` helper.
+
 ## [0.8.2] - 2026-06-02
 
 Co-version with the @unified-product-graph/* 0.8.2 release train.

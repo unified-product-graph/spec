@@ -3418,6 +3418,44 @@ const TEMPLATE_LIFECYCLES: UPGLifecycle[] = [
   fromTemplate('deal', SALES_DEAL_TEMPLATE),
 ]
 
+/**
+ * framework_exercise (Workspace domain)
+ *
+ * One run of a framework over a set of entities. `draft` while the framework's
+ * inputs are still being filled in, `active` once it is the authoritative run
+ * consumers read and rank by, `archived` when superseded — retained for
+ * provenance and revivable. The exercise's per-entity results live on its
+ * `framework_exercise_includes_node` edges, not in these phases.
+ */
+const FRAMEWORK_EXERCISE_LIFECYCLE: UPGLifecycle = {
+  entity_type: 'framework_exercise',
+  initial_phase: 'draft',
+  terminal_phases: ['archived'],
+  phases: [
+    {
+      id: 'draft',
+      label: 'Draft',
+      description:
+        'The exercise has been created and entities pulled into scope, but the framework\'s inputs have not all been filled in yet.',
+      transitions_to: ['active', 'archived'],
+    },
+    {
+      id: 'active',
+      label: 'Active',
+      description:
+        'The current, authoritative run of its framework. Its include edges carry the live results consumers read, rank, and render by.',
+      transitions_to: ['archived'],
+    },
+    {
+      id: 'archived',
+      label: 'Archived',
+      description:
+        'A past run, retained for provenance. Still queryable but superseded by a newer exercise and hidden from default views. Can be revived to active.',
+      transitions_to: ['active'],
+    },
+  ],
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Registry
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3527,6 +3565,9 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   // Product & Growth
   VARIANT_LIFECYCLE,
   GROWTH_CAMPAIGN_LIFECYCLE,
+
+  // Workspace
+  FRAMEWORK_EXERCISE_LIFECYCLE,
 
   // ── Template-generated lifecycles ─────────────────────────────────
   ...TEMPLATE_LIFECYCLES,

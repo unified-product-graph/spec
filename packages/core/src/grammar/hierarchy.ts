@@ -482,6 +482,12 @@ export function canBeChildOf(childType: string, parentType: string): boolean {
  */
 export const UPG_CONTAINMENT_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   'person',
+  // A framework_exercise has no structural parent: it anchors to the entities
+  // it scores via the `framework_exercise_includes_node` edge, not by
+  // containment. Modelling it as a product child would force a containment edge
+  // and read against the whole point of the exercise model (relational, not
+  // hierarchical). Same posture as `person`. See ADR 2026-06-02-framework-exercises.
+  'framework_exercise',
 ])
 
 /**

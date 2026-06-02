@@ -508,6 +508,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
 
   // ── Workspace ──
   { name: 'workspace', type_id: 'ent_328', maturity: 'proposed', since: '0.2.0' },
+  { name: 'framework_exercise', type_id: 'ent_350', maturity: 'proposed', since: '0.8.4' },
 ] as const
 
 // ─── Lookup helpers ────────────────────────────────────────────────────────────

@@ -26,7 +26,7 @@ export * from './frameworks/index.js'
 export * from './format/index.js'
 
 /** The current spec version implemented by this package */
-export const UPG_VERSION = '0.8.2' as const
+export const UPG_VERSION = '0.8.4' as const
 
 /**
  * The `.upg` JSON document format version. Written to the `upg_version` field.

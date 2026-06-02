@@ -341,8 +341,8 @@ export const UPG_DOMAINS = [
   {
     id: 'workspace',
     label: 'Workspace',
-    description: 'Spatial thinking spaces for arranging entities, debating decisions, and committing to the graph. Workspaces are transient canvases that sit alongside all other domains, letting you compose and explore relationships before they become permanent graph structure.',
-    types: ['workspace'],
+    description: 'Spatial thinking spaces for arranging entities, debating decisions, and committing to the graph. Workspaces are transient canvases that sit alongside all other domains, letting you compose and explore relationships before they become permanent graph structure. A framework exercise is a structured workspace: one run of a framework (MoSCoW, RICE, Kano, …) applied to a chosen set of entities, with each entity\'s result recorded on the exercise-to-entity edge rather than the entity itself.',
+    types: ['workspace', 'framework_exercise'],
   },
 ] as const satisfies readonly UPGDomain[]
 

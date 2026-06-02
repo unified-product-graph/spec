@@ -491,8 +491,8 @@ describe('Polymorphic edge allow-list', () => {
  expect(divergent, `Edges where derived polymorphism disagrees with allow-list:\n${divergent.join('\n')}`).toEqual([])
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (12 entries, 4 families)', () => {
- expect(UPG_POLYMORPHIC_EDGE_KEYS.length).toBe(12)
+ it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (13 entries, 5 families)', () => {
+ expect(UPG_POLYMORPHIC_EDGE_KEYS.length).toBe(13)
  })
 })
 

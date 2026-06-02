@@ -231,7 +231,7 @@ const NODE_KEY_ORDER = [
   'lifecycle_status', 'source_id', 'source_type', 'mapping_confidence',
   'external_tool', 'external_ref', 'external_id', 'sort_order', 'properties',
 ]
-const EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'mapping_confidence']
+const EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'mapping_confidence', 'properties']
 const CROSS_EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'source_product_id', 'target_product_id', 'mapping_confidence']
 const PRODUCT_KEY_ORDER = ['id', 'title', 'description', 'stage', 'properties']
 
@@ -247,6 +247,7 @@ function canonicalNode(node: UPGBaseNode): Record<string, unknown> {
 function canonicalEdge(edge: UPGEdge): Record<string, unknown> {
   return orderedObject(edge as unknown as Record<string, unknown>, EDGE_KEY_ORDER, {
     forceKeys: ['id', 'source', 'target', 'type'],
+    openKeys: ['properties'],
   })
 }
 

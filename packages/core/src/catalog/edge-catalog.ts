@@ -38,6 +38,15 @@ export interface UPGEdgeDefinition {
   source_type: string
   /** Target entity type. `UPGEntityType` or `'node'` (polymorphic wildcard). */
   target_type: string
+  /**
+   * Opt-in to the gated edge-property model. When `true`, instances of this
+   * edge type MAY carry `properties` (validated against the relevant schema);
+   * when absent/false, validators reject any `properties` on the edge. This
+   * keeps plain semantic edges payload-free while letting a small, deliberate
+   * set of edges (currently `framework_exercise_includes_node`) hold a value
+   * that belongs to the relationship rather than to either endpoint.
+   */
+  carries_properties?: boolean
 }
 
 // ─── Registry ─────────────────────────────────────────────────────────────────
@@ -1228,6 +1237,19 @@ export const UPG_EDGE_CATALOG = {
   // aggregate belongs_to context, context contains aggregates.
   node_belongs_to_bounded_context: { forward_verb: 'belongs_to', reverse_verb: 'contains', classification: 'cross-domain', source_type: 'node', target_type: 'bounded_context' },
 
+  // ── Cross-domain: Framework exercises ────────────────────────────────────────
+  // A framework_exercise is one run of a framework (MoSCoW, RICE, Kano, …) over a
+  // set of entities. It `includes` each entity it touches; the framework's
+  // per-entity result — a MoSCoW bucket, a RICE score, a canvas slot, a funnel
+  // stage — rides on this edge's `properties`, NOT on the entity node. A value
+  // that exists only within a specific exercise is a fact about the relationship,
+  // not the entity, so it lives on the edge (same principle as owner-as-edge).
+  // Polymorphic (`target_type: 'node'`): an exercise can include any entity type,
+  // which closes the feature-only limitation structurally. `carries_properties`
+  // opts this edge into the gated edge-property model. See ADR
+  // 2026-06-02-framework-exercises.
+  framework_exercise_includes_node: { forward_verb: 'includes', reverse_verb: 'included_in', classification: 'cross-domain', source_type: 'framework_exercise', target_type: 'node', carries_properties: true },
+
   // ── New edges replacing deleted string properties ────────────────────
 
   // Marketing
@@ -1904,7 +1926,7 @@ type _UPGEdgeTypeLocal = keyof typeof UPG_EDGE_CATALOG
 /**
  * Canonical allow-list of edges that use the `'node'` wildcard endpoint.
  *
- * Three semantic families are sanctioned:
+ * Five semantic families are sanctioned:
  *
  * 1. **Universal semantic verbs**: any node can inform / constrain / inspire
  *    any other node. The meaning is deliberately abstract; consumers render
@@ -1914,6 +1936,11 @@ type _UPGEdgeTypeLocal = keyof typeof UPG_EDGE_CATALOG
  *    target would force a combinatorial explosion.
  * 3. **Universal ownership**: any node can be owned by a team, role,
  *    stakeholder, department, or person. Ownership is not per-entity-type.
+ * 4. **Universal architecture references**: any node can belong to a bounded
+ *    context (DDD building blocks span the type system).
+ * 5. **Framework exercises**: a framework_exercise can include any entity type
+ *    it scores. The technique is type-agnostic, so binding the target would
+ *    re-weld frameworks to one entity type — the limitation this edge removes.
  *
  * Adding a new polymorphic edge requires extending this array AND the
  * spec-integrity regression test, which forces a conscious decision and
@@ -1936,6 +1963,8 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   'node_owned_by_person',
   // Universal architecture references
   'node_belongs_to_bounded_context',
+  // Framework exercises (an exercise can include any entity type)
+  'framework_exercise_includes_node',
 ] as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)
@@ -1964,4 +1993,21 @@ export function isPolymorphicEdge(key: _UPGEdgeTypeLocal): boolean {
  */
 export function isRegisteredPolymorphicEdge(key: _UPGEdgeTypeLocal): boolean {
   return _POLY_KEY_SET.has(key)
+}
+
+/**
+ * True if this edge type opts into the gated edge-property model
+ * (`carries_properties: true` in its catalog definition). Only such edges may
+ * carry `properties` on their instances; validators reject `properties` on any
+ * other edge, keeping plain semantic edges payload-free.
+ *
+ * Accepts any string for ergonomic call sites (unknown types return false).
+ *
+ * @example
+ * edgeCarriesProperties('framework_exercise_includes_node') // → true
+ * edgeCarriesProperties('persona_pursues_job')              // → false
+ */
+export function edgeCarriesProperties(type: string): boolean {
+  const def = (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[type]
+  return def?.carries_properties === true
 }
