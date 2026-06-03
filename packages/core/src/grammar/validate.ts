@@ -421,9 +421,9 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
  *                         [min, max]. Falls back to a >0 sanity check when the
  *                         scale id is unknown.
  *   - number input      → value must be a finite, non-negative number.
- *   - divisor inputs    → any input that appears as a denominator in the
- *                         framework's first computed expression (`… / effort`,
- *                         `… / job_size`) must not be zero.
+ *   - divisor inputs    → a lone divisor identifier in any computed expression
+ *                         (`… / effort`, `… / job_size`) must not be zero. A
+ *                         parenthesised sum denominator (Kano) is not flagged.
  *
  * Conservative by design (mirrors the F5 property checks): only inputs the
  * framework actually declares for the scored entity's type are checked; an
@@ -496,21 +496,32 @@ function validateFrameworkScores(
 }
 
 /**
- * The set of input keys that appear as a denominator in a framework's first
- * computed expression (the one `executePrioritise` evaluates). Detected by
- * scanning for an identifier immediately following a `/`, so it is
- * framework-agnostic: RICE's `effort`, WSJF's `job_size`, etc. A zero in any of
- * these makes the computed score diverge, so it is always invalid.
+ * The set of input keys that appear as a *lone* denominator in any of a
+ * framework's computed expressions. Framework-agnostic: RICE's `effort`
+ * (`… / effort`), WSJF's `job_size` (`… / job_size`), `value / effort`. A zero
+ * in one of these makes the computed score diverge, so it is always invalid.
+ *
+ * A parenthesised multi-term denominator is intentionally NOT decomposed. In
+ * Kano's `(…) / (delighter_count + performance_count + must_be_count +
+ * indifferent_count)` no single count is a must-not-be-zero divisor: any one can
+ * be 0 while the sum stays positive, so flagging individual terms (the old
+ * heuristic flagged the first, `delighter_count`) was a false positive. Only a
+ * bare `/ ident` or a lone `/(ident)` counts.
  */
 function divisorInputs(framework: UPGFramework): ReadonlySet<string> {
-  const expr = framework.data?.computed_properties?.[0]?.expression
-  if (typeof expr !== 'string' || expr.length === 0) return EMPTY_STRING_SET
+  const exprs = (framework.data?.computed_properties ?? [])
+    .map((c) => c?.expression)
+    .filter((e): e is string => typeof e === 'string' && e.length > 0)
+  if (exprs.length === 0) return EMPTY_STRING_SET
   const out = new Set<string>()
-  // Match `/` (not `//`) followed by an identifier, tolerating whitespace and a
-  // leading parenthesis: `/ effort`, `/(job_size)`, `/ job_size`.
-  const re = /\/\s*\(?\s*([A-Za-z_][A-Za-z0-9_]*)/g
-  let m: RegExpExecArray | null
-  while ((m = re.exec(expr)) !== null) out.add(m[1])
+  // `/` (not `//`) followed by a lone divisor identifier: a bare `/ effort`, or
+  // a single identifier wrapped in parens `/(job_size)`. A `/ (a + b + …)`
+  // multi-term denominator matches neither branch and is left alone.
+  const re = /\/\s*(?:\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)|([A-Za-z_][A-Za-z0-9_]*))/g
+  for (const expr of exprs) {
+    let m: RegExpExecArray | null
+    while ((m = re.exec(expr)) !== null) out.add(m[1] ?? m[2])
+  }
   return out
 }
 

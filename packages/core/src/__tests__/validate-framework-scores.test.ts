@@ -194,6 +194,27 @@ describe('framework-score validation', () => {
     })
   })
 
+  describe('Kano parenthesised-sum denominator (no false positive)', () => {
+    // Kano's satisfaction coefficient divides by a SUM:
+    // `(delighter_count + performance_count + must_be_count + indifferent_count)`.
+    // No single count is a must-not-be-zero divisor — any one can be 0 while the
+    // sum stays positive. The old heuristic captured the first term and flagged a
+    // legitimate `delighter_count: 0`; it must not.
+    it('does NOT flag delighter_count: 0 as a zero divisor', () => {
+      const result = validateUPGDocument(
+        exerciseDoc('kano-model', {
+          functional_response: 'i_like_it',
+          dysfunctional_response: 'i_dislike_it',
+          delighter_count: 0,
+          performance_count: 5,
+          must_be_count: 3,
+          indifferent_count: 2,
+        }),
+      )
+      expect(scoreWarnings(result.warnings)).toEqual([])
+    })
+  })
+
   describe('conservative skips (no false positives)', () => {
     it('skips an unknown framework_id rather than flagging', () => {
       const result = validateUPGDocument(exerciseDoc('not-a-framework-xyz', { moscow: 'maybe' }))

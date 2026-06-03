@@ -7,6 +7,13 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.10] - 2026-06-03
+
+A patch release. Fixes a false-positive in framework-score validation.
+
+### Fixed
+- Framework-score validation no longer flags a zero in a parenthesised **sum** denominator as an illegal divisor. Kano's satisfaction coefficient divides by `(delighter_count + performance_count + must_be_count + indifferent_count)`; the old heuristic captured the first term and warned that a legitimate `delighter_count: 0` "must not be 0". Only a lone divisor (`/ effort`, `/(job_size)`) is flagged now, and every computed expression is scanned, not just the first. RICE, WSJF, and Cost of Delay divisors still flag a 0 as before.
+
 ## [0.8.9] - 2026-06-03
 
 Completes the framework composition model and frees the "lens" vocabulary. `UPG_VERSION` moves to `0.8.9` in lockstep with the package train (a release guard now enforces this; the published 0.8.8 had left it at 0.8.7).
