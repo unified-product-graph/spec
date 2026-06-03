@@ -7,6 +7,13 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.11] - 2026-06-03
+
+A co-versioned patch. The catalogue, entity types, and edges are unchanged; the fix lands in `@unified-product-graph/mcp-server`.
+
+### Fixed
+- MCP server startup no longer prints an inverted deprecation warning for canonical types. The check sourced deprecation from the historical migration union, which still lists `hypothesis` from the v0.2.8 split even though it was re-promoted to canonical-stable at v0.4.0, so graphs holding canonical `hypothesis` nodes were flagged and pointed at a deprecated type. Detection and the suggested replacement now read from entity-meta (`isDeprecatedType` / `getReplacementType`), the source of truth for current maturity. (#1976)
+
 ## [0.8.10] - 2026-06-03
 
 A patch release. Fixes a false-positive in framework-score validation.
