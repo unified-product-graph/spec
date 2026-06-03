@@ -22,6 +22,8 @@ import type {
   UPGDocument,
   UPGPortfolioDocument,
   UPGCrossEdge,
+  UPGProduct,
+  UPGProductStage,
 } from '../shapes/document.js'
 
 /**
@@ -261,12 +263,38 @@ function canonicalProduct(product: Record<string, unknown>): Record<string, unkn
   return orderedObject(product, PRODUCT_KEY_ORDER, { forceKeys: ['id', 'title'], openKeys: ['properties'] })
 }
 
+/**
+ * Reconcile the root product summary against its canonical node.
+ *
+ * The product lives in two places: the root `doc.product` summary (mirrored into
+ * the `$upg` header) and, once graph tools operate on it, a `type: 'product'`
+ * node in `doc.nodes` sharing the product's id. Graph edits (`update_node`, batch
+ * ops) touch the node, so the root summary and the header drift, a product can
+ * read `concept` / "304 types" in the header while the node already says `launch`
+ * / "313 types". Treat the node as the source of truth and overlay its live
+ * title, description, and stage onto the root, so the body block, the derived
+ * summary, and the header all re-derive from current data on every write. This
+ * is self-healing: a file that already drifted is corrected on its next write.
+ * No matching node (product is root-only): returned unchanged.
+ */
+function effectiveRootProduct(doc: UPGDocument): UPGProduct {
+  const node = doc.nodes?.find((n) => n.type === 'product' && n.id === doc.product.id)
+  if (!node) return doc.product
+  return {
+    ...doc.product,
+    title: node.title ?? doc.product.title,
+    description: node.description ?? doc.product.description,
+    // A product's lifecycle status IS its stage, the same axis (grammar/lifecycles).
+    stage: (node.status as UPGProductStage | undefined) ?? doc.product.stage,
+  }
+}
+
 // ─── Body assembly + checksum ────────────────────────────────────────────────
 
 /** The canonical body of a single-product doc: product + sorted nodes + sorted edges. */
 function singleBody(doc: UPGDocument): Record<string, unknown> {
   return {
-    product: canonicalProduct(doc.product as unknown as Record<string, unknown>),
+    product: canonicalProduct(effectiveRootProduct(doc) as unknown as Record<string, unknown>),
     nodes: sortNodes(doc.nodes ?? []).map(canonicalNode),
     edges: sortEdges(doc.edges ?? []).map(canonicalEdge),
   }
@@ -353,12 +381,12 @@ function buildProvenance(doc: UPGDocument | UPGPortfolioDocument, opts: Serializ
 /** Single-product canonical form: the `$upg` header envelope (Layer 1 + Layer 2). */
 function serializeSingleWithHeader(doc: UPGDocument, opts: SerializeOptions): string {
   const body = singleBody(doc)
-  const product = doc.product
+  const product = effectiveRootProduct(doc)
   const header: Record<string, unknown> = {
     format_version: UPG_CANONICAL_FORMAT_VERSION,
     spec_version: doc.upg_version,
     product: orderedObject(
-      { id: product.id, title: product.title, stage: (product as { stage?: string }).stage },
+      { id: product.id, title: product.title, stage: product.stage },
       ['id', 'title', 'stage'],
       { forceKeys: ['id', 'title'] },
     ),

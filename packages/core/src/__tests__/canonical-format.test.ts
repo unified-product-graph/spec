@@ -234,3 +234,52 @@ describe('normalizeDocument — accepts pre-parsed objects (both envelopes)', ()
     expect(flat._integrity).toBeUndefined()
   })
 })
+
+describe('canonical serialisation — root product reconciles from its node', () => {
+  // The product can exist twice: the root `doc.product` summary and a
+  // `type: 'product'` node with the same id. Graph edits touch the node; the
+  // serialiser must treat the node as the source of truth so the header + body
+  // do not drift (e.g. a header reading `concept` while the node says `launch`).
+  const driftedDoc = (): UPGDocument => ({
+    upg_version: '0.8.11',
+    exported_at: '2026-06-04T00:00:00.000Z',
+    source: { tool: 'vitest' },
+    product: { id: 'prod-1', title: 'Old Title', stage: 'concept', description: 'Old summary, 304 types.' },
+    nodes: [
+      { id: 'prod-1', type: 'product', title: 'New Title', status: 'launch', description: 'New summary, 313 types.' },
+      { id: 'n-1', type: 'persona', title: 'P' },
+    ],
+    edges: [],
+  })
+
+  it('overlays the product node title/description/stage onto the header AND the body', () => {
+    const parsed = JSON.parse(serializeCanonical(driftedDoc()))
+    expect(parsed.$upg.product.title).toBe('New Title')
+    expect(parsed.$upg.product.stage).toBe('launch')
+    expect(parsed.$upg.summary).toBe('New summary, 313 types.')
+    expect(parsed.product.title).toBe('New Title')
+    expect(parsed.product.stage).toBe('launch')
+    expect(parsed.product.description).toBe('New summary, 313 types.')
+  })
+
+  it('keeps the integrity checksum consistent with the reconciled body', () => {
+    const doc = driftedDoc()
+    const parsed = JSON.parse(serializeCanonical(doc))
+    expect(parsed.$upg.integrity.body).toBe(computeBodyChecksum(doc))
+  })
+
+  it('leaves a root-only product (no matching product node) unchanged', () => {
+    const doc: UPGDocument = {
+      upg_version: '0.8.11',
+      exported_at: '2026-06-04T00:00:00.000Z',
+      source: { tool: 'vitest' },
+      product: { id: 'prod-1', title: 'Root Only', stage: 'beta', description: 'Just the root.' },
+      nodes: [{ id: 'n-1', type: 'persona', title: 'P' }],
+      edges: [],
+    }
+    const parsed = JSON.parse(serializeCanonical(doc))
+    expect(parsed.$upg.product.title).toBe('Root Only')
+    expect(parsed.$upg.product.stage).toBe('beta')
+    expect(parsed.product.description).toBe('Just the root.')
+  })
+})

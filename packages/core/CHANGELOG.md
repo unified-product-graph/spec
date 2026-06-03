@@ -7,6 +7,13 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.12] - 2026-06-04
+
+A co-versioned patch. The catalogue is unchanged; the fix is in the canonical serialiser.
+
+### Fixed
+- `serializeCanonical` now reconciles the root product summary from its canonical `type: 'product'` node when one is present. The product is denormalised twice (the root `doc.product`, mirrored into the `$upg` header, and a product node sharing its id); graph edits touched the node while the root summary and header drifted (e.g. a header reading `stage: concept` while the node already said `launch`). The header, the derived summary, and the body product block now re-derive from the node's live title/description/stage on every write, with the integrity checksum kept consistent. Self-healing on the next write; root-only products are unchanged. (#1981)
+
 ## [0.8.11] - 2026-06-03
 
 A co-versioned patch. The catalogue, entity types, and edges are unchanged; the fix lands in `@unified-product-graph/mcp-server`.

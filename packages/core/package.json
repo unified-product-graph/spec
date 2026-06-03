@@ -1,6 +1,6 @@
 {
   "name": "@unified-product-graph/core",
-  "version": "0.8.11",
+  "version": "0.8.12",
   "description": "Unified Product Graph — open specification and TypeScript types for product knowledge",
   "type": "module",
   "license": "MIT",
