@@ -25,8 +25,13 @@ export * from './regions/index.js'
 export * from './frameworks/index.js'
 export * from './format/index.js'
 
-/** The current spec version implemented by this package */
-export const UPG_VERSION = '0.8.7' as const
+/**
+ * The current spec version implemented by this package.
+ * MUST stay in lockstep with the package.json version of the publish train —
+ * it stamps the `upg_version` field of every `.upg` file written by the SDK.
+ * The `check:version-lockstep` gate enforces this at release time.
+ */
+export const UPG_VERSION = '0.8.9' as const
 
 /**
  * The `.upg` JSON document format version. Written to the `upg_version` field.

@@ -7,6 +7,16 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.9] - 2026-06-03
+
+Completes the framework composition model and frees the "lens" vocabulary. `UPG_VERSION` moves to `0.8.9` in lockstep with the package train (a release guard now enforces this; the published 0.8.8 had left it at 0.8.7).
+
+### Added
+- `slot_role` on the `framework_exercise_includes_node` edge: an entity in a framework exercise can record which slot role it plays (e.g. `pain_reliever`), on the same edge as its scores. Validated against the framework's declared slot roles (warn-only). [Phase 3b-2]
+
+### Changed
+- Renamed the framework-authoring field `scoring_lens` → `scoring_method` (type `FrameworkScoringLens` → `FrameworkScoringMethod`), freeing "lens" for the perspective-lens system and aligning with the "a framework is a method" framing. The expanded `required_properties`/`computed_properties` surface is unchanged.
+
 ## [0.8.8] - 2026-06-03
 
 Framework composition model + scoring-lens completion. `UPG_VERSION` stays `0.8.7`: the catalogue (entities, edges, scales, regions, domains) is unchanged; these are framework-authoring and validator additions.

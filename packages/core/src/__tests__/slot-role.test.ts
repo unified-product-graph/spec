@@ -19,7 +19,7 @@ const SNAKE = /^[a-z][a-z0-9_]*$/
 
 // A framework "needs" slot roles when two slots share an entityTypeId.
 const repeatedTypeFrameworks = UPG_FRAMEWORKS.filter((f) => {
-  const types = f.slots.map((s) => s.entityTypeId)
+  const types = (f.slots ?? []).map((s) => s.entityTypeId)
   return new Set(types).size < types.length
 })
 
@@ -30,7 +30,7 @@ describe('slot roles — repeated-type frameworks disambiguate their slots', () 
 
   for (const f of repeatedTypeFrameworks) {
     it(`${f.id}: every slot carries a snake_case role`, () => {
-      for (const s of f.slots) {
+      for (const s of f.slots ?? []) {
         expect(s.role, `${f.id} slot "${s.label}" is missing a role`).toBeTruthy()
         expect(s.role, `${f.id} slot "${s.label}" role "${s.role}"`).toMatch(SNAKE)
       }
@@ -40,7 +40,7 @@ describe('slot roles — repeated-type frameworks disambiguate their slots', () 
       // Group slots by entityTypeId; within a group the (role) must disambiguate,
       // unless the slots genuinely play the same role (e.g. OKR's two Key Results).
       const byType = new Map<string, string[]>()
-      for (const s of f.slots) {
+      for (const s of f.slots ?? []) {
         const arr = byType.get(s.entityTypeId) ?? []
         arr.push(s.role ?? '')
         byType.set(s.entityTypeId, arr)
@@ -60,7 +60,7 @@ describe('slot roles — repeated-type frameworks disambiguate their slots', () 
 describe('slot roles — any declared role is a machine-readable id', () => {
   it('every slot role across the catalog is snake_case', () => {
     for (const f of UPG_FRAMEWORKS) {
-      for (const s of f.slots) {
+      for (const s of f.slots ?? []) {
         if (s.role !== undefined) {
           expect(s.role, `${f.id} slot "${s.label}"`).toMatch(SNAKE)
         }

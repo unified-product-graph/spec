@@ -1,7 +1,7 @@
 /**
  * UPG Framework type definitions.
  *
- * Frameworks are declarative lenses that structure graph data into known
+ * Frameworks are declarative methods that structure graph data into known
  * product-management patterns (RICE, Lean Canvas, Opportunity Solution Tree).
  * Each framework describes four layers: data, structure, presentation, education.
  *
@@ -142,13 +142,13 @@ export interface FrameworkComputedProperty {
 }
 
 /**
- * A scoring lens declared ONCE and applied to several entity types.
+ * A scoring method declared ONCE and applied to several entity types.
  *
  * Many scoring frameworks (RICE, ICE, WSJF, cost-of-delay) apply the same
  * inputs and formula across more than one entity type. Authored verbatim, that
  * means repeating the identical `required_properties` array and computed
  * formula once per type — the per-type duplication the framework-shape audit's
- * `COMPUTED_EXPRESSION_UNDEFINED_VARIABLE` rule otherwise mandates. A lens
+ * `COMPUTED_EXPRESSION_UNDEFINED_VARIABLE` rule otherwise mandates. A method
  * states the inputs and computed once and lists the types it `applies_to`; a
  * build-time expander (`expandFramework`) derives the fully-expanded
  * `required_properties`/`computed_properties` from it, so the public surface
@@ -157,9 +157,9 @@ export interface FrameworkComputedProperty {
  *
  * Scope: the DATA-layer scoring duplication only. `entity_types` (which may
  * interleave scored types with `role: 'item'` context types) and `slots`
- * (framework-specific and irregular) stay hand-authored alongside the lens.
+ * (framework-specific and irregular) stay hand-authored alongside the method.
  */
-export interface FrameworkScoringLens {
+export interface FrameworkScoringMethod {
   /**
    * The scoring inputs, declared once. The expander sets
    * `required_properties[type] = inputs` for every `applies_to` type, so the
@@ -173,7 +173,7 @@ export interface FrameworkScoringLens {
    */
   computed?: Omit<FrameworkComputedProperty, 'entity_type'>[]
   /**
-   * The entity types this lens scores. Each must also appear in
+   * The entity types this method scores. Each must also appear in
    * `data.entity_types` with `role: 'scored_item'`. The order here is the order
    * `required_properties` keys and `computed_properties` entries are emitted in.
    */
@@ -193,7 +193,7 @@ export interface FrameworkConstant {
 /**
  * Everything the framework needs from the graph's data layer: which entity
  * types play which roles, which properties each type must carry under the
- * lens, and any computed or scaffolded constants.
+ * method, and any computed or scaffolded constants.
  *
  * @example
  * // RICE: scores a feature on reach, impact, confidence, effort.
@@ -243,7 +243,7 @@ export interface FrameworkDataSpec {
    * `UPG_PROPERTY_SCHEMA`. Renderers merge both when displaying an entity under
    * a framework. A saved score lives on a framework-application edge/instance,
    * never on the entity (annotation store deferred). See `src/ARCHITECTURE.md`,
-   * "Framework Properties: Lens-Scoped Fields".
+   * "Framework Properties: Method-Scoped Fields".
    */
   required_properties: Record<string, FrameworkPropertyRequirement[]>
   /** Properties that are derived from other properties via expressions */
@@ -251,16 +251,16 @@ export interface FrameworkDataSpec {
   /** Fixed entities that the framework creates automatically */
   constants?: FrameworkConstant[]
   /**
-   * A scoring lens applied to several entity types, declared once. When present
+   * A scoring method applied to several entity types, declared once. When present
    * on an AUTHORED definition, a build-time expander (`expandFramework`, run at
    * the `definitions/` aggregation boundary) derives `required_properties` and
    * `computed_properties` for every `applies_to` type from it — so authored
    * definitions stay DRY while the expanded public surface carries the full
-   * fields plus this lens. Additive and optional: a consumer that ignores it
+   * fields plus this method. Additive and optional: a consumer that ignores it
    * sees the same fully-expanded `required_properties`/`computed_properties` as
-   * before. See `FrameworkScoringLens` and `expandFramework`.
+   * before. See `FrameworkScoringMethod` and `expandFramework`.
    */
-  scoring_lens?: FrameworkScoringLens
+  scoring_method?: FrameworkScoringMethod
 }
 
 // ─── Structure Layer ────────────────────────────────────────────────────────
@@ -430,7 +430,7 @@ export interface FrameworkEducation {
 // ─── Main Interface ─────────────────────────────────────────────────────────
 
 /**
- * A UPG Framework is a declarative, config-driven lens that structures
+ * A UPG Framework is a declarative, config-driven method that structures
  * UPG graph data into a well-known product management pattern.
  *
  * Frameworks are pure data; no code. The rendering engine reads the

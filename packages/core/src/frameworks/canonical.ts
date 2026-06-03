@@ -1457,7 +1457,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "format": "number"
         }
       ],
-      "scoring_lens": {
+      "scoring_method": {
         "applies_to": [
           "feature",
           "opportunity",
@@ -1800,7 +1800,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "format": "number"
         }
       ],
-      "scoring_lens": {
+      "scoring_method": {
         "applies_to": [
           "feature"
         ],
@@ -3917,7 +3917,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "format": "number"
         }
       ],
-      "scoring_lens": {
+      "scoring_method": {
         "applies_to": [
           "risk"
         ],
@@ -4182,7 +4182,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "format": "number"
         }
       ],
-      "scoring_lens": {
+      "scoring_method": {
         "applies_to": [
           "feature",
           "opportunity",
@@ -4438,7 +4438,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "format": "number"
         }
       ],
-      "scoring_lens": {
+      "scoring_method": {
         "applies_to": [
           "feature",
           "opportunity"
@@ -4675,7 +4675,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "format": "number"
         }
       ],
-      "scoring_lens": {
+      "scoring_method": {
         "applies_to": [
           "feature",
           "opportunity"
