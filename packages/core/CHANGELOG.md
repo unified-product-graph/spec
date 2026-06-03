@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.8] - 2026-06-03
+
+Framework composition model + scoring-lens completion. `UPG_VERSION` stays `0.8.7`: the catalogue (entities, edges, scales, regions, domains) is unchanged; these are framework-authoring and validator additions.
+
+### Added
+- First-class `role` on `FrameworkSlot`: a stable machine-readable semantic id (e.g. `pain_reliever`, `accountable`, `must_have`) distinct from `entityTypeId`, so frameworks that fill several slots with the same entity type are addressable by the part each slot plays. Populated across the 16 repeated-type frameworks. Additive and optional; not a validation signal.
+- Framework-score validation as WARNINGS (`rule: 'framework-score'`, in `CONTENT_DEPTH_WARNING_RULES`): a `framework_exercise`'s persisted per-entity scores are checked against the framework's own input spec (enum bucket, in-scale assessment, non-negative number, non-zero divisor). A drifted exercise still loads; `verify`/`check` escalate to exit 2.
+
+### Changed
+- `kano-model` and `raid-log` now declare their derivations via `scoring_lens` (kano's `feature` promoted to `role: scored_item`), so all six computing frameworks use one authoring model. Derived `required_properties`/`computed_properties` are byte-identical.
+
+### Fixed
+- Structural validation now rejects a malformed `properties` container (non-object) as an error, and reports a present-but-non-array `nodes`/`edges` with a self-explaining message instead of a downstream `.map` crash (/641).
+
 ## [0.8.7] - 2026-06-03
 
 Framework-surface consolidation + the CLI-hardening and cross-surface QA wave. `UPG_VERSION` is now `0.8.7`. (Co-versions the 0.8.6 train, whose changelog entry was skipped.)

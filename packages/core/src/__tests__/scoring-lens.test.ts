@@ -1,16 +1,20 @@
 /**
  * Scoring-lens expander — correctness + regression gate.
  *
- * The four scoring frameworks (rice/ice/cost-of-delay/wsjf) declare their
- * inputs + formula ONCE via `data.scoring_lens` and list the types they
- * `applies_to`; `expandFramework` derives the per-type `required_properties`
- * and `computed_properties` at the `definitions/` aggregation boundary.
+ * The six scoring frameworks (rice/ice/cost-of-delay/wsjf/kano-model/raid-log)
+ * declare their inputs + formula ONCE via `data.scoring_lens` and list the types
+ * they `applies_to`; `expandFramework` derives the per-type `required_properties`
+ * and `computed_properties` at the `definitions/` aggregation boundary. (kano
+ * computes Kano satisfaction coefficients and raid-log a risk severity, not a
+ * priority rank — the same inputs-to-computed mechanism.)
  *
- * The proof that the lens is a faithful, zero-change refactor: each expanded
- * scorer, with the new `scoring_lens` field removed, must be byte-for-byte
- * equal to the baseline captured BEFORE the conversion
+ * The proof that the lens is a faithful refactor: each expanded scorer, with the
+ * new `scoring_lens` field removed, must be byte-for-byte equal to the baseline
  * (`fixtures/scoring-lens-baseline.json`). If a future edit to a definition or
- * to the expander changes a scorer's expanded shape, this test fails.
+ * to the expander changes a scorer's expanded shape, this test fails. Note:
+ * kano-model's `feature` was intentionally promoted role item -> scored_item as
+ * part of the conversion (so the lens invariant holds: applies_to types are
+ * scored types); its required_properties + computed_properties stay identical.
  */
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -20,7 +24,7 @@ import { UPG_FRAMEWORKS_BY_ID } from '../frameworks/definitions/index.js'
 import { expandFramework, type UPGFrameworkSource } from '../frameworks/expand-scoring-lens.js'
 import type { UPGFramework } from '../frameworks/types.js'
 
-const SCORERS = ['rice-scoring', 'ice-scoring', 'cost-of-delay', 'wsjf'] as const
+const SCORERS = ['rice-scoring', 'ice-scoring', 'cost-of-delay', 'wsjf', 'kano-model', 'raid-log'] as const
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const baseline: Record<string, UPGFramework> = JSON.parse(

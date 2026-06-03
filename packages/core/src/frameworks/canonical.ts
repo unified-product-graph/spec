@@ -232,31 +232,37 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Customer Jobs",
+        "role": "customer_job",
         "entityTypeId": "job",
         "description": "Place job entities in the Customer Jobs position of the matrix"
       },
       {
         "label": "Pains",
+        "role": "pain",
         "entityTypeId": "need",
         "description": "Place need entities in the Pains position of the matrix"
       },
       {
         "label": "Gains",
+        "role": "gain",
         "entityTypeId": "desired_outcome",
         "description": "Place desired outcome entities in the Gains position of the matrix"
       },
       {
         "label": "Products & Services",
+        "role": "product_or_service",
         "entityTypeId": "feature",
         "description": "Place feature entities in the Products & Services position of the matrix"
       },
       {
         "label": "Pain Relievers",
+        "role": "pain_reliever",
         "entityTypeId": "feature",
         "description": "Place feature entities in the Pain Relievers position of the matrix"
       },
       {
         "label": "Gain Creators",
+        "role": "gain_creator",
         "entityTypeId": "feature",
         "description": "Place feature entities in the Gain Creators position of the matrix"
       }
@@ -885,26 +891,31 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Competitive Rivalry",
+        "role": "competitive_rivalry",
         "entityTypeId": "competitor",
         "description": "Intensity of competition among existing players"
       },
       {
         "label": "Threat of New Entrants",
+        "role": "new_entrants",
         "entityTypeId": "competitor",
         "description": "How easy is it for new competitors to enter?"
       },
       {
         "label": "Threat of Substitutes",
+        "role": "substitutes",
         "entityTypeId": "competitor",
         "description": "Can customers switch to alternatives?"
       },
       {
         "label": "Buyer Power",
+        "role": "buyer_power",
         "entityTypeId": "persona",
         "description": "How much leverage do buyers have?"
       },
       {
         "label": "Supplier Power",
+        "role": "supplier_power",
         "entityTypeId": "persona",
         "description": "How much leverage do suppliers have?"
       }
@@ -1072,31 +1083,37 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Inbound Logistics",
+        "role": "inbound_logistics",
         "entityTypeId": "key_activity",
         "description": "Inbound Logistics phase: key activity entities move through this stage"
       },
       {
         "label": "Operations",
+        "role": "operations",
         "entityTypeId": "key_activity",
         "description": "Operations phase: key activity entities move through this stage"
       },
       {
         "label": "Outbound Logistics",
+        "role": "outbound_logistics",
         "entityTypeId": "key_activity",
         "description": "Outbound Logistics phase: key activity entities move through this stage"
       },
       {
         "label": "Marketing & Sales",
+        "role": "marketing_and_sales",
         "entityTypeId": "key_activity",
         "description": "Marketing & Sales phase: key activity entities move through this stage"
       },
       {
         "label": "Service",
+        "role": "service",
         "entityTypeId": "key_activity",
         "description": "Service phase: key activity entities move through this stage"
       },
       {
         "label": "Support Activities",
+        "role": "support_activity",
         "entityTypeId": "capability",
         "description": "Support Activities phase: capability entities move through this stage"
       }
@@ -1167,26 +1184,31 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Portfolio",
+        "role": "portfolio",
         "entityTypeId": "portfolio",
         "description": "Innovation portfolio balanced across three horizons: core performance, emerging growth, and future creation"
       },
       {
         "label": "Product",
+        "role": "product",
         "entityTypeId": "product",
         "description": "Product or business unit assigned to a horizon: H1 (defend and extend), H2 (build), or H3 (seed and explore)"
       },
       {
         "label": "Initiative",
+        "role": "initiative",
         "entityTypeId": "portfolio",
         "description": "Growth initiative positioned in a horizon, with appropriate funding model, governance, and success metrics"
       },
       {
         "label": "Product Area",
+        "role": "product_area",
         "entityTypeId": "product_area",
         "description": "Product area representing a horizon: core products (H1), adjacent expansions (H2), or experimental ventures (H3)"
       },
       {
         "label": "Capability",
+        "role": "capability",
         "entityTypeId": "capability",
         "description": "Capability needed to execute across horizons: H1 needs efficiency, H2 needs scaling, H3 needs discovery"
       }
@@ -1666,21 +1688,25 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Must-haves",
+        "role": "must_have",
         "entityTypeId": "feature",
         "description": "Expected features: absence causes dissatisfaction"
       },
       {
         "label": "Performance",
+        "role": "performance",
         "entityTypeId": "feature",
         "description": "More is better: linear satisfaction increase"
       },
       {
         "label": "Delighters",
+        "role": "delighter",
         "entityTypeId": "feature",
         "description": "Unexpected features: presence creates delight"
       },
       {
         "label": "Indifferent",
+        "role": "indifferent",
         "entityTypeId": "feature",
         "description": "Features users don't care about either way"
       }
@@ -1689,7 +1715,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "entity_types": [
         {
           "type": "feature",
-          "role": "item"
+          "role": "scored_item"
         }
       ],
       "required_properties": {
@@ -1773,7 +1799,90 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "label": "Dissatisfaction Coefficient",
           "format": "number"
         }
-      ]
+      ],
+      "scoring_lens": {
+        "applies_to": [
+          "feature"
+        ],
+        "inputs": [
+          {
+            "property": "functional_response",
+            "type": "enum",
+            "required": true,
+            "scope": "framework",
+            "label": "Functional Response",
+            "description": "How users feel when the feature IS present",
+            "enum_values": [
+              "i_like_it",
+              "i_expect_it",
+              "i_am_neutral",
+              "i_can_tolerate_it",
+              "i_dislike_it"
+            ]
+          },
+          {
+            "property": "dysfunctional_response",
+            "type": "enum",
+            "required": true,
+            "scope": "framework",
+            "label": "Dysfunctional Response",
+            "description": "How users feel when the feature IS NOT present",
+            "enum_values": [
+              "i_like_it",
+              "i_expect_it",
+              "i_am_neutral",
+              "i_can_tolerate_it",
+              "i_dislike_it"
+            ]
+          },
+          {
+            "property": "delighter_count",
+            "type": "number",
+            "required": false,
+            "scope": "framework",
+            "label": "Delighter classifications",
+            "description": "Count of survey responses classifying this feature as a delighter (attractive)"
+          },
+          {
+            "property": "performance_count",
+            "type": "number",
+            "required": false,
+            "scope": "framework",
+            "label": "Performance classifications",
+            "description": "Count of survey responses classifying this feature as performance (one-dimensional)"
+          },
+          {
+            "property": "must_be_count",
+            "type": "number",
+            "required": false,
+            "scope": "framework",
+            "label": "Must-be classifications",
+            "description": "Count of survey responses classifying this feature as must-be (basic)"
+          },
+          {
+            "property": "indifferent_count",
+            "type": "number",
+            "required": false,
+            "scope": "framework",
+            "label": "Indifferent classifications",
+            "description": "Count of survey responses classifying this feature as indifferent"
+          }
+        ],
+        "computed": [
+          {
+            "property": "satisfaction_coefficient",
+            "expression": "(delighter_count + performance_count) / (delighter_count + performance_count + must_be_count + indifferent_count)",
+            "label": "Satisfaction Coefficient",
+            "format": "number"
+          },
+          {
+            "property": "dissatisfaction_coefficient",
+            "expression": "(must_be_count + performance_count) / (delighter_count + performance_count + must_be_count + indifferent_count) * -1",
+            "label": "Dissatisfaction Coefficient",
+            "format": "number"
+          }
+        ]
+      }
     },
     "structure": {
       "pattern": "matrix"
@@ -1828,16 +1937,19 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Now",
+        "role": "now",
         "entityTypeId": "feature",
         "description": "Committed work in progress"
       },
       {
         "label": "Next",
+        "role": "next",
         "entityTypeId": "feature",
         "description": "High-confidence upcoming work"
       },
       {
         "label": "Later",
+        "role": "later",
         "entityTypeId": "initiative",
         "description": "Exploratory, needs more discovery"
       }
@@ -2353,26 +2465,31 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Atoms",
+        "role": "atom",
         "entityTypeId": "design_component",
         "description": "Atoms: design component entities for this dimension of the framework"
       },
       {
         "label": "Molecules",
+        "role": "molecule",
         "entityTypeId": "design_component",
         "description": "Molecules: design token entities for this dimension of the framework"
       },
       {
         "label": "Organisms",
+        "role": "organism",
         "entityTypeId": "design_pattern",
         "description": "Organisms: design pattern entities for this dimension of the framework"
       },
       {
         "label": "Templates",
+        "role": "template",
         "entityTypeId": "wireframe",
         "description": "Templates: design system entities for this dimension of the framework"
       },
       {
         "label": "Pages",
+        "role": "page",
         "entityTypeId": "screen",
         "description": "Pages: screen entities for this dimension of the framework"
       }
@@ -3037,26 +3154,31 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Outer Ring",
+        "role": "outer_ring",
         "entityTypeId": "acquisition_channel",
         "description": "All 19 traction channels brainstormed"
       },
       {
         "label": "Middle Ring",
+        "role": "middle_ring",
         "entityTypeId": "acquisition_channel",
         "description": "Top 6 channels worth testing"
       },
       {
         "label": "Inner Ring",
+        "role": "inner_ring",
         "entityTypeId": "acquisition_channel",
         "description": "Top 3 channels to focus on"
       },
       {
         "label": "Traction Test",
+        "role": "traction_test",
         "entityTypeId": "growth_campaign",
         "description": "Cheap test for each channel"
       },
       {
         "label": "Bullseye Channel",
+        "role": "bullseye_channel",
         "entityTypeId": "acquisition_channel",
         "description": "The single best-performing channel"
       }
@@ -3126,26 +3248,31 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Free Entry",
+        "role": "free_entry",
         "entityTypeId": "gtm_strategy",
         "description": "How users access the product for free"
       },
       {
         "label": "Aha Moment",
+        "role": "aha_moment",
         "entityTypeId": "gtm_strategy",
         "description": "First experience of core value"
       },
       {
         "label": "Expansion Motion",
+        "role": "expansion_motion",
         "entityTypeId": "sales_motion",
         "description": "How usage spreads within accounts"
       },
       {
         "label": "Monetisation Trigger",
+        "role": "monetisation_trigger",
         "entityTypeId": "gtm_strategy",
         "description": "When and how to convert to paid"
       },
       {
         "label": "Metric",
+        "role": "metric",
         "entityTypeId": "metric",
         "description": "Key metric driving the PLG motion"
       }
@@ -3220,21 +3347,25 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Objective",
+        "role": "objective",
         "entityTypeId": "objective",
         "description": "Qualitative, inspiring goal"
       },
       {
         "label": "Key Result 1",
+        "role": "key_result",
         "entityTypeId": "key_result",
         "description": "Measurable outcome proving progress"
       },
       {
         "label": "Key Result 2",
+        "role": "key_result",
         "entityTypeId": "key_result",
         "description": "Measurable outcome proving progress"
       },
       {
         "label": "Initiatives",
+        "role": "initiative",
         "entityTypeId": "initiative",
         "description": "Work streams that drive key results"
       }
@@ -3308,26 +3439,31 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Activity",
+        "role": "activity",
         "entityTypeId": "key_activity",
         "description": "Place persona entities in the Activity position of the matrix"
       },
       {
         "label": "Responsible",
+        "role": "responsible",
         "entityTypeId": "role",
         "description": "Does the work"
       },
       {
         "label": "Accountable",
+        "role": "accountable",
         "entityTypeId": "role",
         "description": "Makes the final call"
       },
       {
         "label": "Consulted",
+        "role": "consulted",
         "entityTypeId": "role",
         "description": "Gives input"
       },
       {
         "label": "Informed",
+        "role": "informed",
         "entityTypeId": "role",
         "description": "Kept in the loop"
       }
@@ -3401,21 +3537,25 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "What Went Well",
+        "role": "went_well",
         "entityTypeId": "outcome",
         "description": "Practices to continue"
       },
       {
         "label": "What Didn't Go Well",
+        "role": "went_poorly",
         "entityTypeId": "need",
         "description": "Issues to address"
       },
       {
         "label": "Action Items",
+        "role": "action_item",
         "entityTypeId": "learning",
         "description": "Changes for next iteration"
       },
       {
         "label": "Learnings",
+        "role": "learning",
         "entityTypeId": "learning",
         "description": "Insights to carry forward"
       }
@@ -3776,7 +3916,36 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "label": "Severity",
           "format": "number"
         }
-      ]
+      ],
+      "scoring_lens": {
+        "applies_to": [
+          "risk"
+        ],
+        "inputs": [
+          {
+            "property": "probability",
+            "type": "number",
+            "required": true,
+            "label": "Probability",
+            "description": "Likelihood the risk materialises (risk.probability assessment)"
+          },
+          {
+            "property": "impact",
+            "type": "number",
+            "required": true,
+            "label": "Impact",
+            "description": "Consequence severity if the risk materialises (risk.impact assessment)"
+          }
+        ],
+        "computed": [
+          {
+            "property": "severity",
+            "expression": "probability * impact",
+            "label": "Severity",
+            "format": "number"
+          }
+        ]
+      }
     },
     "structure": {
       "pattern": "table"
@@ -3852,31 +4021,37 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Items to score",
+        "role": "candidate",
         "entityTypeId": "feature",
         "description": "Features or experiments being evaluated"
       },
       {
         "label": "Impact",
+        "role": "impact",
         "entityTypeId": "outcome",
         "description": "How much will this move the needle?"
       },
       {
         "label": "Confidence",
+        "role": "confidence",
         "entityTypeId": "assumption",
         "description": "How sure are we about the impact?"
       },
       {
         "label": "Ease",
+        "role": "ease",
         "entityTypeId": "feature",
         "description": "How easy is this to implement?"
       },
       {
         "label": "Opportunities to score",
+        "role": "candidate",
         "entityTypeId": "opportunity",
         "description": "Opportunities scored on the same ICE Scoring inputs as features."
       },
       {
         "label": "Needs to score",
+        "role": "candidate",
         "entityTypeId": "need",
         "description": "Needs scored on the same ICE Scoring inputs as features."
       }
@@ -4127,31 +4302,37 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Backlog Items",
+        "role": "candidate",
         "entityTypeId": "feature",
         "description": "Backlog Items: feature entries to evaluate"
       },
       {
         "label": "User/Business Value",
+        "role": "user_business_value",
         "entityTypeId": "metric",
         "description": "User/Business Value: metric entries to evaluate"
       },
       {
         "label": "Time Criticality",
+        "role": "time_criticality",
         "entityTypeId": "metric",
         "description": "How much value decays if delivery is delayed (deadlines, competition, seasonal windows)"
       },
       {
         "label": "Risk Reduction / Opportunity Enablement",
+        "role": "risk_reduction",
         "entityTypeId": "metric",
         "description": "Risk Reduction / Opportunity Enablement: metric entries to evaluate"
       },
       {
         "label": "Job Size",
+        "role": "job_size",
         "entityTypeId": "metric",
         "description": "Estimated effort (story points, t-shirt size, or person-weeks)"
       },
       {
         "label": "Opportunities to score",
+        "role": "candidate",
         "entityTypeId": "opportunity",
         "description": "Opportunities scored on the same WSJF (Weighted Shortest Job First) inputs as features."
       }
@@ -4607,16 +4788,19 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "Symptom",
+        "role": "symptom",
         "entityTypeId": "need",
         "description": "The observed problem the analysis starts from."
       },
       {
         "label": "Why chain",
+        "role": "why",
         "entityTypeId": "insight",
         "description": "Each \"why?\" answer along the chain, typically five iterations deep."
       },
       {
         "label": "Root cause",
+        "role": "root_cause",
         "entityTypeId": "insight",
         "description": "The terminal answer at the bottom of the chain: the underlying cause to address."
       }
@@ -4961,16 +5145,19 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "slots": [
       {
         "label": "First-order move",
+        "role": "first_order",
         "entityTypeId": "decision",
         "description": "The decision or move under consideration."
       },
       {
         "label": "Second-order consequences",
+        "role": "second_order",
         "entityTypeId": "insight",
         "description": "Downstream effects that follow from the first-order move."
       },
       {
         "label": "Higher-order consequences",
+        "role": "higher_order",
         "entityTypeId": "insight",
         "description": "Third-, fourth-, fifth-order ripples: second-order consequences of the second-order consequences."
       }

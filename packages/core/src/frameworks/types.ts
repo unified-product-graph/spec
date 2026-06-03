@@ -23,6 +23,23 @@ export interface FrameworkSlot {
   label: string
   /** The UPG entity type that fills this slot */
   entityTypeId: string
+  /**
+   * The semantic role this slot plays in the framework, as a stable
+   * machine-readable id (e.g. "pain_reliever", "accountable", "must_have").
+   *
+   * Distinct from `entityTypeId`: many frameworks fill several slots with the
+   * SAME entity type (a Value Proposition Canvas has six `feature` slots; a RACI
+   * matrix four `role` slots), and the slot role is what disambiguates them so a
+   * consumer can address "the pain-reliever features" rather than just "the
+   * features". Framework-local vocabulary, not a global UPG type.
+   *
+   * Additive and optional. It is also distinct from the COARSE structural
+   * `FrameworkEntityTypeSpec.role` (item/bucket/scored_item/root/leaf/branch),
+   * which describes an entity type's structural place; this is the FINE semantic
+   * part a specific slot plays. Neither is a validation signal — scoring is keyed
+   * off `scope: 'framework'` properties, not roles.
+   */
+  role?: string
   /** Explanation of what this slot represents in the framework */
   description?: string
 }

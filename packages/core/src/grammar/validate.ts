@@ -8,6 +8,9 @@ import { UPG_CROSS_EDGE_TYPES } from '../shapes/document.js'
 import { UPG_EDGE_CATALOG } from '../catalog/edge-catalog.js'
 import { getTypes } from '../registry/domains.js'
 import { getPropertySchema, type PropertyDefinition } from '../properties/property-schema.js'
+import { UPG_FRAMEWORKS_BY_ID } from '../frameworks/canonical.js'
+import type { UPGFramework, FrameworkPropertyRequirement } from '../frameworks/types.js'
+import { getScale } from './scales.js'
 
 /**
  * Cross-product edge types must live in `portfolio.cross_edges[]`, not in a
@@ -49,18 +52,28 @@ export interface UPGValidationWarning {
    * re-runs the validator and re-classifies these as policy violations so a
    * CI gate still fails, without making the parser refuse to read the file.
    */
-  rule?: 'property-type' | 'property-enum' | 'self-loop'
+  rule?: 'property-type' | 'property-enum' | 'self-loop' | 'framework-score'
 }
 
 /**
- * Warning `rule` codes for the content-depth checks added in.
+ * Warning `rule` codes for the content-depth checks.
  * `verify`/`check` treat a document carrying any of these as a policy
  * violation (exit 2) even though they never block the load path.
+ *
+ * - `property-type` / `property-enum` / `self-loop` —.
+ * - `framework-score` —. A `framework_exercise`'s persisted per-entity
+ *   result (carried on its `framework_exercise_includes_node` edge properties)
+ *   that violates the framework's own input spec: an invalid enum bucket, a
+ *   non-numeric / out-of-scale / negative score, or a zero in a divisor input
+ *   (e.g. RICE `effort`, WSJF `job_size`). A WARNING, not an error: a drifted
+ *   exercise still LOADS, consistent with the severity discipline above. See
+ *   `validateFrameworkScores`.
  */
 export const CONTENT_DEPTH_WARNING_RULES: ReadonlySet<NonNullable<UPGValidationWarning['rule']>> = new Set([
   'property-type',
   'property-enum',
   'self-loop',
+  'framework-score',
 ])
 
 /**
@@ -125,8 +138,18 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
   const allKnownEdgeTypes = new Set(Object.keys(UPG_EDGE_CATALOG))
 
   // Nodes
+  // (defense-in-depth): `nodes` must be an array. A present-but-non-array
+  // value (`nodes: 42`, `nodes: {}`) would otherwise reach a downstream `.map`
+  // and throw a raw, location-less TypeError on the load path. Distinguish the
+  // missing case from the wrong-type case so the failure is self-explaining.
+  // (The SDK load path also guards before `.map`; this is the validator layer.)
   if (!Array.isArray(d.nodes)) {
-    errors.push({ path: '$.nodes', message: 'nodes is required and must be an array' })
+    errors.push({
+      path: '$.nodes',
+      message: d.nodes === undefined
+        ? 'nodes is required and must be an array'
+        : `nodes must be an array, got ${describeKind(d.nodes)}`,
+    })
   } else {
     const nodeIds = new Set<string>()
     // Lookup by id, used for cross-property referential checks (empty-cell detection).
@@ -162,6 +185,23 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
         errors.push({ path: `${path}.title`, message: 'Node title must not be blank (whitespace-only)' })
       }
 
+      // ── properties container shape ────────────────────────
+      // `properties`, when present, must be a non-null plain object. A node
+      // built with `--data` type confusion can carry `properties: 42`,
+      // `properties: [1,2,3]`, or `properties: true`; today those slip
+      // through (the per-property checks below silently skip a non-object)
+      // and `verify` reports "all checks passed". This is a STRUCTURAL error
+      // (not a content-depth warning): the field is malformed, not merely
+      // drifted, so both reads and `verify` should surface it (exit 2).
+      if (n.properties !== undefined && n.properties !== null) {
+        if (typeof n.properties !== 'object' || Array.isArray(n.properties)) {
+          errors.push({
+            path: `${path}.properties`,
+            message: `Node properties must be a plain object when present, got ${describeKind(n.properties)}.`,
+          })
+        }
+      }
+
       // ── property type + enum depth ( / F5) ───────────────────
       // Validate each present property against the entity schema's declared
       // type and enum membership. Emitted as WARNINGS, never errors: real
@@ -172,8 +212,14 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
     })
 
     // Edges
+    // (defense-in-depth): same array-shape guard as `nodes` above.
     if (!Array.isArray(d.edges)) {
-      errors.push({ path: '$.edges', message: 'edges is required and must be an array' })
+      errors.push({
+        path: '$.edges',
+        message: d.edges === undefined
+          ? 'edges is required and must be an array'
+          : `edges must be an array, got ${describeKind(d.edges)}`,
+      })
     } else {
       d.edges.forEach((edge: unknown, i: number) => {
         const path = `$.edges[${i}]`
@@ -341,10 +387,226 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
           }
         })
       })
+
+      // ── framework score validation ─────────────────────────
+      // A framework_exercise persists each entity's result on its
+      // `framework_exercise_includes_node` edge `properties`. Validate those
+      // stored scores against the framework's OWN input spec. Findings are
+      // WARNINGS (rule 'framework-score'): a drifted exercise still loads,
+      // and `verify` re-classifies to exit 2.
+      validateFrameworkScores(d.nodes as unknown[], d.edges as unknown[], warnings)
     }
   }
 
   return { valid: errors.length === 0, errors, warnings }
+}
+
+/**
+ *: validate the per-entity scores a `framework_exercise` persists on its
+ * `framework_exercise_includes_node` edge `properties` against the framework's
+ * own declared input spec (`data.required_properties[<targetType>]`).
+ *
+ * Why on the edge, not the node: a framework_exercise records each scored
+ * entity's result on the includes-edge (a MoSCoW bucket, RICE reach/impact/
+ * confidence/effort, a WSJF job_size), because the value is a fact about that
+ * run, not an intrinsic entity property. Today garbage persists undetected: an
+ * invalid `moscow` bucket, an off-scale or negative RICE input, a non-numeric
+ * score, or `effort: 0` (a zero divisor that makes the RICE score blow up).
+ *
+ * What we check, grounded ONLY in the framework definition (no invented rules):
+ *   - enum input        → value must be a string in the requirement's
+ *                         `enum_values`.
+ *   - assessment input  → value (scalar, or an object's numeric `.value`) must
+ *                         be a finite number within the declared `scale_id`'s
+ *                         [min, max]. Falls back to a >0 sanity check when the
+ *                         scale id is unknown.
+ *   - number input      → value must be a finite, non-negative number.
+ *   - divisor inputs    → any input that appears as a denominator in the
+ *                         framework's first computed expression (`… / effort`,
+ *                         `… / job_size`) must not be zero.
+ *
+ * Conservative by design (mirrors the F5 property checks): only inputs the
+ * framework actually declares for the scored entity's type are checked; an
+ * unknown framework_id, a missing input value, or an entity type the framework
+ * does not score is skipped, not flagged. WARNINGS only — never errors — so a
+ * drifted exercise still loads. The CLI `verify` command re-classifies these
+ * (see CONTENT_DEPTH_WARNING_RULES).
+ */
+function validateFrameworkScores(
+  nodes: unknown[],
+  edges: unknown[],
+  warnings: UPGValidationWarning[],
+): void {
+  // Index nodes by id and collect the framework_exercise nodes.
+  const nodeById = new Map<string, Record<string, unknown>>()
+  const exercises: Array<{ id: string; framework: UPGFramework }> = []
+  for (const node of nodes) {
+    if (!node || typeof node !== 'object') continue
+    const n = node as Record<string, unknown>
+    if (typeof n.id === 'string') nodeById.set(n.id, n)
+    if (n.type !== 'framework_exercise') continue
+    const props = n.properties
+    if (!props || typeof props !== 'object' || Array.isArray(props)) continue
+    const frameworkId = (props as Record<string, unknown>).framework_id
+    if (typeof frameworkId !== 'string') continue
+    const framework = UPG_FRAMEWORKS_BY_ID[frameworkId]
+    // Unknown framework_id: not this rule's concern — skip rather than
+    // false-flag (a frozen exercise may reference an evolved/removed id).
+    if (!framework) continue
+    if (typeof n.id === 'string') exercises.push({ id: n.id, framework })
+  }
+  if (exercises.length === 0) return
+  const exerciseById = new Map(exercises.map((e) => [e.id, e.framework]))
+
+  // Walk every includes-edge from a resolved exercise and check its score.
+  edges.forEach((edge: unknown, i: number) => {
+    if (!edge || typeof edge !== 'object') return
+    const e = edge as Record<string, unknown>
+    if (e.type !== 'framework_exercise_includes_node') return
+    if (typeof e.source !== 'string' || typeof e.target !== 'string') return
+    const framework = exerciseById.get(e.source)
+    if (!framework) return
+    const score = e.properties
+    if (!score || typeof score !== 'object' || Array.isArray(score)) return
+
+    const targetNode = nodeById.get(e.target)
+    const targetType = typeof targetNode?.type === 'string' ? (targetNode.type as string) : undefined
+    if (!targetType) return
+
+    const requirements = framework.data?.required_properties?.[targetType]
+    if (!requirements || requirements.length === 0) return
+
+    const divisors = divisorInputs(framework)
+    const path = `$.edges[${i}].properties`
+    const scoreObj = score as Record<string, unknown>
+
+    for (const req of requirements) {
+      const value = scoreObj[req.property]
+      if (value === undefined || value === null) continue // missing input: not a depth concern here
+      const finding = checkScoreValue(req, value, divisors.has(req.property), framework.id)
+      if (finding) {
+        warnings.push({
+          path: `${path}.${req.property}`,
+          message: finding,
+          rule: 'framework-score',
+        })
+      }
+    }
+  })
+}
+
+/**
+ * The set of input keys that appear as a denominator in a framework's first
+ * computed expression (the one `executePrioritise` evaluates). Detected by
+ * scanning for an identifier immediately following a `/`, so it is
+ * framework-agnostic: RICE's `effort`, WSJF's `job_size`, etc. A zero in any of
+ * these makes the computed score diverge, so it is always invalid.
+ */
+function divisorInputs(framework: UPGFramework): ReadonlySet<string> {
+  const expr = framework.data?.computed_properties?.[0]?.expression
+  if (typeof expr !== 'string' || expr.length === 0) return EMPTY_STRING_SET
+  const out = new Set<string>()
+  // Match `/` (not `//`) followed by an identifier, tolerating whitespace and a
+  // leading parenthesis: `/ effort`, `/(job_size)`, `/ job_size`.
+  const re = /\/\s*\(?\s*([A-Za-z_][A-Za-z0-9_]*)/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(expr)) !== null) out.add(m[1])
+  return out
+}
+
+const EMPTY_STRING_SET: ReadonlySet<string> = new Set<string>()
+
+/**
+ * Validate a single persisted score `value` against one framework input
+ * requirement. Returns a human-readable finding string, or `null` if the value
+ * is acceptable. The check is keyed on the requirement's declared `type`.
+ */
+function checkScoreValue(
+  req: FrameworkPropertyRequirement,
+  value: unknown,
+  isDivisor: boolean,
+  frameworkId: string,
+): string | null {
+  switch (req.type) {
+    case 'enum': {
+      const allowed = req.enum_values ?? []
+      if (typeof value !== 'string') {
+        return `${frameworkId} score "${req.property}" must be one of ${allowed.join(', ')}; got ${describeKind(value)}.`
+      }
+      if (allowed.length > 0 && !allowed.includes(value)) {
+        return `${frameworkId} score "${req.property}" has value "${value}" outside its allowed set: ${allowed.join(', ')}.`
+      }
+      return null
+    }
+    case 'assessment': {
+      const num = numericScore(value)
+      if (num === null) {
+        return `${frameworkId} score "${req.property}" must be a number; got ${describeKind(value)}.`
+      }
+      const scale = req.scale_id ? getScale(req.scale_id) : undefined
+      if (scale) {
+        if (num < scale.min || num > scale.max) {
+          return `${frameworkId} score "${req.property}" is ${num}, outside the ${req.scale_id} scale range [${scale.min}, ${scale.max}].`
+        }
+      } else if (num <= 0) {
+        // No resolvable scale: fall back to the universal "scores are positive"
+        // sanity bound so 0/negative still get caught.
+        return `${frameworkId} score "${req.property}" must be greater than 0; got ${num}.`
+      }
+      if (isDivisor && num === 0) {
+        return `${frameworkId} score "${req.property}" must not be 0 (it is a divisor in the framework's formula).`
+      }
+      return null
+    }
+    case 'number': {
+      const num = numericScore(value)
+      if (num === null) {
+        return `${frameworkId} score "${req.property}" must be a number; got ${describeKind(value)}.`
+      }
+      if (isDivisor && num === 0) {
+        return `${frameworkId} score "${req.property}" must not be 0 (it is a divisor in the framework's formula).`
+      }
+      if (num < 0) {
+        return `${frameworkId} score "${req.property}" must not be negative; got ${num}.`
+      }
+      return null
+    }
+    case 'boolean': {
+      if (typeof value !== 'boolean') {
+        return `${frameworkId} score "${req.property}" must be a boolean; got ${describeKind(value)}.`
+      }
+      return null
+    }
+    case 'string': {
+      if (typeof value !== 'string') {
+        return `${frameworkId} score "${req.property}" must be a string; got ${describeKind(value)}.`
+      }
+      return null
+    }
+    default:
+      return null
+  }
+}
+
+/**
+ * Coerce a persisted assessment/number score to a finite number, or `null`.
+ * Accepts a bare number, a numeric string (scores are sometimes serialised as
+ * strings), or an assessment object with a numeric `value` field
+ * (`{ value: 3, label: 'High' }`). Mirrors how `executePrioritise` reads
+ * scores via `collectNumericScope`, so the validator and the scorer agree on
+ * what counts as a usable number.
+ */
+function numericScore(value: unknown): number | null {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value === 'string') {
+    const n = Number.parseFloat(value)
+    return Number.isFinite(n) ? n : null
+  }
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const v = (value as Record<string, unknown>).value
+    if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  }
+  return null
 }
 
 /**

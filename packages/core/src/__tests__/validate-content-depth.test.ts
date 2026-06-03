@@ -232,9 +232,9 @@ describe('content-depth validation', () => {
   })
 
   describe('warning-rule contract', () => {
-    it('exposes the three content-depth warning rules', () => {
+    it('exposes the content-depth warning rules (incl. framework-score)', () => {
       expect([...CONTENT_DEPTH_WARNING_RULES].sort()).toEqual(
-        ['property-enum', 'property-type', 'self-loop'],
+        ['framework-score', 'property-enum', 'property-type', 'self-loop'],
       )
     })
 

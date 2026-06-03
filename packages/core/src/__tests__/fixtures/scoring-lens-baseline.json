@@ -891,5 +891,315 @@
         "Plans would create false precision about uncertain outcomes"
       ]
     }
+  },
+  "kano-model": {
+    "id": "kano-model",
+    "approach_ids": [
+      "prioritise"
+    ],
+    "name": "Kano Model",
+    "version": "1.0.0",
+    "description": "Classify features by how they affect user satisfaction: must-haves, performance features, and delighters.",
+    "category": "prioritization",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Noriaki Kano",
+      "description": "Created by Professor Noriaki Kano at Tokyo University of Science. Based on his theory of attractive quality.",
+      "url": "https://en.wikipedia.org/wiki/Kano_model",
+      "year": 1984,
+      "license": "public_domain"
+    },
+    "tags": [
+      "prioritization",
+      "quadrant"
+    ],
+    "slots": [
+      {
+        "label": "Must-haves",
+        "entityTypeId": "feature",
+        "description": "Expected features: absence causes dissatisfaction"
+      },
+      {
+        "label": "Performance",
+        "entityTypeId": "feature",
+        "description": "More is better: linear satisfaction increase"
+      },
+      {
+        "label": "Delighters",
+        "entityTypeId": "feature",
+        "description": "Unexpected features: presence creates delight"
+      },
+      {
+        "label": "Indifferent",
+        "entityTypeId": "feature",
+        "description": "Features users don't care about either way"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "feature",
+          "role": "scored_item"
+        }
+      ],
+      "required_properties": {
+        "feature": [
+          {
+            "property": "functional_response",
+            "type": "enum",
+            "required": true,
+            "scope": "framework",
+            "label": "Functional Response",
+            "description": "How users feel when the feature IS present",
+            "enum_values": [
+              "i_like_it",
+              "i_expect_it",
+              "i_am_neutral",
+              "i_can_tolerate_it",
+              "i_dislike_it"
+            ]
+          },
+          {
+            "property": "dysfunctional_response",
+            "type": "enum",
+            "required": true,
+            "scope": "framework",
+            "label": "Dysfunctional Response",
+            "description": "How users feel when the feature IS NOT present",
+            "enum_values": [
+              "i_like_it",
+              "i_expect_it",
+              "i_am_neutral",
+              "i_can_tolerate_it",
+              "i_dislike_it"
+            ]
+          },
+          {
+            "property": "delighter_count",
+            "type": "number",
+            "required": false,
+            "scope": "framework",
+            "label": "Delighter classifications",
+            "description": "Count of survey responses classifying this feature as a delighter (attractive)"
+          },
+          {
+            "property": "performance_count",
+            "type": "number",
+            "required": false,
+            "scope": "framework",
+            "label": "Performance classifications",
+            "description": "Count of survey responses classifying this feature as performance (one-dimensional)"
+          },
+          {
+            "property": "must_be_count",
+            "type": "number",
+            "required": false,
+            "scope": "framework",
+            "label": "Must-be classifications",
+            "description": "Count of survey responses classifying this feature as must-be (basic)"
+          },
+          {
+            "property": "indifferent_count",
+            "type": "number",
+            "required": false,
+            "scope": "framework",
+            "label": "Indifferent classifications",
+            "description": "Count of survey responses classifying this feature as indifferent"
+          }
+        ]
+      },
+      "computed_properties": [
+        {
+          "property": "satisfaction_coefficient",
+          "expression": "(delighter_count + performance_count) / (delighter_count + performance_count + must_be_count + indifferent_count)",
+          "entity_type": "feature",
+          "label": "Satisfaction Coefficient",
+          "format": "number"
+        },
+        {
+          "property": "dissatisfaction_coefficient",
+          "expression": "(must_be_count + performance_count) / (delighter_count + performance_count + must_be_count + indifferent_count) * -1",
+          "entity_type": "feature",
+          "label": "Dissatisfaction Coefficient",
+          "format": "number"
+        }
+      ]
+    },
+    "structure": {
+      "pattern": "matrix"
+    },
+    "presentation": {
+      "layout": {
+        "type": "matrix",
+        "rows": 5,
+        "cols": 5,
+        "template": "kano-classification"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Classify features by how they affect user satisfaction (must-haves vs delighters). Teams invest in the right category at the right time.",
+      "core_question": "Which features prevent dissatisfaction, which increase satisfaction linearly, and which create unexpected delight?",
+      "when_to_use": [
+        "You need to distinguish must-have features from delighters",
+        "You want to identify features that drive satisfaction vs prevent dissatisfaction",
+        "You are investing in differentiation and need to know which delighters move users"
+      ],
+      "when_not_to_use": [
+        "You cannot survey users for functional/dysfunctional responses",
+        "The backlog is too early-stage for paired survey questions to be meaningful"
+      ]
+    }
+  },
+  "raid-log": {
+    "id": "raid-log",
+    "approach_ids": [
+      "inspect"
+    ],
+    "name": "RAID Log",
+    "version": "1.0.0",
+    "description": "A project management register tracking Risks, Assumptions, Issues, and Dependencies, the four categories most likely to derail a project if left unmanaged.",
+    "category": "program_mgmt",
+    "origin": {
+      "type": "practitioner",
+      "description": "Standard project management tool used across methodologies. The RAID log (Risks, Assumptions, Issues, Dependencies) provides a single living document for tracking all factors that could derail a programme.",
+      "license": "cc_by"
+    },
+    "tags": [
+      "program_mgmt",
+      "table"
+    ],
+    "slots": [
+      {
+        "label": "Risk Register",
+        "entityTypeId": "risk_register",
+        "description": "Risk or assumption logged with likelihood, impact, owner, and mitigation strategy"
+      },
+      {
+        "label": "Risk",
+        "entityTypeId": "risk",
+        "description": "Individual risk scored by probability and impact; severity = probability * impact"
+      },
+      {
+        "label": "Dependency",
+        "entityTypeId": "dependency",
+        "description": "Dependency on another team, system, or deliverable that could block progress if not resolved"
+      },
+      {
+        "label": "Status Report",
+        "entityTypeId": "status_report",
+        "description": "Status update summarising RAID log changes: new risks, resolved issues, and dependency updates"
+      },
+      {
+        "label": "Deliverable",
+        "entityTypeId": "deliverable",
+        "description": "Deliverable affected by logged risks, issues, or dependencies, linking RAID items to project scope"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "risk_register",
+          "role": "item"
+        },
+        {
+          "type": "risk",
+          "role": "scored_item"
+        },
+        {
+          "type": "dependency",
+          "role": "item"
+        },
+        {
+          "type": "status_report",
+          "role": "item"
+        },
+        {
+          "type": "deliverable",
+          "role": "item"
+        }
+      ],
+      "required_properties": {
+        "risk": [
+          {
+            "property": "probability",
+            "type": "number",
+            "required": true,
+            "label": "Probability",
+            "description": "Likelihood the risk materialises (risk.probability assessment)"
+          },
+          {
+            "property": "impact",
+            "type": "number",
+            "required": true,
+            "label": "Impact",
+            "description": "Consequence severity if the risk materialises (risk.impact assessment)"
+          }
+        ]
+      },
+      "computed_properties": [
+        {
+          "property": "severity",
+          "expression": "probability * impact",
+          "entity_type": "risk",
+          "label": "Severity",
+          "format": "number"
+        }
+      ]
+    },
+    "structure": {
+      "pattern": "table"
+    },
+    "presentation": {
+      "layout": {
+        "type": "table",
+        "columns": [
+          {
+            "property": "title",
+            "label": "Item",
+            "sortable": true
+          },
+          {
+            "property": "description",
+            "label": "Category"
+          },
+          {
+            "property": "status",
+            "label": "Status"
+          },
+          {
+            "property": "description",
+            "label": "Owner / Action"
+          }
+        ]
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "type",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Track Risks, Assumptions, Issues, and Dependencies in a single living document so the project manager sees all potential blockers in one place.",
+      "core_question": "What are the current risks, untested assumptions, open issues, and external dependencies that could derail this programme?",
+      "when_to_use": [
+        "You are managing complex, multi-team initiatives with dependencies",
+        "You need to track risks, decisions, and milestones across workstreams",
+        "Stakeholders need visibility into programme-level progress"
+      ],
+      "when_not_to_use": [
+        "The project is small enough for a single team to manage",
+        "Formal programme management would create overhead without value"
+      ]
+    }
   }
 }
