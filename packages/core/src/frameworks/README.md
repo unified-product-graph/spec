@@ -4,21 +4,23 @@ Declarative records describing each named product technique (RICE, Kano, BMC, AA
 
 A framework is a **lens** layered over canonical entities. RICE adds `reach`, `impact`, `confidence`, and `effort` to a feature. Kano adds `functional_response` and `dysfunctional_response`. These lens-scoped fields live inside the framework's scoring context. They are not promoted onto the universal entity property schema.
 
-## Two layers: canonical (public) and research (internal)
+## One source, two surfaces: research (internal) and canonical (public)
 
-| Layer | What | Where | Surfaces |
+`definitions/` is the **single source of truth** for framework content. `canonical.ts` is a **generated projection** of it — never hand-edit a framework body in `canonical.ts`.
+
+| Surface | What | Where | Ships in |
 |---|---|---|---|
-| **Canonical** | The 34 famous, battle-tested frameworks that anchor the public catalog. | `canonical.ts` (generated) | `@unified-product-graph/core` (npm + GitHub) |
-| **Research** | The fuller library of 182 additional framework definitions, kept in source for internal tooling, vocabulary mapping, and tier-1 wiring tests. | `definitions/` (30 category files) | Monorepo only; **excluded** from `core` mirror via `scripts/sync-oss-repos.sh` |
+| **Canonical** | The famous, battle-tested frameworks that anchor the public catalog (42 at present). | `canonical.ts` (generated) | `@unified-product-graph/core` (npm + GitHub) |
+| **Research** | The full authored library (~182 additional framework definitions), source of truth for everything, used by internal tooling, vocabulary mapping, the shape audit, and tier-1 wiring tests. | `definitions/` (30 category files) | Monorepo only; **excluded** from the `core` mirror via `scripts/sync-oss-repos.sh` |
 
-The public surface ships only the canonical set. Frameworks are promoted from research → canonical one at a time as each is reviewed and validated. Run `scripts/regen-canonical-frameworks.mjs` after editing the canonical ID allowlist.
+The public surface ships only the canonical subset. To promote a framework, add its id to the array in `canonical.ts` and run `npm run regen:canonical`; the body is filled from its definition. To edit a published framework, edit its definition in `definitions/` and regenerate. `npm run check:canonical` (`--check`) is the sync gate — wired into core's `prepublishOnly`, it fails if `canonical.ts` has drifted from `definitions/`, so a hand-edit or a stale projection can never be published.
 
 ## Exports
 
 ```ts
 import {
-  UPG_FRAMEWORKS,            // 34 canonical records (public surface)
-  UPG_FRAMEWORKS_BY_ID,      // O(1) lookup over the 34
+  UPG_FRAMEWORKS,            // canonical records (public surface)
+  UPG_FRAMEWORKS_BY_ID,      // O(1) lookup by id
   UPG_FRAMEWORKS_BY_CATEGORY,
   UPG_FRAMEWORK_CATEGORIES,  // category catalog
   UPG_STRUCTURE_PATTERNS,    // structural pattern catalog

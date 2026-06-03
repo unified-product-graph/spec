@@ -7,6 +7,7 @@ import type { UPGDocument } from '../shapes/document.js'
 import { UPG_CROSS_EDGE_TYPES } from '../shapes/document.js'
 import { UPG_EDGE_CATALOG } from '../catalog/edge-catalog.js'
 import { getTypes } from '../registry/domains.js'
+import { getPropertySchema, type PropertyDefinition } from '../properties/property-schema.js'
 
 /**
  * Cross-product edge types must live in `portfolio.cross_edges[]`, not in a
@@ -36,7 +37,31 @@ export interface UPGValidationWarning {
   path: string
   /** Human-readable description of the best-practice notice */
   message: string
+  /**
+   * Stable machine-readable category for the warning, when it belongs to one
+   * of the content-depth checks. Lets consumers (e.g. the CLI `verify`
+   * command) select a specific class of finding without parsing `message`.
+   *
+   * These are surfaced as warnings (not errors) on purpose: the document
+   * LOAD path throws on any `errors[]` entry, and real graphs already carry
+   * known drift (non-canonical enum values, primitive-where-assessment).
+   * Promoting them to errors would brick those graphs on load. `verify`
+   * re-runs the validator and re-classifies these as policy violations so a
+   * CI gate still fails, without making the parser refuse to read the file.
+   */
+  rule?: 'property-type' | 'property-enum' | 'self-loop'
 }
+
+/**
+ * Warning `rule` codes for the content-depth checks added in.
+ * `verify`/`check` treat a document carrying any of these as a policy
+ * violation (exit 2) even though they never block the load path.
+ */
+export const CONTENT_DEPTH_WARNING_RULES: ReadonlySet<NonNullable<UPGValidationWarning['rule']>> = new Set([
+  'property-type',
+  'property-enum',
+  'self-loop',
+])
 
 /**
  * Validates a UPGDocument against the UPG v0.2 specification.
@@ -129,6 +154,20 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
       }
       if (!n.title || typeof n.title !== 'string') {
         errors.push({ path: `${path}.title`, message: 'Node title is required and must be a string' })
+      } else if (n.title.trim().length === 0) {
+        // Trim before the required-title check so whitespace-only titles
+        // (e.g. "   ") are caught symmetrically with the empty string "".
+        // A truthy-but-blank title is still a missing title. Mirrors the CLI
+        // write-side guard (PR #1935 /).
+        errors.push({ path: `${path}.title`, message: 'Node title must not be blank (whitespace-only)' })
+      }
+
+      // ── property type + enum depth ( / F5) ───────────────────
+      // Validate each present property against the entity schema's declared
+      // type and enum membership. Emitted as WARNINGS, never errors: real
+      // graphs carry known drift and the load path throws on any error.
+      if (typeof n.type === 'string') {
+        validateNodeProperties(n, `${path}`, warnings)
       }
     })
 
@@ -162,6 +201,18 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
           errors.push({ path: `${path}.target`, message: 'Edge target is required and must be a string' })
         } else if (!nodeIds.has(e.target as string)) {
           errors.push({ path: `${path}.target`, message: `Edge target references unknown node id: ${e.target}` })
+        }
+        // ── self-loop detection ( / F8) ────────────────────────
+        // An edge whose source and target are the same node is almost always
+        // an authoring error. Surfaced as a WARNING (not an error) so it does
+        // not throw on the load path; `verify` re-classifies it as a policy
+        // violation. See CONTENT_DEPTH_WARNING_RULES.
+        if (typeof e.source === 'string' && typeof e.target === 'string' && e.source === e.target) {
+          warnings.push({
+            path: `${path}`,
+            message: `Self-loop edge: source and target are the same node ("${e.source}"). A node related to itself is almost always an error.`,
+            rule: 'self-loop',
+          })
         }
         if (!e.type || typeof e.type !== 'string') {
           errors.push({ path: `${path}.type`, message: 'Edge type is required and must be a string' })
@@ -294,6 +345,125 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
   }
 
   return { valid: errors.length === 0, errors, warnings }
+}
+
+/**
+ * Returns the JavaScript-runtime category a value falls into, expressed in the
+ * `PropertyDefinition['type']` vocabulary, or `null` if it cannot be mapped.
+ *
+ * `assessment` and `object` are both backed by plain objects at runtime, so a
+ * non-null, non-array object satisfies either. Arrays map to `string[]` (the
+ * only array-shaped property type in the schema); element types are not
+ * inspected here.
+ */
+function runtimeKind(val: unknown): PropertyDefinition['type'] | 'array' | null {
+  if (val === null || val === undefined) return null
+  if (Array.isArray(val)) return 'string[]'
+  switch (typeof val) {
+    case 'string':
+      return 'string'
+    case 'number':
+      return 'number'
+    case 'boolean':
+      return 'boolean'
+    case 'object':
+      // assessment and object are both plain objects at runtime; report the
+      // broader `object` and let the caller accept either.
+      return 'object'
+    default:
+      return null
+  }
+}
+
+/**
+ * True when `val` is shape-compatible with the declared property `type`.
+ * `assessment` accepts any plain object (its nested `{value,label}` shape is
+ * not deep-checked here, to stay conservative against real-world drift).
+ */
+function valueMatchesType(defType: PropertyDefinition['type'], val: unknown): boolean {
+  const kind = runtimeKind(val)
+  if (kind === null) return true // null/undefined: treated as "absent", not a mismatch
+  switch (defType) {
+    case 'string':
+      return kind === 'string'
+    case 'number':
+      return kind === 'number'
+    case 'boolean':
+      return kind === 'boolean'
+    case 'string[]':
+      return kind === 'string[]'
+    case 'object':
+    case 'assessment':
+      // Both are plain objects at runtime. Arrays are not objects here.
+      return kind === 'object'
+    default:
+      return true
+  }
+}
+
+/**
+ * A human-readable name for a value's runtime kind, for warning messages.
+ */
+function describeKind(val: unknown): string {
+  if (Array.isArray(val)) return 'array'
+  return typeof val
+}
+
+/**
+ * (F5): validate a node's `properties` against the entity schema's
+ * declared property TYPE and ENUM membership. Findings are pushed as WARNINGS
+ * (tagged with a `rule` code), never errors, so they never block the load path.
+ *
+ * Conservative by design — false positives on a real graph become spurious
+ * warnings, so we only check what is unambiguous:
+ *   - Only properties that exist in the entity schema are checked (unknown
+ *     extras are author/runtime extensions and are left alone).
+ *   - Only present (non-null, non-undefined) values are checked.
+ *   - Type checks accept `assessment`/`object` for any plain object without
+ *     deep-checking nested shape.
+ *   - Enum checks only fire when the value is a string not in the closed set.
+ *
+ * Entity types with no typed schema (or non-canonical / alias types) are
+ * skipped entirely.
+ */
+function validateNodeProperties(
+  node: Record<string, unknown>,
+  basePath: string,
+  warnings: UPGValidationWarning[],
+): void {
+  const type = node.type
+  if (typeof type !== 'string') return
+  const schema = getPropertySchema(type)
+  if (!schema) return // no typed properties (or alias/unknown type): nothing to check
+
+  const props = node.properties
+  if (!props || typeof props !== 'object' || Array.isArray(props)) return
+
+  for (const [key, value] of Object.entries(props as Record<string, unknown>)) {
+    const def = schema[key]
+    if (!def) continue // author/runtime extension property: not in the spec schema
+    if (value === null || value === undefined) continue // absent: not a violation
+
+    // Type check.
+    if (!valueMatchesType(def.type, value)) {
+      warnings.push({
+        path: `${basePath}.properties.${key}`,
+        message: `Property "${key}" on ${type} should be ${def.type}, got ${describeKind(value)}.`,
+        rule: 'property-type',
+      })
+      // A type-mismatched value cannot meaningfully be enum-checked; skip.
+      continue
+    }
+
+    // Enum membership check (only for string-typed, closed-set properties).
+    if (def.enum && typeof value === 'string' && !def.enum.includes(value)) {
+      warnings.push({
+        path: `${basePath}.properties.${key}`,
+        message: `Property "${key}" on ${type} has value "${value}" outside its allowed set: ${def.enum.join(', ')}.`,
+        rule: 'property-enum',
+      })
+    }
+  }
 }
 
 /**

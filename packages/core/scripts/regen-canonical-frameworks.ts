@@ -1,15 +1,23 @@
 /**
  * Regenerate `src/frameworks/canonical.ts` from the authored definitions.
  *
- * `canonical.ts` is the PUBLIC surface: the curated 34 frameworks re-exported
- * from the package root. They are authored in `src/frameworks/definitions/*.ts`
- * (the full ~182-framework research catalog) and *promoted* into `canonical.ts`
- * one at a time. This script performs that promotion: it preserves the exact
- * set and order of framework ids already in `canonical.ts`, and re-emits each
- * one from its current authored definition — so edits to a definition file flow
- * into the published surface with a single command.
+ * `definitions/` is the SINGLE SOURCE OF TRUTH for framework content.
+ * `canonical.ts` is the PUBLIC surface: the curated subset re-exported from the
+ * package root and shipped by `@unified-product-graph/core`. It is a generated
+ * projection of `definitions/` — it preserves the exact set and order of
+ * framework ids already declared in `canonical.ts` and re-emits each one from
+ * its current authored definition, so an edit to a definition file flows into
+ * the published surface with a single command. Never hand-edit a framework body
+ * in canonical.ts; edit the definition and regenerate.
  *
- * Run: tsx scripts/regen-canonical-frameworks.ts   (or: npm run regen:canonical)
+ * Run:   npm run regen:canonical      (writes canonical.ts)
+ * Check: npm run check:canonical      (--check: fails if canonical.ts is stale,
+ *                                       writes nothing)
+ *
+ * `--check` is the sync gate: it computes what canonical.ts *should* be from the
+ * current definitions and exits non-zero if the committed file differs. It is
+ * wired into core's `prepublishOnly`, so a drifted canonical can never be
+ * published — which is what lets `definitions/` be the one source of truth.
  *
  * To promote a NEW framework into the canonical set, add its id to the array in
  * canonical.ts (anywhere, in the order you want) and re-run; the body is filled
@@ -86,5 +94,21 @@ for (const fw of UPG_FRAMEWORKS) {
 `
 
 const body = JSON.stringify(frameworks, null, 2)
-writeFileSync(CANONICAL_PATH, header + body + footer)
-console.log(`Regenerated canonical.ts with ${frameworks.length} frameworks.`)
+const output = header + body + footer
+
+// ── 4. Either check sync (gate mode) or write (regen mode) ──
+if (process.argv.includes('--check')) {
+  if (current !== output) {
+    console.error(
+      'canonical.ts is OUT OF SYNC with definitions/.\n' +
+        'A framework body in canonical.ts no longer matches its definition\n' +
+        '(or a definition changed without regenerating). canonical.ts is generated:\n' +
+        'fix the source in definitions/ and run `npm run regen:canonical`, then commit.',
+    )
+    process.exit(1)
+  }
+  console.log(`canonical.ts in sync with definitions/ (${frameworks.length} frameworks).`)
+} else {
+  writeFileSync(CANONICAL_PATH, output)
+  console.log(`Regenerated canonical.ts with ${frameworks.length} frameworks.`)
+}

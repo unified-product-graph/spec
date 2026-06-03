@@ -25,6 +25,7 @@ export type FrameworkIssueKind =
   | 'SLOT_DATA_DRIFT'
   | 'WHEN_TO_USE_BOILERPLATE'
   | 'REQUIRED_PROPERTY_NOT_ON_ENTITY'
+  | 'SCORED_ITEM_WITHOUT_INPUTS'
 
 export type FrameworkIssueSeverity = 'blocker' | 'warning'
 
@@ -233,6 +234,25 @@ function auditFramework(fw: UPGFramework): FrameworkIssue[] {
     }
   }
 
+  // ── Issue 4: scored_item entity types must carry scoring inputs ───────────
+  // A `role: 'scored_item'` entity type declares "this is the thing being
+  // scored", so it must carry the framework's scoring inputs in
+  // required_properties. A scored_item with no inputs is a role/shape mismatch:
+  // either the inputs are missing, or the type is really a context anchor that
+  // should be role:'item' (the thing actually scored is a different type).
+  for (const et of fw.data?.entity_types ?? []) {
+    if (et.role !== 'scored_item') continue
+    const props = requiredProps[et.type] ?? []
+    if (props.length === 0) {
+      issues.push({
+        kind: 'SCORED_ITEM_WITHOUT_INPUTS',
+        severity: 'blocker',
+        location: `data.entity_types[type="${et.type}"].role="scored_item"`,
+        detail: `Entity type "${et.type}" is role:'scored_item' but has no required_properties, so there is nothing to score. Give it scoring inputs (required_properties["${et.type}"]) or make it role:'item' (a context anchor).`,
+      })
+    }
+  }
+
   return issues
 }
 
@@ -312,6 +332,7 @@ export function runFrameworkShapeAudit(
     SLOT_DATA_DRIFT: 0,
     WHEN_TO_USE_BOILERPLATE: 0,
     REQUIRED_PROPERTY_NOT_ON_ENTITY: 0,
+    SCORED_ITEM_WITHOUT_INPUTS: 0,
   }
   const by_severity: Record<FrameworkIssueSeverity, number> = {
     blocker: 0,

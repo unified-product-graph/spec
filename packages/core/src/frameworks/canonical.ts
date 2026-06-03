@@ -1,7 +1,7 @@
 /**
  * Canonical Framework Library: v1 public surface.
  *
- * The 34 famous, battle-tested product frameworks that anchor the public
+ * The famous, battle-tested product frameworks that anchor the public
  * Unified Product Graph framework catalog. Curated for editorial confidence
  * over breadth: every name here is universally recognised and actively
  * taught in product education.
@@ -1250,7 +1250,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "name": "RICE Scoring",
     "version": "1.0.0",
-    "description": "Score features and opportunities by Reach, Impact, Confidence, and Effort to produce a ranked priority list.",
+    "description": "Score features, opportunities, and needs by Reach, Impact, Confidence, and Effort to produce a ranked priority list.",
     "category": "prioritization",
     "origin": {
       "type": "practitioner",
@@ -1268,7 +1268,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Items to score",
         "entityTypeId": "feature",
-        "description": "Features, opportunities, or solutions being evaluated"
+        "description": "Features, opportunities, or needs being evaluated"
       },
       {
         "label": "Opportunities to score",
@@ -1434,7 +1434,60 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "label": "RICE Score",
           "format": "number"
         }
-      ]
+      ],
+      "scoring_lens": {
+        "applies_to": [
+          "feature",
+          "opportunity",
+          "need"
+        ],
+        "inputs": [
+          {
+            "property": "reach",
+            "type": "assessment",
+            "scale_id": "reach_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Reach",
+            "description": "How many users will this impact per quarter?"
+          },
+          {
+            "property": "impact",
+            "type": "assessment",
+            "scale_id": "impact_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "How much will this impact each user, on the impact scale?"
+          },
+          {
+            "property": "confidence",
+            "type": "assessment",
+            "scale_id": "confidence_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "How confident are you in the reach, impact, and effort estimates?"
+          },
+          {
+            "property": "effort",
+            "type": "assessment",
+            "scale_id": "effort_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Effort",
+            "description": "How much work is required to build and ship this, on the effort scale?"
+          }
+        ],
+        "computed": [
+          {
+            "property": "rice_score",
+            "expression": "(reach * impact * confidence) / effort",
+            "label": "RICE Score",
+            "format": "number"
+          }
+        ]
+      }
     },
     "structure": {
       "pattern": "table"
@@ -3559,7 +3612,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "entity_types": [
         {
           "type": "team",
-          "role": "scored_item"
+          "role": "item"
         },
         {
           "type": "retrospective",
@@ -3953,7 +4006,48 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "label": "ICE Score",
           "format": "number"
         }
-      ]
+      ],
+      "scoring_lens": {
+        "applies_to": [
+          "feature",
+          "opportunity",
+          "need"
+        ],
+        "inputs": [
+          {
+            "property": "impact",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "Expected impact on the target metric (1-10)"
+          },
+          {
+            "property": "confidence",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "Confidence in the impact estimate (1-10)"
+          },
+          {
+            "property": "ease",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Ease",
+            "description": "Ease of implementation (1-10)"
+          }
+        ],
+        "computed": [
+          {
+            "property": "ice_score",
+            "expression": "impact * confidence * ease",
+            "label": "ICE Score",
+            "format": "number"
+          }
+        ]
+      }
     },
     "structure": {
       "pattern": "table"
@@ -4162,7 +4256,55 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "label": "WSJF Score",
           "format": "number"
         }
-      ]
+      ],
+      "scoring_lens": {
+        "applies_to": [
+          "feature",
+          "opportunity"
+        ],
+        "inputs": [
+          {
+            "property": "user_value",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "User/Business Value",
+            "description": "Relative value to users and the business if delivered"
+          },
+          {
+            "property": "time_criticality",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Time Criticality",
+            "description": "How much value decays if delivery is delayed (deadlines, competition, seasonal windows)"
+          },
+          {
+            "property": "risk_reduction",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Risk Reduction / Opportunity Enablement",
+            "description": "Value from reducing risk or enabling future opportunities"
+          },
+          {
+            "property": "job_size",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Job Size",
+            "description": "Estimated effort (story points, t-shirt size, or person-weeks)"
+          }
+        ],
+        "computed": [
+          {
+            "property": "wsjf_score",
+            "expression": "(user_value + time_criticality + risk_reduction) / job_size",
+            "label": "WSJF Score",
+            "format": "number"
+          }
+        ]
+      }
     },
     "structure": {
       "pattern": "table"
@@ -4235,7 +4377,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "name": "Cost of Delay",
     "version": "1.0.0",
-    "description": "Quantify the economic cost of not shipping a feature to drive priority decisions. Combines urgency with value.",
+    "description": "Quantify the economic cost of not shipping a feature or opportunity to drive priority decisions. Combines urgency with value.",
     "category": "prioritization",
     "origin": {
       "type": "practitioner",
@@ -4351,7 +4493,39 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "label": "WSJF Score",
           "format": "number"
         }
-      ]
+      ],
+      "scoring_lens": {
+        "applies_to": [
+          "feature",
+          "opportunity"
+        ],
+        "inputs": [
+          {
+            "property": "cost_of_delay",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Cost of Delay",
+            "description": "Weekly revenue impact of not shipping"
+          },
+          {
+            "property": "job_size",
+            "type": "number",
+            "required": true,
+            "scope": "framework",
+            "label": "Job Size",
+            "description": "Weeks of development effort"
+          }
+        ],
+        "computed": [
+          {
+            "property": "wsjf_score",
+            "expression": "cost_of_delay / job_size",
+            "label": "WSJF Score",
+            "format": "number"
+          }
+        ]
+      }
     },
     "structure": {
       "pattern": "table"

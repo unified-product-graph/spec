@@ -1,6 +1,6 @@
 {
   "name": "@unified-product-graph/core",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "description": "Unified Product Graph — open specification and TypeScript types for product knowledge",
   "type": "module",
   "license": "MIT",
@@ -34,8 +34,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src/",
+    "regen:canonical": "tsx scripts/regen-canonical-frameworks.ts",
+    "check:canonical": "tsx scripts/regen-canonical-frameworks.ts --check",
     "audit:slot-connectivity": "tsx scripts/audit-framework-slot-connectivity.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run check:canonical && npm run build"
   },
   "devDependencies": {
     "tsup": "^8.5.1"

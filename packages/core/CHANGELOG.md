@@ -7,6 +7,18 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.7] - 2026-06-03
+
+Framework-surface consolidation + the CLI-hardening and cross-surface QA wave. `UPG_VERSION` is now `0.8.7`. (Co-versions the 0.8.6 train, whose changelog entry was skipped.)
+
+### Added
+- `scoring_lens` (optional) on `FrameworkDataSpec`: declare a framework's scoring inputs + formula once and list the entity types it `applies_to`; a build-time expander derives the per-type `required_properties`/`computed_properties`, so the public surface stays fully expanded. The four scorers (RICE/ICE/WSJF/cost-of-delay) now use it.
+- Content-depth validation as WARNINGS (never load-blocking errors): `property-type`, `property-enum`, and `self-loop` checks, plus `CONTENT_DEPTH_WARNING_RULES` so `verify`/`check` re-classify them to a CI failure while the load path stays permissive. Whitespace-only node titles are now an error (symmetric with empty).
+
+### Changed
+- `canonical.ts` is now a generated projection of `definitions/` (single source of truth), with a `regen:canonical --check` sync gate wired into `prepublishOnly`.
+- `team-health-check`: `team` is now `role: 'item'` (it carried no scoring inputs); added a `SCORED_ITEM_WITHOUT_INPUTS` shape-audit guard (gated to zero on the canonical surface). Refreshed RICE and cost-of-delay descriptions for the broadened scored-type sets.
+
 ## [0.8.5] - 2026-06-02
 
 Co-version with the @unified-product-graph/* 0.8.5 fast-follow (skill_audit source resolution, CLI/docs consistency, npx-cache fix, exercise-aware prioritise hint). No spec/catalogue change; `UPG_VERSION` stays `0.8.4`.

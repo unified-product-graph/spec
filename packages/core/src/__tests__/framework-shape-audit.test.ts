@@ -20,7 +20,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { runFrameworkShapeAudit } from '../frameworks/audit-shape.js'
-import { UPG_FRAMEWORKS_BY_ID } from '../frameworks/index.js'
+import { UPG_FRAMEWORKS, UPG_FRAMEWORKS_BY_ID } from '../frameworks/index.js'
 import { getPropertySchema } from '../properties/property-schema.js'
 import type { UPGFramework } from '../frameworks/types.js'
 
@@ -46,6 +46,28 @@ describe('Framework Shape Audit — showcase frameworks must be clean', () => {
       ).toEqual([])
     })
   }
+})
+
+describe('Framework Shape Audit — scored_item integrity (M10)', () => {
+  // A role:'scored_item' entity type must carry scoring inputs in
+  // required_properties; otherwise there is nothing to score and the type is
+  // really a context anchor (role:'item'). team-health-check was the only
+  // canonical offender (its `team` was scored_item with no inputs); fixed.
+  // The public surface must stay clean. (The wider research catalog still has a
+  // few offenders that need per-framework editorial judgement; reported in the
+  // warn-only sweep, not gated here.)
+  it('no canonical framework has a scored_item without scoring inputs', () => {
+    const result = runFrameworkShapeAudit(UPG_FRAMEWORKS)
+    const offenders = result.reports.flatMap((r) =>
+      r.issues
+        .filter((i) => i.kind === 'SCORED_ITEM_WITHOUT_INPUTS')
+        .map((i) => `  - ${r.framework_id}: ${i.location}`),
+    )
+    expect(
+      offenders,
+      `scored_item-without-inputs offenders in the canonical surface:\n${offenders.join('\n')}`,
+    ).toEqual([])
+  })
 })
 
 describe('Framework Shape Audit — sweep report', () => {

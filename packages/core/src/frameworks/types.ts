@@ -124,6 +124,45 @@ export interface FrameworkComputedProperty {
   format?: 'number' | 'percentage' | 'currency'
 }
 
+/**
+ * A scoring lens declared ONCE and applied to several entity types.
+ *
+ * Many scoring frameworks (RICE, ICE, WSJF, cost-of-delay) apply the same
+ * inputs and formula across more than one entity type. Authored verbatim, that
+ * means repeating the identical `required_properties` array and computed
+ * formula once per type — the per-type duplication the framework-shape audit's
+ * `COMPUTED_EXPRESSION_UNDEFINED_VARIABLE` rule otherwise mandates. A lens
+ * states the inputs and computed once and lists the types it `applies_to`; a
+ * build-time expander (`expandFramework`) derives the fully-expanded
+ * `required_properties`/`computed_properties` from it, so the public surface
+ * (`canonical.ts`, `@unified-product-graph/core`) stays fully expanded and
+ * every consumer is unaffected.
+ *
+ * Scope: the DATA-layer scoring duplication only. `entity_types` (which may
+ * interleave scored types with `role: 'item'` context types) and `slots`
+ * (framework-specific and irregular) stay hand-authored alongside the lens.
+ */
+export interface FrameworkScoringLens {
+  /**
+   * The scoring inputs, declared once. The expander sets
+   * `required_properties[type] = inputs` for every `applies_to` type, so the
+   * inputs must be valid for each (in practice they are framework-scoped,
+   * `scope: 'framework'`).
+   */
+  inputs: FrameworkPropertyRequirement[]
+  /**
+   * Computed scores, declared once WITHOUT `entity_type`. The expander emits
+   * one copy per `applies_to` type with `entity_type` filled in.
+   */
+  computed?: Omit<FrameworkComputedProperty, 'entity_type'>[]
+  /**
+   * The entity types this lens scores. Each must also appear in
+   * `data.entity_types` with `role: 'scored_item'`. The order here is the order
+   * `required_properties` keys and `computed_properties` entries are emitted in.
+   */
+  applies_to: string[]
+}
+
 /** A fixed entity that the framework scaffolds automatically (e.g. quadrant labels, funnel stages) */
 export interface FrameworkConstant {
   /** The UPG entity type for this constant */
@@ -194,6 +233,17 @@ export interface FrameworkDataSpec {
   computed_properties?: FrameworkComputedProperty[]
   /** Fixed entities that the framework creates automatically */
   constants?: FrameworkConstant[]
+  /**
+   * A scoring lens applied to several entity types, declared once. When present
+   * on an AUTHORED definition, a build-time expander (`expandFramework`, run at
+   * the `definitions/` aggregation boundary) derives `required_properties` and
+   * `computed_properties` for every `applies_to` type from it — so authored
+   * definitions stay DRY while the expanded public surface carries the full
+   * fields plus this lens. Additive and optional: a consumer that ignores it
+   * sees the same fully-expanded `required_properties`/`computed_properties` as
+   * before. See `FrameworkScoringLens` and `expandFramework`.
+   */
+  scoring_lens?: FrameworkScoringLens
 }
 
 // ─── Structure Layer ────────────────────────────────────────────────────────
