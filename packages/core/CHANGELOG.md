@@ -7,6 +7,15 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.8.13] - 2026-06-04
+
+A co-versioned patch. The catalogue is unchanged. The agent-facing cloud `list_frameworks` tool description shipped a stale literal (`351 total at v0.3.0`); de-numbered to mirror the local server, and refreshed the generated tool-reference snapshots.
+
+### Changed
+- `cloud-server` `list_frameworks` description de-numbered (no behavioural change). The live manifest reflects it on the next cloud redeploy.
+
+---
+
 ## [0.8.12] - 2026-06-04
 
 A co-versioned patch. The catalogue is unchanged; the fix is in the canonical serialiser.
