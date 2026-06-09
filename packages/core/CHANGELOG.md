@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.4] - 2026-06-09
+
+**Cross-product structure clone + pre-commit preview + target-profile coverage (batch-4, part 2).** No core spec change — one new local MCP tool plus two opt-in parameters. Decision: `2026-06-09-cross-product-structure-clone.md`.
+
+### Added
+- (MCP server) **`clone_structure`** (batch-4 #17): copies the SHAPE of one product (typed nodes + canonical edges + hierarchy, with `TODO:` placeholder titles tagged `stub`) into another — the single biggest lever for multi-product structural parity, replacing a near-identical per-product skeleton rebuild. Content (descriptions, properties, real titles, statuses) never crosses; only structure does. `from_product` is the read-only exemplar; `into` is the write target and **defaults to the active product**, but naming a non-active product writes there directly with **no `switch_product`** (the cross-product write deferred from batch-3, scoped to shape-only). `regions` scopes the clone; `dry_run: true` previews. Atomic-with-rollback on commit; non-canonical source edges are skipped and reported, not fatal. Tool surface 109 → 110. Local-only.
+- (MCP server) **`validate_graph` pre-commit preview** (batch-4 #18): `pending_nodes` / `pending_edges` evaluate anti-patterns against the CURRENT graph PLUS a proposed delta WITHOUT writing, and return which violations the delta would **newly trigger or resolve** (`delta.newly_triggered` / `newly_resolved`). Lets an agent converge to clean in one pass instead of write → validate → patch cycles. Pending edges reference existing node ids or `$N` indexes into `pending_nodes`; edge type is inferred from endpoints when omitted. Evaluated in a synthetic read-only view — never mutates or persists.
+- (MCP server + SDK) **`coverage_profile`** on `get_graph_digest` and `portfolio_digest` (batch-4 #22): score coverage against a caller-chosen region set (keys of the `coverage` block) instead of the product-stage default. A deliberately-scoped product (e.g. a structural spine) reads its parity via `coverage.profile_summary.overall_pct` without out-of-scope regions (GTM / pricing / business) dragging the headline down. `portfolio_digest` adds a per-product `coverage_profile_pct`, making "is this product at parity?" a direct read across the portfolio.
+
+### Notes
+- Batch-4 is complete with this cut. The `instantiate_spine({ profile })` variant (a predefined-skeleton catalogue) remains a possible future addition if a profile surface proves worth the spec cost.
+
+---
+
 ## [0.9.3] - 2026-06-09
 
 **Multi-product authoring safety pack (batch-4, part 1).** No core spec changes — a DX + safety release for the MCP server and SDK, surfaced from bringing an entire product org to structural-spine parity through one single-active-product server (~850 nodes / ~1,259 edges across 12 graphs). Every change is additive and backward-compatible. Decision: `2026-06-09-multiproduct-authoring-safety.md`.
