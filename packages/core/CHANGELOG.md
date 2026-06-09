@@ -7,6 +7,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.3] - 2026-06-09
+
+**Multi-product authoring safety pack (batch-4, part 1).** No core spec changes — a DX + safety release for the MCP server and SDK, surfaced from bringing an entire product org to structural-spine parity through one single-active-product server (~850 nodes / ~1,259 edges across 12 graphs). Every change is additive and backward-compatible. Decision: `2026-06-09-multiproduct-authoring-safety.md`.
+
+### Added
+- (MCP server + SDK) **`validate_only` dry-run** on `batch_create_nodes` and `batch_create_edges` (batch-4 #15): run the full validation pass (types, status, refs, edge directions/pairs) and report `{ valid, errors, would_create_* }` WITHOUT writing. Errors now ACCUMULATE across the whole batch, so an agent fixes every bad item in one pass instead of losing the batch to the first. Folds in batch-4 #21 (status-vocabulary footguns are caught pre-commit).
+- (MCP server + SDK) **`ref` aliases** for `batch_create_nodes` (batch-4 #16): a node may declare a batch-local `ref`, referenceable from `parent_ref` / `edges[].from_ref` / `to_ref` in place of a positional `$N` — removing the index-counting that was the #1 cause of failed batches. A stray `$`-prefixed token that resolves to neither a valid `$N` nor a declared alias is now rejected explicitly (was silently treated as a node id); failures echo the alias `ref_map`.
+- (MCP server) **`portfolio_validate`** (batch-4 #19): run `validate_graph` across every product in scope in one call — the audit counterpart to `portfolio_digest`. Replaces the `switch_product` + `validate_graph` round-trip per product; reuses the single-product code path verbatim so per-product verdicts can never diverge. Tool surface 108 → 109. Local-only (no cloud analogue).
+- (MCP server) **`expect_product` guard + `active_product` echo** on active-product writes (batch-4 #20): every write to the active product's graph echoes `active_product: { id, title }`, and accepts an optional `expect_product` arg that aborts before writing if the active product isn't the one named — cheap insurance against a forgotten `switch_product` writing into the wrong graph in a multi-product session.
+
+### Notes
+- Cross-product WRITE (content propagation into product internals) and the structure-template / `clone_structure` operation (batch-4 #17), pre-commit anti-pattern preview (#18), and coverage profiles (#22) are scoped for the 0.9.4 cut.
+
+---
+
 ## [0.9.2] - 2026-06-09
 
 **Journey-model disambiguation.** The four Experience-Design journey types (`user_journey`, `journey_phase`, `journey_step`, `journey_action`) had a coherent concept but broken wiring: there was no deterministic answer to "what are the steps of this journey?". A `journey_phase` is now a temporal band that **spans** steps, not a container that **owns** them, mirroring the marketing precedent `customer_journey_stage_spans_journey_step`. Steps stay owned by `user_journey` (the stable 0.1.0 spine), so each step has exactly one containment parent and the journey renders one canonical step list. Additive plus one edge rename (dual-read via `UPG_EDGE_MIGRATIONS['0.9.2']`). Decision: `2026-06-09-journey-model-disambiguation.md`.
