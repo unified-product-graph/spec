@@ -7,6 +7,26 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.2] - 2026-06-09
+
+**Journey-model disambiguation.** The four Experience-Design journey types (`user_journey`, `journey_phase`, `journey_step`, `journey_action`) had a coherent concept but broken wiring: there was no deterministic answer to "what are the steps of this journey?". A `journey_phase` is now a temporal band that **spans** steps, not a container that **owns** them, mirroring the marketing precedent `customer_journey_stage_spans_journey_step`. Steps stay owned by `user_journey` (the stable 0.1.0 spine), so each step has exactly one containment parent and the journey renders one canonical step list. Additive plus one edge rename (dual-read via `UPG_EDGE_MIGRATIONS['0.9.2']`). Decision: `2026-06-09-journey-model-disambiguation.md`.
+
+### Added
+- `journey_action_surfaces_need` and `journey_action_realised_by_feature` edges: `journey_action` previously had zero outbound edges despite carrying `pain_score` / `opportunity_score` "to drive opportunity discovery". Opportunity discovery now routes through `need` (which reaches `opportunity` via `opportunity_addresses_need`), mirroring `journey_step_reveals_need` one level deeper.
+- `JourneyStepProperties.step_order` and `JourneyActionProperties.action_order`: scalar ordering, completing a single `*_order` convention across phase / step / action (matching the existing `phase_order` and `customer_journey_stage.stage_order`). `journey_step_precedes_journey_step` remains the explicit-chain option for branching journeys.
+- `journey-phases-without-canonical-steps` curated anti-pattern (high severity): fires when phases span steps but no journey owns them via `user_journey_contains_journey_step`, so `validate_graph` surfaces a journey with no canonical step spine.
+
+### Changed
+- **`journey_phase_has_step` → `journey_phase_spans_journey_step`** (paired, via `UPG_EDGE_MIGRATIONS['0.9.2']`): the phase-to-step edge becomes non-owning (verb `has_step` to `spans`, classification `hierarchy` to `cross-domain`). `journey_phase` is removed as a containment parent of `journey_step` in the hierarchy; `user_journey` keeps `journey_step` (owned spine) and `journey_phase` (band overlay).
+- `properties/domains/ux-design.ts` JSDoc reconciled to the actual edge names (removed six phantom edges that the spec documented but never shipped).
+- `presentation/labels.ts` alt-label collisions removed: `user_journey` drops `"customer journey"` (collided with `customer_journey_stage`); `journey_step` drops `"touchpoint"` and `"journey phase"` (distinct entity surfaces).
+- `intelligence/domain-guides.ts` UX creation sequence reordered so `journey_step` precedes its child `journey_action`.
+
+### Notes
+- `journey_phase` and `journey_action` remain `proposed` (the v0.2 Experience-Design extension over the stable 0.1.0 journey/step spine); not promoted to `stable` in this pass.
+
+---
+
 ## [0.9.1] - 2026-06-09
 
 **Cross-product read layer + an OKR-alignment edge + a workspace-resolution fix.** One core spec addition (the `contributes_to` cross-product edge), the read counterpart to 0.8.16's portfolio write tier (server tooling), and a `switch_product` bug fix. From batch-3 dogfooding (portfolio strategy reasoning across the full multi-product workspace). All additive; existing files stay valid.

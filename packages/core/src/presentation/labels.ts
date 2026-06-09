@@ -576,8 +576,13 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   survey_response: { alt_labels: ['survey answer', 'questionnaire response'] },
 
   // Design layer
-  user_journey: { alt_labels: ['journey map', 'customer journey', 'experience map', 'journey'] },
-  journey_step: { alt_labels: ['touchpoint', 'journey stage', 'journey phase'] },
+  // alt_labels must not collide with other entity types' canonical
+  // names or alt_labels, or the string->type resolver is ambiguous.
+  // Dropped 'customer journey' (collides with customer_journey_stage),
+  // 'touchpoint' and 'journey phase' (both distinct entity surfaces: a
+  // touchpoint is the journey_step.touchpoint property, a phase is journey_phase).
+  user_journey: { alt_labels: ['journey map', 'experience map', 'journey'] },
+  journey_step: { alt_labels: ['journey moment', 'journey stage'] },
   design_component: { alt_labels: ['component', 'ui component', 'design element'] },
   design_token: { alt_labels: ['token', 'style token', 'css variable'] },
   wireframe: { alt_labels: ['wireflow', 'lo-fi mockup', 'skeleton'] },

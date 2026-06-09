@@ -47,9 +47,9 @@ function firedIds(violations: ReturnType<typeof evaluateAntiPatterns>): string[]
 
 describe('Evaluator sanity', () => {
   it('every anti-pattern has a per-pattern test below', () => {
-    // If the catalog grows past 12, this test fails — author should add
-    // matching fire/clear fixtures here. Stable count guard.
-    expect(UPG_ANTI_PATTERNS.length).toBe(12)
+    // If the catalog grows past this count, this test fails. The author
+    // should add matching fire/clear fixtures here. Stable count guard.
+    expect(UPG_ANTI_PATTERNS.length).toBe(13)
   })
 
   it('empty graph produces no violations', () => {
@@ -247,6 +247,23 @@ describe('Per-pattern fire / clear', () => {
     i.orphanCount = 5
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'orphan-loose-thoughts')).toBe(false)
   })
+
+  // 13. journey-phases-without-canonical-steps (high)
+  it('journey-phases-without-canonical-steps fires when phases span steps but no journey owns them', () => {
+    const i = emptyInputs()
+    i.edgePresence = {
+      [relKey('journey_phase', 'journey_phase_spans_journey_step', 'journey_step')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'journey-phases-without-canonical-steps')).toBe(true)
+  })
+  it('journey-phases-without-canonical-steps clears when the journey owns its steps', () => {
+    const i = emptyInputs()
+    i.edgePresence = {
+      [relKey('journey_phase', 'journey_phase_spans_journey_step', 'journey_step')]: true,
+      [relKey('user_journey', 'user_journey_contains_journey_step', 'journey_step')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'journey-phases-without-canonical-steps')).toBe(false)
+  })
 })
 
 // ─── Filter + composite + stage gating ───────────────────────────────────────
@@ -326,6 +343,7 @@ describe('Options + composite + stage gating', () => {
       'competitors-missing-past-validation',
       'experiment-run-without-learning',
       'features-without-hypotheses',
+      'journey-phases-without-canonical-steps',
       'objective-without-key-results',
       'opportunity-without-need',
       'orphan-loose-thoughts',

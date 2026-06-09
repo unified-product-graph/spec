@@ -294,7 +294,11 @@ const PRODUCT_SPEC_GUIDE: UPGDomainUsageGuide = {
 const UX_DESIGN_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'ux_design',
   anchor_entity: 'user_journey',
-  creation_sequence: ['user_journey', 'journey_phase', 'journey_action', 'journey_step', 'screen', 'screen_state', 'user_flow', 'wireframe', 'prototype', 'design_question', 'design_concept'],
+  // creation order follows containment: a journey_action is a child
+  // of a journey_step, so the step must precede the action. The journey is the
+  // anchor; phases are the band overlay; steps are the timeline; actions
+  // decompose a step into service-blueprint rows.
+  creation_sequence: ['user_journey', 'journey_phase', 'journey_step', 'journey_action', 'screen', 'screen_state', 'user_flow', 'wireframe', 'prototype', 'design_question', 'design_concept'],
   patterns: [
     {
       name: 'Journey to Screen Flow',

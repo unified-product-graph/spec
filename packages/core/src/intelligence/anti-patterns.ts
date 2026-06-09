@@ -457,6 +457,44 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     severity: 'medium',
     source: { kind: 'fundamental' },
   },
+
+  // ── Experience-design layer ─────────────────────────────────────────────
+  {
+    id: 'journey-phases-without-canonical-steps',
+    name: 'Journey phases without a step spine',
+    description:
+      'The graph has journey phases spanning steps (`journey_phase_spans_journey_step`), but no journey owns its steps via `user_journey_contains_journey_step`. A phase is a band over a step timeline, not a container. When the timeline itself is missing there is no canonical answer to "what are the steps of this journey?". The phase overlay points at steps the journey does not own.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'journey_phase',
+            edge_type: 'journey_phase_spans_journey_step',
+            target_type: 'journey_step',
+            comparison: 'exists',
+          },
+        },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'user_journey',
+            edge_type: 'user_journey_contains_journey_step',
+            target_type: 'journey_step',
+            comparison: 'not_exists',
+          },
+        },
+      ],
+    },
+    why_it_matters:
+      'Steps owned by no journey render a different step list per consumer: the phase overlay sees them, a journey-direct walk does not. The journey has no deterministic step spine to traverse, score, or map to screens.',
+    remediation:
+      'Own every step under its journey with `user_journey_contains_journey_step`, then let phases span ranges of that single timeline via `journey_phase_spans_journey_step`. The phase is a non-owning band overlay, not the step container.',
+    stages: ['concept', 'validation', 'build', 'beta', 'launch', 'growth'],
+    severity: 'high',
+    source: { kind: 'fundamental' },
+  },
 ] as const
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

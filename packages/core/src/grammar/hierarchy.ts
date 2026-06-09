@@ -163,8 +163,13 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // Pairs with `insight_evidenced_by_quote` in the edge catalog.
 
   // ── Design hierarchy ────────────────────────────────────────────────────────
+  // (v0.9.2) A user_journey owns its steps (the stable 0.1.0 spine)
+  // and carries phases as a non-owning band overlay. A journey_phase is NO
+  // LONGER a containment parent of journey_step: it SPANS steps via the
+  // `journey_phase_spans_journey_step` edge (mirroring the marketing
+  // `customer_journey_stage_spans_journey_step` precedent), so each step has
+  // exactly one containment parent and the journey has one canonical step list.
   user_journey: ['journey_step', 'journey_phase'],
-  journey_phase: ['journey_step'],
   journey_step: ['journey_action'],
   // v0.5.8: insights own their evidencing quotes;
   // parallel to `observation: ['quote']`. Research-synthesis canon

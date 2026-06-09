@@ -31,14 +31,19 @@ export interface UserJourneyProperties {
   scenario?: string
 }
 
-/** Phase within a user journey. Groups journey steps into stages.
+/** Phase within a user journey. A temporal BAND over the journey's step
+ * timeline, not a container that owns steps. A journey map renders
+ * phases as a horizontal band above one timeline; a phase spans a range of
+ * that timeline. Steps belong to the journey, not the phase.
  *
  * Per UPG principle P14, structural relationships are edges:
- *   parent journey: `user_journey_contains_journey_phase`
- *   contained steps: `journey_phase_contains_journey_step`
- *   sequenced phase: ordering via `phase_order` here; the
- *     `journey_phase_precedes_journey_phase` edge captures the explicit
- *     phase-to-phase chain when it matters for branching journeys.
+ *   parent journey: `user_journey_passes_through_journey_phase`
+ *     (the journey carries the phase as a non-owning band overlay)
+ *   spanned steps: `journey_phase_spans_journey_step` (non-owning; the steps
+ *     are owned by `user_journey_contains_journey_step`, mirroring the
+ *     marketing precedent `customer_journey_stage_spans_journey_step`)
+ *   phase ordering: the `phase_order` scalar below (the convention shared
+ *     with `journey_step.step_order` and `journey_action.action_order`)
  *
  * @example
  * const properties: JourneyPhaseProperties = {
@@ -77,16 +82,27 @@ export interface JourneyPhaseProperties {
   timeframe?: string
 }
 
-/** Single step within a user journey.
+/** Single step within a user journey. A user-moment on the journey's single
+ * step timeline. Steps belong to the journey via
+ * `user_journey_contains_journey_step` (the stable 0.1.0 spine); a
+ * `journey_phase` spans a range of them but does not own them.
  *
  * @example
  * const properties: JourneyStepProperties = {
+ *   step_order: 1,
  *   touchpoint: 'in-product',
  *   channel: 'in-product',
  *   emotion_score: 4,
  * }
  */
 export interface JourneyStepProperties {
+  /**
+   * Display order within the journey's step timeline (0-indexed). The scalar
+   * ordering convention shared with `journey_phase.phase_order` and
+   * `journey_action.action_order`. For branching journeys, the
+   * explicit `journey_step_precedes_journey_step` edge captures the chain.
+   */
+  step_order?: number
   /** Interaction touchpoint */
   touchpoint?: string
   /** Channel (e.g. "web", "email", "in-store") */
@@ -102,16 +118,24 @@ export interface JourneyStepProperties {
 }
 
 /** Discrete action at a journey step, classified by service layer.
+ * The finest blueprint layer (a service-blueprint row within a moment).
  * Enables service blueprint rendering and cross-domain linking.
  *
  * Per UPG principle P14, structural relationships are edges:
- *   parent step: `journey_step_contains_journey_action`
- *   performing system: `service_performs_journey_action` (the `system` property
- *     is a display label; the canonical link is the edge when a `service` entity exists)
- *   downstream pain: `journey_action_surfaces_need`
+ *   parent step: `journey_step_has_action` (the step owns its actions)
+ *   downstream need: `journey_action_surfaces_need`. Opportunity discovery
+ *     routes through `need`, which reaches `opportunity` via
+ *     `opportunity_addresses_need`; the `pain_score` / `opportunity_score`
+ *     scalars below are blueprint-cell diagnostics that fuel that discovery.
+ *   realising feature: `journey_action_realised_by_feature`
+ *
+ * The `system` property is a display label naming the performing system; when
+ * a `service` entity exists, model the relationship structurally rather than
+ * relying on the label.
  *
  * @example
  * const properties: JourneyActionProperties = {
+ *   action_order: 0,
  *   layer: 'user',
  *   action_description: 'User pastes a meeting transcript into the empty canvas',
  *   channel: 'in-app',
@@ -123,6 +147,13 @@ export interface JourneyStepProperties {
  * }
  */
 export interface JourneyActionProperties {
+  /**
+   * Display order of this action within its step (0-indexed). The scalar
+   * ordering convention shared with `journey_phase.phase_order` and
+   * `journey_step.step_order`. Orders the service-blueprint rows
+   * within a single moment.
+   */
+  action_order?: number
   /** Service layer */
   layer: 'user' | 'frontstage' | 'backstage' | 'support'
   /** Plain-language description. Primary content of the action. */

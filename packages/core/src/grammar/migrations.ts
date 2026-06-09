@@ -1554,6 +1554,21 @@ export type UPGEdgeMigration =
  * Key is the version that INTRODUCES the migration (target version).
  */
 export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
+  '0.9.2': [
+    // (since v0.9.2) Journey-model disambiguation. A journey_phase
+    // is a temporal BAND over the journey's single step timeline, not a
+    // container that owns steps. The owning hierarchy edge
+    // `journey_phase_has_step` is renamed to the non-owning
+    // `journey_phase_spans_journey_step` (mirroring the marketing precedent
+    // `customer_journey_stage_spans_journey_step`). Steps stay owned by the
+    // journey via `user_journey_contains_journey_step` (the stable 0.1.0
+    // spine), so each step keeps a single containment parent and the journey
+    // renders one canonical step list. Endpoints are unchanged
+    // (journey_phase → journey_step); only the edge key and its grammar
+    // (verb has_step → spans, classification hierarchy → cross-domain) change.
+    { kind: 'rename', from: 'journey_phase_has_step', to: 'journey_phase_spans_journey_step', requires_source_type: 'journey_phase', requires_target_type: 'journey_step', reason: 'Journey-model disambiguation: a phase spans steps, it does not own them. The phase to step edge becomes non-owning (verb has_step to spans), so the step keeps a single containment parent (the journey) and the journey has one canonical step list.' },
+  ],
+
   '0.9.0': [
     // (since v0.9.0) theme → roadmap_theme. The four canonical edges that
     // touch the roadmap theme are renamed to the roadmap_theme form. Endpoint guards

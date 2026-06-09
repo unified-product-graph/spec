@@ -417,9 +417,25 @@ export const UPG_EDGE_CATALOG = {
   // decomposed into user_flows. Cross-domain (UX Design → Product Spec).
   journey_step_realised_by_feature: { forward_verb: 'realised_by', reverse_verb: 'realises', classification: 'cross-domain', source_type: 'journey_step', target_type: 'feature' },
   opportunity_improves_user_journey: { forward_verb: 'improves', reverse_verb: 'improved_by', classification: 'cross-domain', source_type: 'opportunity', target_type: 'user_journey' },
-  user_journey_passes_through_journey_phase: { forward_verb: 'passes_through', reverse_verb: 'is_phase_of',    classification: 'hierarchy',  source_type: 'user_journey',      target_type: 'journey_phase' },
-  journey_phase_has_step:                 { forward_verb: 'has_step',          reverse_verb: 'is_step_in',       classification: 'hierarchy',  source_type: 'journey_phase',     target_type: 'journey_step' },
-  journey_step_has_action:                { forward_verb: 'has_action',        reverse_verb: 'is_action_in',     classification: 'hierarchy',  source_type: 'journey_step',      target_type: 'journey_action' },
+  user_journey_passes_through_journey_phase: { forward_verb: 'passes_through', reverse_verb: 'is_phase_of', classification: 'hierarchy', source_type: 'user_journey', target_type: 'journey_phase' },
+  // (since v0.9.2) A journey_phase is a temporal BAND over the
+  // journey's single step timeline, not a container that owns steps. Steps
+  // belong to the journey via `user_journey_contains_journey_step` (the stable
+  // 0.1.0 spine); a phase merely SPANS a range of them. Mirrors the marketing
+  // precedent `customer_journey_stage_spans_journey_step`. Renamed from the
+  // owning `journey_phase_has_step` (hierarchy) so a step has exactly one
+  // containment parent. See UPG_EDGE_MIGRATIONS['0.9.2'].
+  journey_phase_spans_journey_step: { forward_verb: 'spans', reverse_verb: 'spanned_by', classification: 'cross-domain', source_type: 'journey_phase', target_type: 'journey_step' },
+  journey_step_has_action: { forward_verb: 'has_action', reverse_verb: 'is_action_in', classification: 'hierarchy', source_type: 'journey_step', target_type: 'journey_action' },
+  // (since v0.9.2) journey_action outbound edges. Fixes the
+  // discovery dead-end (D2). The finest blueprint layer carries pain_score /
+  // opportunity_score "to drive opportunity discovery" but previously had zero
+  // outbound edges. Opportunity discovery routes through `need` (mirroring
+  // `journey_step_reveals_need`), which already reaches `opportunity` via the
+  // user chain; the action does not link an opportunity directly. The feature
+  // edge mirrors `journey_step_realised_by_feature` one level deeper.
+  journey_action_surfaces_need: { forward_verb: 'surfaces', reverse_verb: 'surfaced_in', classification: 'cross-domain', source_type: 'journey_action', target_type: 'need' },
+  journey_action_realised_by_feature: { forward_verb: 'realised_by', reverse_verb: 'realises', classification: 'cross-domain', source_type: 'journey_action', target_type: 'feature' },
 
   // 2.5 UI System Domain
   product_systematised_in_design_system: { forward_verb: 'systematised_in', reverse_verb: 'systematises', classification: 'hierarchy', source_type: 'product', target_type: 'design_system' },
