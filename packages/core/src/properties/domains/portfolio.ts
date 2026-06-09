@@ -67,4 +67,6 @@ export interface ProductAreaProperties {
   strategic_priority?: Priority
   /** Narrative description of what this area covers */
   description?: string
+  /** Person or team that owns this area */
+  owner?: string
 }

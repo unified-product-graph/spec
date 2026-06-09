@@ -149,8 +149,10 @@ export interface UPGProductArea {
   description?: string
   /** Parent area ID for nesting (sub-areas) */
   parent_area_id?: string | null
-  /** Strategic priority */
-  strategic_priority?: 'critical' | 'high' | 'medium' | 'low'
+  /** Strategic priority (mirrors the canonical `Priority` scale) */
+  strategic_priority?: 'urgent' | 'high' | 'medium' | 'low' | 'none'
+  /** Person or team that owns this area */
+  owner?: string
   /** Product IDs that belong to this area */
   products?: string[]
 }
