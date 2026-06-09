@@ -81,6 +81,14 @@ export type UPGCrossEdgeType =
   // convention (portfolio_contains_product, product_contains_*). Distinct from
   // depends_on_product, which is a runtime dependency, not containment.
   | 'hosts'
+  // Strategic rollup / alignment. Directed subordinate -> superior: a product's
+  // strategy entity contributes to a higher-level one (product objective ->
+  // company objective, product key_result -> company key_result, product
+  // outcome -> company outcome). Unlike the symmetric shares_* peer edges, this
+  // is hierarchical — it expresses the OKR cascade ACROSS products, so a
+  // portfolio can answer "which company objective is this product serving?" and
+  // "which company KRs have no product driving them?".
+  | 'contributes_to'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -95,6 +103,7 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'cannibalises',
   'succeeds',
   'hosts',
+  'contributes_to',
 ]
 
 // ─── Cross-product edge ──────────────────────────────────────────────────────

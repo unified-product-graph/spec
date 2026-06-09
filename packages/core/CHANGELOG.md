@@ -7,7 +7,24 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.9.0] - Unreleased
+## [0.9.1] - 2026-06-09
+
+**Cross-product read layer + an OKR-alignment edge + a workspace-resolution fix.** One core spec addition (the `contributes_to` cross-product edge), the read counterpart to 0.8.16's portfolio write tier (server tooling), and a `switch_product` bug fix. From batch-3 dogfooding (portfolio strategy reasoning across the full multi-product workspace). All additive; existing files stay valid.
+
+### Added
+- `contributes_to` cross-product edge type in `UPG_CROSS_EDGE_TYPES` (union 7 → 8): the directional OKR rollup / alignment edge, subordinate → superior (product `objective` → company `objective`, product `key_result` → company `key_result`, product `outcome` → company `outcome`). Unlike the symmetric `shares_*` peer edges it is hierarchical, so a portfolio can answer "which company objective is this product serving?" and "which company KRs have no product driving them?". Additive; existing files stay valid. Decision: `2026-06-09-cross-product-okr-alignment-edge.md` (batch-3 #14).
+- (MCP server, not core spec) `portfolio_query` + `portfolio_digest`: read node content and health digests ACROSS products in one call — the multi-product `query` / `get_graph_digest` — without `switch_product`. The read counterpart to the 0.8.16 portfolio write tier. Read-only and parallel-safe: the active product is read from the live store, every other product via a transient read-only load. Tool surface 106 → 108 (batch-3 #13).
+- (SDK) `UPGFileStore.loadReadOnly()`: parse + normalise + index a `.upg` without starting a file watcher or taking a lock, for transient cross-product reads.
+
+### Fixed
+- (MCP server) `switch_product` bare-name resolution now anchors to the workspace `.upg/` directory first and requires a regular file, so a bare product name (e.g. `sanity`) that collides with a sibling source directory (`sanity/`) loads `.upg/sanity.upg` instead of throwing `EISDIR` (batch-3 #12).
+
+### Deferred
+- Cross-product **write** (writing nodes/edges into non-active products without `switch_product`) is tracked as batch-4 — the write counterpart to this read layer. Strategic linkage across products is already expressible today via `contributes_to` cross-edges (no switching required); only content propagation into product internals is outstanding.
+
+---
+
+## [0.9.0] - 2026-06-09
 
 **Breaking type rename (with migration) + framework-scoped scoring completion.** Two coordinated spec changes ship in this cut, both additive + deprecate (existing `.upg` files dual-read via `UPG_MIGRATIONS['0.9.0']`): the `theme` → `roadmap_theme` rename (completing the N6 four-way theme-family disambiguation) and the framework-scoped scoring migration for `solution` + `opportunity` (completing). Decisions: `2026-06-09-theme-roadmap-theme-rename.md`, `2026-06-05-framework-scoped-scoring-completion.md`.
 
@@ -27,7 +44,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `theme` (`ent_080`): retained in the type union and resolvable via the migration map for the 0.9.x dual-read window; `replacement: 'roadmap_theme'`. Loaders retarget old nodes and the four old edge keys automatically.
 - `solution`: `reach`, `impact`, `confidence`, `effort`, `rice_score` (apply `rice-scoring`). `timeline` is unaffected (intrinsic).
 - `opportunity`: `reach`, `frequency`, `pain`, `opportunity_score` (apply `opportunity-sizing`).
-- Native scoring fields are signalled deprecated via `@deprecated` JSDoc (flowing into the generated `UPG_PROPERTY_SCHEMA` descriptions) and stay dual-read for 0.9.x. Removal plus the `migrate_properties` lift onto `framework_exercise` includes-edges lands in 0.9.1, **after** consumers read from the edge (never before: a premature data move silently flattens sort/quadrant surfaces to zero).
+- Native scoring fields are signalled deprecated via `@deprecated` JSDoc (flowing into the generated `UPG_PROPERTY_SCHEMA` descriptions) and stay dual-read for 0.9.x. Removal plus the `migrate_properties` lift onto `framework_exercise` includes-edges lands in a later 0.9.x cut (originally earmarked 0.9.1; 0.9.1 became the batch-3 read layer), **after** consumers read from the edge (never before: a premature data move silently flattens sort/quadrant surfaces to zero).
 - Follow-up (0.9.x): a machine-readable `PropertyDefinition.deprecated` field so the property-registry generator emits it and the public GraphQL generator can mark removed scalars `@deprecated` rather than dropping them silently.
 
 ---
