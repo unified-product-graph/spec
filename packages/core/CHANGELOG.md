@@ -7,7 +7,15 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.9.4] - 2026-06-09
+## [0.9.5] - 2026-06-10
+
+**Persona `audience_role` (canonical-registry initiative, Phase 1).** A small, independent property change — the first cut of the canonical shared-entity registry initiative. Decision: `2026-06-10-canonical-shared-entity-registry.md`.
+
+### Added
+- `PersonaProperties.audience_role`: optional enum `'buyer' | 'user' | 'champion' | 'influencer' | 'partner'` — the decision-making-unit (buying-committee) split. A portfolio must separate the economic **buyer** (who signs) from the practitioner **user** (who uses); they are distinct personas with distinct jobs, and flattening them loses the most important B2B distinction. Closed set so roles compare across products. Backward-compatible: optional, existing personas unaffected. No entity / edge / tool count change.
+
+### Notes
+- This unblocks the registry initiative's stopgap migration (each canonical persona gets tagged with `audience_role`). The registry core — an `instance_of` cross-edge + portfolio-tier canonical hosting + drift detection — is designed (Phases 2–4) and sequenced for later cuts.
 
 **Cross-product structure clone + pre-commit preview + target-profile coverage (batch-4, part 2).** No core spec change — one new local MCP tool plus two opt-in parameters. Decision: `2026-06-09-cross-product-structure-clone.md`.
 

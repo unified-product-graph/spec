@@ -34,6 +34,16 @@ export interface PersonaProperties {
   /** Industry or domain knowledge this persona brings
    *  @example "10+ years SaaS experience", "New to healthcare IT" */
   domain_expertise?: string
+  /**
+   * Role in the buying / adoption decision (the decision-making-unit split):
+   * who signs (buyer) vs who uses (user) vs who advocates internally (champion)
+   * vs who shapes the choice (influencer) vs who delivers / implements
+   * (partner). A portfolio must separate the economic buyer from the
+   * practitioner user; they are distinct personas with distinct jobs. Closed
+   * set so roles compare across products.
+   * @example "buyer"
+   */
+  audience_role?: 'buyer' | 'user' | 'champion' | 'influencer' | 'partner'
 }
 
 /** Job-to-be-Done: the underlying goal a user is trying to accomplish.
