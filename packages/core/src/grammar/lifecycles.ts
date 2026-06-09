@@ -3653,7 +3653,7 @@ export const UPG_LIFECYCLE_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   //    user_story (the templated promise is a stable design artefact; the paired
   //    task carries the lifecycle). Re-canon story_statement → user_story at
   //    v0.7.0/. ─
-  'acceptance_criterion', 'changelog', 'theme', 'user_story',
+  'acceptance_criterion', 'changelog', 'roadmap_theme', 'user_story',
 
   // ── Strategy: metric is a measurement definition; metric_quality_assessment
   //    is a point-in-time snapshot; value_stream is a mapped flow;

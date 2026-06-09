@@ -367,15 +367,15 @@ export interface RoadmapItemProperties {
   target_date?: ISODate
 }
 
-/** Thematic grouping of work.
+/** Thematic grouping of roadmap work, around the customer problem it solves.
  *
  * @example
- * const properties: ThemeProperties = {
+ * const properties: RoadmapThemeProperties = {
  *   theme_scope: 'Week-one activation across all customer-facing surfaces.',
  *   priority: 'high',
  * }
  */
-export interface ThemeProperties {
+export interface RoadmapThemeProperties {
   /** Scope description */
   theme_scope?: string
   /** Priority */

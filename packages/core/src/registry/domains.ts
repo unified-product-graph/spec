@@ -104,10 +104,10 @@ export const UPG_DOMAINS = [
   {
     id: 'product_spec',
     label: 'Product Specification',
-    description: 'What you are building and shipping. Feature areas group related capabilities. Features, epics, and user stories break work down. Acceptance criteria define done. Tasks and bugs track execution. Releases and changelogs mark what shipped. Roadmaps and roadmap items plan what comes next. Themes group strategic bets. Translates Strategy into Engineering and tracks delivery through Program Management.',
+    description: 'What you are building and shipping. Feature areas group related capabilities. Features, epics, and user stories break work down. Acceptance criteria define done. Tasks and bugs track execution. Releases and changelogs mark what shipped. Roadmaps and roadmap items plan what comes next. Roadmap themes group roadmap work around the customer problem it solves, one level down from the strategic themes in Strategy. Translates Strategy into Engineering and tracks delivery through Program Management.',
     types: [
       'feature', 'feature_area', 'epic', 'user_story', 'acceptance_criterion', 'release',
-      'task', 'bug', 'roadmap', 'roadmap_item', 'theme', 'changelog',
+      'task', 'bug', 'roadmap', 'roadmap_item', 'roadmap_theme', 'changelog',
     ],
   },
   {

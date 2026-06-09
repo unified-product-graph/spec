@@ -278,6 +278,12 @@ export const UPG_EDGE_CATALOG = {
   strategic_pillar_delivers_value_stream: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'value_stream' },
   strategic_pillar_decided_via_decision: { forward_verb: 'decided_via', reverse_verb: 'decided_for', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'decision' },
   strategic_theme_pursues_initiative: { forward_verb: 'pursues', reverse_verb: 'pursued_under', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'initiative' },
+  // v0.9.0: the soft bridge from the annual strategy focus area to the
+  // roadmap grouping that realises it. Semantic, NOT hierarchy: strategic_theme and
+  // roadmap_theme sit on different spines (strategy cascade vs roadmap cascade), so
+  // this is a cross-reference, not containment. Pairs with the theme → roadmap_theme
+  // rename that removed the bare-'theme' collision (N6/ lineage).
+  strategic_theme_realised_by_roadmap_theme: { forward_verb: 'realised_by', reverse_verb: 'realises', classification: 'semantic', source_type: 'strategic_theme', target_type: 'roadmap_theme' },
   // v0.5.4: three edges that lift strategic_theme from structural
   // isolation to a conceptually central strategy node.
   //
@@ -336,7 +342,7 @@ export const UPG_EDGE_CATALOG = {
   product_builds_feature: { forward_verb: 'builds', reverse_verb: 'built_by', classification: 'hierarchy', source_type: 'product', target_type: 'feature' },
   product_ships_via_release: { forward_verb: 'ships_via', reverse_verb: 'ships', classification: 'hierarchy', source_type: 'product', target_type: 'release' },
   product_plans_via_roadmap: { forward_verb: 'plans_via', reverse_verb: 'plans_for', classification: 'hierarchy', source_type: 'product', target_type: 'roadmap' },
-  product_categorises_by_theme: { forward_verb: 'categorises_by', reverse_verb: 'categorises', classification: 'hierarchy', source_type: 'product', target_type: 'theme' },
+  product_categorises_by_roadmap_theme: { forward_verb: 'categorises_by', reverse_verb: 'categorises', classification: 'hierarchy', source_type: 'product', target_type: 'roadmap_theme' },
   feature_area_contains_feature: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'feature_area', target_type: 'feature' },
   feature_area_contains_feature_area: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'feature_area', target_type: 'feature_area' },
   outcome_delivered_by_feature: { forward_verb: 'delivered_by', reverse_verb: 'delivers', classification: 'cross-domain', source_type: 'outcome', target_type: 'feature' },
@@ -360,12 +366,12 @@ export const UPG_EDGE_CATALOG = {
   release_contains_bug: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'release', target_type: 'bug' },
   release_documented_in_changelog: { forward_verb: 'documented_in', reverse_verb: 'documents', classification: 'hierarchy', source_type: 'release', target_type: 'changelog' },
   roadmap_contains_roadmap_item: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'roadmap', target_type: 'roadmap_item' },
-  roadmap_categorised_by_theme: { forward_verb: 'categorised_by', reverse_verb: 'categorises', classification: 'hierarchy', source_type: 'roadmap', target_type: 'theme' },
+  roadmap_categorised_by_roadmap_theme: { forward_verb: 'categorised_by', reverse_verb: 'categorises', classification: 'hierarchy', source_type: 'roadmap', target_type: 'roadmap_theme' },
   roadmap_schedules_release: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'hierarchy', source_type: 'roadmap', target_type: 'release' },
-  theme_groups_feature: { forward_verb: 'groups', reverse_verb: 'grouped_in', classification: 'hierarchy', source_type: 'theme', target_type: 'feature' },
-  // feature_area is not contained by theme; themes span multiple
+  roadmap_theme_groups_feature: { forward_verb: 'groups', reverse_verb: 'grouped_in', classification: 'hierarchy', source_type: 'roadmap_theme', target_type: 'feature' },
+  // feature_area is not contained by roadmap_theme; roadmap themes span multiple
   // areas cross-cuttingly. Containment path: product → feature_area.
-  theme_spans_feature_area: { forward_verb: 'spans', reverse_verb: 'spanned_by', classification: 'semantic', source_type: 'theme', target_type: 'feature_area' },
+  roadmap_theme_spans_feature_area: { forward_verb: 'spans', reverse_verb: 'spanned_by', classification: 'semantic', source_type: 'roadmap_theme', target_type: 'feature_area' },
   // The legacy `story_task` collapsed into `task` (v0.4.0), so the implements
   // relationship is the canonical `task_implements_user_story` above; there is
   // no separate story_task edge. (v0.2.7 introduced the Statement/Implementation

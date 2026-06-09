@@ -193,9 +193,9 @@ Each directory imports only from the directories above it.
 
 **`frameworks/` is self-contained.** 216 definitions, ready to extract into a separate package when useful.
 
-## Framework Properties: Lens-Scoped Fields
+## Framework Properties: Framework-Scoped Fields
 
-Frameworks are **lenses**. They layer domain-specific fields on top of canonical entities. RICE adds `reach` / `impact` / `confidence` / `effort` to a feature. Kano adds `functional_response` / `dysfunctional_response`. Weighted Scoring adds `benefit_weight` / `cost_weight` / `risk_weight`. These fields belong to the framework's scoring context.
+Frameworks layer domain-specific fields on top of canonical entities. (A *framework* is a method that evaluates or structures entities; do not conflate it with a *lens*, which is a read-time role projection that never writes, in `presentation/lenses.ts`. Earlier drafts called these "lens-scoped"; the field is `scope: 'framework'`, so the term is **framework-scoped**.) RICE adds `reach` / `impact` / `confidence` / `effort` to a feature. Kano adds `functional_response` / `dysfunctional_response`. Weighted Scoring adds `benefit_weight` / `cost_weight` / `risk_weight`. These fields belong to the framework's scoring context.
 
 **Rule:** a framework's `required_properties` may reference property keys outside `UPG_PROPERTY_SCHEMA` for the target entity type. Frameworks self-declare the fields their scoring needs. Promoting RICE's `reach` to `FeatureProperties` would force every feature to carry it regardless of context.
 

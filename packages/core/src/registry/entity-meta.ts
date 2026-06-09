@@ -63,6 +63,15 @@ export interface EntityTypeMeta {
   removed_in?: string
   /** Canonical replacement type (if deprecated) */
   replacement?: string
+  /**
+   * Frameworks usually applied to this type, by `UPGFramework.id`. A
+   * declarative, type-level affordance ("these lenses are usually applied to
+   * me"). Runtimes may offer them as default scoring/structuring exercises on
+   * creation. The score lives on the framework application (a `framework_exercise`
+   * includes-edge), never on the entity. Not field-absorption: this is a pointer,
+   * not embedded columns.
+   */
+  default_frameworks?: string[]
 }
 
 // ─── Entity type registry ──────────────────────────────────────────────────────
@@ -100,8 +109,8 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'switching_cost', type_id: 'ent_022', maturity: 'stable', since: '0.1.0' },
 
   // ── Discovery ──
-  { name: 'opportunity', type_id: 'ent_023', maturity: 'stable', since: '0.1.0' },
-  { name: 'solution', type_id: 'ent_024', maturity: 'stable', since: '0.1.0' },
+  { name: 'opportunity', type_id: 'ent_023', maturity: 'stable', since: '0.1.0', default_frameworks: ['opportunity-sizing', 'rice-scoring'] },
+  { name: 'solution', type_id: 'ent_024', maturity: 'stable', since: '0.1.0', default_frameworks: ['rice-scoring'] },
   { name: 'feasibility_study', type_id: 'ent_025', maturity: 'stable', since: '0.1.0' },
   { name: 'design_sprint', type_id: 'ent_026', maturity: 'stable', since: '0.1.0' },
 
@@ -207,7 +216,8 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'bug', type_id: 'ent_077', maturity: 'stable', since: '0.1.0' },
   { name: 'roadmap', type_id: 'ent_078', maturity: 'stable', since: '0.1.0' },
   { name: 'roadmap_item', type_id: 'ent_079', maturity: 'stable', since: '0.1.0' },
-  { name: 'theme', type_id: 'ent_080', maturity: 'stable', since: '0.1.0' },
+  { name: 'theme', type_id: 'ent_080', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.9.0', replacement: 'roadmap_theme' },
+  { name: 'roadmap_theme', type_id: 'ent_351', maturity: 'stable', since: '0.1.0' },
   { name: 'changelog', type_id: 'ent_081', maturity: 'stable', since: '0.1.0' },
 
   // ── Engineering ──

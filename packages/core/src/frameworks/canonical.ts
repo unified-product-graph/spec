@@ -17,6 +17,188 @@ import type { UPGFramework } from './types.js'
 
 export const UPG_FRAMEWORKS: UPGFramework[] = [
   {
+    "id": "opportunity-sizing",
+    "approach_ids": [
+      "prioritise"
+    ],
+    "name": "Opportunity Sizing",
+    "version": "1.0.0",
+    "description": "Size opportunities by Reach, Frequency, and Pain to rank which problems are most worth solving before committing to solutions.",
+    "category": "prioritization",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Continuous discovery practice",
+      "description": "A lightweight discovery-prioritisation method: weigh how many users hit a problem, how often, and how much it hurts, to rank opportunities before investing in solutions.",
+      "url": "https://www.producttalk.org/2016/08/opportunity-solution-tree/",
+      "year": 2016,
+      "license": "open_attribution"
+    },
+    "tags": [
+      "prioritization",
+      "discovery",
+      "table"
+    ],
+    "slots": [
+      {
+        "label": "Opportunities to size",
+        "entityTypeId": "opportunity",
+        "description": "Opportunities scored on Reach, Frequency, and Pain."
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "opportunity",
+          "role": "scored_item"
+        }
+      ],
+      "required_properties": {
+        "opportunity": [
+          {
+            "property": "reach",
+            "type": "assessment",
+            "scale_id": "reach_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Reach",
+            "description": "How many users experience this problem?"
+          },
+          {
+            "property": "frequency",
+            "type": "assessment",
+            "scale_id": "frequency_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Frequency",
+            "description": "How often do they run into it?"
+          },
+          {
+            "property": "pain",
+            "type": "assessment",
+            "scale_id": "pain_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Pain",
+            "description": "How painful is it when left unaddressed?"
+          }
+        ]
+      },
+      "computed_properties": [
+        {
+          "property": "opportunity_score",
+          "expression": "reach * frequency * pain",
+          "entity_type": "opportunity",
+          "label": "Opportunity Score",
+          "format": "number"
+        }
+      ],
+      "scoring_method": {
+        "applies_to": [
+          "opportunity"
+        ],
+        "inputs": [
+          {
+            "property": "reach",
+            "type": "assessment",
+            "scale_id": "reach_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Reach",
+            "description": "How many users experience this problem?"
+          },
+          {
+            "property": "frequency",
+            "type": "assessment",
+            "scale_id": "frequency_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Frequency",
+            "description": "How often do they run into it?"
+          },
+          {
+            "property": "pain",
+            "type": "assessment",
+            "scale_id": "pain_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Pain",
+            "description": "How painful is it when left unaddressed?"
+          }
+        ],
+        "computed": [
+          {
+            "property": "opportunity_score",
+            "expression": "reach * frequency * pain",
+            "label": "Opportunity Score",
+            "format": "number"
+          }
+        ]
+      }
+    },
+    "structure": {
+      "pattern": "table"
+    },
+    "presentation": {
+      "layout": {
+        "type": "table",
+        "columns": [
+          {
+            "property": "title",
+            "label": "Opportunities to size",
+            "sortable": true
+          },
+          {
+            "property": "reach",
+            "label": "Reach",
+            "sortable": true,
+            "format": "number"
+          },
+          {
+            "property": "frequency",
+            "label": "Frequency",
+            "sortable": true,
+            "format": "number"
+          },
+          {
+            "property": "pain",
+            "label": "Pain",
+            "sortable": true,
+            "format": "number"
+          },
+          {
+            "property": "opportunity_score",
+            "label": "Opportunity Score",
+            "sortable": true,
+            "format": "score_pill"
+          }
+        ]
+      },
+      "sort_by": {
+        "property": "opportunity_score",
+        "direction": "desc"
+      },
+      "colour_by": "score",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Rank opportunities by how widely, how often, and how painfully a problem is felt, so discovery effort flows to the problems most worth solving.",
+      "core_question": "Of the problems we could pursue, which affect the most users, most often, with the most pain?",
+      "when_to_use": [
+        "You have more opportunities than you can pursue",
+        "You need to compare problems before committing to solutions",
+        "You want a defensible, transparent way to choose what to explore"
+      ],
+      "when_not_to_use": [
+        "A single opportunity is already validated and obvious",
+        "You have no signal yet on reach, frequency, or pain"
+      ]
+    }
+  },
+  {
     "id": "opportunity-solution-tree",
     "approach_ids": [
       "trace"
@@ -1272,7 +1454,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "name": "RICE Scoring",
     "version": "1.0.0",
-    "description": "Score features, opportunities, and needs by Reach, Impact, Confidence, and Effort to produce a ranked priority list.",
+    "description": "Score features, solutions, opportunities, and needs by Reach, Impact, Confidence, and Effort to produce a ranked priority list.",
     "category": "prioritization",
     "origin": {
       "type": "practitioner",
@@ -1298,6 +1480,11 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "description": "Opportunities scored on the same RICE Scoring inputs as features."
       },
       {
+        "label": "Solutions to score",
+        "entityTypeId": "solution",
+        "description": "Solutions scored on the same RICE Scoring inputs as features."
+      },
+      {
         "label": "Needs to score",
         "entityTypeId": "need",
         "description": "Needs scored on the same RICE Scoring inputs as features."
@@ -1311,6 +1498,10 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         },
         {
           "type": "opportunity",
+          "role": "scored_item"
+        },
+        {
+          "type": "solution",
           "role": "scored_item"
         },
         {
@@ -1358,6 +1549,44 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           }
         ],
         "opportunity": [
+          {
+            "property": "reach",
+            "type": "assessment",
+            "scale_id": "reach_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Reach",
+            "description": "How many users will this impact per quarter?"
+          },
+          {
+            "property": "impact",
+            "type": "assessment",
+            "scale_id": "impact_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "How much will this impact each user, on the impact scale?"
+          },
+          {
+            "property": "confidence",
+            "type": "assessment",
+            "scale_id": "confidence_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "How confident are you in the reach, impact, and effort estimates?"
+          },
+          {
+            "property": "effort",
+            "type": "assessment",
+            "scale_id": "effort_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Effort",
+            "description": "How much work is required to build and ship this, on the effort scale?"
+          }
+        ],
+        "solution": [
           {
             "property": "reach",
             "type": "assessment",
@@ -1452,6 +1681,13 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         {
           "property": "rice_score",
           "expression": "(reach * impact * confidence) / effort",
+          "entity_type": "solution",
+          "label": "RICE Score",
+          "format": "number"
+        },
+        {
+          "property": "rice_score",
+          "expression": "(reach * impact * confidence) / effort",
           "entity_type": "need",
           "label": "RICE Score",
           "format": "number"
@@ -1461,6 +1697,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "applies_to": [
           "feature",
           "opportunity",
+          "solution",
           "need"
         ],
         "inputs": [

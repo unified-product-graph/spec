@@ -22,6 +22,22 @@ export interface UPGTypeMigration {
  * Each entry describes how an old type maps to a new canonical type.
  */
 export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
+  '0.9.0': [
+    // (since v0.9.0) theme → roadmap_theme. `theme` was the only bare,
+    // unqualified theme among four domain-prefixed siblings (strategic_theme,
+    // content_theme, feedback_theme); it claimed the unqualified word and read as
+    // interchangeable with strategic_theme (the N6/ confusion). Renamed to
+    // roadmap_theme so all four read consistently and the customer-problem roadmap
+    // grouping is explicit. Lifecycle-free, identical property surface (theme_scope
+    // / priority); no property migration required. Paired edge renames live in
+    // UPG_EDGE_MIGRATIONS['0.9.0'].
+    {
+      from: 'theme',
+      to: 'roadmap_theme',
+      reason: 'theme renamed to roadmap_theme. The bare "theme" was the only domain-unprefixed theme among strategic_theme / content_theme / feedback_theme; it grabbed the unqualified word and read as interchangeable with strategic_theme. roadmap_theme makes the customer-problem roadmap grouping explicit and consistent across the four. Same property surface (theme_scope / priority); no property migration needed.',
+    },
+  ],
+
   '0.7.0': [
     // (since v0.7.0) story_statement → user_story. The v0.2.7 split
     // correctly separated the templated promise from the engineering work
@@ -1538,6 +1554,18 @@ export type UPGEdgeMigration =
  * Key is the version that INTRODUCES the migration (target version).
  */
 export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
+  '0.9.0': [
+    // (since v0.9.0) theme → roadmap_theme. The four canonical edges that
+    // touch the roadmap theme are renamed to the roadmap_theme form. Endpoint guards
+    // reference the POST-migration (roadmap_theme) types; edge migration runs after
+    // node migration, so by the time these rules apply the node has already been
+    // renamed theme → roadmap_theme (UPG_MIGRATIONS['0.9.0']).
+    { kind: 'rename', from: 'product_categorises_by_theme', to: 'product_categorises_by_roadmap_theme', requires_source_type: 'product', requires_target_type: 'roadmap_theme', reason: 'theme → roadmap_theme. Product categorises by the roadmap theme; edge key updated to the renamed target type.' },
+    { kind: 'rename', from: 'roadmap_categorised_by_theme', to: 'roadmap_categorised_by_roadmap_theme', requires_source_type: 'roadmap', requires_target_type: 'roadmap_theme', reason: 'theme → roadmap_theme. Roadmap is categorised by the roadmap theme; edge key updated to the renamed target type.' },
+    { kind: 'rename', from: 'theme_groups_feature', to: 'roadmap_theme_groups_feature', requires_source_type: 'roadmap_theme', requires_target_type: 'feature', reason: 'theme → roadmap_theme. The roadmap theme groups features; edge key updated to the renamed source type.' },
+    { kind: 'rename', from: 'theme_spans_feature_area', to: 'roadmap_theme_spans_feature_area', requires_source_type: 'roadmap_theme', requires_target_type: 'feature_area', reason: 'theme → roadmap_theme. The roadmap theme spans feature areas; edge key updated to the renamed source type.' },
+  ],
+
   '0.7.0': [
     // (since v0.7.0) story_statement → user_story re-canon. The four
     // canonical edges that touch the statement are renamed to the user_story

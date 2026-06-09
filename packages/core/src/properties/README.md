@@ -47,4 +47,4 @@ Properties answers *"when I create a persona, what fields can I fill in?"* The c
 
 ## Layering
 
-The canonical property schema stays narrow. Frameworks (in `frameworks/`) self-declare any additional fields their scoring needs. These lens-scoped fields live inside the framework, not on the entity. See `../ARCHITECTURE.md` (Framework Properties section) for the consumer contract.
+The canonical property schema stays narrow. Frameworks (in `frameworks/`) self-declare any additional fields their scoring needs. These framework-scoped fields live inside the framework, not on the entity. See `../ARCHITECTURE.md` (Framework Properties section) for the consumer contract.

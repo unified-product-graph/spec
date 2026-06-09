@@ -26,7 +26,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     // Brand Identity
     'brand_identity',
     // Product Specification
-    'feature', 'feature_area', 'release', 'roadmap', 'theme',
+    'feature', 'feature_area', 'release', 'roadmap', 'roadmap_theme',
     // Engineering
     'bounded_context', 'code_repository', 'integration_pattern', 'external_api', 'data_flow',
     // Growth
@@ -321,8 +321,8 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   a11y_audit: ['a11y_issue'],
 
   // ── Product Specification expansion ─────────────────────────────────────────
-  roadmap: ['roadmap_item', 'theme', 'release'],
-  theme: ['feature'],
+  roadmap: ['roadmap_item', 'roadmap_theme', 'release'],
+  roadmap_theme: ['feature'],
 
   // ── Unified Context Layer hierarchy ─────────────────────────────────────────
   design_system: [
@@ -478,7 +478,7 @@ export function canBeChildOf(childType: string, parentType: string): boolean {
  * @example
  * isContainmentFreeType('person')   // → true
  * isContainmentFreeType('feature')  // → false (nested under product)
- * isContainmentFreeType('theme')    // → false (not yet ratified into the set)
+ * isContainmentFreeType('roadmap_theme')  // → false (not yet ratified into the set)
  */
 export const UPG_CONTAINMENT_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   'person',

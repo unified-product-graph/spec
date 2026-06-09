@@ -537,7 +537,7 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   product: { alt_labels: ['offering', 'app', 'service', 'platform'] },
   vision: { alt_labels: ['product vision', 'north star vision', 'long-term vision'] },
   mission: { alt_labels: ['mission statement', 'purpose'] },
-  strategic_theme: { alt_labels: ['theme', 'strategic pillar', 'focus area'] },
+  strategic_theme: { alt_labels: ['focus area', 'strategic focus area'] }, // N6: not 'theme'/'strategic pillar' (own types)
   initiative: { alt_labels: ['strategic initiative', 'program initiative', 'workstream'] },
   capability: { alt_labels: ['business capability', 'organizational capability'] },
   value_stream: { alt_labels: ['value chain', 'stream'] },
@@ -607,7 +607,7 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   fix: { alt_labels: ['bugfix', 'patch', 'remediation'] },
   roadmap: { alt_labels: ['product roadmap', 'release plan', 'timeline'] },
   roadmap_item: { alt_labels: ['roadmap entry', 'planned item'] },
-  theme: { alt_labels: ['product theme', 'bucket', 'category'] },
+  roadmap_theme: { alt_labels: ['product theme', 'roadmap theme'] }, //: renamed from bare 'theme' (N6 lineage)
 
   // Engineering layer
   bounded_context: { alt_labels: ['context', 'domain boundary', 'module boundary'] },
@@ -826,7 +826,7 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   feedback_vote: { alt_labels: ['upvote', 'vote', 'user vote'] },
   user_advisory_board: { alt_labels: ['cab', 'customer advisory board', 'advisory council'] },
   beta_program: { alt_labels: ['beta', 'early access', 'preview program'] },
-  feedback_theme: { alt_labels: ['feedback cluster', 'theme', 'feedback category'] },
+  feedback_theme: { alt_labels: ['feedback cluster', 'feedback category'] }, // N6: not bare 'theme'
 
   // Pricing & Packaging layer
   pricing_strategy: { alt_labels: ['pricing model', 'monetization strategy'] },

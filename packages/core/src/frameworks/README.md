@@ -2,7 +2,7 @@
 
 Declarative records describing each named product technique (RICE, Kano, BMC, AARRR, OKRs, JTBD, North Star, and so on). Self-contained: this directory has no internal dependencies on other spec layers.
 
-A framework is a **lens** layered over canonical entities. RICE adds `reach`, `impact`, `confidence`, and `effort` to a feature. Kano adds `functional_response` and `dysfunctional_response`. These lens-scoped fields live inside the framework's scoring context. They are not promoted onto the universal entity property schema.
+A framework layers its own fields over canonical entities. RICE adds `reach`, `impact`, `confidence`, and `effort` to a feature. Kano adds `functional_response` and `dysfunctional_response`. These framework-scoped fields (`scope: 'framework'`) live inside the framework's scoring context. They are not promoted onto the universal entity property schema. ("Framework", a method that evaluates entities, is distinct from "lens", a read-time role projection in `presentation/lenses.ts`.)
 
 ## One source, two surfaces: research (internal) and canonical (public)
 

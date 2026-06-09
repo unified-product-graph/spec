@@ -448,14 +448,15 @@ describe('Framework Shape Audit — negative tests (detector self-check)', () =>
 })
 
 describe('Framework Shape Audit — 0.8.6 scoring-target broadening', () => {
-  // RICE/ICE now score feature + opportunity + need; cost-of-delay/WSJF score
-  // feature + opportunity. The declared targets are read from
-  // computed_properties[].entity_type (the SDK's frameworkTargetTypes order), so
-  // a broadened framework MUST carry, for every target type: a computed_property,
-  // a matching required_properties[type] of framework-scoped inputs, an
-  // entity_types entry, and a slot. This pins all four against regression.
+  // RICE scores feature + opportunity + solution + need; ICE scores feature +
+  // opportunity + need; cost-of-delay/WSJF score feature + opportunity. The
+  // declared targets are read from computed_properties[].entity_type (the SDK's
+  // frameworkTargetTypes order), so a broadened framework MUST carry, for every
+  // target type: a computed_property, a matching required_properties[type] of
+  // framework-scoped inputs, an entity_types entry, and a slot. This pins all
+  // four against regression.
   const BROADENED: Record<string, string[]> = {
-    'rice-scoring': ['feature', 'opportunity', 'need'],
+    'rice-scoring': ['feature', 'opportunity', 'solution', 'need'],
     'ice-scoring': ['feature', 'opportunity', 'need'],
     'cost-of-delay': ['feature', 'opportunity'],
     wsjf: ['feature', 'opportunity'],

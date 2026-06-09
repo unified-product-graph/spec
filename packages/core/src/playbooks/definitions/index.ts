@@ -324,9 +324,9 @@ export const PRODUCT_DELIVERY_PLAYBOOK: UPGPlaybook = {
     seqStep(5, 'Releases & Milestones',
       ['release', 'milestone'],
       'Bundle stories into releases. Milestones mark moments of strategic significance: first paying customer, first 1000 users.'),
-    seqStep(6, 'Themes & Changelog',
-      ['theme', 'changelog'],
-      'Group releases into strategic themes. Maintain a changelog the team and customers can read together.'),
+    seqStep(6, 'Roadmap Themes & Changelog',
+      ['roadmap_theme', 'changelog'],
+      'Group roadmap work into roadmap themes around the customer problem. Maintain a changelog the team and customers can read together.'),
   ],
 }
 

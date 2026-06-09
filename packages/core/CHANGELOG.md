@@ -7,6 +7,48 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.0] - Unreleased
+
+**Breaking type rename (with migration) + framework-scoped scoring completion.** Two coordinated spec changes ship in this cut, both additive + deprecate (existing `.upg` files dual-read via `UPG_MIGRATIONS['0.9.0']`): the `theme` → `roadmap_theme` rename (completing the N6 four-way theme-family disambiguation) and the framework-scoped scoring migration for `solution` + `opportunity` (completing). Decisions: `2026-06-09-theme-roadmap-theme-rename.md`, `2026-06-05-framework-scoped-scoring-completion.md`.
+
+### Added
+- `roadmap_theme` entity type (`ent_351`), the canonical successor to `theme`. Same property surface (`theme_scope`, `priority`); no property migration.
+- `strategic_theme_realised_by_roadmap_theme` edge: a semantic (not hierarchy) soft bridge from the annual strategy focus area to the roadmap grouping that realises it. The two sit on different spines (strategy cascade vs roadmap cascade), so it is a cross-reference, not containment.
+- `opportunity-sizing` framework (Reach, Frequency, Pain to Opportunity Score): the discovery-prioritisation method that previously lived as native `opportunity` fields, now modelled like RICE with `scope: 'framework'` inputs, promoted into the canonical (public) catalog. (Distinct from the existing Ulwick `opportunity-scoring`, which scores importance vs satisfaction.)
+- `solution` added to `rice-scoring`'s `applies_to` / slots / scored entity types. Solutions are now RICE-scored through the framework, not via native columns.
+- `EntityTypeMeta.default_frameworks?: string[]`: a declarative, type-level pointer to the frameworks usually applied to a type. Set on `opportunity` (`['opportunity-sizing', 'rice-scoring']`) and `solution` (`['rice-scoring']`).
+
+### Changed
+- **`theme` → `roadmap_theme`** across the catalog: union, `EntityTypeMeta`, hierarchy (`roadmap → roadmap_theme → feature`), labels, region anchors, playbooks, domain guides, and `RoadmapThemeProperties` (was `ThemeProperties`).
+- Edge renames (paired, via `UPG_EDGE_MIGRATIONS['0.9.0']`): `product_categorises_by_theme → product_categorises_by_roadmap_theme`, `roadmap_categorised_by_theme → roadmap_categorised_by_roadmap_theme`, `theme_groups_feature → roadmap_theme_groups_feature`, `theme_spans_feature_area → roadmap_theme_spans_feature_area`.
+- Terminology: prose standardised on **"framework-scoped"** (the code has always said `scope: 'framework'`); "lens" is reserved for the read-time role projection (`presentation/lenses.ts`). Renamed the `ARCHITECTURE.md` "Framework Properties" section and the `frameworks/` + `properties/` READMEs accordingly. No behavioural change.
+
+### Deprecated
+- `theme` (`ent_080`): retained in the type union and resolvable via the migration map for the 0.9.x dual-read window; `replacement: 'roadmap_theme'`. Loaders retarget old nodes and the four old edge keys automatically.
+- `solution`: `reach`, `impact`, `confidence`, `effort`, `rice_score` (apply `rice-scoring`). `timeline` is unaffected (intrinsic).
+- `opportunity`: `reach`, `frequency`, `pain`, `opportunity_score` (apply `opportunity-sizing`).
+- Native scoring fields are signalled deprecated via `@deprecated` JSDoc (flowing into the generated `UPG_PROPERTY_SCHEMA` descriptions) and stay dual-read for 0.9.x. Removal plus the `migrate_properties` lift onto `framework_exercise` includes-edges lands in 0.9.1, **after** consumers read from the edge (never before: a premature data move silently flattens sort/quadrant surfaces to zero).
+- Follow-up (0.9.x): a machine-readable `PropertyDefinition.deprecated` field so the property-registry generator emits it and the public GraphQL generator can mark removed scalars `@deprecated` rather than dropping them silently.
+
+---
+
+## [0.8.16] - 2026-06-09
+
+### Added
+- `hosts` cross-product edge type in `UPG_CROSS_EDGE_TYPES`: composition / hosting, directed host → hosted (matching the spec's container → contained convention; distinct from `depends_on_product`, a runtime dependency). Additive; existing files stay valid. Decision: `2026-06-09-cross-product-composition-edge.md`. Shipped with the local MCP portfolio edit/cleanup tier (server tooling, not core spec): `update_area`, `remove_product_from_area`, `detach_product_from_portfolio`, `delete_area`, `move_product_to_area`, `delete_cross_product_edge`, `batch_create_cross_product_edges`.
+
+---
+
+## [0.8.15] - 2026-06-09
+
+### Added
+- `owner?: string` declared on the `product_area` shape and `ProductAreaProperties` (the person or team that owns the area). Previously accepted by `create_area` but silently dropped. §C.
+
+### Changed
+- `UPGProductArea.strategic_priority` reconciled to the canonical `Priority` scale (`urgent | high | medium | low | none`); legacy `critical` coerces to `urgent` on the write path..
+
+---
+
 ## [0.8.13] - 2026-06-04
 
 A co-versioned patch. The catalogue is unchanged. The agent-facing cloud `list_frameworks` tool description shipped a stale literal (`351 total at v0.3.0`); de-numbered to mirror the local server, and refreshed the generated tool-reference snapshots.

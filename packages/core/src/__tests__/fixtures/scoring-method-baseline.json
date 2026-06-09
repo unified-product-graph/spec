@@ -48,6 +48,10 @@
           "role": "scored_item"
         },
         {
+          "type": "solution",
+          "role": "scored_item"
+        },
+        {
           "type": "need",
           "role": "scored_item"
         }
@@ -92,6 +96,44 @@
           }
         ],
         "opportunity": [
+          {
+            "property": "reach",
+            "type": "assessment",
+            "scale_id": "reach_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Reach",
+            "description": "How many users will this impact per quarter?"
+          },
+          {
+            "property": "impact",
+            "type": "assessment",
+            "scale_id": "impact_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Impact",
+            "description": "How much will this impact each user, on the impact scale?"
+          },
+          {
+            "property": "confidence",
+            "type": "assessment",
+            "scale_id": "confidence_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Confidence",
+            "description": "How confident are you in the reach, impact, and effort estimates?"
+          },
+          {
+            "property": "effort",
+            "type": "assessment",
+            "scale_id": "effort_5",
+            "required": true,
+            "scope": "framework",
+            "label": "Effort",
+            "description": "How much work is required to build and ship this, on the effort scale?"
+          }
+        ],
+        "solution": [
           {
             "property": "reach",
             "type": "assessment",
@@ -180,6 +222,13 @@
           "property": "rice_score",
           "expression": "(reach * impact * confidence) / effort",
           "entity_type": "opportunity",
+          "label": "RICE Score",
+          "format": "number"
+        },
+        {
+          "property": "rice_score",
+          "expression": "(reach * impact * confidence) / effort",
+          "entity_type": "solution",
           "label": "RICE Score",
           "format": "number"
         },
