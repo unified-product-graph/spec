@@ -68,11 +68,26 @@ export interface UPGCuratedAntiPattern {
   description: string
 
   /**
+   * Detection scope.
+   * - `'graph'` (default, omitted): evaluated against a single product graph by
+   *   the `evaluateAntiPatterns` chokepoint (validate_graph, get_anti_pattern_violations_for).
+   * - `'portfolio'`: evaluated across products + the shared registry by
+   *   `portfolio_validate`. The single-graph evaluator SKIPS these (a portfolio
+   *   pattern can never flip a single graph invalid), and they carry no
+   *   `structured_condition` because the cross-product detector is not expressible
+   *   as an `IntelligenceCondition` over one graph.
+   */
+  scope?: 'graph' | 'portfolio'
+
+  /**
    * Machine-evaluable detector. Composes `EntityCheck`,
    * `RelationshipCheck`, `BenchmarkCheck`, etc. via `and` / `or`.
    * Consumers (Entopo, MCP, the site) evaluate this against a graph.
+   *
+   * Required for graph-scoped patterns; OMITTED for `scope: 'portfolio'`
+   * patterns, whose detector lives in `portfolio_validate` instead.
    */
-  structured_condition: IntelligenceCondition
+  structured_condition?: IntelligenceCondition
 
   /** One sentence on the product impact when this anti-pattern fires. */
   why_it_matters: string
@@ -603,6 +618,59 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     stages: ['beta', 'launch', 'growth', 'mature'],
     severity: 'medium',
     source: { kind: 'practitioner', attribution: 'Marty Cagan, Inspired (product discovery)' },
+  },
+
+  // ── Foundations layer (0.9.13): portfolio-scoped, registry-aware ──────────
+  // These read the shared registry + cross-product edges, so they are evaluated
+  // by portfolio_validate, not the single-graph evaluator. They carry no
+  // structured_condition (the detector is cross-product, not a single-graph
+  // IntelligenceCondition).
+  {
+    id: 'specification-without-implementer',
+    since: '0.9.13',
+    scope: 'portfolio',
+    name: 'Specification without implementer',
+    description:
+      'A specification in the shared registry has no product, feature, or api_contract implementing or conforming to it anywhere in the portfolio. A specification nobody implements is a document, not a contract: it states an intent the portfolio never honours.',
+    why_it_matters:
+      'An unimplemented specification carries authority it has not earned. Teams cite it as a standard while no surface actually conforms, so conformance claims cannot be trusted or traced.',
+    remediation:
+      'Link at least one product, feature, or api_contract to the specification via `product_implements_specification`, `product_exposes_specification`, `feature_conforms_to_specification`, or `api_contract_speaks_specification`; or retire the specification from the registry.',
+    stages: ['validation', 'build', 'beta', 'launch', 'growth', 'mature'],
+    severity: 'medium',
+    source: { kind: 'fundamental' },
+  },
+
+  {
+    id: 'primitive-scattered-without-canonical',
+    since: '0.9.13',
+    scope: 'portfolio',
+    name: 'Primitive scattered without a canonical',
+    description:
+      'The same primitive concept appears as a product-local node in two or more products, but no canonical primitive in the shared registry unifies them. Each product redefines the building block on its own terms, so the portfolio carries several drifting copies of one shared idea instead of a single authoritative definition.',
+    why_it_matters:
+      'Scattered primitives drift apart in name, shape, and meaning. Cross-product reasoning breaks because the same concept reads as several unrelated entities, and a change to the shared building block has no single place to land.',
+    remediation:
+      'Define the shared primitive once in the registry with `define_canonical_entity`, then link each product copy via `register_instance` so the building block has one authoritative definition.',
+    stages: ['build', 'beta', 'launch', 'growth', 'mature'],
+    severity: 'medium',
+    source: { kind: 'fundamental' },
+  },
+
+  {
+    id: 'product-reimplements-specification',
+    since: '0.9.13',
+    scope: 'portfolio',
+    name: 'Specification reimplemented across products',
+    description:
+      'Two or more products independently implement the same registry specification rather than one depending on a shared implementation. Parallel implementations of a single contract multiply the surface that must stay in sync and usually signal a missing shared library or service.',
+    why_it_matters:
+      'Every independent reimplementation of a specification is another place a conformance bug can hide and another copy that drifts from the contract. The cost of a spec change scales with the number of reimplementers.',
+    remediation:
+      'Consolidate onto one implementation that the others depend on (`depends_on_product` / `hosts`), or confirm the duplication is deliberate and record why. Capture the stewarding organization with `create_registry_edge` so the contract has an owner.',
+    stages: ['build', 'beta', 'launch', 'growth', 'mature'],
+    severity: 'low',
+    source: { kind: 'fundamental' },
   },
 ] as const
 

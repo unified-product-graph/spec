@@ -2135,6 +2135,8 @@ export const UPG_EDGE_CATALOG = {
   specification_competes_with_specification: { forward_verb: 'competes_with', reverse_verb: 'competes_with', classification: 'semantic', source_type: 'specification', target_type: 'specification' },
   primitive_defined_by_specification: { forward_verb: 'defined_by', reverse_verb: 'defines', classification: 'semantic', source_type: 'primitive', target_type: 'specification' },
   primitive_composes_primitive: { forward_verb: 'composes', reverse_verb: 'composed_by', classification: 'hierarchy', source_type: 'primitive', target_type: 'primitive' },
+  // Stewardship: a registry specification is governed by a (registry-hostable) organization (0.9.13).
+  specification_governed_by_organization: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'semantic', source_type: 'specification', target_type: 'organization' },
 
 } satisfies Record<string, UPGEdgeDefinition>
 

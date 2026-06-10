@@ -46,11 +46,13 @@ function firedIds(violations: ReturnType<typeof evaluateAntiPatterns>): string[]
 // ─── Sanity ──────────────────────────────────────────────────────────────────
 
 describe('Evaluator sanity', () => {
-  it('every anti-pattern has a per-pattern test below', () => {
+  it('every graph-scoped anti-pattern has a per-pattern test below', () => {
     // If the catalog grows past this count, this test fails. The author
     // should add matching fire/clear fixtures here. Stable count guard.
-    // 13 original + 2 F5 enforcement additions = 15.
-    expect(UPG_ANTI_PATTERNS.length).toBe(15)
+    // 13 original + 2 F5 enforcement + 3 foundations (0.9.13, portfolio-scoped,
+    // evaluated by portfolio_validate not here) = 18.
+    expect(UPG_ANTI_PATTERNS.length).toBe(18)
+    expect(UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio').length).toBe(15)
   })
 
   it('empty graph produces no violations', () => {
@@ -382,10 +384,14 @@ describe('Options + composite + stage gating', () => {
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'single-domain-graph')).toBe(true)
   })
 
-  it('every UPG_ANTI_PATTERNS id has a fire fixture in this file', () => {
+  it('every graph-scoped UPG_ANTI_PATTERNS id has a fire fixture in this file', () => {
     // Self-checks the per-pattern coverage above. If a pattern is added to
-    // UPG_ANTI_PATTERNS without a matching test, surface here.
-    const ids = UPG_ANTI_PATTERNS.map((p) => p.id).sort()
+    // UPG_ANTI_PATTERNS without a matching test, surface here. Portfolio-scoped
+    // patterns are evaluated by portfolio_validate (cross-product + registry),
+    // not the single-graph evaluator, so they are excluded here.
+    const ids = UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio')
+      .map((p) => p.id)
+      .sort()
     const expected = [
       'building-without-validating',
       'competitors-missing-past-validation',

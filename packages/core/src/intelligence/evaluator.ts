@@ -145,6 +145,11 @@ export function evaluateAntiPatterns(
 
   const fires: AntiPatternViolation[] = []
   for (const ap of UPG_ANTI_PATTERNS) {
+    // Portfolio-scoped patterns are evaluated by portfolio_validate with
+    // cross-product + registry context this single-graph evaluator cannot
+    // express. Skip them here so one graph is never flipped invalid by a
+    // portfolio pattern. The guard also defends a missing structured_condition.
+    if (ap.scope === 'portfolio' || !ap.structured_condition) continue
     if (severityFilter && ap.severity !== severityFilter) continue
     if (idFilter && !idFilter.has(ap.id)) continue
     // Stage gating: when productStage is provided, skip patterns that don't
@@ -409,8 +414,9 @@ function buildViolation(ap: UPGCuratedAntiPattern): AntiPatternViolation {
  * Phase 1: target_entities = entity-type strings, not specific ids. Phase 1.x
  * will promote to ids once collectors track them.
  */
-function collectTargetEntities(cond: IntelligenceCondition): string[] {
+function collectTargetEntities(cond: IntelligenceCondition | undefined): string[] {
   const types = new Set<string>()
+  if (!cond) return []
   walk(cond)
   return [...types].sort()
 

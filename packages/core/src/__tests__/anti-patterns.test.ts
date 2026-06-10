@@ -40,7 +40,10 @@ const VALID_EDGE_TYPES = new Set(Object.keys(UPG_EDGE_CATALOG))
 
 // ─── Recursive condition walker ──────────────────────────────────────────────
 
-function walkCondition(cond: IntelligenceCondition, fn: (leaf: object) => void): void {
+function walkCondition(cond: IntelligenceCondition | undefined, fn: (leaf: object) => void): void {
+  // Portfolio-scoped patterns carry no structured_condition (their detector is
+  // cross-product, evaluated by portfolio_validate); nothing to walk.
+  if (!cond) return
   if ('check' in cond) {
     fn(cond.check)
     return
@@ -58,9 +61,25 @@ function walkCondition(cond: IntelligenceCondition, fn: (leaf: object) => void):
 // ─── Per-rule integrity ──────────────────────────────────────────────────────
 
 describe('UPG_ANTI_PATTERNS shape', () => {
-  it('contains 10–16 entries (ticket scope + F5 enforcement additions)', () => {
-    expect(UPG_ANTI_PATTERNS.length).toBeGreaterThanOrEqual(10)
-    expect(UPG_ANTI_PATTERNS.length).toBeLessThanOrEqual(16)
+  it('contains 13–20 entries (ticket scope + F5 enforcement + 0.9.13 foundations)', () => {
+    expect(UPG_ANTI_PATTERNS.length).toBeGreaterThanOrEqual(13)
+    expect(UPG_ANTI_PATTERNS.length).toBeLessThanOrEqual(20)
+  })
+
+  it('scope is graph (default) or portfolio, and the two carry conditions consistently', () => {
+    for (const ap of UPG_ANTI_PATTERNS) {
+      const scope = ap.scope ?? 'graph'
+      expect(['graph', 'portfolio'], `${ap.id} scope ${scope}`).toContain(scope)
+      if (scope === 'portfolio') {
+        // Portfolio patterns are evaluated by portfolio_validate, not the
+        // single-graph evaluator, so they carry no structured_condition and
+        // declare the version that introduced them.
+        expect(ap.structured_condition, `${ap.id} portfolio pattern must omit structured_condition`).toBeUndefined()
+        expect(ap.since, `${ap.id} portfolio pattern must record a since version`).toBeTruthy()
+      } else {
+        expect(ap.structured_condition, `${ap.id} graph pattern must carry a structured_condition`).toBeDefined()
+      }
+    }
   })
 
   it('every id is a unique kebab-case slug', () => {
@@ -197,6 +216,7 @@ describe('Coverage', () => {
     let leafCount = 0
     let compoundCount = 0
     for (const ap of UPG_ANTI_PATTERNS) {
+      if (!ap.structured_condition) continue
       if ('check' in ap.structured_condition) leafCount++
       if ('operator' in ap.structured_condition) compoundCount++
     }

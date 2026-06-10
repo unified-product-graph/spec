@@ -7,6 +7,22 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.13] - 2026-06-11
+
+**Foundations follow-ups: a registry-edge authoring path, specification stewardship, and three portfolio-scoped anti-patterns.** The deferred half of the foundations work (0.9.12) lands: canonical entities can now relate to one another in the registry, a specification can name its steward, and the registry surfaces the ways a foundations tier goes wrong across a portfolio.
+
+### Added
+- **`create_registry_edge`** (tools 119 to 120, local only): the authoring path for canonical-internal edges between registry entities, activating the reserved `registry.edges`. A registry `specification` can now be `governed_by` a registry `organization`, a `primitive` `defined_by` a `specification`, a `specification` extend another, all without touching a product graph. Validates that both endpoints exist in the registry, the type is a real catalogue edge, and the catalogue source and target types match the pair. Idempotent.
+- **`specification_governed_by_organization`** catalogue edge (edge count 979 to 980): a registry specification's stewardship, an organization as its governing body. Organizations are registry-hostable canonicals (`define_canonical_entity` already accepts the type), so the steward is a first-class entity, not a free-text field.
+- **Three portfolio-scoped anti-patterns** (`scope: 'portfolio'`, evaluated by `portfolio_validate`, surfaced in a new `portfolio_anti_patterns` block): `specification-without-implementer` (a registry specification no product, feature, or api_contract implements or conforms to), `primitive-scattered-without-canonical` (the same primitive title appears as a product-local node in two or more products with no registry canonical unifying them), and `product-reimplements-specification` (two or more products independently implement the same registry specification). These read the registry plus cross-product edges, context a single graph cannot express.
+
+### Changed
+- **`UPGCuratedAntiPattern` gains an optional `scope`** (`'graph'` default, or `'portfolio'`), and `structured_condition` is now optional. The single-graph evaluator skips portfolio-scoped patterns, so a portfolio pattern can never flip one product graph invalid; their detectors live in `portfolio_validate` instead. Anti-pattern count 15 to 18.
+
+No entity, domain, region, or playbook count change (entities 315, domains 37, regions 11, playbooks 13).
+
+---
+
 ## [0.9.12] - 2026-06-10
 
 **Foundations: a first-class `specification` and `primitive` entity, plus a technical-domain enum widening.** Two governance moats that product orgs usually mismodel as products or scatter across features now have a home, and four engineering enums that real authoring outgrew are widened.
