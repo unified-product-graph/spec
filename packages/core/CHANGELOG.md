@@ -7,6 +7,27 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.7] - 2026-06-10
+
+**Domain-wiring remediation (passes F1–F8) + saturated-fixture refresh.** A spec-integrity hardening cut: eight remediation passes from a 36-domain wiring audit, each shipping its own machine-checkable gate so the class of drift it fixes cannot silently recur. No new tools and no breaking API surface — additive edges/properties plus integrity gates.
+
+### Added
+- **Region/manifest integrity gate** (F1): `region-integrity.test.ts` proves the 10 canonical regions cover every active entity type exactly once, with the Nucleus tier explicitly exempt via `NUCLEUS_DOMAINS` / `SHARED_TYPES`. Reconciles all 10 region rosters against the domain registry (un-orphaning the entities that had drifted out of their region — the P-H pattern) and corrects 7 phantom intra/boundary edge references. Decisions: `2026-06-10-nucleus-region-exemption.md` plus three model-reconciliation ADRs.
+- **Edge-prefix + duplicate-edge gates** (F2/F3): `edge-prefix-gate.test.ts` enforces that every edge key's leading token-run equals its `source_type` (token-aware); `edge-duplicate-gate.test.ts` bounds byte-identical and `(source, target, classification)` collision groups against a frozen baseline.
+- **Anti-pattern detectors** (F5): two prose anti-patterns promoted to machine-checkable detectors (`insights-without-evidence`, `feature-requests-without-provenance`); `UPG_ANTI_PATTERNS` 13 → 15, surfaced via `validate_graph`.
+- **28 forward-bridge / dead-end-leaf edges** (F6): closes 0-outbound leaves and missing semantic bridges from the audit (`UPG_EDGE_COUNT` → 979); `affinity_cluster` gains `observation` as a valid child.
+- **Five `*_order` sequence scalars** (F8): `user_flow.flow_order`, `screen_state.state_order`, `learning_path.path_order`, `milestone.milestone_order`, `partner_tier.tier_order`, propagating the `*_order` presentation convention; `ordering-convention.test.ts` pins the set.
+
+### Changed
+- **`funnel_step` edge endpoints corrected** (F2/F3): three `funnel_step_*` edges retyped from `funnel` to `funnel_step` (key-stable; no migration needed — stored graphs reference edges by key).
+- **alt_labels collision sweep** (F4): 14 cross-type alt-label collisions removed and bare tokens qualified (`channel`, `segment`, …); `alias-collision.test.ts` guards against recurrence.
+- **Five types graduated `proposed` → `stable`** (F7): `metric_quality_assessment`, `classification_axis`, `classification_value`, `brand_logo`, `brand_imagery`. No entity-count change (the count is domain-membership-gated, not maturity-gated).
+
+### Fixed
+- **SATURATED fixture refreshed**: propagated the `theme` → `roadmap_theme` (0.9.0) and `journey_phase_has_step` → `journey_phase_spans_journey_step` (0.9.2) renames into `.upg/notion-saturated.upg`, and added instances for the new edge types, restoring full saturation coverage.
+
+---
+
 ## [0.9.6] - 2026-06-10
 
 **Canonical shared-entity registry + drift detection (canonical-registry initiative, Phases 2–3).** The core of the registry: a portfolio can now define a shared entity ONCE and have every product's local copy link to it as a canonical instance, with drift surfaced automatically. Decision: `2026-06-10-canonical-shared-entity-registry.md`.

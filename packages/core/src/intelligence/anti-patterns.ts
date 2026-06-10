@@ -495,6 +495,104 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     severity: 'high',
     source: { kind: 'fundamental' },
   },
+
+  // ── F5: anti-pattern enforcement ────────────────────────────────
+  // P-C from the 36-domain wiring audit: domain-guide anti-patterns described
+  // in prose with no machine-checkable detector. These two map cleanly to a
+  // RelationshipCheck (edge presence/absence) and are promoted here.
+  {
+    id: 'insights-without-evidence',
+    name: 'Insights without evidence',
+    description:
+      'The graph has insight entities but none are backed by a primary-evidence link: no observation yields them (`observation_yields_insight`), no survey response evidences them (`survey_response_evidences_insight`), and no quote is attached (`insight_evidenced_by_quote`). An insight with no evidence behind it is an opinion wearing a research label.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        { check: { type: 'entity_count', entity_type: 'insight', comparison: 'nonzero' } },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'observation',
+            edge_type: 'observation_yields_insight',
+            target_type: 'insight',
+            comparison: 'not_exists',
+          },
+        },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'survey_response',
+            edge_type: 'survey_response_evidences_insight',
+            target_type: 'insight',
+            comparison: 'not_exists',
+          },
+        },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'insight',
+            edge_type: 'insight_evidenced_by_quote',
+            target_type: 'quote',
+            comparison: 'not_exists',
+          },
+        },
+      ],
+    },
+    why_it_matters:
+      'Insights untethered from evidence cannot be trusted, contested, or traced. Downstream opportunities and design questions inherit an unfalsifiable claim.',
+    remediation:
+      'Back each insight with at least one primary record via `observation_yields_insight`, `survey_response_evidences_insight`, or `insight_evidenced_by_quote`. Capture the supporting observation or quote first.',
+    stages: ['concept', 'validation', 'build', 'beta', 'launch', 'growth', 'mature'],
+    severity: 'high',
+    source: { kind: 'practitioner', attribution: 'Steve Portigal, Interviewing Users' },
+  },
+
+  {
+    id: 'feature-requests-without-provenance',
+    name: 'Feature requests without provenance',
+    description:
+      'The graph has feature_request entities but none trace back to a source: no feedback program collects them (`feedback_program_collects_feature_request`), no customer feedback becomes one (`customer_feedback_becomes_feature_request`), and none originate from a behavioural segment (`feature_request_from_behavioral_segment`). A request with no provenance cannot be weighed against who asked or how many.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        { check: { type: 'entity_count', entity_type: 'feature_request', comparison: 'nonzero' } },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'feedback_program',
+            edge_type: 'feedback_program_collects_feature_request',
+            target_type: 'feature_request',
+            comparison: 'not_exists',
+          },
+        },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'customer_feedback',
+            edge_type: 'customer_feedback_becomes_feature_request',
+            target_type: 'feature_request',
+            comparison: 'not_exists',
+          },
+        },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'feature_request',
+            edge_type: 'feature_request_from_behavioral_segment',
+            target_type: 'behavioral_segment',
+            comparison: 'not_exists',
+          },
+        },
+      ],
+    },
+    why_it_matters:
+      'Requests without a source get prioritised on volume of voice, not on the strength or fit of who is asking. The loudest channel wins by default.',
+    remediation:
+      'Attach provenance to each `feature_request` via `feedback_program_collects_feature_request`, `customer_feedback_becomes_feature_request`, or `feature_request_from_behavioral_segment` before it enters prioritisation.',
+    stages: ['beta', 'launch', 'growth', 'mature'],
+    severity: 'medium',
+    source: { kind: 'practitioner', attribution: 'Marty Cagan, Inspired (product discovery)' },
+  },
 ] as const
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

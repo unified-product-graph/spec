@@ -24,6 +24,10 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     ],
     entities: [
       {
+        type: "product",
+        role: "container",
+      },
+      {
         type: "vision",
         role: "root",
       },
@@ -62,7 +66,11 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       {
         type: "metric",
         role: "leaf",
-        notes: "shared with Analytics",
+        notes: "also anchors Analytics; canonical home is Strategy",
+      },
+      {
+        type: "metric_quality_assessment",
+        role: "leaf",
       },
       {
         type: "decision",
@@ -71,6 +79,10 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "assumption",
+        role: "leaf",
+      },
+      {
+        type: "constraint",
         role: "leaf",
       },
       {
@@ -186,7 +198,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       {
         type: "participant",
         role: "leaf",
-        notes: "research-resolved persona",
+        notes: "research-resolved persona; canonical home is Discovery/Research/Validation",
       },
     ],
     anchor: {
@@ -358,6 +370,14 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         notes: "self-nesting",
       },
       {
+        type: "experiment_plan",
+        role: "container",
+      },
+      {
+        type: "experiment_run",
+        role: "container",
+      },
+      {
         type: "learning",
         role: "leaf",
       },
@@ -527,10 +547,6 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "container",
       },
       {
-        type: "territory",
-        role: "leaf",
-      },
-      {
         type: "classification_axis",
         role: "container",
         notes: "taxonomy dimension of a 2-axis matrix",
@@ -549,7 +565,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     },
     intra_edges: [
       "competitor_offers_competitor_feature",
-      "competitive_analysis_contains_competitor",
+      "competitive_analysis_analyses_competitor",
       "competitive_analysis_dimensioned_by_classification_axis",
       "classification_axis_includes_classification_value",
       "competitor_classified_as_classification_value",
@@ -651,6 +667,10 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "screen_state",
+        role: "leaf",
+      },
+      {
         type: "wireframe",
         role: "leaf",
       },
@@ -728,6 +748,18 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "knowledge_base_article",
+        role: "leaf",
+      },
+      {
+        type: "content_calendar",
+        role: "container",
+      },
+      {
+        type: "documentation_template",
+        role: "leaf",
+      },
+      {
         type: "document",
         role: "leaf",
       },
@@ -745,13 +777,13 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     intra_edges: [
       "user_journey_contains_journey_step",
       "design_system_contains_design_component",
-      "brand_identity_contains_brand_colour",
-      "design_component_self_nests",
+      "brand_identity_coloured_with_brand_colour",
+      "design_component_composes_design_component",
     ],
     boundary_edges: [
       {
         direction: "import",
-        edge_id: "need_informs_design_question",
+        edge_id: "need_reframed_as_design_question",
         crosses_into: "users_needs",
       },
       {
@@ -775,8 +807,8 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         crosses_into: "engineering_platform",
       },
       {
-        direction: "sideways",
-        edge_id: "feature_sketched_in_wireframe",
+        direction: "export",
+        edge_id: "wireframe_specifies_feature",
         crosses_into: "product_delivery",
       },
       {
@@ -852,12 +884,12 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         notes: "semantic spanner, not containment",
       },
       {
-        type: "milestone",
-        role: "container",
-      },
-      {
         type: "changelog",
         role: "leaf",
+      },
+      {
+        type: "feedback_program",
+        role: "container",
       },
       {
         type: "feature_request",
@@ -865,6 +897,54 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "feedback_vote",
+        role: "leaf",
+      },
+      {
+        type: "nps_campaign",
+        role: "leaf",
+      },
+      {
+        type: "user_advisory_board",
+        role: "container",
+      },
+      {
+        type: "beta_program",
+        role: "leaf",
+      },
+      {
+        type: "feedback_theme",
+        role: "leaf",
+      },
+      {
+        type: "program",
+        role: "container",
+      },
+      {
+        type: "project",
+        role: "container",
+      },
+      {
+        type: "milestone",
+        role: "leaf",
+      },
+      {
+        type: "risk_register",
+        role: "container",
+      },
+      {
+        type: "change_request",
+        role: "leaf",
+      },
+      {
+        type: "deliverable",
+        role: "leaf",
+      },
+      {
+        type: "resource_allocation",
+        role: "leaf",
+      },
+      {
+        type: "status_report",
         role: "leaf",
       },
     ],
@@ -933,8 +1013,8 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         crosses_into: "discovery_research_validation",
       },
       {
-        direction: "sideways",
-        edge_id: "feature_sketched_in_wireframe",
+        direction: "import",
+        edge_id: "wireframe_specifies_feature",
         crosses_into: "experience_design_brand",
       },
       {
@@ -995,10 +1075,6 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "database_schema",
-        role: "leaf",
-      },
-      {
-        type: "data_model",
         role: "leaf",
       },
       {
@@ -1066,6 +1142,111 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         type: "technical_debt_item",
         role: "leaf",
       },
+      {
+        type: "investigation",
+        role: "container",
+      },
+      {
+        type: "root_cause",
+        role: "container",
+      },
+      {
+        type: "symptom",
+        role: "leaf",
+      },
+      {
+        type: "fix",
+        role: "leaf",
+      },
+      {
+        type: "ai_model",
+        role: "container",
+      },
+      {
+        type: "prompt_template",
+        role: "leaf",
+      },
+      {
+        type: "prompt_version",
+        role: "leaf",
+      },
+      {
+        type: "eval_benchmark",
+        role: "container",
+      },
+      {
+        type: "eval_run",
+        role: "leaf",
+      },
+      {
+        type: "ai_cost_tracker",
+        role: "leaf",
+      },
+      {
+        type: "hallucination_report",
+        role: "leaf",
+      },
+      {
+        type: "ai_guardrail",
+        role: "leaf",
+      },
+      {
+        type: "model_comparison",
+        role: "leaf",
+      },
+      {
+        type: "ai_experiment",
+        role: "leaf",
+      },
+      {
+        type: "ai_dataset",
+        role: "leaf",
+      },
+      {
+        type: "ai_trace",
+        role: "container",
+        notes: "self-nesting inference chain",
+      },
+      {
+        type: "workflow_template",
+        role: "container",
+      },
+      {
+        type: "workflow_run",
+        role: "container",
+      },
+      {
+        type: "workflow_artifact",
+        role: "leaf",
+      },
+      {
+        type: "agent_definition",
+        role: "container",
+      },
+      {
+        type: "agent_session",
+        role: "leaf",
+      },
+      {
+        type: "agent_skill",
+        role: "leaf",
+      },
+      {
+        type: "agent_hook",
+        role: "leaf",
+      },
+      {
+        type: "agent_task",
+        role: "leaf",
+      },
+      {
+        type: "review_gate",
+        role: "container",
+      },
+      {
+        type: "approval_record",
+        role: "leaf",
+      },
     ],
     anchor: {
       type: "service",
@@ -1083,7 +1264,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "service_depends_on_library_dependency",
       "service_carries_technical_debt_item",
       "service_toggles_feature_flag",
-      "service_caused_by_root_cause",
+      "service_affected_by_root_cause",
       "service_investigated_via_investigation",
     ],
     boundary_edges: [
@@ -1168,11 +1349,43 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "partnership",
+        role: "leaf",
+      },
+      {
+        type: "key_resource",
+        role: "leaf",
+      },
+      {
+        type: "key_activity",
+        role: "leaf",
+      },
+      {
+        type: "customer_relationship",
+        role: "leaf",
+      },
+      {
+        type: "distribution_channel",
+        role: "leaf",
+      },
+      {
         type: "pricing_strategy",
         role: "root",
       },
       {
         type: "pricing_tier",
+        role: "leaf",
+      },
+      {
+        type: "discount_strategy",
+        role: "leaf",
+      },
+      {
+        type: "trial_config",
+        role: "leaf",
+      },
+      {
+        type: "paywall",
         role: "leaf",
       },
       {
@@ -1192,8 +1405,28 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "content_strategy",
+        role: "container",
+      },
+      {
+        type: "sales_motion",
+        role: "leaf",
+      },
+      {
+        type: "demand_gen_program",
+        role: "leaf",
+      },
+      {
+        type: "territory",
+        role: "leaf",
+      },
+      {
         type: "objection",
         role: "leaf",
+      },
+      {
+        type: "rebuttal",
+        role: "container",
       },
       {
         type: "proof_point",
@@ -1241,6 +1474,114 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "variant",
+        role: "leaf",
+      },
+      {
+        type: "account",
+        role: "container",
+      },
+      {
+        type: "contact",
+        role: "leaf",
+      },
+      {
+        type: "lead",
+        role: "leaf",
+      },
+      {
+        type: "deal",
+        role: "container",
+      },
+      {
+        type: "pipeline_sales",
+        role: "container",
+      },
+      {
+        type: "pipeline_stage",
+        role: "leaf",
+      },
+      {
+        type: "quote_document",
+        role: "leaf",
+      },
+      {
+        type: "subscription",
+        role: "container",
+      },
+      {
+        type: "invoice",
+        role: "leaf",
+      },
+      {
+        type: "forecast",
+        role: "leaf",
+      },
+      {
+        type: "marketing_strategy",
+        role: "container",
+      },
+      {
+        type: "marketing_channel",
+        role: "container",
+      },
+      {
+        type: "marketing_campaign_plan",
+        role: "container",
+      },
+      {
+        type: "email_sequence",
+        role: "leaf",
+      },
+      {
+        type: "social_post",
+        role: "leaf",
+      },
+      {
+        type: "seo_keyword",
+        role: "leaf",
+      },
+      {
+        type: "ad_creative",
+        role: "leaf",
+      },
+      {
+        type: "press_release",
+        role: "leaf",
+      },
+      {
+        type: "event",
+        role: "leaf",
+      },
+      {
+        type: "community_initiative",
+        role: "leaf",
+      },
+      {
+        type: "partner_program",
+        role: "container",
+      },
+      {
+        type: "partner_tier",
+        role: "leaf",
+      },
+      {
+        type: "api_ecosystem",
+        role: "container",
+      },
+      {
+        type: "marketplace_listing",
+        role: "leaf",
+      },
+      {
+        type: "developer_portal",
+        role: "leaf",
+      },
+      {
+        type: "integration_partner",
+        role: "leaf",
+      },
+      {
+        type: "partner_revenue_share",
         role: "leaf",
       },
     ],
@@ -1349,6 +1690,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       {
         type: "metric",
         role: "anchor",
+        notes: "canonical home is Strategy; anchors Analytics as the measurement plane",
       },
       {
         type: "data_source",
@@ -1363,23 +1705,35 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "container",
       },
       {
+        type: "data_model",
+        role: "leaf",
+      },
+      {
         type: "data_domain",
         role: "container",
+      },
+      {
+        type: "data_product",
+        role: "leaf",
+      },
+      {
+        type: "data_pipeline",
+        role: "leaf",
+      },
+      {
+        type: "data_lineage",
+        role: "leaf",
       },
       {
         type: "glossary_term",
         role: "leaf",
       },
       {
-        type: "forecast",
+        type: "report",
         role: "leaf",
       },
       {
         type: "data_quality_rule",
-        role: "leaf",
-      },
-      {
-        type: "data_contract",
         role: "leaf",
       },
     ],
@@ -1505,7 +1859,27 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       {
         type: "deployment",
         role: "leaf",
-        notes: "shared with Engineering",
+        notes: "canonical home is Engineering; release event surfaced to Ops",
+      },
+      {
+        type: "alert_rule",
+        role: "leaf",
+      },
+      {
+        type: "ci_pipeline",
+        role: "container",
+      },
+      {
+        type: "release_strategy",
+        role: "leaf",
+      },
+      {
+        type: "on_call_rotation",
+        role: "leaf",
+      },
+      {
+        type: "infrastructure_component",
+        role: "container",
       },
       {
         type: "test_suite",
@@ -1524,8 +1898,24 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "regression_test",
+        role: "leaf",
+      },
+      {
+        type: "test_coverage_report",
+        role: "leaf",
+      },
+      {
+        type: "test_environment",
+        role: "leaf",
+      },
+      {
         type: "threat_model",
         role: "root",
+      },
+      {
+        type: "threat",
+        role: "leaf",
       },
       {
         type: "security_control",
@@ -1544,11 +1934,31 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "security_review",
+        role: "container",
+      },
+      {
+        type: "data_classification",
+        role: "leaf",
+      },
+      {
+        type: "access_policy",
+        role: "leaf",
+      },
+      {
         type: "a11y_standard",
         role: "leaf",
       },
       {
+        type: "a11y_guideline",
+        role: "leaf",
+      },
+      {
         type: "a11y_audit",
+        role: "leaf",
+      },
+      {
+        type: "a11y_issue",
         role: "leaf",
       },
       {
@@ -1568,11 +1978,15 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
-        type: "root_cause",
+        type: "data_contract",
         role: "leaf",
       },
       {
-        type: "investigation",
+        type: "audit_log_policy",
+        role: "leaf",
+      },
+      {
+        type: "security_audit",
         role: "leaf",
       },
       {
@@ -1601,16 +2015,16 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "root",
       },
       {
-        type: "beta_program",
+        type: "customer_journey_stage",
         role: "container",
       },
       {
-        type: "feedback_program",
-        role: "container",
+        type: "touchpoint",
+        role: "leaf",
       },
       {
-        type: "user_advisory_board",
-        role: "container",
+        type: "success_milestone",
+        role: "leaf",
       },
       {
         type: "team",
@@ -1622,6 +2036,10 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "role",
+        role: "leaf",
+      },
+      {
+        type: "person",
         role: "leaf",
       },
       {
@@ -1651,6 +2069,78 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "capacity_plan",
+        role: "leaf",
+      },
+      {
+        type: "legal_entity",
+        role: "container",
+      },
+      {
+        type: "ip_asset",
+        role: "leaf",
+      },
+      {
+        type: "contract",
+        role: "container",
+      },
+      {
+        type: "contract_clause",
+        role: "leaf",
+      },
+      {
+        type: "privacy_policy",
+        role: "leaf",
+      },
+      {
+        type: "locale",
+        role: "container",
+      },
+      {
+        type: "translation_key",
+        role: "leaf",
+      },
+      {
+        type: "translation_bundle",
+        role: "container",
+      },
+      {
+        type: "locale_config",
+        role: "leaf",
+      },
+      {
+        type: "cultural_adaptation",
+        role: "leaf",
+      },
+      {
+        type: "regional_pricing",
+        role: "leaf",
+      },
+      {
+        type: "education_program",
+        role: "container",
+      },
+      {
+        type: "tutorial",
+        role: "leaf",
+      },
+      {
+        type: "walkthrough",
+        role: "leaf",
+      },
+      {
+        type: "webinar",
+        role: "leaf",
+      },
+      {
+        type: "certification",
+        role: "leaf",
+      },
+      {
+        type: "help_video",
+        role: "leaf",
+      },
+      {
+        type: "learning_path",
         role: "container",
       },
     ],
@@ -1667,7 +2157,6 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "incident_analysed_in_postmortem",
       "incident_triggers_postmortem",
       "incident_breaches_service_level_objective",
-      "incident_caused_by_root_cause",
       "incident_exploits_vulnerability",
     ],
     boundary_edges: [
@@ -1688,8 +2177,8 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         direction: "export",
-        edge_id: "beta_program_runs_experiment",
-        crosses_into: "discovery_research_validation",
+        edge_id: "incident_caused_by_root_cause",
+        crosses_into: "engineering_platform",
       },
       {
         direction: "export",

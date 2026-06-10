@@ -58,9 +58,9 @@ function walkCondition(cond: IntelligenceCondition, fn: (leaf: object) => void):
 // ─── Per-rule integrity ──────────────────────────────────────────────────────
 
 describe('UPG_ANTI_PATTERNS shape', () => {
-  it('contains 10–15 entries (ticket scope)', () => {
+  it('contains 10–16 entries (ticket scope + F5 enforcement additions)', () => {
     expect(UPG_ANTI_PATTERNS.length).toBeGreaterThanOrEqual(10)
-    expect(UPG_ANTI_PATTERNS.length).toBeLessThanOrEqual(15)
+    expect(UPG_ANTI_PATTERNS.length).toBeLessThanOrEqual(16)
   })
 
   it('every id is a unique kebab-case slug', () => {
@@ -310,6 +310,88 @@ describe('Opportunity-without-need honours v0.2 multi-chain model', () => {
       }
     })
     expect(found, 'outcome_reveals_opportunity check missing').toBe(true)
+  })
+})
+
+// ─── F5: anti-pattern enforcement additions ────────────────────────
+
+describe('F5 insights-without-evidence enforces evidence-backed insights', () => {
+  const ap = getAntiPatternById('insights-without-evidence')!
+
+  it('entry exists and is high severity', () => {
+    expect(ap).toBeDefined()
+    expect(ap.severity).toBe('high')
+  })
+
+  it('is a compound `and` (insight present + all evidence links absent)', () => {
+    expect('operator' in ap.structured_condition).toBe(true)
+    if ('operator' in ap.structured_condition) {
+      expect(ap.structured_condition.operator).toBe('and')
+      expect(ap.structured_condition.checks.length).toBeGreaterThanOrEqual(4)
+    }
+  })
+
+  it('covers all three primary-evidence edge types', () => {
+    const required = [
+      'observation_yields_insight',
+      'survey_response_evidences_insight',
+      'insight_evidenced_by_quote',
+    ]
+    const found = new Set<string>()
+    walkCondition(ap.structured_condition, (leaf) => {
+      const l = leaf as { type: string; edge_type?: string }
+      if (l.type === 'relationship' && l.edge_type) found.add(l.edge_type)
+    })
+    for (const edge of required) {
+      expect(found.has(edge), `missing evidence edge: ${edge}`).toBe(true)
+    }
+  })
+
+  it('all relationship checks use not_exists (fires only when evidence is fully absent)', () => {
+    walkCondition(ap.structured_condition, (leaf) => {
+      const l = leaf as { type: string; comparison?: string }
+      if (l.type === 'relationship') expect(l.comparison).toBe('not_exists')
+    })
+  })
+})
+
+describe('F5 feature-requests-without-provenance enforces sourced requests', () => {
+  const ap = getAntiPatternById('feature-requests-without-provenance')!
+
+  it('entry exists and is medium severity', () => {
+    expect(ap).toBeDefined()
+    expect(ap.severity).toBe('medium')
+  })
+
+  it('is a compound `and` (feature_request present + all provenance links absent)', () => {
+    expect('operator' in ap.structured_condition).toBe(true)
+    if ('operator' in ap.structured_condition) {
+      expect(ap.structured_condition.operator).toBe('and')
+      expect(ap.structured_condition.checks.length).toBeGreaterThanOrEqual(4)
+    }
+  })
+
+  it('covers all three provenance edge types', () => {
+    const required = [
+      'feedback_program_collects_feature_request',
+      'customer_feedback_becomes_feature_request',
+      'feature_request_from_behavioral_segment',
+    ]
+    const found = new Set<string>()
+    walkCondition(ap.structured_condition, (leaf) => {
+      const l = leaf as { type: string; edge_type?: string }
+      if (l.type === 'relationship' && l.edge_type) found.add(l.edge_type)
+    })
+    for (const edge of required) {
+      expect(found.has(edge), `missing provenance edge: ${edge}`).toBe(true)
+    }
+  })
+
+  it('all relationship checks use not_exists (fires only when provenance is fully absent)', () => {
+    walkCondition(ap.structured_condition, (leaf) => {
+      const l = leaf as { type: string; comparison?: string }
+      if (l.type === 'relationship') expect(l.comparison).toBe('not_exists')
+    })
   })
 })
 

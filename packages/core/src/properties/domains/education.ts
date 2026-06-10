@@ -135,6 +135,13 @@ export interface HelpVideoProperties {
  * }
  */
 export interface LearningPathProperties {
+  /**
+   * Display order of this path within a curriculum or program (0-indexed). The
+   * scalar ordering convention shared with `journey_step.step_order` and
+   * `journey_action.action_order` ( /). Makes a learning_path a
+   * deterministically orderable sequence among sibling paths rather than a star.
+   */
+  path_order?: number
   /** Overall difficulty level of the learning path */
   path_difficulty?: DifficultyLevel
   /** Number of items (tutorials, videos, etc.) in the path */

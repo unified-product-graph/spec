@@ -59,6 +59,13 @@ export interface ProjectProperties {
  * }
  */
 export interface MilestoneProperties {
+  /**
+   * Display order of this milestone within its parent project (0-indexed). The
+   * scalar ordering convention shared with `journey_step.step_order` and
+   * `journey_action.action_order` ( /). Orders the delivery
+   * milestones a project moves through, independent of `due_date`.
+   */
+  milestone_order?: number
   /** Target due date (ISO format) */
   due_date?: ISODate
   /** Whether the milestone was met on time */

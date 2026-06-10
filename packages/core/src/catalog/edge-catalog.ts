@@ -784,8 +784,11 @@ export const UPG_EDGE_CATALOG = {
   value_proposition_targets_persona_cross_domain: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'value_proposition', target_type: 'persona' },
   revenue_stream_drives_metric: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'revenue_stream', target_type: 'metric' },
   // Ring 5 structural edges
-  funnel_step_maps_to_journey_step: { forward_verb: 'maps_to', reverse_verb: 'mapped_by', classification: 'cross-domain', source_type: 'funnel', target_type: 'journey_step' },
-  customer_journey_stage_contains_funnel_step: { forward_verb: 'contains', reverse_verb: 'contained_in', classification: 'cross-domain', source_type: 'customer_journey_stage', target_type: 'funnel' },
+  // (P-I) These three edges name `funnel_step` but were typed against
+  // `funnel`, so they resolved from the wrong side and were invisible on the
+  // funnel_step card. Repointed to `funnel_step`; keys unchanged.
+  funnel_step_maps_to_journey_step: { forward_verb: 'maps_to', reverse_verb: 'mapped_by', classification: 'cross-domain', source_type: 'funnel_step', target_type: 'journey_step' },
+  customer_journey_stage_contains_funnel_step: { forward_verb: 'contains', reverse_verb: 'contained_in', classification: 'cross-domain', source_type: 'customer_journey_stage', target_type: 'funnel_step' },
   customer_journey_stage_spans_journey_step: { forward_verb: 'spans', reverse_verb: 'spanned_by', classification: 'cross-domain', source_type: 'customer_journey_stage', target_type: 'journey_step' },
   dependency_blocks_team: { forward_verb: 'blocks', reverse_verb: 'blocked_by', classification: 'cross-domain', source_type: 'dependency', target_type: 'team' },
   dependency_depends_on_team: { forward_verb: 'depends_on', reverse_verb: 'depended_on_by', classification: 'cross-domain', source_type: 'dependency', target_type: 'team' },
@@ -841,7 +844,7 @@ export const UPG_EDGE_CATALOG = {
   positioning_within_market_segment: { forward_verb: 'within', reverse_verb: 'positioned_by', classification: 'cross-domain', source_type: 'positioning', target_type: 'market_segment' },
   ideal_customer_profile_targets_market_segment: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'ideal_customer_profile', target_type: 'market_segment' },
   launch_amplified_by_marketing_channel: { forward_verb: 'amplified_by', reverse_verb: 'amplifies', classification: 'cross-domain', source_type: 'launch', target_type: 'marketing_channel' },
-  sales_motion_qualifies_via_funnel_step: { forward_verb: 'qualifies_via', reverse_verb: 'qualifies_for', classification: 'cross-domain', source_type: 'sales_motion', target_type: 'funnel' },
+  sales_motion_qualifies_via_funnel_step: { forward_verb: 'qualifies_via', reverse_verb: 'qualifies_for', classification: 'cross-domain', source_type: 'sales_motion', target_type: 'funnel_step' },
   objection_sourced_from_quote: { forward_verb: 'sourced_from', reverse_verb: 'surfaced_objection', classification: 'cross-domain', source_type: 'objection', target_type: 'quote' },
   proof_point_derived_from_evidence: { forward_verb: 'derived_from', reverse_verb: 'evidences', classification: 'cross-domain', source_type: 'proof_point', target_type: 'evidence' },
   proof_point_derived_from_insight: { forward_verb: 'derived_from', reverse_verb: 'evidences', classification: 'cross-domain', source_type: 'proof_point', target_type: 'insight' },
@@ -1935,6 +1938,107 @@ export const UPG_EDGE_CATALOG = {
   // research surfaces at this step". Useful for any journey-based
   // research method (CX mapping, service blueprint, behavioural cohort).
   journey_step_yields_observation: { forward_verb: 'yields', reverse_verb: 'yielded_in', classification: 'cross-domain', source_type: 'journey_step', target_type: 'observation' },
+
+  // ── Part 11: F6 dead-end & missing-bridge pass ────────────────────
+  // P-A (scored / synthesis / verdict leaves with 0 outbound) + P-D (missing
+  // forward bridges) from the 36-domain wiring audit. Every edge below closes a
+  // confirmed dead-end or missing direction. Naming respects the F2 prefix gate
+  // (key begins with its `source_type` as a whole token) and the F3 dup gate (no
+  // source→target pair already in the catalog). Verified against the catalog at
+  // build time; see the F6 commit body for the audit ledger references.
+
+  // ── F6: Priority 1 — both-sides-verified cross-domain bridges ──────────────
+  // data_classification ↔ privacy_policy (security SEC-3/L5 + legal). The
+  // classification leaf reached only data_source; it could not reach the policy
+  // that governs how it must be handled. A privacy_policy GOVERNS a data
+  // classification (sets retention / handling rules for that sensitivity tier).
+  data_classification_governed_by_privacy_policy: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'cross-domain', source_type: 'data_classification', target_type: 'privacy_policy' },
+  // design_component → a11y conformance (design_system DS-3 + accessibility A).
+  // The whole conformance DIRECTION was missing: a11y_issue → design_component
+  // existed (defect points back), but no component → standard/guideline link
+  // expressing "this component CONFORMS TO this rule". Both the testable
+  // standard and the human-readable guideline are valid conformance targets.
+  design_component_conforms_to_a11y_standard: { forward_verb: 'conforms_to', reverse_verb: 'governs_conformance_of', classification: 'cross-domain', source_type: 'design_component', target_type: 'a11y_standard' },
+  design_component_conforms_to_a11y_guideline: { forward_verb: 'conforms_to', reverse_verb: 'governs_conformance_of', classification: 'cross-domain', source_type: 'design_component', target_type: 'a11y_guideline' },
+  // feature_request → feature ship-closure (feedback + product_spec). A request
+  // could reach an opportunity but never the feature that ships it, so the loop
+  // from "user asked" to "we built it" had no closing edge. A feature_request
+  // BECOMES a feature when the team commits to building it.
+  feature_request_becomes_feature: { forward_verb: 'becomes', reverse_verb: 'originated_from', classification: 'cross-domain', source_type: 'feature_request', target_type: 'feature' },
+  // objective → outcome (OKR spine). objective reached key_result and metric but
+  // not the outcome it exists to move; the strategic spine was severed at its
+  // anchor (0 outbound to outcome). An objective ADVANCES an outcome. Intra-
+  // domain (both in strategy) and directional → causal.
+  objective_advances_outcome: { forward_verb: 'advances', reverse_verb: 'advanced_by', classification: 'causal', source_type: 'objective', target_type: 'outcome' },
+
+  // ── F6: Priority 2 — scored / synthesis / verdict dead-end leaves (P-A) ─────
+  // desired_outcome (Ulwick-scored: importance × satisfaction) had 0 outbound —
+  // the scores could not flow anywhere. An under-served desired_outcome REVEALS
+  // an opportunity, and is QUANTIFIED BY the metric that tracks its satisfaction.
+  desired_outcome_reveals_opportunity: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'cross-domain', source_type: 'desired_outcome', target_type: 'opportunity' },
+  desired_outcome_quantified_by_metric: { forward_verb: 'quantified_by', reverse_verb: 'quantifies', classification: 'cross-domain', source_type: 'desired_outcome', target_type: 'metric' },
+  // feasibility_study + design_sprint: discovery VERDICTS with 0 outbound — they
+  // could not reach the decision, solution, or learning they exist to produce.
+  // A study/sprint INFORMS a decision, RECOMMENDS a solution, and PRODUCES a
+  // learning. solution is intra-discovery (semantic); decision (strategy) and
+  // learning (validation) are cross-domain.
+  feasibility_study_informs_decision: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'feasibility_study', target_type: 'decision' },
+  feasibility_study_recommends_solution: { forward_verb: 'recommends', reverse_verb: 'recommended_by', classification: 'semantic', source_type: 'feasibility_study', target_type: 'solution' },
+  feasibility_study_produces_learning: { forward_verb: 'produces', reverse_verb: 'produced_by', classification: 'cross-domain', source_type: 'feasibility_study', target_type: 'learning' },
+  design_sprint_informs_decision: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'design_sprint', target_type: 'decision' },
+  design_sprint_recommends_solution: { forward_verb: 'recommends', reverse_verb: 'recommended_by', classification: 'semantic', source_type: 'design_sprint', target_type: 'solution' },
+  design_sprint_produces_learning: { forward_verb: 'produces', reverse_verb: 'produced_by', classification: 'cross-domain', source_type: 'design_sprint', target_type: 'learning' },
+  // affinity_cluster → observation (user_research). A cluster synthesised an
+  // insight but could not OWN the raw observations it groups; the cluster's
+  // membership was unrepresentable. Intra-domain ownership → hierarchy.
+  affinity_cluster_groups_observation: { forward_verb: 'groups', reverse_verb: 'grouped_in', classification: 'hierarchy', source_type: 'affinity_cluster', target_type: 'observation' },
+  // feedback_theme → opportunity (feedback). A theme validated needs and
+  // surfaced insights but could not point at the opportunity it implies — the
+  // theme could not become actionable discovery input.
+  feedback_theme_reveals_opportunity: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'cross-domain', source_type: 'feedback_theme', target_type: 'opportunity' },
+  // competitor_feature → capability (market_intelligence). A competitor feature
+  // inspired our solution/feature but could not map to the capability it
+  // demonstrates — competitive capability benchmarking was unrepresentable.
+  competitor_feature_benchmarks_capability: { forward_verb: 'benchmarks', reverse_verb: 'benchmarked_by', classification: 'cross-domain', source_type: 'competitor_feature', target_type: 'capability' },
+  // switching_cost → competitor (user). A switching cost is the friction of
+  // leaving an incumbent, but the leaf had 0 outbound — it could not name the
+  // competitor it locks the user into. It LOCKS IN a competitor.
+  switching_cost_locks_in_competitor: { forward_verb: 'locks_in', reverse_verb: 'locked_in_by', classification: 'cross-domain', source_type: 'switching_cost', target_type: 'competitor' },
+
+  // ── F6: region tail — confirmed dead-end leaves across remaining domains ────
+  // test_result (testing) had 0 outbound — a failing result could not file the
+  // defect it found. A test_result REPORTS a bug.
+  test_result_reports_bug: { forward_verb: 'reports', reverse_verb: 'reported_by', classification: 'cross-domain', source_type: 'test_result', target_type: 'bug' },
+  // content_piece → social_post (content → marketing). Content reached messaging
+  // and campaigns but not the social post it is repurposed into — the atomisation
+  // step had no edge.
+  content_piece_repurposed_as_social_post: { forward_verb: 'repurposed_as', reverse_verb: 'repurposed_from', classification: 'cross-domain', source_type: 'content_piece', target_type: 'social_post' },
+  // translation_key (localisation) had 0 outbound — it could neither reach the
+  // content it localises nor the locale it targets. Both bridges close the leaf.
+  // translation_key → content_piece is cross-domain; → locale is intra-domain.
+  translation_key_localises_content_piece: { forward_verb: 'localises', reverse_verb: 'localised_by', classification: 'cross-domain', source_type: 'translation_key', target_type: 'content_piece' },
+  translation_key_targets_locale: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'semantic', source_type: 'translation_key', target_type: 'locale' },
+  // partner_revenue_share → revenue_stream (ecosystem → business_model). The
+  // share governed a partner tier but never fed the revenue stream it
+  // contributes to — partner economics could not roll up to the model.
+  partner_revenue_share_feeds_revenue_stream: { forward_verb: 'feeds', reverse_verb: 'fed_by', classification: 'cross-domain', source_type: 'partner_revenue_share', target_type: 'revenue_stream' },
+  // retrospective (team_org) had 0 outbound — its outputs (learnings, decisions/
+  // action items) could not leave the ceremony. A retrospective PRODUCES a
+  // learning and YIELDS a decision. Both targets cross-domain.
+  retrospective_produces_learning: { forward_verb: 'produces', reverse_verb: 'produced_in', classification: 'cross-domain', source_type: 'retrospective', target_type: 'learning' },
+  retrospective_yields_decision: { forward_verb: 'yields', reverse_verb: 'decided_in', classification: 'cross-domain', source_type: 'retrospective', target_type: 'decision' },
+  // status_report → milestone (program_mgmt). A report had 0 outbound; it could
+  // not name the milestone whose status it reports. Intra-domain → semantic.
+  status_report_reports_on_milestone: { forward_verb: 'reports_on', reverse_verb: 'reported_in', classification: 'semantic', source_type: 'status_report', target_type: 'milestone' },
+  // quote_document → deal (sales). A quote had 0 outbound; it could not advance
+  // the deal it prices. Intra-domain and directional → causal.
+  quote_document_advances_deal: { forward_verb: 'advances', reverse_verb: 'advanced_by', classification: 'causal', source_type: 'quote_document', target_type: 'deal' },
+  // data_quality_rule → data_source (data_analytics). A quality rule had 0
+  // outbound; it could not name the source it governs. Intra-domain → semantic.
+  data_quality_rule_governs_data_source: { forward_verb: 'governs', reverse_verb: 'governed_by', classification: 'semantic', source_type: 'data_quality_rule', target_type: 'data_source' },
+  // press_release → launch (marketing → go_to_market). A press release had 0
+  // outbound; it could not name the launch it announces.
+  press_release_announces_launch: { forward_verb: 'announces', reverse_verb: 'announced_by', classification: 'cross-domain', source_type: 'press_release', target_type: 'launch' },
 
 } satisfies Record<string, UPGEdgeDefinition>
 

@@ -49,7 +49,8 @@ describe('Evaluator sanity', () => {
   it('every anti-pattern has a per-pattern test below', () => {
     // If the catalog grows past this count, this test fails. The author
     // should add matching fire/clear fixtures here. Stable count guard.
-    expect(UPG_ANTI_PATTERNS.length).toBe(13)
+    // 13 original + 2 F5 enforcement additions = 15.
+    expect(UPG_ANTI_PATTERNS.length).toBe(15)
   })
 
   it('empty graph produces no violations', () => {
@@ -264,6 +265,53 @@ describe('Per-pattern fire / clear', () => {
     }
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'journey-phases-without-canonical-steps')).toBe(false)
   })
+
+  // 14. insights-without-evidence (high) — F5
+  it('insights-without-evidence fires when insights exist with no evidence link', () => {
+    const i = emptyInputs()
+    i.countsByType = { insight: 2 }
+    // edgePresence empty → no observation / survey / quote backing
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'insights-without-evidence')).toBe(true)
+  })
+  it('insights-without-evidence clears when at least one evidence link exists', () => {
+    const i = emptyInputs()
+    i.countsByType = { insight: 2 }
+    i.edgePresence = {
+      [relKey('observation', 'observation_yields_insight', 'insight')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'insights-without-evidence')).toBe(false)
+  })
+  it('insights-without-evidence also clears via a quote link', () => {
+    const i = emptyInputs()
+    i.countsByType = { insight: 1 }
+    i.edgePresence = {
+      [relKey('insight', 'insight_evidenced_by_quote', 'quote')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'insights-without-evidence')).toBe(false)
+  })
+
+  // 15. feature-requests-without-provenance (medium) — F5
+  it('feature-requests-without-provenance fires when requests exist with no source link', () => {
+    const i = emptyInputs()
+    i.countsByType = { feature_request: 3 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'feature-requests-without-provenance')).toBe(true)
+  })
+  it('feature-requests-without-provenance clears when a provenance link exists', () => {
+    const i = emptyInputs()
+    i.countsByType = { feature_request: 3 }
+    i.edgePresence = {
+      [relKey('feedback_program', 'feedback_program_collects_feature_request', 'feature_request')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'feature-requests-without-provenance')).toBe(false)
+  })
+  it('feature-requests-without-provenance also clears via a behavioural-segment link', () => {
+    const i = emptyInputs()
+    i.countsByType = { feature_request: 1 }
+    i.edgePresence = {
+      [relKey('feature_request', 'feature_request_from_behavioral_segment', 'behavioral_segment')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'feature-requests-without-provenance')).toBe(false)
+  })
 })
 
 // ─── Filter + composite + stage gating ───────────────────────────────────────
@@ -342,7 +390,9 @@ describe('Options + composite + stage gating', () => {
       'building-without-validating',
       'competitors-missing-past-validation',
       'experiment-run-without-learning',
+      'feature-requests-without-provenance',
       'features-without-hypotheses',
+      'insights-without-evidence',
       'journey-phases-without-canonical-steps',
       'objective-without-key-results',
       'opportunity-without-need',

@@ -74,7 +74,10 @@ const PRIORITY_LABELS: UPGTypeLabel[] = [
   {
     id: 'solution',
     canonical_label: 'Solution',
-    alt_labels: ['proposed solution', 'solution idea', 'concept', 'approach'],
+    // 'concept' stripped (P-B /): bare "concept" was shared with the
+    // distinct `design_concept` type. `design_concept` keeps it; here a search
+    // for a solution uses "approach" / "proposed solution".
+    alt_labels: ['proposed solution', 'solution idea', 'approach'],
     framework_labels: {
       ost: 'Solution',
       design_thinking: 'Solution',
@@ -233,7 +236,10 @@ const PRIORITY_LABELS: UPGTypeLabel[] = [
   {
     id: 'outcome',
     canonical_label: 'Outcome',
-    alt_labels: ['desired outcome', 'product outcome', 'business outcome', 'target outcome'],
+    // 'desired outcome' stripped (P-B /): it was the canonical label of
+    // the distinct `desired_outcome` (Ulwick JTBD) type. The OST framework_label
+    // below still surfaces "Desired Outcome" in OST context, framework-scoped.
+    alt_labels: ['product outcome', 'business outcome', 'target outcome'],
     framework_labels: {
       ost: 'Desired Outcome',
       okr_tree: 'Outcome',
@@ -267,7 +273,10 @@ const PRIORITY_LABELS: UPGTypeLabel[] = [
   {
     id: 'feature',
     canonical_label: 'Feature',
-    alt_labels: ['capability', 'product feature', 'functionality'],
+    // 'capability' stripped (P-B /): it is the canonical label of the
+    // distinct `capability` type (Wardley / DDD). A search for "capability" must
+    // resolve there, not to a feature.
+    alt_labels: ['product feature', 'functionality'],
     framework_labels: {
       rice: 'Scored Item',
       moscow: 'Prioritised Item',
@@ -342,7 +351,10 @@ const PRIORITY_LABELS: UPGTypeLabel[] = [
   {
     id: 'distribution_channel',
     canonical_label: 'Distribution Channel',
-    alt_labels: ['channel', 'sales channel', 'delivery channel', 'distribution'],
+    // bare 'channel' stripped (P-B /): shared 3-way with
+    // `acquisition_channel` and `marketing_channel`. BMC/Lean-Canvas framework
+    // contexts still surface "Channel" via framework_labels below.
+    alt_labels: ['distribution channel', 'sales channel', 'delivery channel', 'distribution'],
     framework_labels: {
       bmc: 'Channel',
       lean_canvas: 'Channel',
@@ -534,7 +546,8 @@ const PRIORITY_LABELS: UPGTypeLabel[] = [
  */
 const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   // Strategic layer
-  product: { alt_labels: ['offering', 'app', 'service', 'platform'] },
+  // 'service' stripped (P-B /): canonical label of the distinct `service` type.
+  product: { alt_labels: ['offering', 'app', 'platform'] },
   vision: { alt_labels: ['product vision', 'north star vision', 'long-term vision'] },
   mission: { alt_labels: ['mission statement', 'purpose'] },
   strategic_theme: { alt_labels: ['focus area', 'strategic focus area'] }, // N6: not 'theme'/'strategic pillar' (own types)
@@ -554,7 +567,8 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
 
   // Validation layer
   learning: { alt_labels: ['validated learning', 'lesson learned', 'takeaway'] },
-  test_plan: { alt_labels: ['experiment plan', 'validation plan'] },
+  // 'experiment plan' stripped (P-B /): canonical label of the distinct `experiment_plan` type.
+  test_plan: { alt_labels: ['test strategy', 'validation plan'] },
   research_plan: { alt_labels: ['study plan', 'research brief'] },
   evidence: { alt_labels: ['proof', 'supporting data', 'signal'] },
   variant: { alt_labels: ['test variant', 'experiment arm', 'variation'] },
@@ -563,7 +577,9 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   competitor: { alt_labels: ['rival', 'alternative', 'competitive product', 'competing product'] },
   competitor_feature: { alt_labels: ['competitive feature', 'rival capability'] },
   market_trend: { alt_labels: ['trend', 'industry trend', 'macro trend'] },
-  market_segment: { alt_labels: ['segment', 'market slice', 'tam segment', 'sam segment'] },
+  // bare 'segment' stripped (P-B /): shared 2-way with `behavioral_segment`.
+  // 'market segment' is the qualified, unambiguous form.
+  market_segment: { alt_labels: ['market segment', 'market slice', 'tam segment', 'sam segment'] },
   competitive_analysis: { alt_labels: ['competitor analysis', 'competitive landscape', 'market analysis'] },
 
   // UX Research layer
@@ -603,7 +619,8 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   brand_voice: { alt_labels: ['tone of voice', 'brand tone', 'writing style'] },
 
   // Product Specification layer
-  epic: { alt_labels: ['initiative', 'large story', 'feature set'] },
+  // 'initiative' stripped (P-B /): canonical label of the distinct `initiative` type.
+  epic: { alt_labels: ['large story', 'feature set'] },
   feature_area: { alt_labels: ['feature group', 'capability area', 'module'] },
   acceptance_criterion: { alt_labels: ['ac', 'done criterion', 'acceptance criteria', 'definition of done'] },
   release: { alt_labels: ['version', 'ship', 'launch version', 'build'] },
@@ -617,8 +634,10 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   // Engineering layer
   bounded_context: { alt_labels: ['context', 'domain boundary', 'module boundary'] },
   service: { alt_labels: ['microservice', 'backend service', 'api service'] },
-  domain_event: { alt_labels: ['event', 'system event', 'business event'] },
-  api_contract: { alt_labels: ['api spec', 'api schema', 'contract', 'openapi spec'] },
+  // 'event' stripped (P-B /): canonical label of the distinct `event` type.
+  domain_event: { alt_labels: ['system event', 'business event'] },
+  // 'contract' stripped (P-B /): canonical label of the distinct `contract` (legal) type.
+  api_contract: { alt_labels: ['api spec', 'api schema', 'openapi spec'] },
   technical_debt_item: { alt_labels: ['tech debt', 'debt', 'tech debt item', 'cleanup'] },
   feature_flag: { alt_labels: ['flag', 'toggle', 'feature toggle', 'release flag'] },
   aggregate: { alt_labels: ['aggregate root', 'ddd aggregate'] },
@@ -631,16 +650,20 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   queue_topic: { alt_labels: ['topic', 'message queue', 'event bus topic', 'pubsub topic'] },
   build_artifact: { alt_labels: ['artifact', 'binary', 'docker image', 'package'] },
   code_repository: { alt_labels: ['repo', 'repository', 'git repo', 'codebase'] },
-  library_dependency: { alt_labels: ['dependency', 'package', 'library', 'npm package'] },
+  // 'dependency' stripped (P-B /): canonical label of the distinct `dependency` type.
+  library_dependency: { alt_labels: ['package', 'library', 'npm package'] },
   integration_pattern: { alt_labels: ['integration', 'pattern', 'middleware pattern'] },
   external_api: { alt_labels: ['third-party api', 'vendor api', 'saas integration'] },
   data_flow: { alt_labels: ['data movement', 'data transfer', 'pipeline flow'] },
 
   // Growth layer
-  acquisition_channel: { alt_labels: ['channel', 'traffic source', 'user source'] },
+  // bare 'channel' stripped (P-B /): shared 3-way (see distribution_channel).
+  acquisition_channel: { alt_labels: ['acquisition channel', 'traffic source', 'user source'] },
   growth_campaign: { alt_labels: ['campaign', 'marketing campaign', 'ad campaign', 'growth campaign'] },
   cohort: { alt_labels: ['user cohort', 'retention cohort', 'signup cohort'] },
-  behavioral_segment: { alt_labels: ['segment', 'user segment', 'audience segment', 'behavioural segment'] },
+  // bare 'segment' stripped (P-B /): shared 2-way with `market_segment`.
+  // 'behavioral segment' / 'user segment' keep the affordance unambiguously.
+  behavioral_segment: { alt_labels: ['user segment', 'audience segment', 'behavioural segment'] },
   growth_loop: { alt_labels: ['viral loop', 'referral loop', 'flywheel'] },
   attribution_model: { alt_labels: ['attribution', 'marketing attribution', 'channel attribution'] },
 
@@ -672,7 +695,8 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   retrospective: { alt_labels: ['retro', 'sprint retro', 'team retro', 'post-mortem'] },
   dependency: { alt_labels: ['team dependency', 'cross-team dependency', 'blocker'] },
   department: { alt_labels: ['org unit', 'division', 'business unit'] },
-  skill: { alt_labels: ['competency', 'capability', 'expertise'] },
+  // 'capability' stripped (P-B /): canonical label of the distinct `capability` type.
+  skill: { alt_labels: ['competency', 'expertise'] },
   ceremony: { alt_labels: ['ritual', 'meeting cadence', 'standup', 'retrospective meeting'] },
   capacity_plan: { alt_labels: ['resourcing plan', 'staffing plan', 'headcount plan'] },
 
@@ -683,7 +707,8 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   data_model: { alt_labels: ['erd', 'entity relationship diagram', 'schema model'] },
   data_quality_rule: { alt_labels: ['data rule', 'quality check', 'data validation'] },
   data_product: { alt_labels: ['data asset', 'data offering'] },
-  data_pipeline: { alt_labels: ['etl', 'elt', 'ingestion pipeline', 'data flow'] },
+  // 'data flow' stripped (P-B /): canonical label of the distinct `data_flow` type.
+  data_pipeline: { alt_labels: ['etl', 'elt', 'ingestion pipeline'] },
   data_lineage: { alt_labels: ['lineage', 'data provenance', 'data trail'] },
   glossary_term: { alt_labels: ['term', 'definition', 'business term'] },
   data_domain: { alt_labels: ['data area', 'data subject area'] },
@@ -729,7 +754,8 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   error_budget: { alt_labels: ['reliability budget', 'downtime budget'] },
   investigation: { alt_labels: ['incident investigation', 'root cause analysis', 'debugging'] },
   postmortem: { alt_labels: ['post-mortem', 'incident review', 'rca', 'root cause analysis'] },
-  runbook: { alt_labels: ['operations guide', 'playbook', 'sop', 'standard operating procedure'] },
+  // 'playbook' stripped (P-B /): canonical label of the distinct `playbook` type.
+  runbook: { alt_labels: ['operations guide', 'sop', 'standard operating procedure'] },
   monitor: { alt_labels: ['health check', 'synthetic monitor', 'uptime check'] },
   alert_rule: { alt_labels: ['alert', 'pager rule', 'notification rule'] },
   release_strategy: { alt_labels: ['rollout strategy', 'deployment strategy', 'canary release'] },
@@ -745,18 +771,27 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   security_control: { alt_labels: ['control', 'safeguard', 'countermeasure', 'mitigation'] },
   security_policy: { alt_labels: ['infosec policy', 'security standard'] },
   penetration_test: { alt_labels: ['pentest', 'pen test', 'security test'] },
-  security_review: { alt_labels: ['code review', 'security assessment', 'audit'] },
+  // bare 'audit' / 'security assessment' stripped (P-B /): both owned by
+  // `security_audit`. A `security_review` is a code-review-scoped activity; the
+  // qualified 'security code review' keeps it findable without colliding.
+  security_review: { alt_labels: ['code review', 'security code review'] },
   data_classification: { alt_labels: ['classification', 'sensitivity level', 'data label'] },
   access_policy: { alt_labels: ['iam policy', 'rbac rule', 'permission', 'access control'] },
 
   // Sales & Revenue layer
-  account: { alt_labels: ['customer account', 'client', 'organization'] },
-  contact: { alt_labels: ['person', 'buyer', 'champion'] },
+  // 'organization' stripped (P-B /): canonical label of the distinct `organization` type.
+  account: { alt_labels: ['customer account', 'client'] },
+  // 'person' stripped (P-B /): canonical label of the distinct `person` type.
+  contact: { alt_labels: ['buyer', 'champion'] },
   lead: { alt_labels: ['prospect', 'mql', 'sql', 'marketing lead'] },
-  deal: { alt_labels: ['opportunity', 'sales opportunity', 'opp'] },
+  // 'opportunity' stripped (P-B /): canonical label of the distinct `opportunity` (OST) type.
+  deal: { alt_labels: ['sales opportunity', 'opp'] },
   pipeline_sales: { alt_labels: ['sales pipeline', 'deal pipeline', 'revenue pipeline'] },
   pipeline_stage: { alt_labels: ['deal stage', 'sales stage'] },
-  quote_document: { alt_labels: ['quote', 'proposal', 'estimate', 'quotation'] },
+  // bare 'quote' qualified to 'sales quote' (P-B /): 'quote' is the
+  // canonical label of the distinct `quote` type. The qualified form keeps the
+  // sales-document search affordance without misresolving.
+  quote_document: { alt_labels: ['sales quote', 'proposal', 'estimate', 'quotation'] },
   subscription: { alt_labels: ['recurring revenue', 'saas subscription', 'plan'] },
   invoice: { alt_labels: ['bill', 'payment request'] },
   forecast: { alt_labels: ['revenue forecast', 'sales forecast', 'projection'] },
@@ -780,7 +815,8 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
 
   // Marketing & Communications layer
   marketing_strategy: { alt_labels: ['marketing plan', 'growth strategy'] },
-  marketing_channel: { alt_labels: ['channel', 'paid channel', 'organic channel'] },
+  // bare 'channel' stripped (P-B /): shared 3-way (see distribution_channel).
+  marketing_channel: { alt_labels: ['marketing channel', 'paid channel', 'organic channel'] },
   marketing_campaign_plan: { alt_labels: ['campaign plan', 'launch campaign'] },
   email_sequence: { alt_labels: ['drip campaign', 'nurture sequence', 'email flow'] },
   social_post: { alt_labels: ['tweet', 'linkedin post', 'social media post'] },
@@ -861,7 +897,9 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   agent_session: { alt_labels: ['session', 'agent run', 'agent conversation'] },
   review_gate: { alt_labels: ['approval gate', 'quality gate', 'stage gate'] },
   approval_record: { alt_labels: ['approval', 'sign-off', 'authorization'] },
-  agent_skill: { alt_labels: ['skill', 'tool', 'agent capability'] },
+  // bare 'skill' qualified to 'agent skill' (P-B /): 'skill' is the
+  // canonical label of the distinct team_org `skill` type.
+  agent_skill: { alt_labels: ['agent skill', 'tool', 'agent capability'] },
   agent_hook: { alt_labels: ['hook', 'trigger', 'callback'] },
   workflow_artifact: { alt_labels: ['artifact', 'output artifact', 'generated artifact'] },
 

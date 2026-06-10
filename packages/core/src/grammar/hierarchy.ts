@@ -155,7 +155,11 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'interview_guide', 'insight', 'survey_response',
   ],
   observation: ['quote'],
-  affinity_cluster: ['insight'],
+  // F6: affinity_cluster owns the observations it groups, in addition
+  // to the insights it synthesises. Pairs with `affinity_cluster_groups_observation`
+  // in the edge catalog (hierarchy). An observation can be both directly owned by
+  // its research_study and grouped under an affinity_cluster (multi-parent grammar).
+  affinity_cluster: ['insight', 'observation'],
   // insight refines into insight; a raw insight can be distilled
   // into a more specific insight (refines_into chain).
   // v0.5.8: insights own their evidencing quotes;

@@ -85,7 +85,9 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'objective', type_id: 'ent_004', maturity: 'stable', since: '0.1.0' },
   { name: 'key_result', type_id: 'ent_005', maturity: 'stable', since: '0.1.0' },
   { name: 'metric', type_id: 'ent_006', maturity: 'stable', since: '0.1.0' },
-  { name: 'metric_quality_assessment', type_id: 'ent_339', maturity: 'proposed', since: '0.2.2' },
+  // F7: graduated proposed → stable at v0.9.x — proposed since 0.2.2,
+  // the metric-quality assessment artefact is settled with no open restructure.
+  { name: 'metric_quality_assessment', type_id: 'ent_339', maturity: 'stable', since: '0.2.2' },
   { name: 'vision', type_id: 'ent_007', maturity: 'stable', since: '0.1.0' },
   { name: 'mission', type_id: 'ent_008', maturity: 'stable', since: '0.1.0' },
   { name: 'strategic_theme', type_id: 'ent_009', maturity: 'stable', since: '0.1.0' },
@@ -146,8 +148,11 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'market_segment', type_id: 'ent_036', maturity: 'stable', since: '0.1.0' },
   { name: 'competitive_analysis', type_id: 'ent_037', maturity: 'stable', since: '0.1.0' },
   // Classification taxonomy hosted by competitive_analysis.
-  { name: 'classification_axis', type_id: 'ent_346', maturity: 'proposed', since: '0.4.0' },
-  { name: 'classification_value', type_id: 'ent_347', maturity: 'proposed', since: '0.4.0' },
+  // F7: graduated proposed → stable at v0.9.x — two minor releases
+  // stable since 0.4.0, the taxonomy-axis/value pair backs the competitive-
+  // analysis classification spine with no open rename/restructure ticket.
+  { name: 'classification_axis', type_id: 'ent_346', maturity: 'stable', since: '0.4.0' },
+  { name: 'classification_value', type_id: 'ent_347', maturity: 'stable', since: '0.4.0' },
 
   // ── UX Research ──
   { name: 'research_study', type_id: 'ent_038', maturity: 'stable', since: '0.1.0' },
@@ -189,8 +194,10 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'journey_phase', type_id: 'ent_330', maturity: 'proposed', since: '0.2.0' },
   { name: 'journey_action', type_id: 'ent_331', maturity: 'proposed', since: '0.2.0' },
   { name: 'design_decision', type_id: 'ent_319', maturity: 'deprecated', since: '0.2.0', deprecated_in: '0.2.0', replacement: 'decision' },
-  { name: 'brand_logo', type_id: 'ent_321', maturity: 'proposed', since: '0.2.0' },
-  { name: 'brand_imagery', type_id: 'ent_322', maturity: 'proposed', since: '0.2.0' },
+  // F7: graduated proposed → stable at v0.9.x — proposed since 0.2.0,
+  // the brand-identity set (logo + imagery) is settled with no open rename.
+  { name: 'brand_logo', type_id: 'ent_321', maturity: 'stable', since: '0.2.0' },
+  { name: 'brand_imagery', type_id: 'ent_322', maturity: 'stable', since: '0.2.0' },
 
   // ── Product Spec ──
   { name: 'feature_area', type_id: 'ent_314', maturity: 'stable', since: '0.1.0' },
@@ -207,6 +214,15 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   // alias. `story_task` (the original work half) was already collapsed into
   // canonical `task` at v0.4.0. So the canonical shape is: user_story (statement)
   // + task (work), linked by `task_implements_user_story`.
+  //
+  // F7 — DEFERRED, deliberately kept `proposed`. The audit flagged
+  // user_story as a stable-spine candidate, but the v0.7.0 re-canon contract
+  // freezes maturity at `proposed` until the re-canonicalised name
+  // has soaked across a full migration window. `user-story-split.test.ts`
+  // ("user_story is canonical again (ent_073, proposed, not deprecated)")
+  // asserts `proposed` as the post-re-canon invariant. Graduating here would
+  // break that contract; promotion is a separate, ticketed decision once the
+  // story_statement → user_story migration has fully aged out.
   { name: 'user_story', type_id: 'ent_073', maturity: 'proposed', since: '0.1.0' },
   { name: 'story_statement', type_id: 'ent_342', maturity: 'deprecated', since: '0.2.7', deprecated_in: '0.7.0', replacement: 'user_story' },
   { name: 'story_task', type_id: 'ent_343', maturity: 'deprecated', since: '0.2.7', deprecated_in: '0.4.0', replacement: 'task' },

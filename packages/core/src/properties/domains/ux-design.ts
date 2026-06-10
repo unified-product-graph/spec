@@ -298,6 +298,14 @@ export interface WireframeProperties {
  * }
  */
 export interface UserFlowProperties {
+  /**
+   * Display order of this flow among sibling flows (0-indexed). The scalar
+   * ordering convention shared with `journey_step.step_order` and
+   * `journey_action.action_order` ( /). The free-text `steps`
+   * array below still captures the within-flow narrative; this scalar makes the
+   * flow itself a deterministically orderable sibling.
+   */
+  flow_order?: number
   /** Initiating event */
   trigger?: string
   /** Ordered steps */
@@ -343,6 +351,13 @@ export interface ScreenProperties {
  * }
  */
 export interface ScreenStateProperties {
+  /**
+   * Display order of this state within its parent screen (0-indexed). The scalar
+   * ordering convention shared with `journey_step.step_order` and
+   * `journey_action.action_order` ( /). Orders the states a
+   * screen moves through (e.g. skeleton, loading, populated).
+   */
+  state_order?: number
   /** State */
   state_name: 'empty' | 'loading' | 'error' | 'populated' | 'skeleton' | 'partial'
   /** Cause for entering this state */

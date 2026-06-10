@@ -33,6 +33,13 @@ export interface PartnerProgramProperties {
  * }
  */
 export interface PartnerTierProperties {
+  /**
+   * Display order of this tier among sibling partner tiers (1 = first tier
+   * shown). Mirrors `pricing_tier.tier_order`; part of the spec-wide `*_order`
+   * sequence convention ( /). Distinct from `tier_level`, which
+   * is a prestige rank, not a presentation order.
+   */
+  tier_order?: number
   /** Numeric rank of the tier (higher = more prestigious) */
   tier_level?: number
   /** What a partner must achieve to reach this tier */
