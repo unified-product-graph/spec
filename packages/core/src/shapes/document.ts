@@ -101,6 +101,22 @@ export type UPGCrossEdgeType =
   // shape strays from its canonical). Coexists with `shares_*`; neither
   // deprecates the other. See `REGISTRY_PRODUCT_ID` and `UPGRegistry`.
   | 'instance_of'
+  // Org-axis to audience. Directed product_area -> canonical (registry) entity:
+  // "this area serves that persona" / "this area targets that market segment".
+  // The source is a portfolio `product_area` id; the target lives in the registry
+  // section (`registry/{node_id}`). Carries optional `relevance` (primary/secondary)
+  // and `audience_role` qualifiers — the primary-vs-secondary distinction is the
+  // core value of the area-to-audience matrix, and a persona can be a `buyer` for
+  // one area and a `user` for another. Created via the dedicated
+  // `link_area_to_audience` tool, not the generic `create_cross_product_edge`.
+  | 'area_serves_persona'
+  | 'area_targets_market_segment'
+  // Metric rollup. Directed product `metric` -> company/portfolio `metric`: a
+  // product KPI feeds a higher-level north-star. Mirrors `contributes_to` (the OKR
+  // cascade) for the measurement cascade (KPI -> north-star -> outcome). Same-type
+  // (metric -> metric), directional. Distinct from the symmetric `shares_metric`
+  // ("these track the same thing") — `rolls_up_to` says "this one feeds that one".
+  | 'rolls_up_to'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -117,6 +133,9 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'hosts',
   'contributes_to',
   'instance_of',
+  'area_serves_persona',
+  'area_targets_market_segment',
+  'rolls_up_to',
 ]
 
 /**
@@ -150,6 +169,26 @@ export interface UPGCrossEdge {
   target_product_id?: string
   /** Confidence level if this edge was inferred during import */
   mapping_confidence?: UPGMappingConfidence
+  /**
+   * Sanctioned divergence marker (`instance_of` only). When true, registry drift
+   * detection treats an instance title that differs from its canonical as
+   * intentional (an informative product-local name, e.g. "Vercel Platform / SDK"
+   * vs canonical "Vercel"), excluding it from the `title_divergence` count so
+   * `clean` reflects only un-sanctioned drift.
+   */
+  alias?: boolean
+  /**
+   * Audience relevance for `area_serves_persona` / `area_targets_market_segment`:
+   * whether the audience is a primary or secondary focus of this area. The
+   * primary-vs-secondary distinction is the core value of the area-to-audience matrix.
+   */
+  relevance?: 'primary' | 'secondary'
+  /**
+   * Audience role in this area's context (`area_serves_persona`). Mirrors
+   * `PersonaProperties.audience_role`: the same persona can be a `buyer` for one
+   * area and a `user` for another.
+   */
+  audience_role?: 'buyer' | 'user' | 'champion' | 'influencer' | 'partner'
 }
 
 // ─── Portfolio structures ─────────────────────────────────────────────────────

@@ -246,6 +246,40 @@ describe('canonical serialisation — portfolio envelope ($upg header, kind: por
     expect(reparsed.registry?.nodes[0]?.id).toBe('persona_developer')
     expect(reparsed.cross_edges.some((e) => e.type === 'instance_of')).toBe(true)
   })
+
+  it('round-trips the batch-5 cross-edge fields (alias, relevance, audience_role)', () => {
+    const doc = portfolioDoc()
+    doc.product_areas = [{ id: 'area_platform', title: 'Platform' }]
+    doc.registry = {
+      nodes: [{ id: 'persona_developer', type: 'persona', title: 'Developer' }],
+    }
+    doc.cross_edges.push(
+      {
+        id: 'ce-alias',
+        source: 'p-b/n1',
+        target: 'registry/persona_developer',
+        type: 'instance_of',
+        source_product_id: 'p-b',
+        target_product_id: 'registry',
+        alias: true,
+      },
+      {
+        id: 'ce-area',
+        source: 'area_platform',
+        target: 'registry/persona_developer',
+        type: 'area_serves_persona',
+        target_product_id: 'registry',
+        relevance: 'primary',
+        audience_role: 'user',
+      },
+    )
+    const reparsed = parseUpg(serializeCanonical(doc)) as UPGPortfolioDocument
+    expect(reparsed.cross_edges.find((e) => e.id === 'ce-alias')?.alias).toBe(true)
+    const area = reparsed.cross_edges.find((e) => e.id === 'ce-area')
+    expect(area?.type).toBe('area_serves_persona')
+    expect(area?.relevance).toBe('primary')
+    expect(area?.audience_role).toBe('user')
+  })
 })
 
 describe('normalizeDocument — accepts pre-parsed objects (both envelopes)', () => {

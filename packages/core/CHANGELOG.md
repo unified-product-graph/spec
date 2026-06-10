@@ -7,6 +7,25 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.8] - 2026-06-10
+
+**Registry lifecycle + portfolio-tier audience and metric edges (batch 5).** Closes the lifecycle gaps found while standing up a real shared-entity registry: canonicals can now be edited, batch-created, and promoted from existing nodes; deliberate name divergences can be sanctioned; and two new portfolio edges connect the org axis to its audience and complete the measurement cascade.
+
+### Added
+- **Three cross-edge types** (`UPG_CROSS_EDGE_TYPES` 9 to 12): `area_serves_persona` and `area_targets_market_segment` (a `product_area` to a canonical registry persona / market_segment, carrying optional primary/secondary `relevance` and an `audience_role`), and `rolls_up_to` (a product metric feeds a company/portfolio metric: the measurement cascade, mirroring `contributes_to` for the OKR cascade).
+- **Optional `UPGCrossEdge` qualifiers**: `alias` (sanction a deliberate instance title divergence), `relevance`, and `audience_role`. The canonical serialiser round-trips all three.
+- **Five MCP tools** (113 to 118): `update_canonical_entity` (edit a canonical without disturbing its instances), `batch_define_canonical_entity` and `batch_register_instance` (atomic registry stand-up), `promote_to_canonical` (lift an existing node into the registry), and `link_area_to_audience` (create the area audience edges with qualifiers).
+- **`get_node` resolves `registry/{id}`**: registry entities are first-class for reads, returning the canonical plus its instances.
+
+### Changed
+- **`register_instance` accepts `alias`**, and `portfolio_validate`'s `registry_drift` honours it: a sanctioned divergence leaves the drift count (a new `sanctioned` tally), so `clean: true` means "no unexpected drift".
+- **`create_edge` / `batch_create_edges` error hints**: a `p_` product-header id used where an in-graph node id is expected returns a targeted identity error, and an unknown explicit edge type returns a `did_you_mean` resolved from the endpoint types.
+- **Generic `create_cross_product_edge`** accepts `rolls_up_to` and rejects the registry/area edge types (directing to `register_instance` / `link_area_to_audience`).
+
+No entity, domain, or within-product edge-catalogue count change. The area-anchored edges carry a portfolio `product_area` id as their source: the only cross-edge source that is not a `{product_id}/{node_id}` pair.
+
+---
+
 ## [0.9.7] - 2026-06-10
 
 **Domain-wiring remediation (passes F1–F8) + saturated-fixture refresh.** A spec-integrity hardening cut: eight remediation passes from a 36-domain wiring audit, each shipping its own machine-checkable gate so the class of drift it fixes cannot silently recur. No new tools and no breaking API surface — additive edges/properties plus integrity gates.

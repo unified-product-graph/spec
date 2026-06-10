@@ -234,7 +234,7 @@ const NODE_KEY_ORDER = [
   'external_tool', 'external_ref', 'external_id', 'sort_order', 'properties',
 ]
 const EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'mapping_confidence', 'properties']
-const CROSS_EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'source_product_id', 'target_product_id', 'mapping_confidence']
+const CROSS_EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'source_product_id', 'target_product_id', 'mapping_confidence', 'alias', 'relevance', 'audience_role']
 const PRODUCT_KEY_ORDER = ['id', 'title', 'description', 'stage', 'properties']
 
 function canonicalNode(node: UPGBaseNode): Record<string, unknown> {
