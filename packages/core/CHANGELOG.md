@@ -7,6 +7,25 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.10] - 2026-06-10
+
+**Tooling DX + a born-valid product (batch 6, part 1) + a release-test gate.** Polish from a real multi-graph portfolio session: parity and discoverability fixes, one model correction, and — the headline — the release train now runs the unit suites, after they were found to have been silently red across a release.
+
+### Changed
+- **Product `properties.stage` is canonical.** The stale `UPG_PROPERTY_MIGRATIONS['0.2.13']` lift of a product node's `properties.stage` to top-level `status` is retired: it contradicted the current convention the whole runtime uses (a product node's lifecycle stage lives in `properties.stage`), so a freshly-created product read as `property_drift` against its own validator. A new product is now born valid. Legacy values are still normalised on read by `coerceProductStage`. Decision: `2026-06-10-product-stage-properties-canonical.md`.
+- **`get_nodes` resolves cross-product ids.** A qualified `{product_id}/{node_id}` (the form `list_registry` / `export_edges` / cross-edges return) now reads that product's graph (read-only for non-active products), so a connective pass fetches node content across the portfolio without a `switch_product` sweep. Results carry a `product_id`.
+- **`create_edge` / `batch_create_edges` accept the `p_` product-header** where the in-graph product node is expected, resolving it to the `type:"product"` node (older graphs carry a distinct `n_…` product node).
+- **`did_you_mean` for a mistyped edge type** now falls back to the closest catalogue key by name (edit distance) when the endpoints don't resolve to a canonical pair — so a typo always gets a concrete suggestion.
+- **`batch_create_cross_product_edges` reaches enum parity** with `create_cross_product_edge` (both now derive their type list from one spec source, so the batch tool can no longer lag a release behind — it had been missing `rolls_up_to`).
+- **`batch_register_instance` echoes** `aliased` / `alias_updated` per result, so a bulk sanction pass is visible without a second `portfolio_validate`.
+
+### Fixed
+- **Release-test gate.** The publish train now runs the train packages' unit suites (`gate:tests`) as a hard pre-flight; a red test aborts the train. This closes the gap that let a prior release ship with several silently-red suites — including import adapters that emitted edge types a rename had retired (now corrected), stale compiled test copies, and fixtures referencing retired edges.
+
+No new tools (118) and no entity / domain / edge-catalogue count change.
+
+---
+
 ## [0.9.9] - 2026-06-10
 
 **Structural-integrity forks: validation, AI-prompt, and journey models corrected; duplicate edges collapsed.** A spec-model cut that fixes several long-standing structural mismodels and retires shadow edges. Every renamed or retired edge ships a dual-read migration (`UPG_EDGE_MIGRATIONS['0.9.9']`), so stored graphs upgrade automatically on load. No new tools (118) and no entity-count change; the within-product edge catalogue settles at 975 after the duplicate collapse.

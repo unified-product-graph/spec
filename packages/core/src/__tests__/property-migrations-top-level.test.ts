@@ -29,12 +29,16 @@ describe('UPGPropertyMigration discriminated-union shape', () => {
  }
  })
 
- it('v0.2.13 carries four top-level drift rules (2× lift + rename + self-ref)', () => {
+ it('v0.2.13 carries three top-level drift rules (1× lift + rename + self-ref)', () => {
+ // The product properties.stage → status lift (formerly rule #1) was retired
+ // in 0.9.10 (batch-6 #33):/661 re-canonicalised product stage to
+ // properties.stage, so lifting it flagged a fresh product as drift. The one
+ // surviving lift is the hypothesis_claim properties.status → status rule.
  const v0213 = UPG_PROPERTY_MIGRATIONS['0.2.13']
  expect(v0213).toBeDefined()
- expect(v0213.length).toBe(4)
+ expect(v0213.length).toBe(3)
  const kinds = v0213.map((r) => r.kind)
- expect(kinds.filter((k) => k === 'lift_property_to_top_level').length).toBe(2)
+ expect(kinds.filter((k) => k === 'lift_property_to_top_level').length).toBe(1)
  expect(kinds).toContain('rename_top_level')
  expect(kinds).toContain('drop_when_self_referential')
  })
@@ -50,43 +54,36 @@ describe('UPGPropertyMigration discriminated-union shape', () => {
 
 // ─── lift_property_to_top_level — properties.stage → status ──────────────────
 
-describe('Lift_property_to_top_level (properties.stage → status)', () => {
- it('lifts properties.stage="idea" to top-level status="concept" (with value remap)', () => {
+describe('Product properties.stage is canonical, not lifted (/661, batch-6 #33)', () => {
+ it('does NOT lift a canonical product properties.stage to top-level status', () => {
  const node = {
  id: 'p1',
  type: 'product',
  title: 'Entopo',
- properties: { stage: 'idea', other: 'preserved' },
+ properties: { stage: 'build', other: 'preserved' },
  }
  const { node: migrated, changes } = migrateNodeProperties(node, '0.2.12', '0.2.13')
- expect((migrated as Record<string, unknown>).status).toBe('concept')
- expect(migrated.properties).toEqual({ other: 'preserved' })
+ expect((migrated as Record<string, unknown>).status).toBeUndefined()
+ expect(migrated.properties).toEqual({ stage: 'build', other: 'preserved' })
  const lifted = changes.find((c) => c.kind === 'lifted_to_top_level')
- expect(lifted).toBeDefined()
- if (lifted?.kind === 'lifted_to_top_level') {
- expect(lifted.from_property).toBe('stage')
- expect(lifted.to).toBe('status')
- expect(lifted.value_changed).toBe(true)
- }
+ expect(lifted).toBeUndefined()
  })
 
- it('passes through canonical UPGProductStage values without remap', () => {
- // The canonical 9 stages should already exist as top-level status, but
- // if a graph carried `properties.stage: 'launch'` (already canonical),
- // lift it without remapping the value.
+ it('leaves a legacy properties.stage="idea" in place (read-path coerces it)', () => {
+ // Legacy "idea" is normalised to "concept" on READ by coerceProductStage,
+ // not by a migration lift, so the value stays in properties.stage on disk
+ // and a freshly-created product is born valid against its own validator.
  const node = {
  id: 'p2',
  type: 'product',
  title: 'X',
- properties: { stage: 'launch' },
+ properties: { stage: 'idea' },
  }
  const { node: migrated, changes } = migrateNodeProperties(node, '0.2.12', '0.2.13')
- expect((migrated as Record<string, unknown>).status).toBe('launch')
- expect(migrated.properties).toEqual({})
+ expect((migrated as Record<string, unknown>).status).toBeUndefined()
+ expect(migrated.properties).toEqual({ stage: 'idea' })
  const lifted = changes.find((c) => c.kind === 'lifted_to_top_level')
- if (lifted?.kind === 'lifted_to_top_level') {
- expect(lifted.value_changed).toBe(false)
- }
+ expect(lifted).toBeUndefined()
  })
 
  it('is a no-op when properties.stage is absent', () => {
@@ -233,24 +230,25 @@ describe('Composition (multiple kinds in one migration pass)', () => {
  }
  const { node: migrated, changes } = migrateNodeProperties(node, '0.0.0', '0.2.13')
 
- // status was set twice (lift produces 'concept' from 'idea', then rename
- // produces 'concept' from 'draft'). The order in the registry is lift
- // first → rename second; rename overwrites with 'concept'. Either way
- // the result is 'concept' for this fixture.
+ // status comes from the rename of lifecycle_status='draft' → 'concept'
+ // (rule #2). The product properties.stage lift was retired in 0.9.10
+ // (batch-6 #33), so properties.stage stays in place — no lifted_to_top_level.
  expect((migrated as Record<string, unknown>).status).toBe('concept')
  expect((migrated as Record<string, unknown>).lifecycle_status).toBeUndefined()
  expect((migrated as Record<string, unknown>).source_id).toBeUndefined()
  expect((migrated as Record<string, unknown>).source_type).toBeUndefined()
- expect(migrated.properties).toEqual({})
+ expect(migrated.properties).toEqual({ stage: 'idea' })
 
  const kinds = changes.map((c) => c.kind).sort()
- expect(kinds).toContain('lifted_to_top_level')
+ expect(kinds).not.toContain('lifted_to_top_level')
  expect(kinds).toContain('renamed_top_level')
  expect(kinds.filter((k) => k === 'self_ref_dropped').length).toBe(2)
  })
 
- it('applies lift only against entopo-graph fixture (no lifecycle_status / no self-ref)', () => {
- // Mirror of the actual entopo.upg product node shape.
+ it('is a no-op against the entopo-graph fixture (properties.stage preserved)', () => {
+ // Mirror of the actual entopo.upg product node shape. With the product
+ // stage lift retired (0.9.10, batch-6 #33), no 0.2.13 rule applies:
+ // properties.stage stays put and the node is born valid.
  const node = {
  id: 'entopo-product',
  type: 'product',
@@ -259,11 +257,11 @@ describe('Composition (multiple kinds in one migration pass)', () => {
  }
  const { node: migrated, changes } = migrateNodeProperties(node, '0.0.0', '0.2.13')
 
- expect((migrated as Record<string, unknown>).status).toBe('concept')
- expect(migrated.properties).toEqual({})
+ expect((migrated as Record<string, unknown>).status).toBeUndefined()
+ expect(migrated.properties).toEqual({ stage: 'idea' })
 
  const kinds = changes.map((c) => c.kind)
- expect(kinds).toContain('lifted_to_top_level')
+ expect(kinds).not.toContain('lifted_to_top_level')
  expect(kinds).not.toContain('renamed_top_level')
  expect(kinds).not.toContain('self_ref_dropped')
  })
@@ -374,7 +372,7 @@ describe('Range filter reaches v0.2.13 rules from any starting version', () => {
  return acc
  }, {})
  expect(byKind.drop_props).toBe(2) // metric (0.2.2) + hypothesis (0.2.8)
- expect(byKind.lift_property_to_top_level).toBe(2) // product.stage + hypothesis_claim.status
+ expect(byKind.lift_property_to_top_level).toBe(1) // hypothesis_claim.status (product.stage lift retired in 0.9.10)
  expect(byKind.rename_top_level).toBe(1)
  expect(byKind.drop_when_self_referential).toBe(1)
  })

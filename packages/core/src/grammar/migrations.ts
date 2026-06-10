@@ -889,22 +889,18 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
   // graphs typically carry only one of the two; the conflict path is
   // theoretical but documented for predictability.
   '0.2.13': [
-    // 1. Lift properties.stage → status (with value remap to UPGProductStage).
-    {
-      kind: 'lift_property_to_top_level',
-      type: 'product',
-      from_property: 'stage',
-      to: 'status',
-      value_map: {
-        // Pre-canonical UPGProductStage aliases from early v0.1 product-node
-        // shape. "idea" was the canonical pre-validation phase before the
-        // 9-stage UPGProductStage shipped; today that's "concept".
-        idea: 'concept',
-        // Pass-through: the canonical 9 product stages already exist as
-        // UPGProductStage values and need no remap when surfaced inline.
-      },
-      reason: 'lifecycle phase belongs in top-level `status` per UPGBaseNode contract, not in `properties`. Pre-canonical "idea" alias mapped to canonical `concept` (UPGProductStage[0]).',
-    },
+    // 1. (RETIRED in 0.9.10, batch-6 #33) The product `properties.stage` →
+    //    top-level `status` lift is superseded by/661, which
+    //    re-canonicalised a product node's lifecycle stage to
+    //    `properties.stage` — a distinct 9-phase `UPGProductStage` axis,
+    //    separate from the generic top-level `status` other entities use. The
+    //    entire runtime (create_product, get_graph_digest, get_product_context,
+    //    completeness, header-sync) reads and writes `properties.stage`, so
+    //    lifting it to `status` made a freshly-created product read as
+    //    `property_drift` against its own validator (a tool emitting drift its
+    //    validator immediately flags). Legacy "idea"-style values are still
+    //    normalised on READ by `coerceProductStage`, so retiring the lift loses
+    //    no cleanup. Decision: 2026-06-10-product-stage-properties-canonical.md.
     // 2. Rename top-level lifecycle_status → status (with value remap).
     {
       kind: 'rename_top_level',

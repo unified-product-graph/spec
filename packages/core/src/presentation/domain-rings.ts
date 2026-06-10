@@ -5,7 +5,16 @@
  *
  * The rings radiate outward from the product nucleus:
  *   Nucleus → Understand → Define → Build → Grow → Operate → Extend
+ *
+ * This is the single source of truth for the OUTWARD ORDER and grouping of the
+ * domains across every UPG surface (e.g. the /docs domain grid). The flattened
+ * ring order — `ringOrderedDomainIds()` — replaces any hand-maintained domain
+ * sequence. A module-init invariant asserts ring membership exactly covers the
+ * canonical `UPG_DOMAINS` set, so a missing or extra domain fails loudly here
+ * rather than silently dropping out of a downstream grid.
  */
+
+import { UPG_DOMAINS } from '../registry/domains.js'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -39,19 +48,23 @@ export const UPG_DOMAIN_RINGS: readonly UPGDomainRing[] = [
     id: 'define',
     label: 'Define',
     description: 'What are we building?',
-    domain_ids: ['strategy', 'product_spec', 'legal', 'ux_design', 'design_system', 'brand'],
+    // `business_model` lives in the `define` ring (foundational "what are we
+    // building & how it sustains"), not in `grow`. This is an intentional
+    // ring-vs-region divergence: UPG_REGIONS still groups business_model under
+    // `business_gtm_growth` (region membership is a separately-tracked decision).
+    domain_ids: ['strategy', 'product_spec', 'business_model', 'ux_design', 'design_system', 'brand', 'legal'],
   },
   {
     id: 'build',
     label: 'Build',
     description: 'How do we construct it?',
-    domain_ids: ['engineering', 'devops', 'testing', 'security', 'accessibility', 'data_analytics', 'ai', 'automation'],
+    domain_ids: ['engineering', 'ai', 'automation', 'data_analytics', 'testing', 'devops', 'security', 'accessibility'],
   },
   {
     id: 'grow',
     label: 'Grow',
     description: 'How do we make money?',
-    domain_ids: ['business_model', 'growth', 'go_to_market', 'pricing', 'sales', 'marketing'],
+    domain_ids: ['pricing', 'go_to_market', 'sales', 'marketing', 'growth'],
   },
   {
     id: 'operate',
@@ -63,9 +76,40 @@ export const UPG_DOMAIN_RINGS: readonly UPGDomainRing[] = [
     id: 'extend',
     label: 'Extend',
     description: 'How do we scale?',
-    domain_ids: ['team_org', 'program_mgmt', 'localisation', 'ecosystem', 'compliance'],
+    domain_ids: ['team_org', 'program_mgmt', 'ecosystem', 'localisation', 'compliance'],
   },
 ]
+
+// ─── Ring ↔ domain coverage invariant ─────────────────────────────────────────
+//
+// The rings are the single source of truth for domain order and grouping. That
+// only holds if every canonical domain appears in exactly one ring, and no ring
+// names a domain that does not exist. We assert it at module init so a drift —
+// a domain added to the registry but not slotted into a ring, a typo'd id, or a
+// duplicate — fails loudly the moment core is imported, instead of silently
+// dropping a domain from (or duplicating one in) every downstream grid.
+function assertRingsPartitionDomains(): void {
+  const ringDomainIds: string[] = UPG_DOMAIN_RINGS.flatMap((r) => [...r.domain_ids])
+  const canonical = new Set<string>(UPG_DOMAINS.map((d) => d.id))
+  const ringSet = new Set<string>(ringDomainIds)
+
+  const duplicates = ringDomainIds.filter((id, i) => ringDomainIds.indexOf(id) !== i)
+  const unknown = [...ringSet].filter((id) => !canonical.has(id))
+  const unassigned = [...canonical].filter((id) => !ringSet.has(id))
+
+  if (duplicates.length || unknown.length || unassigned.length) {
+    const parts: string[] = []
+    if (unassigned.length) parts.push(`domains in no ring: [${unassigned.join(', ')}]`)
+    if (unknown.length) parts.push(`ring domains not in UPG_DOMAINS: [${unknown.join(', ')}]`)
+    if (duplicates.length) parts.push(`domains in multiple rings: [${[...new Set(duplicates)].join(', ')}]`)
+    throw new Error(
+      `UPG_DOMAIN_RINGS must partition UPG_DOMAINS exactly: ${parts.join('; ')}. ` +
+        `Slot every domain into exactly one ring in domain-rings.ts.`,
+    )
+  }
+}
+
+assertRingsPartitionDomains()
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -98,4 +142,17 @@ export function getRingForDomain(domainId: string): UPGDomainRing | undefined {
 export function getDomainsInRing(ringId: string): string[] {
   const ring = UPG_DOMAIN_RINGS.find((r) => r.id === ringId)
   return ring ? [...ring.domain_ids] : []
+}
+
+/**
+ * Every domain id in canonical ring order (nucleus outward, then within-ring
+ * order). The single source of truth for the OUTWARD ORDER of the domains —
+ * use this instead of a hand-maintained sequence. The coverage invariant above
+ * guarantees this is a permutation of `UPG_DOMAINS` with no gaps or duplicates.
+ *
+ * @example
+ * ringOrderedDomainIds().slice(0, 3)   // → ['portfolio', 'workspace', 'user']
+ */
+export function ringOrderedDomainIds(): string[] {
+  return UPG_DOMAIN_RINGS.flatMap((ring) => [...ring.domain_ids])
 }
