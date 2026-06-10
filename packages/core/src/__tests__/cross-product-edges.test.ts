@@ -40,6 +40,13 @@ describe('cross-product edge validation', () => {
       'area_serves_persona',
       'area_targets_market_segment',
       'rolls_up_to',
+      'product_implements_specification',
+      'product_exposes_specification',
+      'feature_conforms_to_specification',
+      'api_contract_speaks_specification',
+      'product_exposes_primitive',
+      'feature_manipulates_primitive',
+      'primitive_stored_as_data_type',
     ])
   })
 

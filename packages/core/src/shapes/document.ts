@@ -117,6 +117,18 @@ export type UPGCrossEdgeType =
   // (metric -> metric), directional. Distinct from the symmetric `shares_metric`
   // ("these track the same thing") — `rolls_up_to` says "this one feeds that one".
   | 'rolls_up_to'
+  // Foundations (0.9.12). A product-graph entity links to a canonical
+  // specification or primitive in the registry. Directed product / feature /
+  // api_contract -> registry canonical (`registry/{node_id}` target), the same
+  // shape as `instance_of`. Registry-internal spec-to-spec and
+  // primitive-to-spec/primitive links are catalog edges, not cross-edges.
+  | 'product_implements_specification'
+  | 'product_exposes_specification'
+  | 'feature_conforms_to_specification'
+  | 'api_contract_speaks_specification'
+  | 'product_exposes_primitive'
+  | 'feature_manipulates_primitive'
+  | 'primitive_stored_as_data_type'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -136,6 +148,13 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'area_serves_persona',
   'area_targets_market_segment',
   'rolls_up_to',
+  'product_implements_specification',
+  'product_exposes_specification',
+  'feature_conforms_to_specification',
+  'api_contract_speaks_specification',
+  'product_exposes_primitive',
+  'feature_manipulates_primitive',
+  'primitive_stored_as_data_type',
 ]
 
 /**

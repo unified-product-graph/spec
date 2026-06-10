@@ -24,8 +24,8 @@ import { UPG_FRAMEWORKS_BY_ID } from '../frameworks/index.js'
 import { isEntitySequenceStep } from '../step-sequence.js'
 
 describe('UPG_PLAYBOOKS — W1 (restated) invariant', () => {
-  it('ships 12 playbooks at v0.3.0', () => {
-    expect(UPG_PLAYBOOKS).toHaveLength(12)
+  it('ships 13 playbooks at v0.3.0', () => {
+    expect(UPG_PLAYBOOKS).toHaveLength(13)
   })
 
   it('every region has at least one playbook (coverage)', () => {
@@ -92,9 +92,9 @@ describe('UPG_PLAYBOOKS — W1 (restated) invariant', () => {
 })
 
 describe('UPG_PLAYBOOKS — counts (settled per §3.7 / §6.6)', () => {
-  it('10 canonical playbooks (one per region)', () => {
+  it('11 canonical playbooks (one per region)', () => {
     const canonicals = UPG_PLAYBOOKS.filter((p) => p.is_canonical === true)
-    expect(canonicals).toHaveLength(10)
+    expect(canonicals).toHaveLength(11)
   })
 
   it('2 specialised playbooks', () => {

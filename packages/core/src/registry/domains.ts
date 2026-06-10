@@ -344,6 +344,12 @@ export const UPG_DOMAINS = [
     description: 'Spatial thinking spaces for arranging entities, debating decisions, and committing to the graph. Workspaces are transient canvases that sit alongside all other domains, letting you compose and explore relationships before they become permanent graph structure. A framework exercise is a structured workspace: one run of a framework (MoSCoW, RICE, Kano, …) applied to a chosen set of entities, with each entity\'s result recorded on the exercise-to-entity edge rather than the entity itself.',
     types: ['workspace', 'framework_exercise'],
   },
+  {
+    id: 'foundations',
+    label: 'Foundations',
+    description: 'The shared specifications and foundational primitives a product organisation stewards or implements everywhere. Specifications are governed specs (query languages, protocols, data formats, encodings) like GROQ or Portable Text; primitives are the compositional units those specs define (a block, a reference, a query value). Both are registry-hostable canonicals that products implement, expose, or conform to. Distinct from a product feature: a specification has no single owner, no P&L, and no buyer; it is the rulebook many products point at.',
+    types: ['specification', 'primitive'],
+  },
 ] as const satisfies readonly UPGDomain[]
 
 // ─── Derived domain ID union ────────────────────────────────────────────────────

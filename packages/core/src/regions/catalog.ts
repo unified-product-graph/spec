@@ -2200,6 +2200,45 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
     ],
   },
+  {
+    id: "foundations",
+    label: "Foundations",
+    order: 11,
+    shape: "polymorphic-target",
+    mental_model: "Shared specs and primitives that many products implement, expose, and conform to.",
+    operators: [
+      "platform architect",
+      "standards author",
+      "staff engineer",
+      "API designer",
+    ],
+    composes_atomic_domains: [
+      "foundations",
+    ],
+    entities: [
+      {
+        type: "specification",
+        role: "anchor",
+      },
+      {
+        type: "primitive",
+        role: "container",
+      },
+    ],
+    anchor: {
+      type: "specification",
+      rationale: "The specification is the rulebook many products point at: they implement, expose, and conform to it, and primitives are defined by it. It is the high-inbound canonical of the Foundations region.",
+      outbound_cross_edge_count: 0,
+      inbound_cross_edge_count: 6,
+    },
+    intra_edges: [
+      "specification_extends_specification",
+      "specification_competes_with_specification",
+      "primitive_defined_by_specification",
+      "primitive_composes_primitive",
+    ],
+    boundary_edges: [],
+  },
 ] as const
 
 export const UPG_REGION_MAP: Readonly<Record<string, UPGRegion>> =

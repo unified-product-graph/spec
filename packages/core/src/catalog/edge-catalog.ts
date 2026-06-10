@@ -2128,6 +2128,14 @@ export const UPG_EDGE_CATALOG = {
   // outbound; it could not name the launch it announces.
   press_release_announces_launch: { forward_verb: 'announces', reverse_verb: 'announced_by', classification: 'cross-domain', source_type: 'press_release', target_type: 'launch' },
 
+  // ── Foundations (0.9.12): registry-internal relationships between canonical
+  //    specifications and primitives. Product-to-foundation links (implements,
+  //    exposes, conforms_to) are portfolio cross-edges, not catalog edges.
+  specification_extends_specification: { forward_verb: 'extends', reverse_verb: 'extended_by', classification: 'hierarchy', source_type: 'specification', target_type: 'specification' },
+  specification_competes_with_specification: { forward_verb: 'competes_with', reverse_verb: 'competes_with', classification: 'semantic', source_type: 'specification', target_type: 'specification' },
+  primitive_defined_by_specification: { forward_verb: 'defined_by', reverse_verb: 'defines', classification: 'semantic', source_type: 'primitive', target_type: 'specification' },
+  primitive_composes_primitive: { forward_verb: 'composes', reverse_verb: 'composed_by', classification: 'hierarchy', source_type: 'primitive', target_type: 'primitive' },
+
 } satisfies Record<string, UPGEdgeDefinition>
 
 // ─── Polymorphic edge registry ──────────────────────────────────────

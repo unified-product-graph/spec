@@ -58,7 +58,7 @@ export const UPG_DOMAIN_RINGS: readonly UPGDomainRing[] = [
     id: 'build',
     label: 'Build',
     description: 'How do we construct it?',
-    domain_ids: ['engineering', 'ai', 'automation', 'data_analytics', 'testing', 'devops', 'security', 'accessibility'],
+    domain_ids: ['engineering', 'foundations', 'ai', 'automation', 'data_analytics', 'testing', 'devops', 'security', 'accessibility'],
   },
   {
     id: 'grow',

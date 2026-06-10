@@ -39,8 +39,8 @@ export interface BoundedContextProperties {
  * }
  */
 export interface ServiceProperties {
-  /** Functional classification. Expanded from Backstage's component type vocabulary. */
-  service_type?: 'web' | 'api' | 'worker' | 'db' | 'queue' | 'library' | 'mobile' | 'docs' | 'lambda'
+  /** Functional classification. Expanded from Backstage's component type vocabulary. `cli` added in 0.9.12. */
+  service_type?: 'web' | 'api' | 'worker' | 'db' | 'queue' | 'library' | 'mobile' | 'docs' | 'lambda' | 'cli'
   /** Technologies used (e.g. ["TypeScript", "Postgres", "Redis"]) */
   tech_stack?: string[]
   /** Owning person or team. Backstage marks this required; strongly recommended. */
@@ -87,8 +87,8 @@ export interface DomainEventProperties {
 export interface ApiContractProperties {
   /** URL of the specification document */
   spec_url?: string
-  /** Communication protocol */
-  protocol?: 'REST' | 'GraphQL' | 'gRPC' | 'AsyncAPI' | 'SOAP' | 'WebSocket' | 'MQTT' | 'other'
+  /** Communication protocol. `SSE` (server-sent events) added in 0.9.12. */
+  protocol?: 'REST' | 'GraphQL' | 'gRPC' | 'AsyncAPI' | 'SOAP' | 'WebSocket' | 'MQTT' | 'SSE' | 'other'
   /** API version */
   version?: string
   /** Maintaining person or team. */
@@ -421,8 +421,18 @@ export interface LibraryDependencyProperties {
  * }
  */
 export interface IntegrationPatternProperties {
-  /** Type */
-  pattern_type?: 'api' | 'event' | 'file' | 'database' | 'webhook'
+  /** Type. `adapter`, `client_library`, `host_embedding`, `pipes_and_filters`, `data_sync` added in 0.9.12. */
+  pattern_type?:
+    | 'api'
+    | 'event'
+    | 'file'
+    | 'database'
+    | 'webhook'
+    | 'adapter'
+    | 'client_library'
+    | 'host_embedding'
+    | 'pipes_and_filters'
+    | 'data_sync'
   /** Communication protocol */
   protocol?: string
 }
@@ -463,8 +473,15 @@ export interface DataFlowProperties {
   trigger?: string
   /** Type of data transferred */
   data_type?: string
-  /** Direction */
+  /** Direction (cardinality of the link). */
   direction?: 'unidirectional' | 'bidirectional'
+  /**
+   * Flow orientation relative to the system or component, a separate axis from
+   * `direction` (which is cardinality). A flow can be `unidirectional` AND
+   * `inbound`. Added in 0.9.12 to split the orientation axis that authors were
+   * conflating into `direction` (inbound/outbound/internal values).
+   */
+  orientation?: 'inbound' | 'outbound' | 'internal'
   /** Communication protocol */
   protocol?: 'rest' | 'graphql' | 'grpc' | 'event' | 'webhook' | 'file'
 }

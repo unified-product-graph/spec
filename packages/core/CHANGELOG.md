@@ -7,6 +7,29 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.12] - 2026-06-10
+
+**Foundations: a first-class `specification` and `primitive` entity, plus a technical-domain enum widening.** Two governance moats that product orgs usually mismodel as products or scatter across features now have a home, and four engineering enums that real authoring outgrew are widened.
+
+### Added
+- **`specification` and `primitive` entity types** (entity count 313 to 315) in a new **`foundations`** domain and region. A `specification` is a governed spec a product implements, exposes, or conforms to (a query language, protocol, data format, encoding); a `primitive` is the compositional unit a specification defines (a block, a reference, a query value). Both are registry-hostable canonicals (`define_canonical_entity` accepts them), so a spec scattered across N products becomes one canonical that product instances link to via `instance_of`. `specification` carries a lifecycle (draft, active, deprecated, superseded); `primitive` is lifecycle-free. Both ship at `proposed` maturity, with a canonical playbook and a domain guide.
+- **11 foundations edges.** Four registry-internal catalogue edges: `specification_extends_specification` (a dialect or superset), `specification_competes_with_specification`, `primitive_defined_by_specification`, `primitive_composes_primitive`. Seven portfolio cross-edges from a product-graph entity to a registry canonical (the `instance_of` shape): `product_implements_specification`, `product_exposes_specification`, `feature_conforms_to_specification`, `api_contract_speaks_specification`, `product_exposes_primitive`, `feature_manipulates_primitive`, `primitive_stored_as_data_type`.
+- **`data_flow.orientation`** (`inbound`, `outbound`, `internal`): a separate axis from `direction` (cardinality), so a flow can be one-way and inbound at once.
+- **A `remap_property_value` migration kind** that remaps a properties-bag enum value in place, optionally splitting it into a sibling property.
+
+### Changed
+- **Four engineering enums widened** to fit real authoring: `service.service_type` gains `cli`; `api_contract.protocol` gains `SSE`; `integration_pattern.pattern_type` gains `adapter`, `client_library`, `host_embedding`, `pipes_and_filters`, `data_sync`.
+
+### Migrations (`UPG_PROPERTY_MIGRATIONS['0.9.12']`, dual-read on load)
+- `data_flow.direction` values `inbound` / `outbound` / `internal` move to the new `orientation` property; `direction` resets to `unidirectional`.
+- `integration_pattern.pattern_type`: `"data sync"` to `data_sync`, `backend_client` to `client_library`.
+- `service.service_type`: `backend` to `api`.
+- `api_contract.protocol`: `HTTP` to `REST`, `HTTP/SSE` to `SSE`.
+
+Edge-catalogue count 975 to 979; region count 10 to 11; domain count 36 to 37. No new tools (119).
+
+---
+
 ## [0.9.11] - 2026-06-10
 
 **Tooling DX (batch 6, part 2): status pre-flight + anti-pattern visibility.** Two discoverability fixes from the same real portfolio session, plus a self-trip fix.

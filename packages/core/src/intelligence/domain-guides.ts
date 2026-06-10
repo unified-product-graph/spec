@@ -980,12 +980,33 @@ const WORKSPACE_GUIDE: UPGDomainUsageGuide = {
   ],
 }
 
+const FOUNDATIONS_GUIDE: UPGDomainUsageGuide = {
+  domain_id: 'foundations',
+  anchor_entity: 'specification',
+  creation_sequence: ['specification', 'primitive'],
+  patterns: [
+    {
+      name: 'Specification defines primitives',
+      description: 'A specification governs one or more primitives; each primitive is defined_by the spec and may compose other primitives',
+      entity_types: ['specification', 'primitive'],
+      edge_chain: ['primitive_defined_by_specification', 'primitive_composes_primitive'],
+    },
+  ],
+  required_bridges: [],
+  anti_patterns: [
+    { description: 'A specification scattered as duplicate features across products instead of one canonical with instance_of links' },
+    { description: 'Modelling a governed spec as a product: it has no single owner, P&L, or buyer; it is the rulebook products point at' },
+  ],
+}
+
 // ─── Registry ───────────────────────────────────────────────────────────────
 
 export const UPG_DOMAIN_GUIDES: readonly UPGDomainUsageGuide[] = [
   // Nucleus
   PORTFOLIO_GUIDE,
   WORKSPACE_GUIDE,
+  // Foundations (0.9.12)
+  FOUNDATIONS_GUIDE,
   // Ring 1: Understand
   USER_GUIDE,
   USER_RESEARCH_GUIDE,

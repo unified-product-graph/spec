@@ -14,6 +14,8 @@
  * @see grammar/hierarchy.ts for parent-child rules
  */
 export type UPGEntityType =
+  // Foundations (0.9.12)
+  | 'specification' | 'primitive'
   // Strategy
   | 'product' | 'outcome' | 'objective' | 'key_result' | 'metric'
   | 'metric_quality_assessment'

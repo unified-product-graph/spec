@@ -3462,9 +3462,47 @@ const FRAMEWORK_EXERCISE_LIFECYCLE: UPGLifecycle = {
 
 /** The complete set of UPG lifecycle definitions, grouped by domain.
  *  Entity types without lifecycles (persona, metric, quote, etc.) are deliberately excluded. */
+// Specification (Foundations, 0.9.12): lifecycle-light. A governed spec is
+// authored (draft), adopted (active), wound down (deprecated), then replaced
+// (superseded). No product-style phase ladder.
+const SPECIFICATION_LIFECYCLE: UPGLifecycle = {
+  entity_type: 'specification',
+  initial_phase: 'draft',
+  terminal_phases: ['superseded'],
+  phases: [
+    {
+      id: 'draft',
+      label: 'Draft',
+      description: 'Being authored. Not yet adopted as the canonical specification.',
+      transitions_to: ['active', 'superseded'],
+    },
+    {
+      id: 'active',
+      label: 'Active',
+      description: 'In force. The current authoritative version products implement and conform to.',
+      transitions_to: ['deprecated', 'superseded'],
+    },
+    {
+      id: 'deprecated',
+      label: 'Deprecated',
+      description: 'Still valid but no longer recommended; a successor exists or is imminent.',
+      transitions_to: ['superseded'],
+    },
+    {
+      id: 'superseded',
+      label: 'Superseded',
+      description: 'Replaced by a newer specification. Retained for historical reference.',
+      transitions_to: [],
+    },
+  ],
+}
+
 export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   // Product (root)
   PRODUCT_LIFECYCLE,
+
+  // Foundations (0.9.12)
+  SPECIFICATION_LIFECYCLE,
 
   // Discovery & Validation
   RESEARCH_STUDY_LIFECYCLE,
@@ -3626,6 +3664,10 @@ export function getLifecycleForType(entityType: string): UPGLifecycle | undefine
  * type into UPG_LIFECYCLES, remove it from here.
  */
 export const UPG_LIFECYCLE_FREE_TYPES: ReadonlySet<string> = new Set<string>([
+  // ── Foundations (1 of 2): a primitive either exists or is deprecated; no
+  //    phase ladder (like metric). `specification` carries a lifecycle. ──
+  'primitive',
+
   // ── User (5): personas and JTBD atoms are reference data ──────────────────
   'persona', 'job', 'job_step', 'desired_outcome', 'switching_cost',
 

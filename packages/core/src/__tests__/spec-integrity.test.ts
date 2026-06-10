@@ -327,7 +327,8 @@ describe('Edge pair uniqueness', () => {
  // If the count changes unexpectedly, the snapshot will flag it for review.
  // lowered 35 → 27 by the duplicate-collapse (13 shadow / near-synonym
  // / inverse edges retired; the inverse flips removed two source:target pairs).
- expect(multiPairs.length).toMatchInlineSnapshot(`27`)
+ // 0.9.12 added specification:specification (extends + competes_with) → 28.
+ expect(multiPairs.length).toMatchInlineSnapshot(`28`)
  })
 })
 

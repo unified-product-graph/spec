@@ -563,6 +563,26 @@ export const OPERATIONS_QUALITY_PLAYBOOK: UPGPlaybook = {
  *
  * Order: by region (1 → 10), canonical first within each region.
  */
+export const FOUNDATIONS_PLAYBOOK: UPGPlaybook = {
+  id: 'playbook:foundations',
+  name: 'Foundations',
+  version: '0.9.12',
+  description:
+    'Register the specifications your products implement and expose, and the primitives those specs define, as canonical entities instead of scattered per-product features.',
+  region: 'foundations',
+  is_canonical: true,
+  related_framework_ids: [],
+  target_anchor_entity: 'specification',
+  creation_sequence: [
+    seqStep(1, 'Specifications',
+      ['specification'],
+      'Define each governed spec your products implement, expose, or conform to (a query language, protocol, or format) as one canonical specification, not a per-product feature.'),
+    seqStep(2, 'Primitives',
+      ['primitive'],
+      'Define the compositional units those specs define (a block, a reference, a query value) as primitives, each linked to its specification.'),
+  ],
+}
+
 export const UPG_PLAYBOOKS: readonly UPGPlaybook[] = [
   // Region 1 - strategy_outcomes
   STRATEGY_OUTCOMES_PLAYBOOK,
@@ -586,4 +606,6 @@ export const UPG_PLAYBOOKS: readonly UPGPlaybook[] = [
   ANALYTICS_DATA_PLAYBOOK,
   // Region 10 - operations_quality
   OPERATIONS_QUALITY_PLAYBOOK,
+  // Region 11 - foundations
+  FOUNDATIONS_PLAYBOOK,
 ]

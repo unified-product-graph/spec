@@ -572,12 +572,82 @@ export type UPGPropertyMigration =
       /** Human-readable explanation surfaced in load-time warnings. */
       reason: string
     }
+  | {
+      kind: 'remap_property_value'
+      /** The entity type this rule applies to (or `'*'` for all types). */
+      type: string
+      /** Key inside `properties` whose value is being remapped (stays in the bag). */
+      property: string
+      /**
+       * Old to new value remap. Only entries in the map are touched; values
+       * absent from the map pass through unchanged.
+       */
+      value_map: Record<string, string>
+      /**
+       * Optional sibling property to receive the mapped value (a split). When
+       * set, the mapped value is written to `to_property` and `property` is
+       * reset to `reset_value`. Used to separate a conflated axis, e.g. lift a
+       * data_flow orientation value out of `direction` into `orientation`.
+       */
+      to_property?: string
+      /** Value written back to `property` after a split. Required when `to_property` is set. */
+      reset_value?: string
+      /** Human-readable explanation surfaced in load-time warnings. */
+      reason: string
+    }
 
 /**
  * Version-scoped property migrations. Same convention as `UPG_MIGRATIONS`:
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.9.12: technical-domain enum widening + data_flow orientation split ──
+  //
+  // Real authoring outgrew four engineering-domain enums. 0.9.12 widens them
+  // (see properties/domains/engineering.ts) and adds a data_flow `orientation`
+  // axis distinct from `direction` (cardinality). These rules dual-read the
+  // legacy values so graphs authored before 0.9.12 stay valid on load:
+  //   - data_flow.direction inbound/outbound/internal -> properties.orientation,
+  //     and direction resets to unidirectional (all three were one-way).
+  //   - integration_pattern.pattern_type "data sync" -> data_sync,
+  //     backend_client -> client_library.
+  //   - service.service_type backend -> api (use the new `cli` for CLI tools).
+  //   - api_contract.protocol HTTP -> REST, HTTP/SSE -> the new SSE value.
+  '0.9.12': [
+    {
+      kind: 'remap_property_value',
+      type: 'data_flow',
+      property: 'direction',
+      value_map: { inbound: 'inbound', outbound: 'outbound', internal: 'internal' },
+      to_property: 'orientation',
+      reset_value: 'unidirectional',
+      reason:
+        'data_flow.direction conflated cardinality with orientation; the orientation values move to the new `orientation` property and direction resets to `unidirectional` (0.9.12).',
+    },
+    {
+      kind: 'remap_property_value',
+      type: 'integration_pattern',
+      property: 'pattern_type',
+      value_map: { 'data sync': 'data_sync', backend_client: 'client_library' },
+      reason:
+        'integration_pattern.pattern_type widened in 0.9.12; legacy "data sync" snake-cases to data_sync and backend_client collapses to client_library.',
+    },
+    {
+      kind: 'remap_property_value',
+      type: 'service',
+      property: 'service_type',
+      value_map: { backend: 'api' },
+      reason:
+        'service.service_type `backend` is too generic to canonise; normalised to `api` in 0.9.12 (use `cli` for command-line tools).',
+    },
+    {
+      kind: 'remap_property_value',
+      type: 'api_contract',
+      property: 'protocol',
+      value_map: { HTTP: 'REST', 'HTTP/SSE': 'SSE' },
+      reason: 'api_contract.protocol normalised in 0.9.12: HTTP maps to REST and HTTP/SSE maps to the new SSE value.',
+    },
+  ],
   // ── v0.8.0: deprecated-property removal pass ───────────────────
   //
   // The seven properties tagged `@deprecated since v0.4.0` that survived the
@@ -1004,6 +1074,7 @@ export type UPGPropertyMigrationChange =
   | { kind: 'renamed_top_level'; from: string; to: string; value_changed: boolean }
   | { kind: 'lifted_to_top_level'; from_property: string; to: string; value_changed: boolean }
   | { kind: 'self_ref_dropped'; field: string }
+  | { kind: 'remapped_property_value'; property: string; to_property?: string; value_changed: boolean }
 
 /**
  * Apply property migrations to a single node. Returns the (possibly new) node
@@ -1140,6 +1211,27 @@ export function migrateNodeProperties<
               changes.push({ kind: 'self_ref_dropped', field })
             }
           }
+          break
+        }
+
+        case 'remap_property_value': {
+          const props = workingNode.properties as Record<string, unknown> | undefined
+          if (!props || !(m.property in props)) break
+          const oldValue = props[m.property]
+          if (typeof oldValue !== 'string' || !(oldValue in m.value_map)) break
+          const mapped = m.value_map[oldValue]
+          const nextProps: Record<string, unknown> = { ...props }
+          if (m.to_property) {
+            // Split: move the mapped value to a sibling property, reset the original.
+            nextProps[m.to_property] = mapped
+            nextProps[m.property] = m.reset_value ?? mapped
+            changes.push({ kind: 'remapped_property_value', property: m.property, to_property: m.to_property, value_changed: true })
+          } else {
+            nextProps[m.property] = mapped
+            changes.push({ kind: 'remapped_property_value', property: m.property, value_changed: mapped !== oldValue })
+          }
+          workingNode.properties = nextProps
+          mutated = true
           break
         }
       }

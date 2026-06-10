@@ -7,6 +7,13 @@
 
 /** The canonical parent → children map. Keys are parent types, values are ordered child types. */
 export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
+  // ── Foundations (0.9.12): registry canonicals that self-nest. A
+  //    specification extends a specification (a dialect of a parent spec); a
+  //    primitive composes primitives (a block contains spans). These back the
+  //    hierarchy-classified specification_extends_specification /
+  //    primitive_composes_primitive catalog edges.
+  specification: ['specification'],
+  primitive: ['primitive'],
   // ── Product (root) ─────────────────────────────────────────────────────────
   product: [
     // Strategy

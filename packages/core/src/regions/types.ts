@@ -129,3 +129,4 @@ export type UPGRegionId =
   | 'business_gtm_growth'
   | 'analytics_data'
   | 'operations_quality'
+  | 'foundations'

@@ -77,6 +77,9 @@ export interface EntityTypeMeta {
 // ─── Entity type registry ──────────────────────────────────────────────────────
 
 export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
+  // Foundations (0.9.12): shared specifications + the primitives they define.
+  { name: 'specification', type_id: 'ent_352', maturity: 'proposed', since: '0.9.12' },
+  { name: 'primitive', type_id: 'ent_353', maturity: 'proposed', since: '0.9.12' },
 
   // ── Strategic ──
   { name: 'product', type_id: 'ent_001', maturity: 'stable', since: '0.1.0' },
