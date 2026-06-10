@@ -322,6 +322,19 @@ function portfolioBody(doc: UPGPortfolioDocument): Record<string, unknown> {
       .map((p) => orderedObject(p as unknown as Record<string, unknown>, ['id', 'title', 'description', 'parent_portfolio_id', 'hierarchy_model', 'products'], { forceKeys: ['id', 'title'] })),
     products,
     cross_edges: sortEdges(doc.cross_edges ?? []).map(canonicalCrossEdge),
+    // Registry tier (shared vocabulary). Emitted only when non-empty so existing
+    // portfolio files without a registry stay byte-identical. Canonical entities
+    // are normal nodes, serialised with the same node/edge canonical rules.
+    ...(doc.registry && doc.registry.nodes.length > 0
+      ? {
+          registry: {
+            nodes: sortNodes(doc.registry.nodes).map(canonicalNode),
+            ...(doc.registry.edges && doc.registry.edges.length > 0
+              ? { edges: sortEdges(doc.registry.edges).map(canonicalEdge) }
+              : {}),
+          },
+        }
+      : {}),
   }
 }
 
@@ -477,6 +490,18 @@ export function normalizeDocument(obj: unknown): UPGDocument | UPGPortfolioDocum
         edges: p.edges ?? [],
       })),
       cross_edges: (raw.cross_edges as UPGPortfolioDocument['cross_edges']) ?? [],
+    }
+    // Registry tier: read back when present, repairing node drift on the
+    // canonical entities the same way product nodes are repaired. Absent on
+    // legacy portfolios — left undefined so the field stays optional.
+    const rawRegistry = raw.registry as
+      | { nodes?: UPGBaseNode[]; edges?: UPGEdge[] }
+      | undefined
+    if (rawRegistry && Array.isArray(rawRegistry.nodes)) {
+      out.registry = {
+        nodes: rawRegistry.nodes.map((n) => repairNodeDrift(n)),
+        ...(Array.isArray(rawRegistry.edges) ? { edges: rawRegistry.edges } : {}),
+      }
     }
     return out
   }

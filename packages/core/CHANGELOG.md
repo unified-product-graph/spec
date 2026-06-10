@@ -7,6 +7,25 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.6] - 2026-06-10
+
+**Canonical shared-entity registry + drift detection (canonical-registry initiative, Phases 2–3).** The core of the registry: a portfolio can now define a shared entity ONCE and have every product's local copy link to it as a canonical instance, with drift surfaced automatically. Decision: `2026-06-10-canonical-shared-entity-registry.md`.
+
+### Added
+- **`instance_of` cross-edge** (9th member of `UPG_CROSS_EDGE_TYPES`): a directed *product entity → canonical (registry) entity* relationship — "this product node is an instance of that shared, authoritative node." Endpoints must share a type (a `persona` instance_of a `persona`); the target is addressed as `registry/{node_id}`. Distinct from the symmetric `shares_*` peer edges and coexists with them (canonical-to-instance vs peer-equivalence; neither deprecates the other). Unlocks rollup ("every Developer instance and its per-surface jobs"), cross-instance diff, and drift detection.
+- **`registry` section on the portfolio document** (`UPGPortfolioDocument.registry`, shape `UPGRegistry`): the shared-vocabulary tier that sits above products. Canonical entities are normal `UPGBaseNode`s (no new type, no flag — canonical-ness is conferred by living in the registry). Optional and additive: portfolios without a registry stay valid and byte-identical; an empty registry is omitted on serialise. `REGISTRY_PRODUCT_ID = 'registry'` is the reserved pseudo product-id used to qualify registry references; product creation rejects it.
+- (SDK) `UPGPortfolioStore` registry accessors: `getRegistry` / `ensureRegistry` / `addRegistryNode` / `getRegistryNode` / `listRegistryNodes(type?)` / `removeRegistryNode`. The canonical serialiser round-trips the registry section (write + normalise).
+- (MCP server) three local registry tools: **`define_canonical_entity`** (create a canonical node in the registry), **`register_instance`** (create an `instance_of` edge from a product node to a canonical, enforcing the same-type constraint and the `registry/` target), and **`list_registry`** (list canonical entities, optionally with their instances). Tool surface 110 → 113. Local-only (portfolio.upg is a workspace concept; no cloud analogue).
+- (MCP server) **registry drift detection in `portfolio_validate`** (Phase 3): flags an `instance_of` edge whose target is missing from the registry, whose endpoints disagree on type, or whose instance title diverges from its canonical (off-canon rename). The payoff of the registry — a renamed-off-canon instance is now *detectable*, not silent.
+
+### Changed
+- `create_cross_product_edge` and `batch_create_cross_product_edges` reject `instance_of`, directing callers to `register_instance` (single enforcement path for the registry's same-type + `registry/` target rules). `list_cross_edge_types` now reports nine types.
+
+### Notes
+- Phase 4 (`primitive` / `standard` type for foundational shared tech) remains deferred pending a coverage pass against existing `dependency` / `capability`; it must not block the registry core. No entity / domain / edge-catalogue count change (cross-edges are a separate union from `UPG_EDGE_CATALOG`).
+
+---
+
 ## [0.9.5] - 2026-06-10
 
 **Persona `audience_role` (canonical-registry initiative, Phase 1).** A small, independent property change — the first cut of the canonical shared-entity registry initiative. Decision: `2026-06-10-canonical-shared-entity-registry.md`.

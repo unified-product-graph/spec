@@ -220,6 +220,32 @@ describe('canonical serialisation — portfolio envelope ($upg header, kind: por
     expect(reparsed.products).toHaveLength(2)
     expect(reparsed.cross_edges).toHaveLength(1)
   })
+
+  it('omits the registry section when absent (byte-identical to a no-registry portfolio)', () => {
+    const obj = JSON.parse(serializeCanonical(portfolioDoc()))
+    expect('registry' in obj).toBe(false)
+  })
+
+  it('round-trips a registry section with canonical entities + an instance_of edge', () => {
+    const withRegistry = portfolioDoc()
+    withRegistry.registry = {
+      nodes: [{ id: 'persona_developer', type: 'persona', title: 'Developer', properties: { audience_role: 'user' } }],
+    }
+    withRegistry.cross_edges.push({
+      id: 'ce-2',
+      source: 'p-b/n1',
+      target: 'registry/persona_developer',
+      type: 'instance_of',
+      source_product_id: 'p-b',
+      target_product_id: 'registry',
+    })
+    const once = serializeCanonical(withRegistry)
+    expect(formatUpgText(once)).toBe(once) // idempotent
+    const reparsed = parseUpg(once) as UPGPortfolioDocument
+    expect(reparsed.registry?.nodes).toHaveLength(1)
+    expect(reparsed.registry?.nodes[0]?.id).toBe('persona_developer')
+    expect(reparsed.cross_edges.some((e) => e.type === 'instance_of')).toBe(true)
+  })
 })
 
 describe('normalizeDocument — accepts pre-parsed objects (both envelopes)', () => {

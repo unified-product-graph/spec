@@ -89,6 +89,18 @@ export type UPGCrossEdgeType =
   // portfolio can answer "which company objective is this product serving?" and
   // "which company KRs have no product driving them?".
   | 'contributes_to'
+  // Canonical instance. Directed product entity -> canonical (registry) entity:
+  // "this product node is an instance of that shared, authoritative node." The
+  // target lives in the portfolio document's `registry` section (qualified as
+  // `registry/{node_id}`), not in a product. The endpoints must share a type
+  // (a persona instance_of a persona, a metric instance_of a metric); the
+  // same-type rule is enforced by the registry tooling, not by this list.
+  // Distinct from the symmetric `shares_*` peer edges: `instance_of` is
+  // canonical-to-instance and unlocks rollup ("every Developer instance and its
+  // per-surface jobs"), diff, and drift detection (an instance whose title or
+  // shape strays from its canonical). Coexists with `shares_*`; neither
+  // deprecates the other. See `REGISTRY_PRODUCT_ID` and `UPGRegistry`.
+  | 'instance_of'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -104,7 +116,18 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'succeeds',
   'hosts',
   'contributes_to',
+  'instance_of',
 ]
+
+/**
+ * Reserved pseudo product-id for the portfolio registry tier. Canonical
+ * registry entities are addressed in qualified-id references (and `instance_of`
+ * cross-edge targets) as `registry/{node_id}`. No real product may claim this
+ * id; product creation rejects it. The registry itself lives in the
+ * `registry` section of the portfolio document (`UPGPortfolioDocument.registry`),
+ * not in a product file.
+ */
+export const REGISTRY_PRODUCT_ID = 'registry' as const
 
 // ─── Cross-product edge ──────────────────────────────────────────────────────
 
@@ -227,6 +250,38 @@ export interface UPGOrganization {
   industry?: string
 }
 
+// ─── Registry (shared-vocabulary tier) ────────────────────────────────────────
+
+/**
+ * The canonical shared-entity registry: the portfolio's shared vocabulary tier.
+ *
+ * Entities shared across products (personas, metrics, competitors,
+ * market_segments, ...) are defined ONCE here as authoritative nodes; each
+ * product's local instance links to the canonical via an `instance_of`
+ * cross-edge (`registry/{node_id}` target). This is a third conceptual tier
+ * above products: product graphs hold instances, the portfolio holds org
+ * structure, and `registry` holds the shared vocabulary.
+ *
+ * A canonical entity is just a normal `UPGBaseNode` — canonical-ness is
+ * conferred by living in the registry, not by a new type or flag. `edges` is
+ * reserved for future canonical-internal structure (e.g. a canonical persona
+ * pursuing a canonical job) and is optional; v1 tooling operates on `nodes`.
+ *
+ * @example
+ * const registry: UPGRegistry = {
+ *   nodes: [
+ *     { id: 'persona_developer', type: 'persona', title: 'Developer',
+ *       properties: { audience_role: 'user' } },
+ *   ],
+ * }
+ */
+export interface UPGRegistry {
+  /** Canonical shared entities. Each is a normal node addressed as `registry/{id}`. */
+  nodes: UPGBaseNode[]
+  /** Reserved: canonical-internal relationships. Optional; unused by v1 tooling. */
+  edges?: UPGEdge[]
+}
+
 // ─── Document integrity ───────────────────────────────────────────────────────
 
 /**
@@ -319,4 +374,11 @@ export interface UPGPortfolioDocument {
   products: Array<UPGProduct & { nodes: UPGBaseNode[]; edges: UPGEdge[] }>
   /** Cross-product edges linking entities across products */
   cross_edges: UPGCrossEdge[]
+  /**
+   * The canonical shared-entity registry (shared-vocabulary tier). Optional and
+   * additive: portfolio documents without a registry remain valid, and an empty
+   * registry is omitted rather than serialised. Product instances reference
+   * canonical nodes here via `instance_of` cross-edges (`registry/{node_id}`).
+   */
+  registry?: UPGRegistry
 }
