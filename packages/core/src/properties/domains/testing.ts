@@ -1,6 +1,6 @@
 /**
  * UPG Property Schemas: QA & Testing Domain.
- * TestSuite, TestCase, QaSession, RegressionTest, TestCoverageReport,
+ * TestPlan, TestSuite, TestCase, QaSession, RegressionTest, TestCoverageReport,
  * TestEnvironment, TestResult.
  * https://unifiedproductgraph.org/spec | MIT
  */
@@ -10,6 +10,36 @@ import type { ISODate, ISODateTime, Priority } from '../primitives.js'
 // ---------------------------------------------------------------------------
 // QA & TESTING
 // ---------------------------------------------------------------------------
+
+/** Test plan: the QA verification procedure for a product or release.
+ *
+ * Re-homed validation → QA in. A `test_plan` defines HOW the team
+ * verifies the software works — the scope under test, the environments it runs
+ * in, the entry/exit (pass) criteria — and groups the `test_suite`s that carry
+ * it out. Its former validation-planning role (designing an experiment for a
+ * hypothesis) is now carried by `experiment_plan`.
+ *
+ * @example
+ * const properties: TestPlanProperties = {
+ *   test_scope: 'Checkout, billing settlement, and refund flows.',
+ *   plan_type: 'release',
+ *   environments: ['staging', 'production_mirror'],
+ *   entry_criteria: 'Build deployed to staging; seed data loaded.',
+ *   pass_criteria: 'All P0/P1 suites green; no open blocker bugs.',
+ * }
+ */
+export interface TestPlanProperties {
+  /** What the plan covers (e.g. "checkout flow", "auth module", "release 2.4"). */
+  test_scope?: string
+  /** Kind of verification effort this plan governs. */
+  plan_type?: 'release' | 'regression' | 'integration' | 'acceptance' | 'smoke' | 'exploratory'
+  /** Environments the plan exercises (mirrors `TestEnvironmentProperties.env_type`). */
+  environments?: Array<'local' | 'ci' | 'staging' | 'sandbox' | 'production_mirror'>
+  /** Conditions that must hold before execution may begin. */
+  entry_criteria?: string
+  /** Exit / pass criteria determining whether the plan succeeds. */
+  pass_criteria?: string
+}
 
 /** Test suite.
  *

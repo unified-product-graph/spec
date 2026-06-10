@@ -168,6 +168,7 @@ export interface ServiceLevelAgreementProperties {
  * @example
  * const properties: CustomerJourneyStageProperties = {
  *   stage_type: 'awareness',
+ *   stage_order: 0,
  *   avg_duration: '45m',
  *   conversion_rate: 0.08,
  * }
@@ -175,6 +176,13 @@ export interface ServiceLevelAgreementProperties {
 export interface CustomerJourneyStageProperties {
   /** Which pirate metric (AAARRR) this stage maps to */
   stage_type?: 'awareness' | 'acquisition' | 'activation' | 'retention' | 'revenue' | 'referral'
+  /**
+   * Display order along the lifecycle timeline (0-indexed). The `*_order`
+   * convention shared with `journey_phase.phase_order` and
+   * `journey_step.step_order` ( / CS-8), so two same-`stage_type` stages
+   * are orderable.
+   */
+  stage_order?: number
   /** Average time a customer spends in this stage */
   avg_duration?: string
   /** Percentage of customers who advance to the next stage */
@@ -185,14 +193,18 @@ export interface CustomerJourneyStageProperties {
  *
  * @example
  * const properties: TouchpointProperties = {
- *   touchpoint_channel: 'in-product',
+ *   touchpoint_channel: 'in_app',
  *   touchpoint_type: 'reactive',
  *   satisfaction_score: 42,
  * }
  */
 export interface TouchpointProperties {
-  /** Channel where the interaction occurs (e.g. "email", "in-app", "call") */
-  touchpoint_channel?: string
+  /**
+   * Medium (modality) of the interaction: how it physically happens. Distinct
+   * from a go-to-market *channel* (`marketing_channel`/`acquisition_channel`/
+   * `distribution_channel`), which are market routes, not interaction media.
+   */
+  touchpoint_channel?: 'in_app' | 'email' | 'phone' | 'chat' | 'sms' | 'in_person' | 'mail'
   /** Whether the touchpoint is initiated by the customer, CSM, or system */
   touchpoint_type?: 'reactive' | 'proactive' | 'automated'
   /** Customer satisfaction score for this touchpoint */

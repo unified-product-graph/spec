@@ -325,7 +325,9 @@ describe('Edge pair uniqueness', () => {
 
  // Document the count — this is informational, not a failure.
  // If the count changes unexpectedly, the snapshot will flag it for review.
- expect(multiPairs.length).toMatchInlineSnapshot(`35`)
+ // lowered 35 → 27 by the duplicate-collapse (13 shadow / near-synonym
+ // / inverse edges retired; the inverse flips removed two source:target pairs).
+ expect(multiPairs.length).toMatchInlineSnapshot(`27`)
  })
 })
 
@@ -375,14 +377,13 @@ describe('pickCanonicalEdge / resolveAllEdges (G5)', () => {
  })
 
  it('pickCanonicalEdge with hierarchy hint prefers the hierarchy-class edge', () => {
- // product:decision has both product_decided_via_decision (hierarchy) and
- // product_decided_via_decision_hierarchy (hierarchy) — first declared wins
- // inside the same classification.
+ // product:decision and product:incident each had a duplicate
+ // hierarchy shadow (product_decided_via_decision_hierarchy,
+ // product_experiences_incident_hierarchy); both were collapsed into the clean
+ // key, so each pair now resolves to its single canonical hierarchy edge.
  expect(pickCanonicalEdge('product', 'decision', 'hierarchy')).toBe(
  'product_decided_via_decision',
  )
- // product:incident has product_experiences_incident (hierarchy) and
- // product_experiences_incident_hierarchy (hierarchy).
  expect(pickCanonicalEdge('product', 'incident', 'hierarchy')).toBe(
  'product_experiences_incident',
  )

@@ -1,8 +1,9 @@
 /**
  * UPG Property Schemas: AI & ML Domain.
- * AiModel, PromptVersion, EvalBenchmark, EvalRun, AiCostTracker,
- * HallucinationReport, AiGuardrail, ModelComparison, AiExperiment,
- * AiDataset, AiTrace.
+ * AiModel, PromptTemplate, PromptVersion, EvalBenchmark, EvalRun,
+ * AiCostTracker, HallucinationReport, AiGuardrail, ModelComparison,
+ * AiExperiment, AiDataset, AiTrace.
+ * Creation order: ai_model → prompt_template → prompt_version.
  * https://unifiedproductgraph.org/spec | MIT
  */
 
@@ -46,6 +47,28 @@ export interface AiModelProperties {
   aliases?: string[]
   /** Free-form classification tags */
   tags?: string[]
+}
+
+/** Prompt template.
+ *
+ * The canonical parent of `prompt_version`: a template contains its
+ * versions the way a file contains its commits. Lives in the AI domain, owned
+ * by the `ai_model` that defines it (ai_model → prompt_template → prompt_version).
+ *
+ * @example
+ * const properties: PromptTemplateProperties = {
+ *   use_case: 'Kick off a discovery sprint with a fresh persona set.',
+ *   variables: ['user_name', 'workspace_slug', 'cta_url'],
+ *   version: '0.3.1',
+ * }
+ */
+export interface PromptTemplateProperties {
+  /** Intended use case for the prompt */
+  use_case?: string
+  /** Variable names expected by the template */
+  variables?: string[]
+  /** Version identifier of the template */
+  version?: string
 }
 
 /** Prompt version.

@@ -110,9 +110,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "objective_achieved_through_key_result",
       "objective_measured_by_metric",
       "key_result_quantified_by_metric",
-      "key_result_tracked_by_metric",
       "outcome_measured_by_metric",
-      "outcome_tracked_by_metric",
       "metric_decomposes_into_metric",
       "metric_guards_metric",
       "metric_drives_metric",
@@ -367,7 +365,6 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       {
         type: "experiment",
         role: "hub",
-        notes: "self-nesting",
       },
       {
         type: "experiment_plan",
@@ -376,6 +373,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       {
         type: "experiment_run",
         role: "container",
+        notes: "self-nesting",
       },
       {
         type: "learning",
@@ -383,10 +381,6 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "evidence",
-        role: "leaf",
-      },
-      {
-        type: "test_plan",
         role: "leaf",
       },
       {
@@ -480,7 +474,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         direction: "export",
-        edge_id: "insight_informs_opportunity_cross_domain",
+        edge_id: "insight_informs_opportunity",
         crosses_into: "discovery_research_validation",
       },
       {
@@ -1164,7 +1158,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "prompt_template",
-        role: "leaf",
+        role: "container",
       },
       {
         type: "prompt_version",
@@ -1596,7 +1590,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "business_model_earns_via_revenue_stream",
       "business_model_costs_via_cost_structure",
       "business_model_measured_by_unit_economics",
-      "business_model_reaches_via_distribution_channel",
+      "business_model_distributes_via_distribution_channel",
       "business_model_maintains_customer_relationship",
       "business_model_requires_key_resource",
       "business_model_performs_key_activity",
@@ -1767,11 +1761,6 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         direction: "import",
-        edge_id: "key_result_tracked_by_metric",
-        crosses_into: "strategy_outcomes",
-      },
-      {
-        direction: "import",
         edge_id: "revenue_stream_measured_by_metric_cross_domain",
         crosses_into: "business_gtm_growth",
       },
@@ -1879,6 +1868,10 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         type: "infrastructure_component",
+        role: "container",
+      },
+      {
+        type: "test_plan",
         role: "container",
       },
       {
@@ -2162,7 +2155,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     boundary_edges: [
       {
         direction: "import",
-        edge_id: "product_experiences_incident_hierarchy",
+        edge_id: "product_experiences_incident",
         crosses_into: "product_delivery",
       },
       {

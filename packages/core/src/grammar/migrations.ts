@@ -1554,6 +1554,73 @@ export type UPGEdgeMigration =
  * Key is the version that INTRODUCES the migration (target version).
  */
 export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
+  '0.9.9': [
+    // (since v0.9.9/) Validation experiment-model + test_plan
+    // re-home. The validation chain is reshaped to the single-parent line
+    // hypothesis → experiment_plan → experiment → experiment_run, `experiment`
+    // gains its stable hypothesis loop, and `test_plan` re-homes to the QA
+    // domain (its planning role absorbed by `experiment_plan`).
+    //
+    // The plan→experiment containment inverts: the old `experiment_has_plan`
+    // (experiment → experiment_plan, hierarchy) becomes
+    // `experiment_plan_designs_experiment` (experiment_plan → experiment). Flip
+    // swaps endpoints. Endpoint guards reference the post-flip orientation: the
+    // original source (experiment) becomes the new target, the original target
+    // (experiment_plan) becomes the new source.
+    { kind: 'rename', from: 'experiment_has_plan', to: 'experiment_plan_designs_experiment', flip: true, requires_source_type: 'experiment', requires_target_type: 'experiment_plan', reason: 'Validation experiment-model reshape. The plan owns the experiment it designs; the containment direction inverts from experiment → experiment_plan to experiment_plan → experiment. Flip swaps endpoints so the surviving edge reads plan-designs-experiment.' },
+    // test_plan re-homed validation → QA. Its two validation-side
+    // edges are dropped: a hypothesis no longer plans via a QA test_plan (it
+    // requires an experiment_plan), and the test_plan → experiment_run ran-as
+    // bridge is superseded by the experiment_plan → experiment flow.
+    { kind: 'drop', from: 'hypothesis_planned_via_test_plan', reason: 'test_plan re-homed validation → QA. A hypothesis no longer plans via test_plan; the validation plan is experiment_plan (hypothesis_requires_experiment_plan).' },
+    { kind: 'drop', from: 'test_plan_ran_as_experiment_run', reason: 'test_plan re-homed validation → QA. The Strategyzer Test Card flow now runs hypothesis → experiment_plan → experiment → experiment_run; the test_plan → experiment_run bridge is superseded by experiment_plan_designs_experiment.' },
+
+    // (since v0.9.9) AI prompt-model correction. The prompt abstraction
+    // is inverted to the correct ai_model → prompt_template → prompt_version
+    // containment. The backwards/obsolete edges are dropped, and the
+    // prompt_template → ai_model "targets" relationship is flipped into the new
+    // ai_model → prompt_template ownership.
+    { kind: 'rename', from: 'prompt_template_targets_ai_model', to: 'ai_model_defines_prompt_template', flip: true, requires_source_type: 'prompt_template', requires_target_type: 'ai_model', reason: 'AI prompt-model correction. The model owns its templates; the prompt_template → ai_model "targets" edge becomes the ai_model → prompt_template ownership edge. Flip swaps endpoints so the surviving edge reads model-defines-template.' },
+    { kind: 'drop', from: 'prompt_version_evolves_prompt_template', reason: 'AI prompt-model correction. The backwards prompt_version → prompt_template edge is retired; prompt_template now contains its versions (prompt_template_contains_prompt_version).' },
+    { kind: 'drop', from: 'ai_model_prompted_via_prompt_version', reason: 'AI prompt-model correction. The model no longer owns prompt_version directly; the chain is ai_model → prompt_template → prompt_version.' },
+    { kind: 'drop', from: 'product_prompted_via_prompt_template', reason: 'AI prompt-model correction. prompt_template re-parented product → ai_model (ai_model_defines_prompt_template); the product-level containment is removed.' },
+    { kind: 'drop', from: 'content_calendar_schedules_prompt_template', reason: 'AI prompt-model correction. prompt_template re-homed into the ai_model containment tree; it is an AI artefact, not a content-calendar-scheduled item.' },
+
+    // (since v0.9.9) Strategic-theme containment edge rename. The
+    // malformed `objective_rolls_up_to_strategic_theme` (key read object-first
+    // while source_type was strategic_theme; forward_verb was the malformed
+    // `contains_objective`) is renamed to the clean source-first
+    // `strategic_theme_contains_objective`. Endpoints unchanged
+    // (strategic_theme → objective); only the key and forward verb change.
+    { kind: 'rename', from: 'objective_rolls_up_to_strategic_theme', to: 'strategic_theme_contains_objective', requires_source_type: 'strategic_theme', requires_target_type: 'objective', reason: 'Strategic-theme containment edge rename. The key now reads source-first and the forward verb is the clean `contains` (was the malformed `contains_objective`). Endpoints unchanged (strategic_theme → objective); satisfies the F2 prefix gate.' },
+
+    // (since v0.9.9) Duplicate / shadow edge collapse. Each retired key
+    // is dual-read to the surviving canonical key. Tier 1 = byte-identical
+    // shadows; Tier 2 = tense/suffix twins; Tier 3 = near-synonyms collapsed per
+    // Captain's lean. Inverse pairs flip the direction onto the kept containment
+    // edge. Collapsing these lowers the edge-duplicate gate collision bound.
+    // ── Tier 1: byte-identical shadows ──
+    { kind: 'rename', from: 'insight_informs_opportunity_cross_domain', to: 'insight_informs_opportunity', requires_source_type: 'insight', requires_target_type: 'opportunity', reason: 'Duplicate collapse. Byte-identical shadow of insight_informs_opportunity; the suffixed twin never resolved.' },
+    { kind: 'rename', from: 'product_experiences_incident_hierarchy', to: 'product_experiences_incident', requires_source_type: 'product', requires_target_type: 'incident', reason: 'Duplicate collapse. Byte-identical shadow of product_experiences_incident; the suffixed twin never resolved.' },
+    { kind: 'rename', from: 'value_proposition_targets_persona_cross_domain', to: 'value_proposition_targets_persona', requires_source_type: 'value_proposition', requires_target_type: 'persona', reason: 'Duplicate collapse. Byte-identical shadow of value_proposition_targets_persona; the suffixed twin never resolved.' },
+    { kind: 'rename', from: 'metric_measures_metric_cross_domain', to: 'metric_measures_metric', requires_source_type: 'metric', requires_target_type: 'metric', reason: 'Duplicate collapse. Byte-identical shadow of metric_measures_metric; the suffixed twin never resolved.' },
+    { kind: 'rename', from: 'insight_validates_need_cross_domain', to: 'insight_validates_need', requires_source_type: 'insight', requires_target_type: 'need', reason: 'Duplicate collapse. Byte-identical shadow of insight_validates_need; the suffixed twin never resolved.' },
+    // ── Tier 2: tense / suffix twins ──
+    { kind: 'rename', from: 'metric_decomposed_into_metric', to: 'metric_decomposes_into_metric', requires_source_type: 'metric', requires_target_type: 'metric', reason: 'Duplicate collapse. Tense-twin of the active-voice metric_decomposes_into_metric.' },
+    { kind: 'rename', from: 'product_decided_via_decision_hierarchy', to: 'product_decided_via_decision', requires_source_type: 'product', requires_target_type: 'decision', reason: 'Duplicate collapse. Suffix-twin of product_decided_via_decision.' },
+    { kind: 'rename', from: 'support_ticket_reveals_need_cross_domain', to: 'support_ticket_reveals_need', requires_source_type: 'support_ticket', requires_target_type: 'need', reason: 'Duplicate collapse. Near-duplicate of support_ticket_reveals_need (whose reverse_verb is normalised to revealed_by).' },
+    // ── Tier 3: near-synonyms (Captain's lean = collapse) ──
+    { kind: 'rename', from: 'outcome_tracked_by_metric', to: 'outcome_measured_by_metric', requires_source_type: 'outcome', requires_target_type: 'metric', reason: 'Duplicate collapse. Near-synonym of outcome_measured_by_metric (keep measured_by, drop tracked_by).' },
+    { kind: 'rename', from: 'key_result_tracked_by_metric', to: 'key_result_quantified_by_metric', requires_source_type: 'key_result', requires_target_type: 'metric', reason: 'Duplicate collapse. Near-synonym of key_result_quantified_by_metric (keep quantified_by, drop tracked_by).' },
+    { kind: 'rename', from: 'business_model_reaches_via_distribution_channel', to: 'business_model_distributes_via_distribution_channel', requires_source_type: 'business_model', requires_target_type: 'distribution_channel', reason: 'Duplicate collapse. Near-synonym of business_model_distributes_via_distribution_channel (the Business Model Canvas Channels verb).' },
+    // ── Inverse pairs: flip onto the kept containment edge ──
+    // Flip guards reference the PRE-flip (original-edge) endpoints: the original
+    // source becomes the new target after flip, so requires_source_type matches
+    // the new edge's target_type and requires_target_type matches its source_type.
+    { kind: 'rename', from: 'product_categorised_in_product_area', to: 'product_area_contains_product', flip: true, requires_source_type: 'product', requires_target_type: 'product_area', reason: 'Duplicate collapse. Inverse of the containment edge product_area_contains_product (product_area → product). Flip swaps endpoints; the "categorised in" read survives as the reverse_verb belongs_to.' },
+    { kind: 'rename', from: 'changelog_documents_release', to: 'release_documented_in_changelog', flip: true, requires_source_type: 'changelog', requires_target_type: 'release', reason: 'Duplicate collapse. Inverse of the containment edge release_documented_in_changelog (release → changelog, matching hierarchy release: [changelog]). Flip swaps endpoints; the "changelog documents release" read survives as the reverse_verb documents.' },
+  ],
+
   '0.9.2': [
     // (since v0.9.2) Journey-model disambiguation. A journey_phase
     // is a temporal BAND over the journey's single step timeline, not a

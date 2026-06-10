@@ -7,6 +7,23 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.9] - 2026-06-10
+
+**Structural-integrity forks: validation, AI-prompt, and journey models corrected; duplicate edges collapsed.** A spec-model cut that fixes several long-standing structural mismodels and retires shadow edges. Every renamed or retired edge ships a dual-read migration (`UPG_EDGE_MIGRATIONS['0.9.9']`), so stored graphs upgrade automatically on load. No new tools (118) and no entity-count change; the within-product edge catalogue settles at 975 after the duplicate collapse.
+
+### Changed
+- **Validation experiment-model reshape.** The validation chain is corrected to the single-parent line `hypothesis → experiment_plan → experiment → experiment_run`. The plan-to-experiment containment inverts: `experiment_has_plan` becomes `experiment_plan_designs_experiment` (the plan designs the experiment it owns), and `experiment` gains its stable hypothesis loop (`hypothesis_tested_by_experiment`, `experiment_validates_hypothesis`).
+- **`test_plan` re-homed validation → QA.** `test_plan` is now a QA artefact rather than a validation planner; its planning role is absorbed by `experiment_plan`. New QA edges `product_plans_qa_via_test_plan`, `test_plan_executed_by_test_suite`, and `test_plan_specifies_test_environment`; the validation-side `hypothesis_planned_via_test_plan` and `test_plan_ran_as_experiment_run` are dropped.
+- **AI prompt-model correction.** The prompt abstraction is inverted to the correct `ai_model → prompt_template → prompt_version` containment (`ai_model_defines_prompt_template`, `prompt_template_contains_prompt_version`, `prompt_version_supersedes_prompt_version`), with the evaluation, tracing, and provenance bridges (`eval_run_evaluates_ai_model`, `eval_run_scores_prompt_version`, `ai_trace_executed_prompt_version`, `hallucination_report_traces_to_ai_trace`, `hallucination_report_caused_by_root_cause`, `ai_dataset_sourced_from_data_source`). The backwards/obsolete prompt edges are dropped.
+- **Strategic-theme containment edge renamed.** `objective_rolls_up_to_strategic_theme` → `strategic_theme_contains_objective` (source-first key, clean `contains` verb; endpoints unchanged).
+- **`touchpoint_channel` constrained to a medium enum** (`in_app` | `email` | `phone` | `chat` | `sms` | `in_person` | `mail`), disambiguating the interaction *medium* from a go-to-market *channel* (`marketing_channel` / `acquisition_channel` / `distribution_channel`).
+- **Journey-model de-duplication** and **duplicate / shadow edge collapse**: byte-identical shadows, tense/suffix twins, and near-synonym edges collapse onto their surviving canonical keys (each dual-read), lowering the edge-duplicate collision bound. `UPG_EDGE_COUNT` 979 → 975.
+
+### Migration
+- **`UPG_EDGE_MIGRATIONS['0.9.9']`** dual-reads every renamed or dropped edge key, so a graph written by an earlier version resolves to the new canonical edges on load. Renames with an inverted direction carry a `flip`; superseded edges with no structural replacement are `drop`ped.
+
+---
+
 ## [0.9.8] - 2026-06-10
 
 **Registry lifecycle + portfolio-tier audience and metric edges (batch 5).** Closes the lifecycle gaps found while standing up a real shared-entity registry: canonicals can now be edited, batch-created, and promoted from existing nodes; deliberate name divergences can be sanctioned; and two new portfolio edges connect the org axis to its audience and complete the measurement cascade.

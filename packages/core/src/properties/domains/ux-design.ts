@@ -11,8 +11,17 @@ import type { UPGAssessment, Priority } from '../primitives.js'
 // EXPERIENCE DESIGN
 // ---------------------------------------------------------------------------
 
-/** Whether a journey maps current or future state */
-export type JourneyType = 'current_state' | 'future_state' | 'day_in_the_life' | 'service_blueprint'
+/** Whether a journey maps current or future state.
+ *
+ * BREAKING in v0.9.9: the `'service_blueprint'` value is deprecated
+ * and removed from the union. A service blueprint is a first-class
+ * `service_blueprint` *entity* (in the customer_success domain), not a *type of*
+ * `user_journey`. Migration: a `user_journey` carrying
+ * `journey_type: 'service_blueprint'` should be re-modelled as a
+ * `service_blueprint` node; drop the journey_type value (it no longer
+ * type-checks). `current_state` / `future_state` / `day_in_the_life` are kept.
+ */
+export type JourneyType = 'current_state' | 'future_state' | 'day_in_the_life'
 
 /** User journey map.
  *
@@ -103,7 +112,14 @@ export interface JourneyStepProperties {
    * explicit `journey_step_precedes_journey_step` edge captures the chain.
    */
   step_order?: number
-  /** Interaction touchpoint */
+  /**
+   * @deprecated since v0.9.9. Touchpoints are modelled in two places,
+   * neither of which is this string: the `touchpoint` *entity* is the
+   * cross-channel customer-success layer (`touchpoint_occurs_in_journey_step`),
+   * and `journey_action` is the in-product blueprint layer (the finest band of
+   * a `journey_step`). Use one of those rather than a free-text string here.
+   * Removed in a future major.
+   */
   touchpoint?: string
   /** Channel (e.g. "web", "email", "in-store") */
   channel?: string

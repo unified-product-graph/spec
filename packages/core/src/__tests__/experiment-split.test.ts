@@ -47,10 +47,10 @@ describe('Entity registration', () => {
  expect(run.type_id).toBe('ent_341')
  expect(plan.since).toBe('0.2.6')
  expect(run.since).toBe('0.2.6')
- // Both ship as `proposed` promotion rubric — promoted to
- // stable once paired with framework definitions and validated by
- // real consumer use.
- expect(plan.maturity).toBe('proposed')
+ // experiment_plan graduated proposed → stable: it is the canonical
+ // validation PLAN type (absorbed test_plan's planning props). experiment_run
+ // stays proposed (the optional multi-run / replication child).
+ expect(plan.maturity).toBe('stable')
  expect(run.maturity).toBe('proposed')
  })
 
@@ -202,8 +202,14 @@ describe('Canonical edges', () => {
 })
 
 describe('Hierarchy registration', () => {
- it('experiment_plan owns experiment_run as a hierarchy child', () => {
- expect(UPG_VALID_CHILDREN['experiment_plan']).toContain('experiment_run')
+ it('experiment_plan owns experiment as a hierarchy child ( chain)', () => {
+ // The plan designs the experiment it produces; the validation chain
+ // is hypothesis ▷ experiment_plan ▷ experiment ▷ experiment_run.
+ expect(UPG_VALID_CHILDREN['experiment_plan']).toContain('experiment')
+ })
+
+ it('experiment owns experiment_run as a hierarchy child', () => {
+ expect(UPG_VALID_CHILDREN['experiment']).toContain('experiment_run')
  })
 
  it('experiment_run owns learning, evidence, metric children', () => {

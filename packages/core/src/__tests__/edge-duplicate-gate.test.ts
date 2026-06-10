@@ -31,17 +31,15 @@ type Def = (typeof UPG_EDGE_CATALOG)[keyof typeof UPG_EDGE_CATALOG]
 const ENTRIES = Object.entries(UPG_EDGE_CATALOG) as [string, Def][]
 
 // ── Baseline: the byte-identical duplicate groups present at the time this gate
-// was written. Each is a true shadow (same source, target, both verbs, and
-// classification under two keys); the second key is dead wiring that
-// `pickCanonicalEdge` never returns. Listed sorted-within-group so the freeze is
-// stable. Collapsing these is the deferred breaking dedup ( follow-up).
-const KNOWN_BYTE_IDENTICAL_GROUPS: ReadonlyArray<readonly [string, string]> = [
-  ['insight_informs_opportunity', 'insight_informs_opportunity_cross_domain'],
-  ['product_experiences_incident', 'product_experiences_incident_hierarchy'],
-  ['value_proposition_targets_persona', 'value_proposition_targets_persona_cross_domain'],
-  ['metric_measures_metric', 'metric_measures_metric_cross_domain'],
-  ['insight_validates_need', 'insight_validates_need_cross_domain'],
-]
+// was written. Each was a true shadow (same source, target, both verbs, and
+// classification under two keys); the second key was dead wiring that
+// `pickCanonicalEdge` never returned.
+//
+// The five baseline shadow groups were COLLAPSED — each suffixed twin
+// was retired and dual-read to its clean key (UPG_EDGE_MIGRATIONS['0.9.9']). The
+// baseline is now empty: no byte-identical shadow remains. This gate still FAILS
+// loudly if a NEW byte-identical shadow is introduced.
+const KNOWN_BYTE_IDENTICAL_GROUPS: ReadonlyArray<readonly [string, string]> = []
 
 function byteIdenticalSignature(def: Def): string {
   return `${def.source_type}|${def.target_type}|${def.forward_verb}|${def.reverse_verb}|${def.classification}`
@@ -99,12 +97,13 @@ describe('edge duplicate gate — (source,target,classification) collisions are 
       by3.set(k, arr)
     }
     const collisionGroups = [...by3.values()].filter((keys) => keys.length > 1).length
-    // Baseline at the time of writing. Reducing this (via the dedup
-    // follow-up) is expected and welcome — lower it then. It must not silently
+    // Baseline lowered 36 → 26 by the duplicate-collapse (13 shadow /
+    // near-synonym / inverse edges retired). Reducing this further (via a future
+    // dedup) is expected and welcome — lower it then. It must not silently
     // increase.
     expect(
       collisionGroups,
       'a new (source,target,classification) collision was introduced; if intentional (distinct verbs), update this baseline.',
-    ).toBeLessThanOrEqual(36)
+    ).toBeLessThanOrEqual(26)
   })
 })

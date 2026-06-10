@@ -98,8 +98,22 @@ export const UPG_EDGE_CATALOG = {
   // `evolved_from` in the reverse lets a feature trace its solution ancestry.
   solution_becomes_feature: { forward_verb: 'becomes', reverse_verb: 'evolved_from', classification: 'causal', source_type: 'solution', target_type: 'feature' },
   hypothesis_requires_experiment_plan: { forward_verb: 'requires', reverse_verb: 'planned_for', classification: 'causal', source_type: 'hypothesis', target_type: 'experiment_plan' },
-  hypothesis_planned_via_test_plan: { forward_verb: 'planned_via', reverse_verb: 'plans_for', classification: 'hierarchy', source_type: 'hypothesis', target_type: 'test_plan' },
+  // V4: close the stable canonical loop directly on `experiment`.
+  // Before this, resolve_edge_for_pair(hypothesis, experiment) and the reverse
+  // were both null — the stable experiment could not attach to the hypothesis
+  // it tests without adopting the proposed run type.
+  hypothesis_tested_by_experiment: { forward_verb: 'tested_by', reverse_verb: 'tests', classification: 'causal', source_type: 'hypothesis', target_type: 'experiment' },
+  experiment_validates_hypothesis: { forward_verb: 'validates', reverse_verb: 'validated_by', classification: 'causal', source_type: 'experiment', target_type: 'hypothesis' },
   hypothesis_investigated_via_research_plan: { forward_verb: 'investigated_via', reverse_verb: 'investigates', classification: 'hierarchy', source_type: 'hypothesis', target_type: 'research_plan' },
+  // V8: a research insight can seed a hypothesis directly. The region
+  // says validation consumes `insight` from user_research, but the only paths
+  // in were via solution/learning/assumption.
+  insight_generates_hypothesis: { forward_verb: 'generates', reverse_verb: 'generated_from', classification: 'cross-domain', source_type: 'insight', target_type: 'hypothesis' },
+  // V7: the validation-side research plan is conducted as the
+  // user_research-side research study. Both sit in the
+  // discovery_research_validation region but had no connecting edge; the plan
+  // jumped straight to `participant`, bypassing the study container.
+  research_plan_conducted_as_research_study: { forward_verb: 'conducted_as', reverse_verb: 'conducts', classification: 'cross-domain', source_type: 'research_plan', target_type: 'research_study' },
   experiment_run_produces_learning: { forward_verb: 'produces', reverse_verb: 'learned_from', classification: 'causal', source_type: 'experiment_run', target_type: 'learning' },
   experiment_run_yields_evidence: { forward_verb: 'yields', reverse_verb: 'supports', classification: 'causal', source_type: 'experiment_run', target_type: 'evidence' },
   // (v0.2.7 closure) the legacy duplicate pair
@@ -133,7 +147,11 @@ export const UPG_EDGE_CATALOG = {
   // canonical edge, not a foreign-key property (the v0.2.6 ExperimentPlan
   // interface left this slot pending in line with the principle).
   experiment_plan_targets_metric: { forward_verb: 'targets', reverse_verb: 'targeted_by_plan', classification: 'cross-domain', source_type: 'experiment_plan', target_type: 'metric' },
-  experiment_has_plan:                    { forward_verb: 'has_plan',          reverse_verb: 'is_plan_for',      classification: 'hierarchy',  source_type: 'experiment',        target_type: 'experiment_plan' },
+  // The validation plan designs the experiment it produces. This
+  // replaces the backwards `experiment_has_plan` (experiment → experiment_plan):
+  // the chain now reads hypothesis → experiment_plan → experiment → experiment_run,
+  // with experiment_plan the owning parent of experiment.
+  experiment_plan_designs_experiment:     { forward_verb: 'designs',           reverse_verb: 'designed_by',      classification: 'hierarchy',  source_type: 'experiment_plan',   target_type: 'experiment' },
   experiment_executed_as_experiment_run:  { forward_verb: 'executed_as',       reverse_verb: 'execution_of',     classification: 'hierarchy',  source_type: 'experiment',        target_type: 'experiment_run' },
   experiment_produces_learning:           { forward_verb: 'produces',          reverse_verb: 'produced_by',      classification: 'causal',     source_type: 'experiment',        target_type: 'learning' },
   experiment_produces_evidence:           { forward_verb: 'produces',          reverse_verb: 'produced_by',      classification: 'causal',     source_type: 'experiment',        target_type: 'evidence' },
@@ -266,11 +284,15 @@ export const UPG_EDGE_CATALOG = {
   product_holds_assumption: { forward_verb: 'holds', reverse_verb: 'held_by', classification: 'semantic', source_type: 'product', target_type: 'assumption' },
   product_measures_with_metric: { forward_verb: 'measures_with', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'product', target_type: 'metric' },
   outcome_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'outcome', target_type: 'metric' },
-  outcome_tracked_by_metric: { forward_verb: 'tracked_by', reverse_verb: 'tracks', classification: 'hierarchy', source_type: 'outcome', target_type: 'metric' },
+  // outcome_tracked_by_metric retired — near-synonym of
+  // outcome_measured_by_metric (the kept canonical key). Captain's lean =
+  // collapse. See UPG_EDGE_MIGRATIONS['0.9.9'].
   objective_achieved_through_key_result: { forward_verb: 'achieved_through', reverse_verb: 'achieves', classification: 'hierarchy', source_type: 'objective', target_type: 'key_result' },
   objective_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'objective', target_type: 'metric' },
   key_result_quantified_by_metric: { forward_verb: 'quantified_by', reverse_verb: 'quantifies', classification: 'hierarchy', source_type: 'key_result', target_type: 'metric' },
-  key_result_tracked_by_metric: { forward_verb: 'tracked_by', reverse_verb: 'tracks', classification: 'hierarchy', source_type: 'key_result', target_type: 'metric' },
+  // key_result_tracked_by_metric retired — near-synonym of
+  // key_result_quantified_by_metric (the kept canonical key). Captain's lean =
+  // collapse. See UPG_EDGE_MIGRATIONS['0.9.9'].
   vision_realised_through_mission: { forward_verb: 'realised_through', reverse_verb: 'realises', classification: 'hierarchy', source_type: 'vision', target_type: 'mission' },
   mission_supported_by_strategic_pillar: { forward_verb: 'supported_by', reverse_verb: 'supports', classification: 'hierarchy', source_type: 'mission', target_type: 'strategic_pillar' },
   strategic_pillar_organises_strategic_theme: { forward_verb: 'organises', reverse_verb: 'organised_by', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'strategic_theme' },
@@ -294,17 +316,20 @@ export const UPG_EDGE_CATALOG = {
   // make them measurable. Direct link means a dashboard can surface KRs next
   // to the theme without traversing objective.
   //
-  // `objective_rolls_up_to_strategic_theme`: the OKR containment edge.
+  // `strategic_theme_contains_objective`: the OKR containment edge (
+  // renamed from the malformed `objective_rolls_up_to_strategic_theme`).
   // an objective is the specific quarterly bet *within* a theme. strategic_theme
   // is the broader multi-quarter focus area; objective is subordinate.
   // Direction: strategic_theme → objective (parent → child, per UPG hierarchy
-  // convention where source is the parent). The reverse verb `rolls_up_to`
+  // convention where source is the parent). The key now reads source-first
+  // (strategic_theme), the forward verb is the clean `contains` (was the
+  // malformed `contains_objective`), and the reverse verb `rolls_up_to`
   // surfaces the upward-rollup read. Mirrors `strategic_pillar_organises_
   // strategic_theme` (pillar → theme), completing the strategic cascade:
   // strategic_pillar → strategic_theme → objective → key_result.
   strategic_theme_delivers_outcome: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'causal', source_type: 'strategic_theme', target_type: 'outcome' },
   strategic_theme_measured_by_key_result: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'causal', source_type: 'strategic_theme', target_type: 'key_result' },
-  objective_rolls_up_to_strategic_theme: { forward_verb: 'contains_objective', reverse_verb: 'rolls_up_to', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'objective' },
+  strategic_theme_contains_objective: { forward_verb: 'contains', reverse_verb: 'rolls_up_to', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'objective' },
   initiative_assumes_assumption: { forward_verb: 'assumes', reverse_verb: 'assumed_by', classification: 'hierarchy', source_type: 'initiative', target_type: 'assumption' },
   initiative_drives_outcome: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'initiative', target_type: 'outcome' },
   capability_enables_value_stream: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'cross-domain', source_type: 'capability', target_type: 'value_stream' },
@@ -618,7 +643,9 @@ export const UPG_EDGE_CATALOG = {
   threat_model_surfaces_vulnerability: { forward_verb: 'surfaces', reverse_verb: 'surfaced_by', classification: 'hierarchy', source_type: 'threat_model', target_type: 'vulnerability' },
   product_enforces_security_control: { forward_verb: 'enforces', reverse_verb: 'enforced_by', classification: 'hierarchy', source_type: 'product', target_type: 'security_control' },
   product_governed_by_security_policy: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'hierarchy', source_type: 'product', target_type: 'security_policy' },
-  product_experiences_incident_hierarchy: { forward_verb: 'experiences', reverse_verb: 'affects', classification: 'hierarchy', source_type: 'product', target_type: 'incident' },
+  // product_experiences_incident_hierarchy retired — byte-identical
+  // shadow of product_experiences_incident (the clean key). See
+  // UPG_EDGE_MIGRATIONS['0.9.9'].
   product_tested_by_penetration_test: { forward_verb: 'tested_by', reverse_verb: 'tests', classification: 'hierarchy', source_type: 'product', target_type: 'penetration_test' },
   product_reviewed_by_security_review: { forward_verb: 'reviewed_by', reverse_verb: 'reviews', classification: 'hierarchy', source_type: 'product', target_type: 'security_review' },
   product_classifies_data_with_data_classification: { forward_verb: 'classifies_data_with', reverse_verb: 'classifies_data_for', classification: 'hierarchy', source_type: 'product', target_type: 'data_classification' },
@@ -640,6 +667,12 @@ export const UPG_EDGE_CATALOG = {
   data_classification_applies_to_data_source: { forward_verb: 'applies_to', reverse_verb: 'classified_by', classification: 'cross-domain', source_type: 'data_classification', target_type: 'data_source' },
 
   // 3.4 Quality Assurance & Testing Domain
+  // test_plan re-homed validation → QA. It is the QA planning layer:
+  // the product owns its test plans; each plan is carried out by the suites it
+  // groups and specifies the environments it exercises.
+  product_plans_qa_via_test_plan: { forward_verb: 'plans_qa_via', reverse_verb: 'plans_qa_for', classification: 'hierarchy', source_type: 'product', target_type: 'test_plan' },
+  test_plan_executed_by_test_suite: { forward_verb: 'executed_by', reverse_verb: 'executes', classification: 'hierarchy', source_type: 'test_plan', target_type: 'test_suite' },
+  test_plan_specifies_test_environment: { forward_verb: 'specifies', reverse_verb: 'specified_by', classification: 'hierarchy', source_type: 'test_plan', target_type: 'test_environment' },
   product_maintains_test_suite: { forward_verb: 'maintains', reverse_verb: 'maintained_by', classification: 'hierarchy', source_type: 'product', target_type: 'test_suite' },
   test_suite_contains_test_case: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'test_suite', target_type: 'test_case' },
   product_undergoes_qa_session: { forward_verb: 'undergoes', reverse_verb: 'conducted_on', classification: 'hierarchy', source_type: 'product', target_type: 'qa_session' },
@@ -673,7 +706,12 @@ export const UPG_EDGE_CATALOG = {
 
   // 3.6 AI/ML Operations Domain
   product_powered_by_ai_model: { forward_verb: 'powered_by', reverse_verb: 'powers', classification: 'hierarchy', source_type: 'product', target_type: 'ai_model' },
-  ai_model_prompted_via_prompt_version: { forward_verb: 'prompted_via', reverse_verb: 'prompts', classification: 'hierarchy', source_type: 'ai_model', target_type: 'prompt_version' },
+  // The prompt abstraction is corrected to ai_model → prompt_template
+  // → prompt_version. The model defines templates; each template contains its
+  // versions. This replaces the inverted ai_model → prompt_version ownership
+  // and the backwards prompt_version → prompt_template edge.
+  ai_model_defines_prompt_template: { forward_verb: 'defines', reverse_verb: 'defined_by', classification: 'hierarchy', source_type: 'ai_model', target_type: 'prompt_template' },
+  prompt_template_contains_prompt_version: { forward_verb: 'contains', reverse_verb: 'version_of', classification: 'hierarchy', source_type: 'prompt_template', target_type: 'prompt_version' },
   ai_model_benchmarked_by_eval_benchmark: { forward_verb: 'benchmarked_by', reverse_verb: 'benchmarks', classification: 'hierarchy', source_type: 'ai_model', target_type: 'eval_benchmark' },
   eval_benchmark_executed_as_eval_run: { forward_verb: 'executed_as', reverse_verb: 'executes', classification: 'hierarchy', source_type: 'eval_benchmark', target_type: 'eval_run' },
   ai_model_costed_by_ai_cost_tracker: { forward_verb: 'costed_by', reverse_verb: 'costs', classification: 'hierarchy', source_type: 'ai_model', target_type: 'ai_cost_tracker' },
@@ -681,7 +719,10 @@ export const UPG_EDGE_CATALOG = {
   ai_model_constrained_by_ai_guardrail: { forward_verb: 'constrained_by', reverse_verb: 'constrains', classification: 'hierarchy', source_type: 'ai_model', target_type: 'ai_guardrail' },
   product_compared_via_model_comparison: { forward_verb: 'compared_via', reverse_verb: 'compares', classification: 'hierarchy', source_type: 'product', target_type: 'model_comparison' },
   ai_model_compared_in_model_comparison: { forward_verb: 'compared_in', reverse_verb: 'compares', classification: 'hierarchy', source_type: 'ai_model', target_type: 'model_comparison' },
-  prompt_version_evolves_prompt_template: { forward_verb: 'evolves', reverse_verb: 'evolved_by', classification: 'cross-domain', source_type: 'prompt_version', target_type: 'prompt_template' },
+  // (AI-10) prompt_version self-ordering: track iteration order with a
+  // real edge, not just a string property — the domain's own anti-pattern is
+  // "version prompts like code".
+  prompt_version_supersedes_prompt_version: { forward_verb: 'supersedes', reverse_verb: 'superseded_by', classification: 'semantic', source_type: 'prompt_version', target_type: 'prompt_version' },
   eval_benchmark_measures_feature: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'eval_benchmark', target_type: 'feature' },
   ai_guardrail_enforces_security_policy: { forward_verb: 'enforces', reverse_verb: 'enforced_by', classification: 'cross-domain', source_type: 'ai_guardrail', target_type: 'security_policy' },
   model_comparison_informs_decision: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'model_comparison', target_type: 'decision' },
@@ -689,6 +730,18 @@ export const UPG_EDGE_CATALOG = {
   ai_model_evaluated_through_ai_experiment: { forward_verb: 'evaluated_through', reverse_verb: 'evaluates',     classification: 'hierarchy',  source_type: 'ai_model',          target_type: 'ai_experiment' },
   ai_model_trained_on_ai_dataset:         { forward_verb: 'trained_on',        reverse_verb: 'trains',           classification: 'hierarchy',  source_type: 'ai_model',          target_type: 'ai_dataset' },
   ai_model_produces_ai_trace:             { forward_verb: 'produces',          reverse_verb: 'produced_by',      classification: 'causal',     source_type: 'ai_model',          target_type: 'ai_trace' },
+  // Observability bridges — turn four sinks into wired evidence and
+  // close the Model Evaluation Loop.
+  // AI-3: an eval_run can reach the model and prompt version it judged.
+  eval_run_evaluates_ai_model:            { forward_verb: 'evaluates',         reverse_verb: 'evaluated_by',     classification: 'cross-domain', source_type: 'eval_run',         target_type: 'ai_model' },
+  eval_run_scores_prompt_version:         { forward_verb: 'scores',            reverse_verb: 'scored_by',        classification: 'cross-domain', source_type: 'eval_run',         target_type: 'prompt_version' },
+  // AI-5: a hallucination_report reaches the trace that produced it and its root cause.
+  hallucination_report_traces_to_ai_trace: { forward_verb: 'traces_to',        reverse_verb: 'traced_by',        classification: 'cross-domain', source_type: 'hallucination_report', target_type: 'ai_trace' },
+  hallucination_report_caused_by_root_cause: { forward_verb: 'caused_by',       reverse_verb: 'causes',           classification: 'cross-domain', source_type: 'hallucination_report', target_type: 'root_cause' },
+  // AI-6: an ai_trace reaches the prompt version it executed.
+  ai_trace_executed_prompt_version:       { forward_verb: 'executed',          reverse_verb: 'executed_in',      classification: 'cross-domain', source_type: 'ai_trace',          target_type: 'prompt_version' },
+  // AI-4/AI-11: an ai_dataset carries provenance to its data source.
+  ai_dataset_sourced_from_data_source:    { forward_verb: 'sourced_from',      reverse_verb: 'sources',          classification: 'cross-domain', source_type: 'ai_dataset',        target_type: 'data_source' },
 
   // 3.7 Agentic Workflows & Process Domain
   product_automated_via_workflow_template: { forward_verb: 'automated_via', reverse_verb: 'automates', classification: 'hierarchy', source_type: 'product', target_type: 'workflow_template' },
@@ -729,7 +782,9 @@ export const UPG_EDGE_CATALOG = {
   // variant is owned by growth_campaign in the hierarchy; experiments
   // test them via a semantic relationship.
   experiment_run_tests_variant: { forward_verb: 'tests', reverse_verb: 'tested_in', classification: 'semantic', source_type: 'experiment_run', target_type: 'variant' },
-  metric_decomposed_into_metric: { forward_verb: 'decomposed_into', reverse_verb: 'rolls_up_to', classification: 'hierarchy', source_type: 'metric', target_type: 'metric' },
+  // metric_decomposed_into_metric retired — tense-twin of
+  // metric_decomposes_into_metric (the active-voice canonical key). See
+  // UPG_EDGE_MIGRATIONS['0.9.9'].
   metric_drives_metric: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'causal', source_type: 'metric', target_type: 'metric' },
   funnel_step_reveals_need: { forward_verb: 'reveals', reverse_verb: 'visible_in', classification: 'cross-domain', source_type: 'funnel_step', target_type: 'need' },
   funnel_step_tracks_event_schema: { forward_verb: 'tracks', reverse_verb: 'fires_in', classification: 'cross-domain', source_type: 'funnel_step', target_type: 'event_schema' },
@@ -759,7 +814,11 @@ export const UPG_EDGE_CATALOG = {
   business_model_requires_key_resource: { forward_verb: 'requires', reverse_verb: 'required_by', classification: 'hierarchy', source_type: 'business_model', target_type: 'key_resource' },
   business_model_performs_key_activity: { forward_verb: 'performs', reverse_verb: 'performed_by', classification: 'hierarchy', source_type: 'business_model', target_type: 'key_activity' },
   business_model_targets_market_segment: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'business_model', target_type: 'market_segment' },
-  business_model_reaches_via_distribution_channel: { forward_verb: 'reaches_via', reverse_verb: 'reaches_for', classification: 'hierarchy', source_type: 'business_model', target_type: 'distribution_channel' },
+  // business_model_reaches_via_distribution_channel retired —
+  // near-synonym of business_model_distributes_via_distribution_channel (the
+  // kept canonical key; "distributes_via" is the Business Model Canvas Channels
+  // verb). FLAG: Captain has not separately confirmed this collapse. See
+  // UPG_EDGE_MIGRATIONS['0.9.9'].
   business_model_maintains_customer_relationship: { forward_verb: 'maintains', reverse_verb: 'maintained_by', classification: 'hierarchy', source_type: 'business_model', target_type: 'customer_relationship' },
   business_model_distributes_via_distribution_channel: { forward_verb: 'distributes_via', reverse_verb: 'distributes_for', classification: 'hierarchy', source_type: 'business_model', target_type: 'distribution_channel' },
   revenue_stream_tiered_as_pricing_tier: { forward_verb: 'tiered_as', reverse_verb: 'tiers', classification: 'hierarchy', source_type: 'revenue_stream', target_type: 'pricing_tier' },
@@ -781,7 +840,9 @@ export const UPG_EDGE_CATALOG = {
   // as a `need` with `valence='pain'`; link each pain the proposition
   // relieves structurally.
   value_proposition_solves_need: { forward_verb: 'solves', reverse_verb: 'solved_by', classification: 'cross-domain', source_type: 'value_proposition', target_type: 'need' },
-  value_proposition_targets_persona_cross_domain: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'value_proposition', target_type: 'persona' },
+  // value_proposition_targets_persona_cross_domain retired —
+  // byte-identical shadow of value_proposition_targets_persona (the clean key).
+  // See UPG_EDGE_MIGRATIONS['0.9.9'].
   revenue_stream_drives_metric: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'revenue_stream', target_type: 'metric' },
   // Ring 5 structural edges
   // (P-I) These three edges name `funnel_step` but were typed against
@@ -933,7 +994,9 @@ export const UPG_EDGE_CATALOG = {
   customer_feedback_reveals_churn_reason: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'hierarchy', source_type: 'customer_feedback', target_type: 'churn_reason' },
   user_flow_contains_customer_journey_stage: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'user_flow', target_type: 'customer_journey_stage' },
   customer_journey_stage_contains_touchpoint: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'customer_journey_stage', target_type: 'touchpoint' },
-  support_ticket_reveals_need: { forward_verb: 'reveals', reverse_verb: 'revealed_by_ticket', classification: 'cross-domain', source_type: 'support_ticket', target_type: 'need' },
+  // reverse_verb normalised revealed_by_ticket → revealed_by when the
+  // support_ticket_reveals_need_cross_domain twin was collapsed into this clean key.
+  support_ticket_reveals_need: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'cross-domain', source_type: 'support_ticket', target_type: 'need' },
   customer_feedback_creates_observation: { forward_verb: 'creates', reverse_verb: 'created_from_feedback', classification: 'cross-domain', source_type: 'customer_feedback', target_type: 'observation' },
   churn_reason_generates_hypothesis: { forward_verb: 'generates', reverse_verb: 'generated_from_churn', classification: 'cross-domain', source_type: 'churn_reason', target_type: 'hypothesis' },
   user_flow_maps_user_journey: { forward_verb: 'maps', reverse_verb: 'mapped_by', classification: 'cross-domain', source_type: 'user_flow', target_type: 'user_journey' },
@@ -945,7 +1008,9 @@ export const UPG_EDGE_CATALOG = {
   customer_health_score_informs_playbook: { forward_verb: 'informs', reverse_verb: 'informed_by_health_score', classification: 'cross-domain', source_type: 'customer_health_score', target_type: 'playbook' },
   customer_feedback_becomes_feature_request: { forward_verb: 'becomes', reverse_verb: 'originated_from', classification: 'cross-domain', source_type: 'customer_feedback', target_type: 'feature_request' },
   support_ticket_reports_bug: { forward_verb: 'reports', reverse_verb: 'reported_by', classification: 'cross-domain', source_type: 'support_ticket', target_type: 'bug' },
-  support_ticket_reveals_need_cross_domain: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'cross-domain', source_type: 'support_ticket', target_type: 'need' },
+  // support_ticket_reveals_need_cross_domain retired — near-duplicate
+  // of support_ticket_reveals_need (the clean key, whose reverse_verb is now
+  // revealed_by). See UPG_EDGE_MIGRATIONS['0.9.9'].
   churn_reason_reveals_need: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'cross-domain', source_type: 'churn_reason', target_type: 'need' },
 
   // 5.2 Content & Knowledge Domain
@@ -953,7 +1018,9 @@ export const UPG_EDGE_CATALOG = {
   product_documents_in_knowledge_base_article: { forward_verb: 'documents_in', reverse_verb: 'documented_by', classification: 'hierarchy', source_type: 'product', target_type: 'knowledge_base_article' },
   product_expressed_via_brand_asset: { forward_verb: 'expressed_via', reverse_verb: 'expresses', classification: 'hierarchy', source_type: 'product', target_type: 'brand_asset' },
   product_documented_in_document: { forward_verb: 'documented_in', reverse_verb: 'documents', classification: 'hierarchy', source_type: 'product', target_type: 'document' },
-  product_prompted_via_prompt_template: { forward_verb: 'prompted_via', reverse_verb: 'prompts', classification: 'hierarchy', source_type: 'product', target_type: 'prompt_template' },
+  // product_prompted_via_prompt_template retired — prompt_template
+  // re-parented product → ai_model (ai_model_defines_prompt_template). See
+  // UPG_EDGE_MIGRATIONS['0.9.9'].
   product_templated_via_documentation_template: { forward_verb: 'templated_via', reverse_verb: 'templates', classification: 'hierarchy', source_type: 'product', target_type: 'documentation_template' },
   product_records_in_document: { forward_verb: 'records_in', reverse_verb: 'records', classification: 'hierarchy', source_type: 'product', target_type: 'document' },
   content_strategy_scheduled_in_content_calendar: { forward_verb: 'scheduled_in', reverse_verb: 'schedules', classification: 'hierarchy', source_type: 'content_strategy', target_type: 'content_calendar' },
@@ -963,12 +1030,19 @@ export const UPG_EDGE_CATALOG = {
   content_calendar_schedules_knowledge_base_article: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'hierarchy', source_type: 'content_calendar', target_type: 'knowledge_base_article' },
   content_calendar_schedules_brand_asset: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'hierarchy', source_type: 'content_calendar', target_type: 'brand_asset' },
   content_calendar_schedules_document: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'hierarchy', source_type: 'content_calendar', target_type: 'document' },
-  content_calendar_schedules_prompt_template: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'hierarchy', source_type: 'content_calendar', target_type: 'prompt_template' },
+  // content_calendar_schedules_prompt_template retired — prompt_template
+  // re-homed to the ai_model containment tree (it is an AI artefact, not a
+  // content-calendar-scheduled item). See UPG_EDGE_MIGRATIONS['0.9.9'].
   content_calendar_schedules_documentation_template: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'hierarchy', source_type: 'content_calendar', target_type: 'documentation_template' },
   content_piece_supports_messaging: { forward_verb: 'supports', reverse_verb: 'supported_by', classification: 'cross-domain', source_type: 'content_piece', target_type: 'messaging' },
   content_piece_part_of_growth_campaign: { forward_verb: 'part_of', reverse_verb: 'includes', classification: 'cross-domain', source_type: 'content_piece', target_type: 'growth_campaign' },
   knowledge_base_article_documents_feature: { forward_verb: 'documents', reverse_verb: 'documented_by', classification: 'cross-domain', source_type: 'knowledge_base_article', target_type: 'feature' },
-  changelog_documents_release: { forward_verb: 'documents', reverse_verb: 'documented_in', classification: 'cross-domain', source_type: 'changelog', target_type: 'release' },
+  // changelog_documents_release retired — inverse of the containment
+  // edge release_documented_in_changelog (release → changelog, matching the
+  // hierarchy release: ['changelog']). The "changelog documents release" read is
+  // preserved by that edge's reverse_verb (documents). FLAG: this is the only
+  // inverse pair collapsed; feature↔bug is kept (distinct classification +
+  // semantic). See UPG_EDGE_MIGRATIONS['0.9.9'].
   prompt_template_powers_feature: { forward_verb: 'powers', reverse_verb: 'powered_by', classification: 'cross-domain', source_type: 'prompt_template', target_type: 'feature' },
   content_theme_targets_persona: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'content_theme', target_type: 'persona' },
   // v0.7.2 ( §1): topic-cluster / content-pillar model; themes organize pieces. Connects the isolated `content_theme` AND `content_piece` members.
@@ -1007,7 +1081,9 @@ export const UPG_EDGE_CATALOG = {
   // 6.1 Team & Organisation Domain
   product_staffed_by_team: { forward_verb: 'staffed_by', reverse_verb: 'staffs', classification: 'hierarchy', source_type: 'product', target_type: 'team' },
   product_influenced_by_stakeholder: { forward_verb: 'influenced_by', reverse_verb: 'influences', classification: 'hierarchy', source_type: 'product', target_type: 'stakeholder' },
-  product_decided_via_decision_hierarchy: { forward_verb: 'decided_via', reverse_verb: 'decides', classification: 'hierarchy', source_type: 'product', target_type: 'decision' },
+  // product_decided_via_decision_hierarchy retired — duplicate of
+  // product_decided_via_decision (the clean key). See
+  // UPG_EDGE_MIGRATIONS['0.9.9'].
   product_organised_into_department: { forward_verb: 'organised_into', reverse_verb: 'organises', classification: 'hierarchy', source_type: 'product', target_type: 'department' },
   department_contains_team: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'department', target_type: 'team' },
   department_includes_stakeholder: { forward_verb: 'includes', reverse_verb: 'included_in', classification: 'hierarchy', source_type: 'department', target_type: 'stakeholder' },
@@ -1117,7 +1193,9 @@ export const UPG_EDGE_CATALOG = {
   dashboard_contains_report: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'dashboard', target_type: 'report' },
   dashboard_contains_experiment_run: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'dashboard', target_type: 'experiment_run' },
   metric_measures_metric: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'metric', target_type: 'metric' },
-  metric_measures_metric_cross_domain: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'metric', target_type: 'metric' },
+  // metric_measures_metric_cross_domain retired — byte-identical
+  // shadow of metric_measures_metric (the clean key). See
+  // UPG_EDGE_MIGRATIONS['0.9.9'].
   // `experiment_tests_hypothesis` dropped, superseded by
   // the canonical `experiment_run_validates_hypothesis` (causal) introduced
   // in v0.2.6. Authors expressing "this experiment tests this hypothesis"
@@ -1141,7 +1219,11 @@ export const UPG_EDGE_CATALOG = {
   product_area_contains_product_area: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'product_area', target_type: 'product_area' },
   // decision B: product_area groups features (the natural "Studio area owns 6 features" mental model)
   product_area_contains_feature: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'product_area', target_type: 'feature' },
-  product_categorised_in_product_area: { forward_verb: 'categorised_in', reverse_verb: 'categorises', classification: 'hierarchy', source_type: 'product', target_type: 'product_area' },
+  // product_categorised_in_product_area retired — inverse of
+  // product_area_contains_product (the kept containment direction:
+  // product_area → product, matching the UPG parent→child convention). FLAG:
+  // the inverse "product categorised in area" read is preserved by the kept
+  // edge's reverse_verb (belongs_to). See UPG_EDGE_MIGRATIONS['0.9.9'].
 
   // 8.2 Cross-Product Edges
   // direct product-level shorthand edges for market-intelligence shapes.
@@ -1212,7 +1294,9 @@ export const UPG_EDGE_CATALOG = {
   insight_reveals_desired_outcome: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'cross-domain', source_type: 'insight', target_type: 'desired_outcome' },
   insight_informs_job: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'insight', target_type: 'job' },
   insight_characterises_persona: { forward_verb: 'characterises', reverse_verb: 'characterised_by', classification: 'cross-domain', source_type: 'insight', target_type: 'persona' },
-  insight_validates_need_cross_domain: { forward_verb: 'validates', reverse_verb: 'validated_by', classification: 'cross-domain', source_type: 'insight', target_type: 'need' },
+  // insight_validates_need_cross_domain retired — byte-identical
+  // shadow of insight_validates_need (the clean key). See
+  // UPG_EDGE_MIGRATIONS['0.9.9'].
   observation_reveals_need: { forward_verb: 'reveals', reverse_verb: 'revealed_by', classification: 'cross-domain', source_type: 'observation', target_type: 'need' },
   observation_characterises_persona: { forward_verb: 'characterises', reverse_verb: 'characterised_by', classification: 'cross-domain', source_type: 'observation', target_type: 'persona' },
   quote_evidences_need: { forward_verb: 'evidences', reverse_verb: 'evidenced_by', classification: 'cross-domain', source_type: 'quote', target_type: 'need' },
@@ -1226,7 +1310,9 @@ export const UPG_EDGE_CATALOG = {
   insight_inspires_design_concept: { forward_verb: 'inspires', reverse_verb: 'inspired_by', classification: 'cross-domain', source_type: 'insight', target_type: 'design_concept' },
   observation_yields_insight: { forward_verb: 'yields', reverse_verb: 'yielded_by', classification: 'cross-domain', source_type: 'observation', target_type: 'insight' },
   insight_refines_into_insight: { forward_verb: 'refines_into', reverse_verb: 'refined_from', classification: 'hierarchy', source_type: 'insight', target_type: 'insight' },
-  insight_informs_opportunity_cross_domain: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'insight', target_type: 'opportunity' },
+  // insight_informs_opportunity_cross_domain retired — byte-identical
+  // shadow of insight_informs_opportunity (the clean key). See
+  // UPG_EDGE_MIGRATIONS['0.9.9'].
   insight_validates_persona: { forward_verb: 'validates', reverse_verb: 'validated_by', classification: 'cross-domain', source_type: 'insight', target_type: 'persona' },
   // Validation-to-Discovery Feedback Loops
   learning_validates_opportunity: { forward_verb: 'validates', reverse_verb: 'validated_by', classification: 'cross-domain', source_type: 'learning', target_type: 'opportunity' },
@@ -1292,7 +1378,9 @@ export const UPG_EDGE_CATALOG = {
   service_level_agreement_measures_metric: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'service_level_agreement', target_type: 'metric' },
 
   // Content
-  prompt_template_targets_ai_model: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'prompt_template', target_type: 'ai_model' },
+  // prompt_template_targets_ai_model retired — superseded by the
+  // containment edge ai_model_defines_prompt_template (the model owns its
+  // templates). See UPG_EDGE_MIGRATIONS['0.9.9'].
 
   // Education
   education_program_targets_persona: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'education_program', target_type: 'persona' },
@@ -1483,13 +1571,13 @@ export const UPG_EDGE_CATALOG = {
   messaging_enables_sales_motion: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'cross-domain', source_type: 'messaging', target_type: 'sales_motion' },
 
   // Test Card + Learning Card (Strategyzer): canonical validation flow
-  // hypothesis → test_plan → experiment_run → evidence → learning → decision.
-  // The catalog already had the hypothesis → test_plan and experiment_run →
-  // {hypothesis, evidence, learning, decision} edges. Missing: the
-  // test_plan ran-as bridge (mirrors `experiment_plan_ran_as_experiment_run`
-  // for the test_plan/test-card pair), the evidence → learning interpretation
-  // step, and the learning → decision commitment step.
-  test_plan_ran_as_experiment_run: { forward_verb: 'ran_as', reverse_verb: 'ran_for', classification: 'hierarchy', source_type: 'test_plan', target_type: 'experiment_run' },
+  // hypothesis → experiment_plan → experiment → experiment_run → evidence →
+  // learning → decision. The "Test Design" card is the
+  // `experiment_plan`; the plan designs the experiment
+  // (`experiment_plan_designs_experiment`), which is executed as run(s). The
+  // former `test_plan_ran_as_experiment_run` bridge was retired when `test_plan`
+  // re-homed to QA — see UPG_EDGE_MIGRATIONS['0.9.9']. This block keeps
+  // the evidence → learning interpretation and learning → decision commitment.
   evidence_interpreted_as_learning: { forward_verb: 'interpreted_as', reverse_verb: 'interpreted_from', classification: 'causal', source_type: 'evidence', target_type: 'learning' },
   learning_informs_decision: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'causal', source_type: 'learning', target_type: 'decision' },
 

@@ -1,7 +1,8 @@
 /**
  * UPG Property Schemas: Content & Knowledge Domain.
  * ContentPiece, KnowledgeBaseArticle, BrandAsset, InternalDoc,
- * PromptTemplate, ContentCalendar, ContentTheme, DocumentationTemplate, Document.
+ * ContentCalendar, ContentTheme, DocumentationTemplate, Document.
+ * (`PromptTemplate` moved to the AI domain file —.)
  * https://unifiedproductgraph.org/spec | MIT
  */
 
@@ -120,24 +121,6 @@ export interface DocumentProperties {
   content_summary?: string
   /** Primary language (BCP 47 tag, e.g. "en", "en-GB", "fr") */
   language?: string
-}
-
-/** Prompt template.
- *
- * @example
- * const properties: PromptTemplateProperties = {
- *   use_case: 'Kick off a discovery sprint with a fresh persona set.',
- *   variables: ['user_name', 'workspace_slug', 'cta_url'],
- *   version: '0.3.1',
- * }
- */
-export interface PromptTemplateProperties {
-  /** Intended use case for the prompt */
-  use_case?: string
-  /** Variable names expected by the template */
-  variables?: string[]
-  /** Version identifier of the template */
-  version?: string
 }
 
 /** Content calendar.

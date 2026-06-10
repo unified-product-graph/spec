@@ -26,19 +26,13 @@ import { UPG_POLYMORPHIC_EDGE_KEYS } from '../catalog/edge-catalog.js'
  *    exercise_includes_node` family) have a wildcard source and are registered
  *    in UPG_POLYMORPHIC_EDGE_KEYS; their key prefix is the wildcard token, not a
  *    concrete source_type. They are exempted en masse below.
- *  - objective_rolls_up_to_strategic_theme: the relationship is correctly typed
- *    strategic_theme → objective (forward_verb `contains_objective`), but the
- *    KEY is named from the object's perspective (`objective_rolls_up_to_…`). The
- *    key is heavily wired (hierarchy.ts, generated Entopo/site mirrors, a
- *    dedicated test) so renaming it to `strategic_theme_contains_objective` is a
- *    BREAKING edge-key rename needing a migration + downstream regen — out of
- *    the gate-wave's mechanical scope. FLAGGED for a follow-up (Captain /
- *    parallel-Spock). Tracked here so the gate stays green meanwhile and the
- *    exception is visible, not silent.
+ *
+ * The former `objective_rolls_up_to_strategic_theme` exception is
+ * RESOLVED: the edge was renamed to `strategic_theme_contains_objective`
+ * (source-first key, clean `contains` forward verb), so it now satisfies the
+ * prefix gate on its own and no longer needs an exception.
  */
-const KNOWN_VERBOSE_KEY_EXCEPTIONS = new Set<string>([
-  'objective_rolls_up_to_strategic_theme',
-])
+const KNOWN_VERBOSE_KEY_EXCEPTIONS = new Set<string>([])
 
 /** A key's leading token-run equals `source_type` (token-aware prefix). */
 function keyPrefixMatchesSource(key: string, sourceType: string): boolean {

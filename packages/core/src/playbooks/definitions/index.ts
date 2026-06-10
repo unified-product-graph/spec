@@ -207,11 +207,13 @@ export const DISCOVERY_RESEARCH_VALIDATION_PLAYBOOK: UPGPlaybook = {
       ['hypothesis', 'assumption'],
       'Frame testable hypotheses from research. What assumptions need validation?'),
     seqStep(8, 'Test',
-      // DT-PB-1: was `experiment` — which resolves to NO canonical edge with
-      // hypothesis or test_plan, forcing an orphan. `experiment_run` is the
-      // hypothesis-linked test unit (experiment_run_validates_hypothesis,
-      // test_plan_ran_as_experiment_run, experiment_run_yields_evidence).
-      ['experiment_run', 'test_plan', 'evidence'],
+      // DT-PB-1: was `experiment` — which resolved to NO canonical edge with
+      // hypothesis, forcing an orphan. `experiment_run` is the hypothesis-linked
+      // test unit (experiment_run_validates_hypothesis, experiment_run_yields_evidence).
+      // `test_plan` re-homed to QA; the validation plan is
+      // `experiment_plan`, which designs the experiment
+      // (experiment_plan_designs_experiment) and runs as experiment_run(s).
+      ['experiment_run', 'experiment_plan', 'evidence'],
       'Validate with targeted experiment runs. Close the loop between research and action.'),
   ],
 }

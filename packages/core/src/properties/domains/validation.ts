@@ -1,6 +1,7 @@
 /**
  * UPG Property Schemas: Validation Domain.
- * Hypothesis, Experiment, Learning, TestPlan, Evidence, ResearchPlan.
+ * Hypothesis, ExperimentPlan, Experiment, ExperimentRun, Learning, Evidence,
+ * ResearchPlan. (`test_plan` re-homed to the QA/testing domain —.)
  * https://unifiedproductgraph.org/spec | MIT
  */
 
@@ -83,16 +84,15 @@ export interface HypothesisEvidenceProperties {
   observed_at?: ISODate
 }
 
-/** A structured activity designed to test a hypothesis.
+/** A structured test designed to validate a hypothesis. The canonical unit of
+ * a test.
  *
- * `experiment` is canonical-stable. Split into `experiment_plan` + `experiment_run`
- * in v0.2.6 for teams needing fine-grained plan/run separation, then re-promoted
- * as the general-purpose option. The plan/run split remains the fine-grained
- * alternative, not a replacement.
- *
- * Use `experiment` for a single entity capturing method, dates, and outcome.
- * Use `experiment_plan` + `experiment_run` when lifecycle separation between
- * planning and execution matters to your workflow.
+ * `experiment` is canonical-stable and the spine of the validation chain
+ * `hypothesis → experiment_plan → experiment → experiment_run`: the
+ * `experiment_plan` is the validation design, the `experiment` is the
+ * structured test it produces, and the optional `experiment_run` child captures
+ * the multi-run / replication case (longitudinal or replicated tests). For a
+ * single everyday A/B test, `experiment` alone (with its plan) suffices.
  *
  * @example
  * const properties: ExperimentProperties = {
@@ -118,21 +118,22 @@ export interface ExperimentProperties {
   actual_lift?: number
 }
 
-/** Planning intent for a structured test of a hypothesis (UCS pattern P4: work-unit).
+/** The validation PLAN: the design for a structured test of a hypothesis
+ * (UCS pattern P4: work-unit).
  *
- * Plan-shape fields only: method, success criteria, target metric, projected
- * reach/impact, ownership, intended dates. Once approved and an actual run
- * begins, an `experiment_run` links back via
- * `experiment_plan_ran_as_experiment_run`.
- *
- * Pairs with `experiment_run` (UCS pattern P6: event-occurrence). Replaces the
- * deprecated `experiment` type along with `experiment_run` (v0.2.6 split 1).
+ * `experiment_plan` is the canonical validation plan type (graduated
+ * `proposed → stable` in). It carries the plan-shape fields — method,
+ * success criteria, sample size, projected reach/impact, intended dates — and
+ * designs the `experiment` it produces (`experiment_plan_designs_experiment`).
+ * It absorbed `test_plan`'s planning properties when `test_plan` re-homed to
+ * the QA/testing domain: `test_plan` is now the QA
+ * verification-procedure plan, not a validation-planning artefact.
  *
  * @example
  * const plan: ExperimentPlanProperties = {
  *   method: 'a_b_test',
  *   success_criteria: 'Day-7 activation rate +5% lift, p<0.05',
- *   target_metric_id: 'mtr_day7_activation',
+ *   sample_size: 4000,
  *   projected_reach: { value: 4, scale: 'reach_5', evidence: 'Cohort sizing' },
  *   confidence: { value: 3, scale: 'confidence_5' },
  *   planned_start_date: '2026-05-01',
@@ -144,6 +145,12 @@ export interface ExperimentPlanProperties {
   method?: 'a_b_test' | 'multivariate' | 'qual_interview' | 'prototype_test' | 'fake_door' | 'wizard_of_oz' | 'longitudinal'
   /** Plain-English description of "passing" */
   success_criteria?: string
+  /**
+   * Targeted participants or observations for the planned test. Absorbed from
+   * `test_plan` when it re-homed to QA; the planning sample size now
+   * lives on the validation plan.
+   */
+  sample_size?: number
   // P14: Foreign Keys Are Edges. The plan-targets-metric relationship is
   // expressed as `experiment_plan_targets_metric` (added in v0.2.7 alongside
   // the broader experiment-edge retarget pass). Until then, authors link plans
@@ -164,13 +171,11 @@ export interface ExperimentPlanProperties {
 
 /** Execution evidence for a structured test of a hypothesis (UCS pattern P6: event-occurrence).
  *
- * Created when an `experiment_plan` actually starts collecting data. Run-shape
- * fields only: actual dates, observed reach, outcome summary, severity of
- * finding, learning, and disposition. Multiple runs may spawn from the same
- * plan when re-executed; each run is its own event with its own evidence.
- *
- * Pairs with `experiment_plan` (UCS pattern P4: work-unit). Replaces the
- * deprecated `experiment` type along with `experiment_plan` (v0.2.6 split 1).
+ * The optional multi-run / replication child of `experiment`. A
+ * single `experiment` produces one or more runs; each run is its own event
+ * with its own dates, observed reach, outcome summary, severity of finding,
+ * learning, and disposition. Use runs only when longitudinal or replicated
+ * execution matters — an everyday single test needs only the `experiment`.
  *
  * @example
  * const run: ExperimentRunProperties = {
@@ -238,29 +243,6 @@ export interface LearningProperties {
 // ---------------------------------------------------------------------------
 // VALIDATION EXPANSION
 // ---------------------------------------------------------------------------
-
-/** TestPlan entity.
- *
- * @example
- * const properties: TestPlanProperties = {
- *   plan_type: 'usability',
- *   sample_size: 42,
- *   duration: '5 days',
- * }
- */
-export interface TestPlanProperties {
-  /** Test type */
-  plan_type?: 'usability' | 'concept' | 'ab_test' | 'beta' | 'smoke'
-  /** Participants or observations */
-  sample_size?: number
-  /**
-   * Run duration.
-   * @example "2 weeks"
-   */
-  duration?: string
-  /** Criteria determining whether the test passes */
-  success_criteria?: string
-}
 
 /** ResearchPlan entity.
  *

@@ -179,19 +179,18 @@ const DISCOVERY_GUIDE: UPGDomainUsageGuide = {
 const VALIDATION_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'validation',
   anchor_entity: 'hypothesis',
-  // creation_sequence covers every entity registered to the `validation`
-  // domain. `experiment` is the legacy parent that decomposed into
-  // experiment_plan + experiment_run in v0.2.6 (split rule lives in
-  // UPG_SPLIT_MIGRATIONS); it remains in the registry for round-trip
-  // compatibility and is listed last so new authors reach the split pair
-  // first.
-  creation_sequence: ['hypothesis', 'experiment_plan', 'experiment_run', 'test_plan', 'evidence', 'learning', 'research_plan', 'experiment'],
+  // creation_sequence covers every entity registered to the
+  // `validation` domain along the canonical chain hypothesis → experiment_plan
+  // → experiment → experiment_run. `experiment` is the canonical structured
+  // test; experiment_run is its optional replication child. `test_plan`
+  // re-homed to the QA/testing domain.
+  creation_sequence: ['hypothesis', 'experiment_plan', 'experiment', 'experiment_run', 'evidence', 'learning', 'research_plan'],
   patterns: [
     {
       name: 'Hypothesis Testing Loop',
-      description: 'Hypotheses require plans (intent), plans run as experiment_runs (execution), runs produce evidence and learnings, learnings update hypotheses',
-      entity_types: ['hypothesis', 'experiment_plan', 'experiment_run', 'evidence', 'learning'],
-      edge_chain: ['hypothesis_requires_experiment_plan', 'experiment_plan_ran_as_experiment_run', 'experiment_run_yields_evidence', 'experiment_run_produces_learning', 'learning_updates_hypothesis'],
+      description: 'A hypothesis requires a plan (the experiment design), the plan designs an experiment (the structured test), the experiment is executed as run(s) that produce evidence and learnings, and learnings update the hypothesis',
+      entity_types: ['hypothesis', 'experiment_plan', 'experiment', 'experiment_run', 'evidence', 'learning'],
+      edge_chain: ['hypothesis_requires_experiment_plan', 'experiment_plan_designs_experiment', 'experiment_executed_as_experiment_run', 'experiment_run_yields_evidence', 'experiment_run_produces_learning', 'learning_updates_hypothesis'],
     },
   ],
   required_bridges: [
@@ -316,6 +315,7 @@ const UX_DESIGN_GUIDE: UPGDomainUsageGuide = {
     { description: 'Screens without journeys: isolated screens miss the experience context' },
     { description: 'Prototypes without testing: if nobody tests the prototype, it is just art' },
     { description: 'Design questions left open: exploration status should progress to resolved or parked' },
+    { description: 'Touchpoints stuffed in the deprecated journey_step.touchpoint string. Touchpoints belong in one of two layers: journey_action is the in-product blueprint layer (the finest band of a journey_step), and the touchpoint entity is the cross-channel customer-success layer (touchpoint_occurs_in_journey_step). Pick the layer; do not duplicate the touch as a free-text string.' },
   ],
 }
 
@@ -466,7 +466,9 @@ const DEVOPS_GUIDE: UPGDomainUsageGuide = {
 const TESTING_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'testing',
   anchor_entity: 'test_suite',
-  creation_sequence: ['test_suite', 'test_case', 'qa_session', 'regression_test', 'test_coverage_report', 'test_environment', 'test_result'],
+  // test_plan re-homed validation → QA: the verification-approach
+  // plan that the suites execute. Listed first as the QA planning layer.
+  creation_sequence: ['test_plan', 'test_suite', 'test_case', 'qa_session', 'regression_test', 'test_coverage_report', 'test_environment', 'test_result'],
   patterns: [
     {
       name: 'Test Pyramid',
@@ -567,7 +569,7 @@ const AI_GUIDE: UPGDomainUsageGuide = {
     },
   ],
   required_bridges: [
-    { edge_type: 'prompt_template_targets_ai_model', target_domain: 'content', when: 'Prompt templates should link to the models they target' },
+    { edge_type: 'ai_dataset_sourced_from_data_source', target_domain: 'data_analytics', when: 'AI datasets should trace provenance to the data sources they draw from' },
     { edge_type: 'ai_guardrail_enforces_security_policy', target_domain: 'security', when: 'AI guardrails should map to the security policies that constrain them' },
   ],
   anti_patterns: [
@@ -771,6 +773,7 @@ const CUSTOMER_SUCCESS_GUIDE: UPGDomainUsageGuide = {
     { description: 'Health scores without components: define which metrics compose the score' },
     { description: 'Playbooks without triggers: specify what conditions activate each playbook' },
     { description: 'Churn reasons without analysis: understand patterns, not just individual cases' },
+    { description: 'Conflating the two journey models. customer_journey_stage models the post-sale AARRR lifecycle (a customer-success timeline; use stage_order to sequence stages); journey_phase models in-product experience phases of a single user_journey. They are different lenses, not duplicates. Likewise, the touchpoint entity is the cross-channel customer-success layer, distinct from the in-product journey_action.' },
   ],
 }
 

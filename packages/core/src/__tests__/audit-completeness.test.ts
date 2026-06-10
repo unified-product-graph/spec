@@ -30,9 +30,9 @@
  *
  * G5 (pair-resolver collisions) is reported by the audit script but is
  * NOT a regression gate yet — collisions are sometimes intentional (e.g.
- * `outcome_measured_by_metric` vs `outcome_tracked_by_metric`). The
- * canonical-choice decision is queued for the v0.4.1 resolver redesign;
- * see follow-on.
+ * the genuinely-distinct metric→metric verbs `measures` / `guards` / `drives`).
+ * The byte-identical and near-synonym shadows were collapsed in; the
+ * remaining collisions are deliberate near-synonyms with distinct verbs.
  *
  * Run:
  *   npx vitest run src/__tests__/audit-completeness.test.ts

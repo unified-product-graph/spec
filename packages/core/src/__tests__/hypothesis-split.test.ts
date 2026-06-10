@@ -162,11 +162,15 @@ describe('Canonical edges (v0.4.0 state)', () => {
 })
 
 describe('Canonical hypothesis edges (v0.4.0 state)', () => {
- it('all 12 hypothesis-related edges use canonical hypothesis type (re-promoted at v0.4.0)', () => {
+ it('all hypothesis-related edges use the canonical hypothesis type (re-promoted at v0.4.0)', () => {
  const expected = [
  'solution_proposes_hypothesis',
  'hypothesis_requires_experiment_plan',
- 'hypothesis_planned_via_test_plan',
+ // hypothesis_planned_via_test_plan dropped — test_plan re-homed to
+ // QA; the stable experiment loop replaces it.
+ 'hypothesis_tested_by_experiment',
+ 'experiment_validates_hypothesis',
+ 'insight_generates_hypothesis',
  'hypothesis_investigated_via_research_plan',
  'learning_updates_hypothesis',
  'assumption_becomes_hypothesis',
@@ -211,10 +215,11 @@ describe('Canonical hypothesis edges (v0.4.0 state)', () => {
 })
 
 describe('Hierarchy registration (v0.4.0 state)', () => {
- it('hypothesis owns experiment_plan, test_plan, research_plan, evidence (re-promoted)', () => {
+ it('hypothesis owns experiment_plan, research_plan, evidence (re-promoted)', () => {
  const children = new Set(UPG_VALID_CHILDREN['hypothesis'] ?? [])
  expect(children.has('experiment_plan')).toBe(true)
- expect(children.has('test_plan')).toBe(true)
+ // test_plan re-homed validation → QA; it is no longer a hypothesis child.
+ expect(children.has('test_plan')).toBe(false)
  expect(children.has('research_plan')).toBe(true)
  expect(children.has('evidence')).toBe(true)
  // hypothesis_evidence is deprecated — no longer a direct child

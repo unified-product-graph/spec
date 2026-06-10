@@ -14,8 +14,12 @@
  * Deferred (kept proposed by contract / open ADR):
  *   - user_story — frozen `proposed` by the v0.7.0 re-canon contract;
  *     `user-story-split.test.ts` asserts the invariant.
- *   - experiment_plan / experiment_run — entangled with (open ADR).
+ *   - experiment_run — kept proposed (the optional multi-run / replication child;
+ *     graduated experiment_plan to stable but left the run proposed).
  *   - ai_experiment / ai_dataset / ai_trace — entangled with (open ADR).
+ *
+ * experiment_plan graduated proposed → stable as the canonical
+ * validation plan; it is no longer a deferred-proposed type.
  */
 
 import { describe, it, expect } from 'vitest'
@@ -31,8 +35,7 @@ const GRADUATED = [
 
 const DEFERRED_PROPOSED = [
   'user_story', // re-canon contract
-  'experiment_plan', //
-  'experiment_run', //
+  'experiment_run', // — optional multi-run / replication child (experiment_plan graduated to stable)
   'ai_experiment', //
   'ai_dataset', //
   'ai_trace', //

@@ -64,8 +64,8 @@ export const UPG_DOMAINS = [
   {
     id: 'validation',
     label: 'Validation',
-    description: 'Testing ideas before committing to build them. Hypotheses state testable beliefs. Experiments run the tests. Evidence captures what was observed. Learnings distill what was understood. Test plans structure the approach. Research plans coordinate broader investigation. Consumes opportunities from Discovery and insights from User Research, producing evidence that informs Strategy and Product Specification.',
-    types: ['hypothesis', 'experiment', 'experiment_plan', 'experiment_run', 'learning', 'test_plan', 'evidence', 'research_plan'],
+    description: 'Testing ideas before committing to build them. Hypotheses state testable beliefs. Experiment plans structure the validation design. Experiments run the tests, with experiment runs capturing replication. Evidence captures what was observed. Learnings distill what was understood. Research plans coordinate broader investigation. Consumes opportunities from Discovery and insights from User Research, producing evidence that informs Strategy and Product Specification.',
+    types: ['hypothesis', 'experiment', 'experiment_plan', 'experiment_run', 'learning', 'evidence', 'research_plan'],
   },
   {
     id: 'market_intelligence',
@@ -217,9 +217,9 @@ export const UPG_DOMAINS = [
   {
     id: 'testing',
     label: 'Quality Assurance',
-    description: 'Verifying your product works correctly. Test suites group related tests. Test cases define individual checks. QA sessions capture exploratory testing. Regression tests guard against regressions. Test coverage reports measure completeness. Test environments define where tests run. Test results record outcomes. Validates Engineering (code quality) and Product Specification (acceptance criteria). Feeds DevOps (release confidence).',
+    description: 'Verifying your product works correctly. Test plans define the verification approach (scope, environments, pass criteria). Test suites group related tests. Test cases define individual checks. QA sessions capture exploratory testing. Regression tests guard against regressions. Test coverage reports measure completeness. Test environments define where tests run. Test results record outcomes. Validates Engineering (code quality) and Product Specification (acceptance criteria). Feeds DevOps (release confidence).',
     types: [
-      'test_suite', 'test_case', 'qa_session', 'regression_test', 'test_coverage_report',
+      'test_plan', 'test_suite', 'test_case', 'qa_session', 'regression_test', 'test_coverage_report',
       'test_environment', 'test_result',
     ],
   },
@@ -244,7 +244,7 @@ export const UPG_DOMAINS = [
   {
     id: 'ai',
     label: 'AI & Machine Learning',
-    description: 'AI and machine learning capabilities within your product. AI models track deployed models. Prompt versions manage prompt evolution. Eval benchmarks and eval runs measure quality. AI cost trackers monitor spend. Hallucination reports flag reliability issues. AI guardrails set safety boundaries. Model comparisons evaluate alternatives. AI experiments test new approaches. AI datasets track training data. AI traces log inference chains. Connects to Engineering, Data & Analytics, and Product Specification.',
+    description: 'AI and machine learning capabilities within your product. AI models track deployed models. Prompt templates define reusable prompts; prompt versions manage their evolution. Eval benchmarks and eval runs measure quality. AI cost trackers monitor spend. Hallucination reports flag reliability issues. AI guardrails set safety boundaries. Model comparisons evaluate alternatives. AI experiments test new approaches. AI datasets track training data. AI traces log inference chains. Connects to Engineering, Data & Analytics, and Product Specification.',
     types: [
       'ai_model', 'prompt_version', 'eval_benchmark', 'eval_run', 'ai_cost_tracker',
       'hallucination_report', 'ai_guardrail', 'model_comparison',

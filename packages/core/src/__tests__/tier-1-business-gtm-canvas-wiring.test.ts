@@ -136,9 +136,12 @@ const NEW_EDGES = {
   },
 
   // Test Card + Learning Card — HIGH-confidence
-  test_plan_ran_as_experiment_run: {
-    source_type: 'test_plan', target_type: 'experiment_run',
-    classification: 'hierarchy', forward_verb: 'ran_as', reverse_verb: 'ran_for',
+  // Re-pointed from the retired `test_plan_ran_as_experiment_run`
+  // (test_plan re-homed to QA). The Test Card "Test Design" is the
+  // experiment_plan, which designs the experiment it produces.
+  experiment_plan_designs_experiment: {
+    source_type: 'experiment_plan', target_type: 'experiment',
+    classification: 'hierarchy', forward_verb: 'designs', reverse_verb: 'designed_by',
   },
   evidence_interpreted_as_learning: {
     source_type: 'evidence', target_type: 'learning',

@@ -43,7 +43,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'data_source', 'event_schema', 'dashboard', 'data_domain', 'glossary_term',
     // Content & Knowledge
     'content_piece', 'knowledge_base_article', 'brand_asset', 'document',
-    'prompt_template', 'documentation_template',
+    'documentation_template',
     // Legal
     'legal_entity', 'privacy_policy',
     // Compliance
@@ -57,7 +57,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     // Accessibility
     'a11y_standard', 'a11y_audit', 'a11y_annotation',
     // Quality Assurance
-    'test_suite', 'qa_session', 'test_coverage_report', 'test_environment',
+    'test_plan', 'test_suite', 'qa_session', 'test_coverage_report', 'test_environment',
     // Customer Feedback
     'feedback_program', 'user_advisory_board', 'beta_program',
     // Pricing & Packaging
@@ -83,7 +83,10 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     // Partners & Ecosystem
     'partner_program', 'api_ecosystem', 'developer_portal',
     // Portfolio
-    'product_area',
+    // product no longer lists product_area as a child: the
+    // product↔product_area containment is the single direction
+    // product_area_contains_product (product_area → product). The inverse
+    // product_categorised_in_product_area edge was collapsed.
     // Workspace
     'workspace',
   ],
@@ -102,22 +105,27 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   solution: ['hypothesis', 'prototype', 'metric'],
 
   // ── Validation hierarchy ────────────────────────────────────────────────────
-  // hypothesis is re-promoted as canonical. hypothesis_evidence
-  // collapsed into evidence; relationship expressed via hypothesis_has_evidence
-  // edge. evidence.direction carries supports/refutes/neutral semantics.
-  hypothesis: ['experiment_plan', 'test_plan', 'research_plan', 'evidence'],
-  // experiment is canonical. It can contain experiment_plan/run
-  // sub-artefacts (the plan/run split is opt-in for finer granularity).
-  experiment: ['experiment_plan', 'experiment_run', 'learning', 'evidence'],
-  experiment_plan: ['experiment_run'],
-  // v0.5.5: mirrors `experiment_plan_ran_as_experiment_run`
-  // for the Strategyzer Test Card + Learning Card flow. A test plan (the
-  // upfront experiment design captured on the Test Card) runs as one or more
-  // experiment runs that produce evidence and learning.
-  test_plan: ['experiment_run'],
+  // The validation chain is a single-parent line:
+  //   hypothesis ▷ experiment_plan ▷ experiment ▷ experiment_run.
+  // hypothesis is canonical (hypothesis_evidence collapsed into evidence;
+  // relationship expressed via hypothesis_has_evidence edge; evidence.direction
+  // carries supports/refutes/neutral semantics). `test_plan` re-homed to the
+  // QA/testing domain, so it is no longer a hypothesis child.
+  hypothesis: ['experiment_plan', 'research_plan', 'evidence'],
+  // experiment_plan is the canonical validation PLAN (graduated stable,
+  //). It designs the experiment it produces; the plan owns the
+  // experiment in the containment line. It also retains experiment_run as a
+  // child for the v0.2.6 split-migration path
+  // (`experiment_plan_ran_as_experiment_run`), where a legacy experiment routes
+  // directly to a plan + run pair.
+  experiment_plan: ['experiment', 'experiment_run'],
+  // experiment is the canonical structured test. It owns its run(s) and the
+  // learning/evidence it produces. The optional experiment_run child captures
+  // the multi-run / replication case.
+  experiment: ['experiment_run', 'learning', 'evidence'],
   // experiment_run carries learning/evidence/metric children (run produces
-  // evidence) and self-nests for replications/multi-armed runs that share
-  // a parent plan.
+  // evidence) and self-nests for replications/multi-armed runs (V9: this is
+  // where self-nesting genuinely lives, not on `experiment`).
   experiment_run: ['learning', 'evidence', 'metric', 'experiment_run'],
 
   // ── OKR hierarchy ──────────────────────────────────────────────────────────
@@ -130,8 +138,9 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   strategic_pillar: ['strategic_theme', 'capability', 'value_stream', 'decision'],
   // v0.5.4: objectives are the specific quarterly bets *within* a
   // strategic theme. The theme is the multi-quarter focus area; objectives are
-  // subordinate. Pairs with `objective_rolls_up_to_strategic_theme` in the edge
-  // catalog (hierarchy, strategic_theme → objective, reverse_verb: rolls_up_to).
+  // subordinate. Pairs with `strategic_theme_contains_objective` in the edge
+  // catalog (hierarchy, strategic_theme → objective, reverse_verb: rolls_up_to;
+  // renamed from objective_rolls_up_to_strategic_theme in).
   strategic_theme: ['initiative', 'objective'],
   initiative: ['assumption'],
   // v0.5.2: capability decomposes into sub-capabilities (Wardley
@@ -275,7 +284,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   content_strategy: ['content_calendar', 'content_theme'],
   content_calendar: [
     'content_theme', 'content_piece', 'knowledge_base_article', 'brand_asset',
-    'document', 'prompt_template', 'documentation_template',
+    'document', 'documentation_template',
   ],
 
   // ── Operations & CS hierarchy ────────────────────────────────────────────────
@@ -361,6 +370,10 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   learning_path: ['tutorial', 'certification'],
 
   // ── Quality Assurance & Testing hierarchy ────────────────────────────────────
+  // test_plan re-homed validation → QA. It is the QA planning layer:
+  // the verification approach (scope, environments, pass criteria) that the
+  // test suites execute. A test_plan groups the suites that carry it out.
+  test_plan: ['test_suite', 'test_environment'],
   test_suite: [
     'test_case', 'regression_test', 'qa_session', 'test_coverage_report',
     'test_environment', 'test_result',
@@ -394,11 +407,16 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   ],
 
   // ── AI/ML Operations hierarchy ───────────────────────────────────────────────
+  // The prompt abstraction is corrected: ai_model → prompt_template →
+  // prompt_version (a model has templates; each template has versions). The
+  // model no longer owns prompt_version directly.
   ai_model: [
-    'prompt_version', 'eval_benchmark', 'ai_cost_tracker',
+    'prompt_template', 'eval_benchmark', 'ai_cost_tracker',
     'hallucination_report', 'ai_guardrail', 'model_comparison',
     'ai_experiment', 'ai_dataset', 'ai_trace',
   ],
+  // prompt_template owns its prompt_versions the way a file owns its commits.
+  prompt_template: ['prompt_version'],
   // v0.5.7: benchmarks define the metric set they measure
   // (HELM, MLPerf, BIG-bench all spec a metric list). metric already has many
   // hierarchy parents (outcome, objective, key_result, solution, data_source).

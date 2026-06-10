@@ -8,7 +8,7 @@
  *
  *   - strategic_theme_delivers_outcome         (strategy · causal)
  *   - strategic_theme_measured_by_key_result   (strategy · causal)
- *   - objective_rolls_up_to_strategic_theme    (strategy · hierarchy)
+ *   - strategic_theme_contains_objective       (strategy · hierarchy; rename)
  *
  * adds the explicit Solution Tree graduation moment:
  *
@@ -69,36 +69,44 @@ describe(' — strategic_theme_measured_by_key_result', () => {
   })
 })
 
-// ───: objective_rolls_up_to_strategic_theme ──────────────────────────
+// ─── /: strategic_theme_contains_objective ───────────────────
 //
 // UPG hierarchy convention: source = parent, target = child.
 // strategic_theme is the parent; objective is the child.
 // Edge direction: strategic_theme → objective.
-// The name captures the *reverse-direction* semantic (objectives roll up to
-// their theme) via the reverse_verb: 'rolls_up_to'.
+// Renamed from the malformed `objective_rolls_up_to_strategic_theme`
+// to the source-first `strategic_theme_contains_objective`; the forward verb is
+// the clean `contains` (was `contains_objective`); reverse_verb `rolls_up_to`
+// still captures the upward-rollup read.
 
-describe(' — objective_rolls_up_to_strategic_theme', () => {
+describe(' / — strategic_theme_contains_objective', () => {
   it('exists in UPG_EDGE_CATALOG with correct shape', () => {
-    const def = UPG_EDGE_CATALOG.objective_rolls_up_to_strategic_theme
+    const def = UPG_EDGE_CATALOG.strategic_theme_contains_objective
     expect(def).toBeDefined()
     // UPG hierarchy convention: source = parent, target = child
     expect(def.source_type).toBe('strategic_theme')
     expect(def.target_type).toBe('objective')
     expect(def.classification).toBe('hierarchy')
-    expect(def.forward_verb).toBe('contains_objective')
+    expect(def.forward_verb).toBe('contains')
     expect(def.reverse_verb).toBe('rolls_up_to')
+  })
+
+  it('the renamed-from key is gone from the catalog', () => {
+    expect(
+      (UPG_EDGE_CATALOG as Record<string, unknown>).objective_rolls_up_to_strategic_theme,
+    ).toBeUndefined()
   })
 
   it('UPG_EDGE_PAIR_MAP indexes the strategic_theme → objective pair', () => {
     expect(UPG_EDGE_PAIR_MAP['strategic_theme:objective']).toContain(
-      'objective_rolls_up_to_strategic_theme',
+      'strategic_theme_contains_objective',
     )
   })
 
   it('resolveContainmentEdge("strategic_theme","objective") returns the canonical hierarchy edge', () => {
-    // objective_rolls_up_to_strategic_theme is the hierarchy edge for this pair.
+    // strategic_theme_contains_objective is the hierarchy edge for this pair.
     expect(resolveContainmentEdge('strategic_theme', 'objective')).toBe(
-      'objective_rolls_up_to_strategic_theme',
+      'strategic_theme_contains_objective',
     )
   })
 })
@@ -127,7 +135,7 @@ describe(' — solution_becomes_feature', () => {
 
 describe(' — strategic_theme outgoing-edge count', () => {
   it('strategic_theme now has at least 4 outgoing edges (was 1)', () => {
-    // Note: `objective_rolls_up_to_strategic_theme` has source_type=strategic_theme
+    // Note: `strategic_theme_contains_objective` has source_type=strategic_theme
     // (UPG parent → child convention), so it also counts as an outgoing edge.
     const outgoing = Object.entries(UPG_EDGE_CATALOG)
       .filter(([, def]) => def.source_type === 'strategic_theme')
@@ -137,7 +145,7 @@ describe(' — strategic_theme outgoing-edge count', () => {
     // v0.5.4 additions
     expect(outgoing).toContain('strategic_theme_delivers_outcome')
     expect(outgoing).toContain('strategic_theme_measured_by_key_result')
-    expect(outgoing).toContain('objective_rolls_up_to_strategic_theme')
+    expect(outgoing).toContain('strategic_theme_contains_objective')
     expect(outgoing.length).toBeGreaterThanOrEqual(4)
   })
 })
@@ -176,7 +184,7 @@ describe('semantic overlap guard', () => {
     const newKeys = [
       'strategic_theme_delivers_outcome',
       'strategic_theme_measured_by_key_result',
-      'objective_rolls_up_to_strategic_theme',
+      'strategic_theme_contains_objective',
       'solution_becomes_feature',
     ] as const
     for (const key of newKeys) {

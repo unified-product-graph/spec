@@ -130,13 +130,21 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'hypothesis_evidence', type_id: 'ent_345', maturity: 'deprecated', since: '0.2.8', deprecated_in: '0.4.0', replacement: 'evidence' },
   // `experiment` is canonical. It has its own property schema
   // (method, start_date, end_date, sample_size, expected_lift) and is the
-  // canonical parent of `ab_test` in the hierarchy. Plan/Run split
-  // (experiment_plan + experiment_run) remains as the fine-grained option;
-  // `experiment` covers the general-purpose use case.
+  // canonical unit of a structured test. The validation flow is
+  // `hypothesis → experiment_plan → experiment → experiment_run`: the plan is
+  // the validation design, the experiment is the structured test, the run is
+  // the optional multi-run/replication child.
   { name: 'experiment', type_id: 'ent_028', maturity: 'stable', since: '0.1.0' },
-  { name: 'experiment_plan', type_id: 'ent_340', maturity: 'proposed', since: '0.2.6' },
+  // experiment_plan graduated proposed → stable. It is the canonical
+  // validation PLAN type — it absorbed `test_plan`'s planning properties
+  // (method / success_criteria / sample_size) when `test_plan` re-homed to the
+  // QA/testing domain.
+  { name: 'experiment_plan', type_id: 'ent_340', maturity: 'stable', since: '0.2.6' },
   { name: 'experiment_run', type_id: 'ent_341', maturity: 'proposed', since: '0.2.6' },
   { name: 'learning', type_id: 'ent_029', maturity: 'stable', since: '0.1.0' },
+  // test_plan re-homed validation → testing/QA. It is the QA
+  // verification-procedure plan (test scope / environments / pass criteria);
+  // its former validation-planning role is carried by experiment_plan.
   { name: 'test_plan', type_id: 'ent_030', maturity: 'stable', since: '0.1.0' },
   { name: 'evidence', type_id: 'ent_031', maturity: 'stable', since: '0.1.0' },
   { name: 'research_plan', type_id: 'ent_032', maturity: 'stable', since: '0.1.0' },
@@ -276,7 +284,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'behavioral_segment', type_id: 'ent_111', maturity: 'stable', since: '0.1.0' },
   { name: 'segment', type_id: 'ent_338', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.2.0', replacement: 'behavioral_segment' },
   { name: 'growth_loop', type_id: 'ent_112', maturity: 'stable', since: '0.1.0' },
-  { name: 'growth_experiment', type_id: 'ent_113', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'experiment_run' },
+  { name: 'growth_experiment', type_id: 'ent_113', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'experiment' },
   { name: 'variant', type_id: 'ent_114', maturity: 'stable', since: '0.1.0' },
   { name: 'attribution_model', type_id: 'ent_115', maturity: 'stable', since: '0.1.0' },
 
@@ -330,7 +338,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'metric_definition', type_id: 'ent_154', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'metric' },
   { name: 'event_schema', type_id: 'ent_155', maturity: 'stable', since: '0.1.0' },
   { name: 'dashboard', type_id: 'ent_156', maturity: 'stable', since: '0.1.0' },
-  { name: 'ab_test', type_id: 'ent_157', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'experiment_run' },
+  { name: 'ab_test', type_id: 'ent_157', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'experiment' },
   { name: 'data_model', type_id: 'ent_158', maturity: 'stable', since: '0.1.0' },
   { name: 'data_quality_rule', type_id: 'ent_159', maturity: 'stable', since: '0.1.0' },
   { name: 'data_product', type_id: 'ent_160', maturity: 'stable', since: '0.1.0' },
@@ -420,7 +428,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
 
   // ── Pricing & Packaging ──
   { name: 'pricing_strategy', type_id: 'ent_226', maturity: 'stable', since: '0.1.0' },
-  { name: 'pricing_experiment', type_id: 'ent_227', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'experiment_run' },
+  { name: 'pricing_experiment', type_id: 'ent_227', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'experiment' },
   { name: 'package', type_id: 'ent_228', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.2.0', replacement: 'pricing_tier' },
   { name: 'discount_strategy', type_id: 'ent_229', maturity: 'stable', since: '0.1.0' },
   { name: 'trial_config', type_id: 'ent_230', maturity: 'stable', since: '0.1.0' },

@@ -42,27 +42,34 @@ describe('edge near-synonym audit', () => {
     expect(pair).toBeDefined()
     expect(pair!.length).toBeGreaterThanOrEqual(2)
     expect(pair).toContain('insight_informs_opportunity')
-    expect(pair).toContain('insight_informs_opportunity_cross_domain')
+    // insight_informs_opportunity_cross_domain was collapsed into
+    // insight_informs_opportunity. The genuinely-distinct `surfaces` verb stays.
+    expect(pair).not.toContain('insight_informs_opportunity_cross_domain')
     expect(pair).toContain('insight_surfaces_opportunity')
   })
 
-  it('detects known exact-duplicate pairs', () => {
-    // product→decision: both edges have forward_verb "decided_via"
+  it('product→decision is now a single canonical edge ( collapse)', () => {
+    // The product_decided_via_decision_hierarchy duplicate was
+    // collapsed; product→decision now resolves to a single decided_via edge.
     const productDecision = pairMap.get('product→decision')
     expect(productDecision).toBeDefined()
-    expect(productDecision!.length).toBeGreaterThanOrEqual(2)
     const verbs = productDecision!.map(k => UPG_EDGE_CATALOG[k as keyof typeof UPG_EDGE_CATALOG].forward_verb)
-    expect(verbs.filter(v => v === 'decided_via').length).toBeGreaterThanOrEqual(2)
+    expect(verbs.filter(v => v === 'decided_via').length).toBe(1)
+    expect(productDecision).toContain('product_decided_via_decision')
+    expect(productDecision).not.toContain('product_decided_via_decision_hierarchy')
   })
 
-  it('detects metric→metric as a multi-edge pair with multiple verbs', () => {
+  it('detects metric→metric as a multi-edge pair with genuinely distinct verbs', () => {
     const metricMetric = pairMap.get('metric→metric')
     expect(metricMetric).toBeDefined()
-    expect(metricMetric!.length).toBeGreaterThanOrEqual(4)
-    // Should have exact duplicate "measures" pair
+    // the byte-identical metric_measures_metric_cross_domain and the
+    // tense-twin metric_decomposed_into_metric were collapsed. The pair keeps
+    // its genuinely-distinct verbs.
     const verbs = metricMetric!.map(k => UPG_EDGE_CATALOG[k as keyof typeof UPG_EDGE_CATALOG].forward_verb)
-    expect(verbs.filter(v => v === 'measures').length).toBeGreaterThanOrEqual(2)
-    // Should also have genuinely different verbs
+    expect(verbs.filter(v => v === 'measures').length).toBe(1)
+    expect(metricMetric).not.toContain('metric_measures_metric_cross_domain')
+    expect(metricMetric).not.toContain('metric_decomposed_into_metric')
+    // Should still have genuinely different verbs
     expect(verbs).toContain('guards')
     expect(verbs).toContain('drives')
   })
@@ -76,13 +83,14 @@ describe('edge near-synonym audit', () => {
     expect(verbs).toContain('measured_by')
   })
 
-  it('detects key_result→metric near-synonym pair (quantified_by / tracked_by)', () => {
+  it('key_result→metric collapses to the single quantified_by edge', () => {
+    // the tracked_by near-synonym was collapsed into quantified_by.
     const pair = pairMap.get('key_result→metric')
     expect(pair).toBeDefined()
-    expect(pair!.length).toBeGreaterThanOrEqual(2)
     const verbs = pair!.map(k => UPG_EDGE_CATALOG[k as keyof typeof UPG_EDGE_CATALOG].forward_verb)
     expect(verbs).toContain('quantified_by')
-    expect(verbs).toContain('tracked_by')
+    expect(verbs).not.toContain('tracked_by')
+    expect(pair).not.toContain('key_result_tracked_by_metric')
   })
 
   it('the catalog has the expected total edge count (regression guard)', () => {

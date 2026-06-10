@@ -91,8 +91,11 @@ const PRIORITY_LABELS: UPGTypeLabel[] = [
   {
     id: 'experiment',
     canonical_label: 'Experiment',
+    // V6: dropped 'test' (too generic; collides) and 'validation'
+    // (the domain name). The deprecated growth/pricing/ab experiment types
+    // redirect to `experiment` (V2), so their labels stay here.
     alt_labels: [
-      'test', 'validation', 'ab test', 'a/b test', 'split test',
+      'ab test', 'a/b test', 'split test',
       'growth experiment', 'pricing experiment', 'usability test',
       'discovery experiment',
     ],
@@ -567,8 +570,8 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
 
   // Validation layer
   learning: { alt_labels: ['validated learning', 'lesson learned', 'takeaway'] },
-  // 'experiment plan' stripped (P-B /): canonical label of the distinct `experiment_plan` type.
-  test_plan: { alt_labels: ['test strategy', 'validation plan'] },
+  // test_plan re-homed validation → QA; its label entry now lives in
+  // the Quality Assurance & Testing layer below.
   research_plan: { alt_labels: ['study plan', 'research brief'] },
   evidence: { alt_labels: ['proof', 'supporting data', 'signal'] },
   variant: { alt_labels: ['test variant', 'experiment arm', 'variation'] },
@@ -844,6 +847,10 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   learning_path: { alt_labels: ['curriculum', 'course track', 'learning journey'] },
 
   // Quality Assurance & Testing layer
+  // test_plan re-homed validation → QA: QA-shaped labels only.
+  // 'validation plan' and 'experiment plan' stripped — those belong to the
+  // validation-side `experiment_plan` type.
+  test_plan: { alt_labels: ['test strategy', 'qa plan', 'master test plan'] },
   test_suite: { alt_labels: ['test collection', 'test group'] },
   test_case: { alt_labels: ['test', 'test scenario', 'verification step'] },
   qa_session: { alt_labels: ['testing session', 'exploratory test', 'qa round'] },
