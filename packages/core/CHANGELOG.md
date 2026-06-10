@@ -7,6 +7,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.11] - 2026-06-10
+
+**Tooling DX (batch 6, part 2): status pre-flight + anti-pattern visibility.** Two discoverability fixes from the same real portfolio session, plus a self-trip fix.
+
+### Added
+- **`list_status_values(entity_type)`** (tools 118 to 119, on both the local and cloud servers): the valid `status` values a type can hold, as a focused pre-flight lookup so an author no longer learns the set only from a rejected write. Returns lifecycle phases as `{ status, label, terminal }` plus `initial_status` / `terminal_statuses`, or `lifecycle_free: true` with empty `values`. Sourced from `UPG_LIFECYCLES` (exactly what the write validator checks): the low-token sibling of `get_lifecycle`.
+- **Anti-pattern version tracking.** `UPGCuratedAntiPattern` gains an optional `since` field, and `get_spec_version` now reports `anti_patterns: { total, versioned }`. A consumer can see which validators are newer than the version a graph was authored under, so a spec upgrade no longer silently flips a clean graph invalid with no heads-up.
+
+### Changed
+- **A drafted hypothesis is auto-promoted to `active`** when it gains a `hypothesis_requires_experiment_plan` edge (via `create_edge` / `batch_create_edges`). Pairing a hypothesis with a plan is what activates it; this stops the documented structural-spine recipe (hypotheses paired with plans) from self-tripping the `untested-hypothesis-pile-up` anti-pattern. Best-effort: a promotion failure never fails the edge.
+
+No entity, domain, or edge-catalogue count change (tool count 118 to 119).
+
+---
+
 ## [0.9.10] - 2026-06-10
 
 **Tooling DX + a born-valid product (batch 6, part 1) + a release-test gate.** Polish from a real multi-graph portfolio session: parity and discoverability fixes, one model correction, and — the headline — the release train now runs the unit suites, after they were found to have been silently red across a release.
