@@ -7,6 +7,23 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.17] - 2026-06-11
+
+**CLI-next: the CLI catches up to the spec, the tree learns its frameworks, and ordering finally means something.** The `upg` CLI had frozen at the 0.8.x command set while the MCP tool surface grew to 121; its `list`/`tree` ordered lexically and re-rendered shared subtrees into noise. This release closes all of it, and folds in the `get_tree` pattern-definition fixes from a post-ship report on a real 304-node graph.
+
+### Added
+- **Meaning-aware node ordering** (`compareNodesWithinType`, SDK). The intra-type sort ladder: explicit order field (`<type>_order` / order / sequence / ...) -> semantic version (title or `version`) -> lifecycle/status phase position -> `created_at` -> numeric-aware locale. A release series now reads `v5.0.0, v5.1.0, ... v5.9.0, v5.10.0, ... v5.30.0, v6.0.0` instead of the lexical `v5.1.0, v5.10.0, ... v5.2.0`. `list`/`tree` and `get_tree` share it.
+- **DAG-honest tree assembly.** A UPG graph is a DAG; a multi-parent node now renders its subtree ONCE and appears as a `shared` reference under its other parents, in both `get_tree` (`stats.shared_refs`) and the CLI `tree` (`↗ shown above`). Nothing is silently dropped, nothing re-explodes, cycles terminate. `assembleTree` moved to the SDK so the local server, cloud server, and CLI share one implementation.
+- **A `delivery` tree pattern** for the roadmap/release region; `UPG_TREE_PATTERNS` is now 8.
+- **CLI tool-parity surface**: the full 0.9.x MCP surface as commands. New groups `spec` (offline catalogue browser, 36 nouns), `query`, `registry`, `portfolio`, `area`, `migrate`; `tree --pattern <id>` (framework-aware trees via the shared assembler); and singletons `move`, `disconnect`, `dedupe`, `clone`, `context`, `log`, `prioritise`, `sync status`, `product update`, `batch`. Six MCP tools are deliberately not mirrored (recorded by ADR): the agent-cognitive `plan`/`reflect`/`trace`, the remote-mutating `apply_pull_changeset`/`push_to_cloud`, and the skill-dev `skill_audit`.
+
+### Changed
+- **`get_tree` pattern definitions corrected (G1-G7)** against the real graph: child slots gain a `required` flag so gaps flag only genuinely-missing required children (no more ~50 false `epic` gaps); the `strategy` pattern reaches the polymorphically-parented bets and auto-flags a bet with no initiative; `okr` extends to the `metric` leaf and `ost` to `hypothesis`/`experiment_plan`; `validation` accepts `experiment` or `experiment_run`; anchor selection picks the candidate that surfaces the most of the pattern, not the first non-empty.
+
+No entity, domain, region, playbook, framework, or local-tool count change (entities 315, edges 980, local tools 121, regions 11, frameworks 46). The work is in the CLI, the SDK, and the tree presentation layer.
+
+---
+
 ## [0.9.16] - 2026-06-11
 
 **get_tree reaches the cloud, the show-tree skill calls it, and the three "area" taxonomies get a documented cross-walk.** 0.9.15 shipped `get_tree` local-only and left the show-tree skill on its interim hardcoded chains; this release finishes the loop and closes the deferred A4 introspection gap.

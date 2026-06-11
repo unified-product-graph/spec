@@ -16,12 +16,12 @@ import {
 const SLUG = /^[a-z][a-z0-9_]*$/
 
 describe('UPG_TREE_PATTERNS integrity', () => {
-  it('has the 7 canonical patterns with unique slug ids', () => {
-    expect(UPG_TREE_PATTERNS.length).toBe(7)
+  it('has the 8 canonical patterns with unique slug ids', () => {
+    expect(UPG_TREE_PATTERNS.length).toBe(8)
     const ids = UPG_TREE_PATTERNS.map((p) => p.id)
     expect(new Set(ids).size).toBe(ids.length)
     for (const id of ids) expect(id, `bad id ${id}`).toMatch(SLUG)
-    for (const want of ['ost', 'okr', 'user', 'product', 'validation', 'strategy', 'feature_areas']) {
+    for (const want of ['ost', 'okr', 'user', 'product', 'validation', 'strategy', 'feature_areas', 'delivery']) {
       expect(ids, `missing pattern ${want}`).toContain(want)
     }
   })
@@ -35,7 +35,7 @@ describe('UPG_TREE_PATTERNS integrity', () => {
       for (const [parent, children] of Object.entries(p.child_map)) {
         expect(UPG_TYPES_SET.has(parent), `${p.id} child_map parent ${parent}`).toBe(true)
         for (const c of children) {
-          expect(UPG_TYPES_SET.has(c), `${p.id} child_map ${parent} -> ${c}`).toBe(true)
+          expect(UPG_TYPES_SET.has(c.type), `${p.id} child_map ${parent} -> ${c.type}`).toBe(true)
         }
       }
     }
@@ -51,11 +51,29 @@ describe('UPG_TREE_PATTERNS integrity', () => {
         grew = false
         for (const [parent, children] of Object.entries(p.child_map)) {
           if (!reachable.has(parent)) continue
-          for (const c of children) if (!reachable.has(c)) { reachable.add(c); grew = true }
+          for (const c of children) if (!reachable.has(c.type)) { reachable.add(c.type); grew = true }
         }
       }
       for (const parent of Object.keys(p.child_map)) {
         expect(reachable.has(parent), `${p.id}: child_map key ${parent} not reachable from anchor/fallbacks`).toBe(true)
+      }
+    }
+  })
+
+  it('required child slots are well-formed (boolean flag, at least one required slot per pattern)', () => {
+    for (const p of UPG_TREE_PATTERNS) {
+      let requiredCount = 0
+      for (const children of Object.values(p.child_map)) {
+        for (const c of children) {
+          if (c.required !== undefined) expect(typeof c.required, `${p.id} ${c.type}.required`).toBe('boolean')
+          if (c.required) requiredCount++
+        }
+      }
+      // feature_areas and delivery are intentionally all-optional browse views
+      // (heterogeneous wiring; gap-flagging would be noise). The framework
+      // patterns each declare at least one gap-worthy required child.
+      if (p.id !== 'feature_areas' && p.id !== 'delivery') {
+        expect(requiredCount, `${p.id} has no required child slot`).toBeGreaterThan(0)
       }
     }
   })

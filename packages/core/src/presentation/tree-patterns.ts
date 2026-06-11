@@ -1,6 +1,7 @@
 /**
  * UPG canonical tree patterns: the named, server-owned shapes the `get_tree`
- * tool assembles (OST, OKR, user, product, validation, strategy, feature areas).
+ * tool assembles (OST, OKR, user, product, validation, strategy, feature areas,
+ * delivery).
  *
  * A tree pattern is anchor + a TYPE-DRIVEN child map, NOT a list of edge names.
  * `get_tree` roots at `anchor_type` (falling back through `fallback_anchors` when
@@ -10,13 +11,33 @@
  * drifted precisely because it hardcoded edge names (e.g. `vision_guides_strategic_theme`)
  * that a real graph did not use (its bets anchored on the product). Following to
  * the next TYPE, not a named edge, is drift-proof: a chain refinement in the edge
- * catalogue cannot rot the pattern.
+ * catalogue cannot rot the pattern. Polymorphic parentage is native: a child type
+ * is simply listed under every parent type that can hold it (a `strategic_theme`
+ * appears under `vision`, `product`, and `strategic_pillar`).
+ *
+ * Each child carries a `required` flag. Only a MISSING required child produces a
+ * `gap`; optional children render when present and are silent when absent. This
+ * is what separates a real structural hole (a bet with no initiative) from noise
+ * (a feature with no epic, where the epic tier is optional).
  *
  * The chains here were authored by resolving every (parent, child) pair against
- * the live catalogue with `pickCanonicalEdge` / `resolveAllEdges` (2026-06-11).
+ * the live catalogue (2026-06-11), and corrected against a post-ship report from
+ * field-testing on a real 304-node graph (G1-G7).
  *
  * https://unifiedproductgraph.org | MIT
  */
+
+/** One child slot in a pattern: a child entity type and whether it is gap-worthy. */
+export interface UPGTreeChild {
+  /** The child entity type. */
+  type: string
+  /**
+   * When true, a parent of this slot's owning type that has NO child of `type`
+   * is reported as a structural gap. Optional (default false) children render
+   * when present and are silent when absent.
+   */
+  required?: boolean
+}
 
 /** A canonical tree shape for `get_tree`. */
 export interface UPGTreePattern {
@@ -38,16 +59,22 @@ export interface UPGTreePattern {
   fallback_anchors: string[]
   /**
    * Type-driven adjacency: for a node of type `parent_type`, a graph neighbour
-   * whose type is in `child_map[parent_type]` is a child. Omitted parent types
-   * are leaves. Branching is expressed by listing several child types.
+   * whose type is one of `child_map[parent_type]`'s slots is a child. Omitted
+   * parent types are leaves. Branching is expressed by listing several slots; a
+   * child type listed under several parents is polymorphically parented.
    */
-  child_map: Record<string, string[]>
+  child_map: Record<string, UPGTreeChild[]>
   /** The pattern's natural rendering depth (default for get_tree's `depth`). */
   natural_depth: number
 }
 
+/** Sugar for a required child slot. */
+const req = (type: string): UPGTreeChild => ({ type, required: true })
+/** Sugar for an optional child slot. */
+const opt = (type: string): UPGTreeChild => ({ type })
+
 /**
- * The 7 canonical tree patterns. Every type referenced is an active UPG entity
+ * The canonical tree patterns. Every type referenced is an active UPG entity
  * type; integrity tests assert that and that each pattern is reachable from its
  * anchor. Append-only by convention (ids are a public surface).
  */
@@ -55,29 +82,32 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
   {
     id: 'ost',
     label: 'Opportunity Solution Tree',
-    description: 'A desired outcome branching into the opportunities under it and the solutions that address them (Teresa Torres).',
+    description: 'A desired outcome branching into the opportunities under it, the solutions that address them, and the hypotheses + experiment plans that validate them (Teresa Torres).',
     framework_id: 'opportunity-solution-tree',
     anchor_type: 'outcome',
     fallback_anchors: ['desired_outcome', 'opportunity'],
     child_map: {
-      outcome: ['opportunity'],
-      desired_outcome: ['opportunity'],
-      opportunity: ['solution'],
+      outcome: [req('opportunity')],
+      desired_outcome: [req('opportunity')],
+      opportunity: [req('solution')],
+      solution: [opt('hypothesis')],
+      hypothesis: [opt('experiment_plan')],
     },
-    natural_depth: 3,
+    natural_depth: 5,
   },
   {
     id: 'okr',
     label: 'Objectives and Key Results',
-    description: 'Strategic themes containing objectives, each measured by its key results (John Doerr).',
+    description: 'Strategic themes containing objectives, each measured by its key results and the metric that quantifies them (John Doerr).',
     framework_id: 'okr-framework',
     anchor_type: 'strategic_theme',
     fallback_anchors: ['objective'],
     child_map: {
-      strategic_theme: ['objective'],
-      objective: ['key_result'],
+      strategic_theme: [req('objective')],
+      objective: [req('key_result')],
+      key_result: [opt('metric')],
     },
-    natural_depth: 3,
+    natural_depth: 4,
   },
   {
     id: 'user',
@@ -86,54 +116,55 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     anchor_type: 'persona',
     fallback_anchors: ['job'],
     child_map: {
-      persona: ['job', 'need', 'desired_outcome'],
-      job: ['need', 'desired_outcome'],
+      persona: [req('job'), opt('need'), opt('desired_outcome')],
+      job: [opt('need'), opt('desired_outcome')],
     },
     natural_depth: 3,
   },
   {
     id: 'product',
     label: 'Product breakdown',
-    description: 'The product organised into feature areas, then features, epics, and user stories.',
+    description: 'The product organised into feature areas, then features, and the optional epic + user story tiers beneath them.',
     anchor_type: 'product',
     fallback_anchors: ['feature_area', 'feature'],
     child_map: {
-      product: ['feature_area'],
-      feature_area: ['feature'],
-      feature: ['epic'],
-      epic: ['user_story'],
+      product: [opt('feature_area')],
+      feature_area: [req('feature')],
+      feature: [opt('epic')],
+      epic: [opt('user_story')],
     },
     natural_depth: 5,
   },
   {
     id: 'validation',
     label: 'Validation chain',
-    description: 'A hypothesis through its experiment plan, experiment, run, and the learning it produced.',
+    description: 'A hypothesis through its experiment plan, the experiment (or its runs), and the learning it produced.',
     framework_id: 'build-measure-learn',
     anchor_type: 'hypothesis',
     fallback_anchors: ['experiment_plan', 'experiment'],
     child_map: {
-      hypothesis: ['experiment_plan'],
-      experiment_plan: ['experiment'],
-      experiment: ['experiment_run'],
-      experiment_run: ['learning'],
+      hypothesis: [req('experiment_plan')],
+      experiment_plan: [req('experiment'), req('experiment_run')],
+      experiment: [opt('experiment_run'), opt('learning')],
+      experiment_run: [opt('learning')],
     },
     natural_depth: 5,
   },
   {
     id: 'strategy',
     label: 'Strategy cascade',
-    description: 'Vision and mission into the strategic themes (bets), the initiatives that pursue them, and the outcomes they drive. Themes anchor on vision OR the product, whichever the graph wired.',
+    description: 'Vision and mission into the strategic themes (bets), the initiatives that pursue them, and the outcomes they drive. Themes are polymorphically parented: they hang off vision, the product, or a strategic pillar, whichever the graph wired.',
     anchor_type: 'vision',
     fallback_anchors: ['product', 'strategic_theme'],
     child_map: {
-      vision: ['mission', 'strategic_theme'],
-      product: ['strategic_theme'],
-      mission: ['strategic_theme'],
-      strategic_theme: ['initiative'],
-      initiative: ['outcome'],
+      vision: [opt('mission'), opt('strategic_theme')],
+      mission: [opt('strategic_pillar')],
+      strategic_pillar: [opt('strategic_theme')],
+      product: [opt('strategic_theme')],
+      strategic_theme: [req('initiative')],
+      initiative: [opt('outcome')],
     },
-    natural_depth: 4,
+    natural_depth: 5,
   },
   {
     id: 'feature_areas',
@@ -142,9 +173,26 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     anchor_type: 'feature_area',
     fallback_anchors: ['feature'],
     child_map: {
-      feature_area: ['feature'],
+      feature_area: [opt('feature')],
     },
     natural_depth: 2,
+  },
+  {
+    id: 'delivery',
+    label: 'Delivery roadmap',
+    description: 'How product work is scheduled and shipped: the roadmap and its themes/items, the releases they schedule, and the features (with optional epic + user story tiers) they deliver.',
+    anchor_type: 'roadmap',
+    fallback_anchors: ['product', 'release'],
+    child_map: {
+      product: [opt('roadmap'), opt('release')],
+      roadmap: [opt('roadmap_theme'), opt('roadmap_item'), opt('release')],
+      roadmap_theme: [opt('feature')],
+      roadmap_item: [opt('feature')],
+      release: [opt('feature')],
+      feature: [opt('epic')],
+      epic: [opt('user_story')],
+    },
+    natural_depth: 5,
   },
 ] as const
 
