@@ -7,6 +7,17 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.21] - 2026-06-11
+
+**The `get_tree` fallback message no longer contradicts the tree it renders.**
+
+### Fixed
+- A pattern's anchor fallback fires for two reasons, and the message conflated them. Under the most-nodes anchor rule, `get_tree` falls back when the anchor type is ABSENT, but also when it is PRESENT and merely nests under a richer root (e.g. services that all sit under a `bounded_context`). The note always said "No `<anchor>` found", which on a graph with nested services contradicts the services rendered right below it. `assembleTree` now returns **`anchor_present`** (does the anchor type have at least one node), and the CLI `tree --pattern` note and the show-tree skill use it: absent keeps "No `<anchor>` found; rooted on `<fallback>`", present-but-nested says "`<anchor>` present, but `<fallback>` surfaces more of the tree; rooted there." Behaviour was already correct; only the wording is fixed. Generalises to every pattern whose anchor sits below a structural root.
+
+No entity, domain, region, edge, or tool-count change (entities 315, edges 980, local tools 123).
+
+---
+
 ## [0.9.20] - 2026-06-11
 
 **The tree-pattern catalogue is now introspectable and drift-guarded.** A pattern can no longer cite an edge the grammar lacks, and clients can read the catalogue instead of reverse-engineering it.
