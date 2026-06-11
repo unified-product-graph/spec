@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.24] - 2026-06-11
+
+**Hardens write idempotency against a CONCURRENT re-delivery, and adds request-boundary diagnostics.** Investigation of the duplicate-delivery reports found the trigger was a CLIENT re-delivering tool calls in a long-running session (a freshly-installed server in a fresh client session never reproduces it, sequential or otherwise). The server should not depend on a well-behaved client, so this release closes the one real server-side gap: 0.9.23's content-level dedup recorded its result only AFTER the call finished, so two overlapping identical mutating calls could both miss the cache and both write.
+
+### Fixed
+- **Concurrent-delivery dedup race (`@unified-product-graph/mcp-server`).** The content-dedup ledger now memoises the in-flight PROMISE (keyed on tool + active product + normalised args) before awaiting, so a concurrent identical re-delivery shares the original execution instead of starting a second. A failed call is evicted (transient errors stay retryable); a successful one is kept (a later sequential re-delivery still replays). The server now no-ops a re-delivered mutating call whether it arrives sequentially OR concurrently.
+
+### Added
+- **Request-boundary diagnostics.** With `UPG_MCP_LOG` set, the server logs every incoming `tools/call` at the dispatch boundary (`ev: "recv"` with the tool, request id, and a payload hash) before any dedup, so a re-delivery is visible even when a ledger swallows it. Off by default.
+
+No entity, domain, region, edge, or tool-count change (entities 315, edges 980, local tools 123). The cloud server (Postgres-backed, separate write path) is unaffected.
+
+---
+
 ## [0.9.23] - 2026-06-11
 
 **Closes the duplicate-delivery hole that 0.9.22 only half-fixed, and stops a cross-product write from duplicating on retry.** 0.9.22 deduped a re-delivered mutating call by its JSON-RPC request id, but the real re-delivery carries a *fresh* request id (a client-level re-issue, invisible to a request-id ledger): each create handler re-executed and minted a second copy with new ids. Because the replay lands on the *next* mutating call and never on a read, a "write then recount" check passed falsely — which is why 0.9.22 looked fixed.
