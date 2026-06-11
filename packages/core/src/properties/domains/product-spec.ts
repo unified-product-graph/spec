@@ -88,8 +88,10 @@ export interface KeyResultProperties {
   target_value?: number
   /** Display unit (e.g. "%", "users", "£") */
   unit?: string
-  /** Delivery health */
-  kr_status?: 'on_track' | 'at_risk' | 'behind' | 'achieved'
+  // Delivery health lives on the canonical lifecycle `UPGBaseNode.status`
+  // (KEY_RESULT_LIFECYCLE phases: on_track | at_risk | behind | achieved). The
+  // former `kr_status` property duplicated it and was removed in 0.9.14 (A2);
+  // `UPG_PROPERTY_MIGRATIONS['0.9.14']` lifts any legacy value to `status`.
 }
 
 // ---------------------------------------------------------------------------

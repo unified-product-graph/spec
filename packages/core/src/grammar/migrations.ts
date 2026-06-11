@@ -601,6 +601,23 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.9.14: drop the key_result kr_status / status twin (A2) ──────────────
+  //
+  // key_result carried BOTH a lifecycle `status` and a `kr_status` property with
+  // the identical four-value enum (on_track | at_risk | behind | achieved) ==
+  // the KEY_RESULT_LIFECYCLE phases. Two fields, same values: an authoring trap.
+  // The redundant property is removed; the authored health value lifts to the
+  // canonical `UPGBaseNode.status` so a graph that set `kr_status` stays correct.
+  '0.9.14': [
+    {
+      kind: 'lift_property_to_top_level',
+      type: 'key_result',
+      from_property: 'kr_status',
+      to: 'status',
+      reason:
+        'A2 (0.9.14). key_result.kr_status duplicated the lifecycle `status` with the identical enum (on_track | at_risk | behind | achieved). The twin is removed; the authored health value lifts to `UPGBaseNode.status` verbatim.',
+    },
+  ],
   // ── v0.9.12: technical-domain enum widening + data_flow orientation split ──
   //
   // Real authoring outgrew four engineering-domain enums. 0.9.12 widens them

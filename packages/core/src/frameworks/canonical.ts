@@ -5443,6 +5443,324 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "Time pressure makes a deeper trace expensive and the first-order call is good enough"
       ]
     }
+  },
+  {
+    "id": "value-vs-effort",
+    "approach_ids": [
+      "prioritise"
+    ],
+    "name": "Value vs Effort",
+    "version": "1.0.0",
+    "description": "Plot features on a 2x2 matrix of value against effort. Quick wins (high value, low effort) get prioritised first.",
+    "category": "prioritization",
+    "origin": {
+      "type": "practitioner",
+      "description": "Common product management prioritisation tool. A simplified form of cost-benefit analysis.",
+      "license": "cc_by"
+    },
+    "tags": [
+      "prioritization",
+      "quadrant"
+    ],
+    "slots": [
+      {
+        "label": "Quick Wins",
+        "entityTypeId": "feature",
+        "role": "quick_win",
+        "description": "High value, low effort: do first"
+      },
+      {
+        "label": "Big Bets",
+        "entityTypeId": "feature",
+        "role": "big_bet",
+        "description": "High value, high effort: plan carefully"
+      },
+      {
+        "label": "Fill-ins",
+        "entityTypeId": "feature",
+        "role": "fill_in",
+        "description": "Low value, low effort: do when idle"
+      },
+      {
+        "label": "Avoid",
+        "entityTypeId": "feature",
+        "role": "money_pit",
+        "description": "Low value, high effort: deprioritise"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "feature",
+          "role": "item"
+        }
+      ],
+      "required_properties": {
+        "feature": [
+          {
+            "property": "value",
+            "type": "number",
+            "required": true,
+            "label": "Value",
+            "description": "Expected business value (1-10)"
+          },
+          {
+            "property": "effort",
+            "type": "number",
+            "required": true,
+            "label": "Effort",
+            "description": "Implementation effort (1-10)"
+          }
+        ]
+      },
+      "computed_properties": [
+        {
+          "property": "value_effort_ratio",
+          "expression": "value / effort",
+          "entity_type": "feature",
+          "label": "Value/Effort Ratio",
+          "format": "number"
+        }
+      ]
+    },
+    "structure": {
+      "pattern": "quadrant"
+    },
+    "presentation": {
+      "layout": {
+        "type": "quadrant",
+        "x_axis": "impact",
+        "y_axis": "effort",
+        "x_label": "Quick Wins",
+        "y_label": "Big Bets"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Plot features on a value/effort matrix to identify quick wins (high value, low effort) and avoid resource traps (low value, high effort).",
+      "core_question": "Which features give us the best return on engineering investment, and which are traps disguised as good ideas?",
+      "when_to_use": [
+        "You have more ideas or features than capacity to build them",
+        "Stakeholders disagree on what to build next",
+        "You need a transparent, defensible prioritisation process"
+      ],
+      "when_not_to_use": [
+        "You have a single obvious next step with no contention",
+        "The backlog is small enough to sequence intuitively"
+      ]
+    }
+  },
+  {
+    "id": "eisenhower-matrix",
+    "approach_ids": [
+      "prioritise"
+    ],
+    "name": "Eisenhower Matrix",
+    "version": "1.0.0",
+    "description": "Classify tasks by urgency and importance into four quadrants: do, schedule, delegate, or eliminate.",
+    "category": "prioritization",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Dwight D. Eisenhower",
+      "description": "Based on a quote attributed to Eisenhower: 'What is important is seldom urgent and what is urgent is seldom important.' Popularised by Stephen Covey.",
+      "license": "public_domain"
+    },
+    "tags": [
+      "prioritization",
+      "quadrant"
+    ],
+    "slots": [
+      {
+        "label": "Do First",
+        "entityTypeId": "feature",
+        "role": "do_first",
+        "description": "Urgent and important: act immediately"
+      },
+      {
+        "label": "Schedule",
+        "entityTypeId": "feature",
+        "role": "schedule",
+        "description": "Important but not urgent: plan it"
+      },
+      {
+        "label": "Delegate",
+        "entityTypeId": "feature",
+        "role": "delegate",
+        "description": "Urgent but not important: hand off"
+      },
+      {
+        "label": "Eliminate",
+        "entityTypeId": "feature",
+        "role": "eliminate",
+        "description": "Neither urgent nor important: drop it"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "feature",
+          "role": "item"
+        }
+      ],
+      "required_properties": {
+        "feature": [
+          {
+            "property": "urgency",
+            "type": "number",
+            "required": true,
+            "label": "Urgency",
+            "description": "How time-sensitive is this? (1-5)"
+          },
+          {
+            "property": "importance",
+            "type": "number",
+            "required": true,
+            "label": "Importance",
+            "description": "How important is this to goals? (1-5)"
+          }
+        ]
+      },
+      "computed_properties": [
+        {
+          "property": "priority_score",
+          "expression": "(urgency * 2) + importance",
+          "entity_type": "feature",
+          "label": "Priority Score",
+          "format": "number"
+        }
+      ]
+    },
+    "structure": {
+      "pattern": "quadrant"
+    },
+    "presentation": {
+      "layout": {
+        "type": "quadrant",
+        "x_axis": "impact",
+        "y_axis": "effort",
+        "x_label": "Do First",
+        "y_label": "Schedule"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Sort tasks by urgency and importance into four quadrants, making it clear what to do now, schedule, delegate, or eliminate.",
+      "core_question": "Am I spending my time on what matters most, or am I trapped in the urgent-but-unimportant quadrant?",
+      "when_to_use": [
+        "You have more ideas or features than capacity to build them",
+        "Stakeholders disagree on what to build next",
+        "You need a transparent, defensible prioritisation process"
+      ],
+      "when_not_to_use": [
+        "You have a single obvious next step with no contention",
+        "The backlog is small enough to sequence intuitively"
+      ]
+    }
+  },
+  {
+    "id": "four-forces-of-progress",
+    "approach_ids": [
+      "reflect"
+    ],
+    "name": "Four Forces of Progress",
+    "version": "1.0.0",
+    "description": "Analyse the four forces that drive or inhibit customers switching to a new solution: Push, Pull, Anxiety, and Habit.",
+    "category": "discovery",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Bob Moesta",
+      "description": "Demand-Side Sales 101",
+      "url": "https://jobstobedone.org/",
+      "year": 2014,
+      "license": "published_methodology"
+    },
+    "tags": [
+      "discovery",
+      "matrix"
+    ],
+    "slots": [
+      {
+        "label": "Push of Current Situation",
+        "entityTypeId": "need",
+        "role": "push",
+        "description": "Place need entities in the Push of Current Situation position of the matrix"
+      },
+      {
+        "label": "Pull of New Solution",
+        "entityTypeId": "desired_outcome",
+        "role": "pull",
+        "description": "Place desired outcome entities in the Pull of New Solution position of the matrix"
+      },
+      {
+        "label": "Anxiety of New Solution",
+        "entityTypeId": "switching_cost",
+        "role": "anxiety",
+        "description": "Place switching cost entities in the Anxiety of New Solution position of the matrix"
+      },
+      {
+        "label": "Habit of Current Situation",
+        "entityTypeId": "switching_cost",
+        "role": "habit",
+        "description": "Place switching cost entities in the Habit of Current Situation position of the matrix"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "need",
+          "role": "bucket"
+        },
+        {
+          "type": "switching_cost",
+          "role": "bucket"
+        },
+        {
+          "type": "desired_outcome",
+          "role": "bucket"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "matrix"
+    },
+    "presentation": {
+      "layout": {
+        "type": "matrix",
+        "rows": 2,
+        "cols": 2
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Map the four forces that drive or resist a customer's switch to a new solution (Push, Pull, Anxiety, Habit) to understand why people change (or don't).",
+      "core_question": "Are the push and pull forces strong enough to overcome the anxiety of the new and the comfort of the familiar?",
+      "when_to_use": [
+        "You need to understand unmet user needs before committing to solutions",
+        "The problem space is ambiguous and requires structured exploration",
+        "You want to reduce the risk of building the wrong thing"
+      ],
+      "when_not_to_use": [
+        "The solution is well-understood and validated",
+        "You are in a delivery phase with clear requirements"
+      ]
+    }
   }
 ] as UPGFramework[]
 

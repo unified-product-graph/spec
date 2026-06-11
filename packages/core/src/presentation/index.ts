@@ -4,5 +4,6 @@
  */
 
 export * from './labels.js'
+export * from './entity-emoji.js'
 export * from './lenses.js'
 export * from './domain-rings.js'

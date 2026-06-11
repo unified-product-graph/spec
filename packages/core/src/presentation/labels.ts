@@ -9,6 +9,11 @@
 import { UPG_ACTIVE_TYPES } from '../registry/entity-meta.js'
 import { UPG_MIGRATIONS } from '../grammar/migrations.js'
 import { UPG_FRAMEWORKS } from '../frameworks/canonical.js'
+import { ENTITY_EMOJI, DEFAULT_ENTITY_EMOJI } from './entity-emoji.js'
+
+/** Seed shape for hand-authored label entries: every field of UPGTypeLabel except
+ * `emoji`, which the assembly step below attaches from `ENTITY_EMOJI`. */
+type UPGTypeLabelSeed = Omit<UPGTypeLabel, 'emoji'>
 
 // ─── Interface ──────────────────────────────────────────────────────────────────
 
@@ -17,6 +22,13 @@ export interface UPGTypeLabel {
   id: string
   /** Default display name */
   canonical_label: string
+  /**
+   * One distinct, relevant emoji glyph for the type (the canonical, Captain-reviewed
+   * set in `entity-emoji.ts`). Always resolves: a type without an explicit glyph
+   * falls back to `DEFAULT_ENTITY_EMOJI`. This is THE live emoji source, surfaced
+   * by `get_type_label` + `list_type_labels`, so renderers stop hardcoding.
+   */
+  emoji: string
   /** All known synonyms across frameworks + common usage (lowercase for matching) */
   alt_labels: string[]
   /** Framework-specific labels: { framework_id: "what that framework calls it" } */
@@ -31,7 +43,7 @@ export interface UPGTypeLabel {
  * Hand-authored label entries for types that appear across multiple frameworks.
  * These are the "Rosetta Stone" entries, the ones users will encounter across views.
  */
-const PRIORITY_LABELS: UPGTypeLabel[] = [
+const PRIORITY_LABELS: UPGTypeLabelSeed[] = [
 
   // ── need (CONSOLIDATED: replaces pain_point + user_need) ─────────────────────
 
@@ -1028,6 +1040,7 @@ export const UPG_TYPE_LABELS: UPGTypeLabel[] = UPG_ACTIVE_TYPES.map((typeName) =
 
     return {
       ...priority,
+      emoji: ENTITY_EMOJI[typeName] ?? DEFAULT_ENTITY_EMOJI,
       alt_labels: [...priority.alt_labels, ...newAliases, ...slotAliases],
       framework_labels: mergedFrameworkLabels,
     }
@@ -1043,6 +1056,7 @@ export const UPG_TYPE_LABELS: UPGTypeLabel[] = UPG_ACTIVE_TYPES.map((typeName) =
     return {
       id: typeName,
       canonical_label: toTitleCase(typeName),
+      emoji: ENTITY_EMOJI[typeName] ?? DEFAULT_ENTITY_EMOJI,
       alt_labels: [...standard.alt_labels, ...newAliases, ...slotAliases],
       framework_labels: generated?.framework_labels ?? {},
     }
@@ -1054,6 +1068,7 @@ export const UPG_TYPE_LABELS: UPGTypeLabel[] = UPG_ACTIVE_TYPES.map((typeName) =
   return {
     id: typeName,
     canonical_label: toTitleCase(typeName),
+    emoji: ENTITY_EMOJI[typeName] ?? DEFAULT_ENTITY_EMOJI,
     alt_labels: [...migrationAliases, ...slotAliases],
     framework_labels: generated?.framework_labels ?? {},
   }

@@ -94,6 +94,32 @@ describe('Product properties.stage is canonical, not lifted (/661, batch-6 #33)'
  })
 })
 
+// ─── A2 (0.9.14): key_result kr_status twin lifts to status ───────────────────
+
+describe('A2: key_result.kr_status lifts to lifecycle status (0.9.14)', () => {
+ it('lifts an authored kr_status to top-level status and removes the property', () => {
+ const node = {
+ id: 'kr1',
+ type: 'key_result',
+ title: 'Activation rate 40%',
+ status: 'on_track',
+ properties: { kr_status: 'at_risk', target_value: 40 },
+ }
+ const { node: migrated, changes } = migrateNodeProperties(node, '0.9.13', '0.9.14')
+ expect((migrated as Record<string, unknown>).status).toBe('at_risk')
+ expect((migrated.properties as Record<string, unknown>).kr_status).toBeUndefined()
+ expect((migrated.properties as Record<string, unknown>).target_value).toBe(40)
+ expect(changes.find((c) => c.kind === 'lifted_to_top_level')).toBeDefined()
+ })
+
+ it('is a no-op when kr_status is absent (status preserved)', () => {
+ const node = { id: 'kr2', type: 'key_result', title: 'X', status: 'achieved', properties: { target_value: 1 } }
+ const { node: out, changes } = migrateNodeProperties(node, '0.9.13', '0.9.14')
+ expect((out as Record<string, unknown>).status).toBe('achieved')
+ expect(changes.find((c) => c.kind === 'lifted_to_top_level')).toBeUndefined()
+ })
+})
+
 // ─── rename_top_level — lifecycle_status → status ────────────────────────────
 
 describe('Rename_top_level (lifecycle_status → status)', () => {

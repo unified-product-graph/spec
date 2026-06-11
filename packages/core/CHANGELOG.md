@@ -7,6 +7,25 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.14] - 2026-06-11
+
+**Introspection completeness: make the live surface complete and honest so clients can stop hardcoding.** A diagnostic of the skill suite found shared docs pointing skills at an introspection field that did not exist, two redundant status fields, a silent mis-parenting path, and four expected frameworks that hard-errored. This release closes those gaps.
+
+### Added
+- **`emoji` on every type label** (the A1 keystone). `UPGTypeLabel` gains a required `emoji` field, surfaced live by `get_type_label({type})` and `list_type_labels`. One distinct glyph per active entity type (315), authored once in `entity-emoji.ts` as the single source of truth. The shared rendering docs already cited `get_type_label().emoji` as authoritative; the field now exists, so renderers can derive emojis live instead of hardcoding a partial table.
+- **Three canonical frameworks** (catalog 43 to 46): `value-vs-effort` and `eisenhower-matrix` (prioritise) and `four-forces-of-progress` (JTBD, reflect). All three are real, widely-taught frameworks that `get_framework` previously hard-errored on. Promoted from `definitions/` with disambiguating slot roles.
+
+### Changed
+- **Dropped the `key_result` kr_status / status twin** (A2). `key_result` carried both a lifecycle `status` and a `kr_status` property with the identical enum (`on_track | at_risk | behind | achieved`). The redundant property is removed; `UPG_PROPERTY_MIGRATIONS['0.9.14']` lifts any authored `kr_status` to `UPGBaseNode.status` verbatim.
+- **`create_node` / `batch_create_nodes` warn on a non-containment `parent_id`** (A3). A `parent_id` / `parent_ref` whose pair has no canonical containment edge did not nest as expected (it resolved a silent lateral edge or orphaned the node while suppressing the orphan hint). The create path now emits a warning (never a refusal), on the single write and on batch `validate_only`, naming the non-containment parent and pointing at `create_edge` vs a valid containment parent.
+
+### Deferred
+- A4 (reconcile the three "area" taxonomies into an introspectable mapping) and a cloud-server parallel of the A3 warning are deferred to a follow-up.
+
+Counts: frameworks 43 to 46; no entity, domain, region, playbook, edge, or tool-count change (entities 315, tools 120, edges 980).
+
+---
+
 ## [0.9.13] - 2026-06-11
 
 **Foundations follow-ups: a registry-edge authoring path, specification stewardship, and three portfolio-scoped anti-patterns.** The deferred half of the foundations work (0.9.12) lands: canonical entities can now relate to one another in the registry, a specification can name its steward, and the registry surfaces the ways a foundations tier goes wrong across a portfolio.
