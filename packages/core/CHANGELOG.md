@@ -7,6 +7,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.16] - 2026-06-11
+
+**get_tree reaches the cloud, the show-tree skill calls it, and the three "area" taxonomies get a documented cross-walk.** 0.9.15 shipped `get_tree` local-only and left the show-tree skill on its interim hardcoded chains; this release finishes the loop and closes the deferred A4 introspection gap.
+
+### Added
+- **`get_tree` on the cloud server** (cloud tools 94 to 95; local unchanged at 121). The assembler (`assembleTree` + the `GraphReader` interface) moved to the shared `@unified-product-graph/mcp-tooling` package, so the local file-backed server and the cloud Postgres-backed server assemble byte-identical trees from one source. The cloud handler builds an in-memory `GraphReader` from a one-shot product node+edge load. `get_tree` leaves the CLOUD_NA parity list.
+- **`UPG_AREA_TAXONOMY`** (core): the documented cross-walk between the three overlapping "area" groupings that skills kept conflating into a stale coverage denominator: the 10 `get_graph_digest.coverage` keys, the 11 canonical regions, and the 8 "business areas". Keyed by coverage key; each row names the matching business area (null for `validation` and `operations`, which the 8-area grouping folds into discovery / omits) and the region ids its entities live in. Helpers `getCoverageKeysForRegion` / `getBusinessAreasForRegion`. Surfaced on `list_regions` (an `area_taxonomy` block plus per-region `coverage_keys` / `business_areas`) and `get_region` (per-region `coverage_keys` / `business_areas`), local and cloud. An SDK drift test pins the key sets against the runtime sources (`BUSINESS_AREAS`, `BUSINESS_AREA_META`).
+
+### Changed
+- **`/upg-show-tree` calls `get_tree`** instead of building traverse chains and resolving edge names. The skill now renders the returned roots / children, surfaces `gaps`, and notes anchor fallback; it no longer carries the edge-name chains that drifted (the exact failure `get_tree` exists to prevent). Adds the `feature_areas` pattern. Skills ship in the mcp-server package, so this reaches users with the release.
+
+No entity, domain, region, playbook, framework, or edge-count change, and no change to the local tool surface (entities 315, edges 980, local tools 121, regions 11).
+
+---
+
 ## [0.9.15] - 2026-06-11
 
 **get_tree: server-side tree assembly.** Tree views (OST, OKR, user, product, validation, strategy, feature areas) were assembled client-side by the show-tree skill out of multiple query calls and hardcoded edge chains that drifted with the spec. This release relocates assembly to the server, which owns the catalogue.

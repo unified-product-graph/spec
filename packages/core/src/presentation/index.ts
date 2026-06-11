@@ -6,5 +6,6 @@
 export * from './labels.js'
 export * from './entity-emoji.js'
 export * from './tree-patterns.js'
+export * from './area-taxonomy.js'
 export * from './lenses.js'
 export * from './domain-rings.js'
