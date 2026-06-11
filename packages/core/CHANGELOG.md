@@ -7,6 +7,19 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.22] - 2026-06-11
+
+**Stops silent data duplication from re-delivered MCP writes, and stops dedupe from destroying structure.** Three fixes for a HIGH-severity report where a mutating call was applied twice (the duplicate landing a few calls later, past any immediate recount).
+
+### Fixed
+- **Idempotent MCP writes (primary).** A re-delivered mutating tool call (the same JSON-RPC request id, e.g. a transport-level resend) re-ran the handler, minted fresh ids, and wrote a second copy. The local MCP server now memoises the result per request id and replays it, so a re-delivery (in flight or already finished) is a no-op that returns the original response instead of duplicating the write.
+- **Watcher self-write guard (`@unified-product-graph/sdk`).** The file watcher's 150ms self-write flag expired before chokidar's 200ms `awaitWriteFinish` fired, so every server write looked like an external change and triggered a needless reload/merge. The guard is now a content-hash check: if the changed file equals what we last wrote, it is not external. Timing-independent.
+- **`deduplicate_nodes` no longer drops structural edges.** The merge used a constant sort comparator (not a real `created_at` sort) and redirected inbound edges best-effort with a silent catch, then cascade-removed the originals, so a kept node could lose its inbound containment edge and vanish from the tree. Rewritten: a real keeper sort, a group-wide redirect map that re-homes every edge onto the keeper before removing any node (identical edges union, not multiply), and a structural-parent assertion that surfaces any inbound parent edge not preserved (`structural_warnings`).
+
+No entity, domain, region, edge, or tool-count change (entities 315, edges 980, local tools 123). The cloud server (Postgres-backed, no file watcher, separate SQL dedupe) is unaffected.
+
+---
+
 ## [0.9.21] - 2026-06-11
 
 **The `get_tree` fallback message no longer contradicts the tree it renders.**
