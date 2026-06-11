@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.25] - 2026-06-11
+
+**The real fix for the duplicate-write bug: `upg mcp run` was starting TWO servers.** Every mutating call made through the CLI launch (`cli mcp run`, which is how most MCP clients start the server) was applied twice. Root cause: mcp-server's `index.js` is both the library entry (the CLI imports `runMcpServer`) and the bin (it auto-starts when it is the process entrypoint). The CLI bundles that module into its single-file `cli.cjs`, and a bundler rewrites `import.meta.url` to the bundle's own path — so the realpath-only entrypoint guard matched `process.argv[1]` and the inlined branch auto-started a SECOND server alongside the CLI's own `runMcpServer()`. Two servers shared one stdin, so every request was handled by both and every write duplicated. The 0.9.22 to 0.9.24 idempotency work was at the dispatch layer and could not help: the duplication is two whole server processes, whose per-instance ledgers cannot see each other. `node dist/index.js` and `npx @unified-product-graph/mcp-server` launch a single server and were never affected, which is why direct-launch users never saw it.
+
+### Fixed
+- **`cli mcp run` no longer double-starts the server (`@unified-product-graph/mcp-server`).** The auto-start guard now also requires that our own entry file (`index.js`) is the file being executed, so the branch is a no-op when the module is inlined into another tool's bundle. `node dist/index.js` and the `upg-mcp-server` bin still auto-start as before. The guard is extracted as `shouldAutoStart` and unit-tested for the bundled, direct, and imported-as-library cases.
+
+### Added
+- **A regression gate: `gate:mcp` now launches the real bundled `cli mcp run` and asserts the server receives each request exactly once** (exactly one server instance). This is the faithful test whose absence let the defect ship across three releases; it fails loudly if the bundle ever auto-starts a second server again.
+
+The dispatch-layer idempotency from 0.9.22 to 0.9.24 is retained as defense-in-depth against a genuine in-server re-delivery. No entity, domain, region, edge, or tool-count change (entities 315, edges 980, local tools 123).
+
+---
+
 ## [0.9.24] - 2026-06-11
 
 **Hardens write idempotency against a CONCURRENT re-delivery, and adds request-boundary diagnostics.** Investigation of the duplicate-delivery reports found the trigger was a CLIENT re-delivering tool calls in a long-running session (a freshly-installed server in a fresh client session never reproduces it, sequential or otherwise). The server should not depend on a well-behaved client, so this release closes the one real server-side gap: 0.9.23's content-level dedup recorded its result only AFTER the call finished, so two overlapping identical mutating calls could both miss the cache and both write.
