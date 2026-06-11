@@ -1,7 +1,7 @@
 /**
  * UPG canonical tree patterns: the named, server-owned shapes the `get_tree`
  * tool assembles (OST, OKR, user, product, validation, strategy, feature areas,
- * delivery).
+ * delivery, architecture, journey, design system) — one per tree-shaped region.
  *
  * A tree pattern is anchor + a TYPE-DRIVEN child map, NOT a list of edge names.
  * `get_tree` roots at `anchor_type` (falling back through `fallback_anchors` when
@@ -180,19 +180,76 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
   {
     id: 'delivery',
     label: 'Delivery roadmap',
-    description: 'How product work is scheduled and shipped: the roadmap and its themes/items, the releases they schedule, and the features (with optional epic + user story tiers) they deliver.',
+    description: 'How product work is scheduled and shipped: the roadmap and its themes/items, the releases they schedule, the features (and the changelog + bugs) those releases deliver, and the feature areas a theme spans. Optional epic + user story tiers appear on request.',
     anchor_type: 'roadmap',
-    fallback_anchors: ['product', 'release'],
+    // Fallback is the product alone: a graph with no roadmap roots at the
+    // product (product -> release -> feature), reported as anchor_resolved_from:
+    // roadmap. `release` is deliberately NOT a fallback root — a 32-release
+    // forest would out-node the product and shadow it under the most-nodes rule.
+    fallback_anchors: ['product'],
     child_map: {
-      product: [opt('roadmap'), opt('release')],
+      // product holds releases directly (the delivery axis without a roadmap),
+      // but NOT the roadmap: listing roadmap here made the product a superset of
+      // the roadmap, so the most-nodes anchor rule rooted delivery at the product
+      // even when a roadmap existed. Dropping it lets the roadmap win when present.
+      product: [opt('release')],
       roadmap: [opt('roadmap_theme'), opt('roadmap_item'), opt('release')],
-      roadmap_theme: [opt('feature')],
+      roadmap_theme: [opt('feature'), opt('feature_area')],
       roadmap_item: [opt('feature')],
-      release: [opt('feature')],
+      release: [opt('feature'), opt('changelog'), opt('bug')],
       feature: [opt('epic')],
       epic: [opt('user_story')],
     },
-    natural_depth: 5,
+    // Default to 3 tiers (roadmap -> theme/item/release -> feature) for a
+    // readable overview on a many-release roadmap; `depth` extends into
+    // epic -> user_story.
+    natural_depth: 3,
+  },
+  {
+    id: 'architecture',
+    label: 'Architecture',
+    description: 'The engineering platform: services and the API contracts, endpoints, schemas, queues, deployments, and dependencies they own, grouped by bounded context, with domain aggregates and their members. A DAG (a schema or queue shared by several services renders once, then as a reference).',
+    anchor_type: 'service',
+    fallback_anchors: ['bounded_context'],
+    child_map: {
+      bounded_context: [
+        opt('service'), opt('external_api'), opt('data_flow'), opt('integration_pattern'),
+        opt('code_repository'), opt('api_contract'), opt('aggregate'), opt('domain_event'),
+      ],
+      service: [
+        opt('api_contract'), opt('api_endpoint'), opt('database_schema'), opt('queue_topic'),
+        opt('deployment'), opt('build_artifact'), opt('library_dependency'), opt('feature_flag'),
+      ],
+      aggregate: [opt('domain_entity'), opt('value_object'), opt('command'), opt('read_model'), opt('domain_event')],
+    },
+    natural_depth: 3,
+  },
+  {
+    id: 'journey',
+    label: 'User journey',
+    description: 'A user journey over time: its phases and steps, the actions within each step, and the screens those steps surface. Falls back to a user_flow when journeys are not yet mapped.',
+    anchor_type: 'user_journey',
+    fallback_anchors: ['user_flow'],
+    child_map: {
+      user_journey: [opt('journey_phase'), opt('journey_step')],
+      journey_phase: [opt('journey_step')],
+      journey_step: [opt('journey_action'), opt('screen')],
+      user_flow: [opt('screen')],
+      screen: [opt('screen_state')],
+    },
+    natural_depth: 3,
+  },
+  {
+    id: 'design_system',
+    label: 'Design system',
+    description: 'A design system broken into its components, their nested sub-components (atom to molecule to organism), and the design tokens they consume.',
+    anchor_type: 'design_system',
+    fallback_anchors: ['design_component'],
+    child_map: {
+      design_system: [opt('design_component'), opt('design_token')],
+      design_component: [opt('design_component'), opt('design_token')],
+    },
+    natural_depth: 3,
   },
 ] as const
 

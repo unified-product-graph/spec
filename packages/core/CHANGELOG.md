@@ -7,6 +7,23 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.19] - 2026-06-11
+
+**The tree-pattern catalogue covers every tree-shaped region, and `delivery` finally roots at the roadmap.** `get_tree` now offers 11 patterns (was 8), one per hierarchical region.
+
+### Changed
+- **`delivery` refined.** The 0.9.17 pattern rooted at the product, not the roadmap: its child map listed `product -> roadmap`, which made the product a superset of the roadmap, so the most-nodes anchor rule chose the product even when a roadmap existed. Dropping that slot lets the roadmap win when present; the product is the fallback root (`product -> release`). Added the missing optional children `roadmap_theme -> feature_area`, `release -> changelog`, and `release -> bug`. Default depth is now 3 (a readable overview to the feature tier; `depth` extends into epic and user story).
+
+### Added
+- **Three new tree patterns**, all-optional (browse views, no gap noise):
+  - **`architecture`** (anchor `service`, fallback `bounded_context`): services and the API contracts, endpoints, schemas, queues, deployments, and dependencies they own, grouped by bounded context, with domain aggregates and their members. A DAG: a schema or queue shared by several services renders once, then as a reference.
+  - **`journey`** (anchor `user_journey`, fallback `user_flow`): a journey over time, its phases and steps, the actions within each step, and the screens those steps surface.
+  - **`design_system`** (anchor `design_system`, fallback `design_component`): a design system, its components, their nested sub-components, and the design tokens they consume.
+
+No entity, domain, region, edge, or tool-count change (entities 315, edges 980, local tools 121). The work is in the presentation layer: `UPG_TREE_PATTERNS` (8 to 11) and the pattern lists carried by both servers, the CLI, and the show-tree skill.
+
+---
+
 ## [0.9.18] - 2026-06-11
 
 **The CLI help stops drifting, and an unknown `tree` filter stops lying.** The CLI rendered `--help` from a hand-maintained table divorced from each command's own option definitions, so adding a flag silently left its help stale (that is how `tree --pattern` shipped undocumented in 0.9.17). Separately, `upg tree <unknown>` quietly rendered the whole graph mislabeled as the filter. Both are now structural.

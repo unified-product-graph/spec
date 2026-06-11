@@ -16,12 +16,15 @@ import {
 const SLUG = /^[a-z][a-z0-9_]*$/
 
 describe('UPG_TREE_PATTERNS integrity', () => {
-  it('has the 8 canonical patterns with unique slug ids', () => {
-    expect(UPG_TREE_PATTERNS.length).toBe(8)
+  it('has the 11 canonical patterns with unique slug ids', () => {
+    expect(UPG_TREE_PATTERNS.length).toBe(11)
     const ids = UPG_TREE_PATTERNS.map((p) => p.id)
     expect(new Set(ids).size).toBe(ids.length)
     for (const id of ids) expect(id, `bad id ${id}`).toMatch(SLUG)
-    for (const want of ['ost', 'okr', 'user', 'product', 'validation', 'strategy', 'feature_areas', 'delivery']) {
+    for (const want of [
+      'ost', 'okr', 'user', 'product', 'validation', 'strategy', 'feature_areas',
+      'delivery', 'architecture', 'journey', 'design_system',
+    ]) {
       expect(ids, `missing pattern ${want}`).toContain(want)
     }
   })
@@ -69,10 +72,12 @@ describe('UPG_TREE_PATTERNS integrity', () => {
           if (c.required) requiredCount++
         }
       }
-      // feature_areas and delivery are intentionally all-optional browse views
-      // (heterogeneous wiring; gap-flagging would be noise). The framework
-      // patterns each declare at least one gap-worthy required child.
-      if (p.id !== 'feature_areas' && p.id !== 'delivery') {
+      // These are intentionally all-optional browse views (heterogeneous wiring;
+      // gap-flagging would be noise — a chore release with no changelog, a theme
+      // that spans feature_areas instead of features, a service with no queue).
+      // The framework patterns each declare at least one gap-worthy required child.
+      const ALL_OPTIONAL = new Set(['feature_areas', 'delivery', 'architecture', 'journey', 'design_system'])
+      if (!ALL_OPTIONAL.has(p.id)) {
         expect(requiredCount, `${p.id} has no required child slot`).toBeGreaterThan(0)
       }
     }
