@@ -7,6 +7,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.18] - 2026-06-11
+
+**The CLI help stops drifting, and an unknown `tree` filter stops lying.** The CLI rendered `--help` from a hand-maintained table divorced from each command's own option definitions, so adding a flag silently left its help stale (that is how `tree --pattern` shipped undocumented in 0.9.17). Separately, `upg tree <unknown>` quietly rendered the whole graph mislabeled as the filter. Both are now structural.
+
+### Added
+- **A help-drift guard.** The command registry is now a single source of truth that the program, the help-safety test, and a new drift test all iterate. The guard asserts that every registered command has a help topic, every long option it declares is documented, and every subcommand is mentioned, so a new command or flag cannot escape help coverage.
+
+### Fixed
+- **Help is back in sync with the commands.** Documented the options the guard flagged across eleven commands: `context --summary`, `verify --no-content-depth`, `query --edge-include` / `--limit`, `prioritise --framework` (which is required), `move --old-edge`, `dedupe --type` / `--dry-run`, `diff --stat`, `gaps --domain`, `import --output` / `--yes`, `init --file` / `--yes`, `install-skills --mode` / `--list` / `--remove`, and `score --slot-role`. The `spec` help now enumerates its full noun catalogue.
+- **`upg tree <unknown-filter>` errors (exit 3)** instead of silently rendering the whole graph under a wrong label. A valid entity type with no instances reports cleanly, and filtering by a domain id is now actually implemented (the help had always claimed it).
+
+No entity, domain, region, playbook, framework, edge, or tool-count change (entities 315, edges 980, local tools 121). The work is entirely in the CLI.
+
+---
+
 ## [0.9.17] - 2026-06-11
 
 **CLI-next: the CLI catches up to the spec, the tree learns its frameworks, and ordering finally means something.** The `upg` CLI had frozen at the 0.8.x command set while the MCP tool surface grew to 121; its `list`/`tree` ordered lexically and re-rendered shared subtrees into noise. This release closes all of it, and folds in the `get_tree` pattern-definition fixes from a post-ship report on a real 304-node graph.
