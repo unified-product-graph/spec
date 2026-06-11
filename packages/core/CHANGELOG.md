@@ -7,6 +7,21 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.20] - 2026-06-11
+
+**The tree-pattern catalogue is now introspectable and drift-guarded.** A pattern can no longer cite an edge the grammar lacks, and clients can read the catalogue instead of reverse-engineering it.
+
+### Added
+- **Two introspection tools** (local + cloud, spec-introspection family, local 121 to 123 / cloud 95 to 97):
+  - **`list_tree_patterns`** returns every `get_tree` pattern as a summary row: id, label, the region it is the tree view of, anchor, fallback anchors, natural depth, gap policy, and slot count. Paired with `list_regions`, coverage becomes a queryable diff.
+  - **`get_tree_pattern(id)`** returns the full declarative record: region, anchor, fallbacks, gap policy, depth, and the child map resolved to concrete edges. Each parent-to-child slot carries the canonical `via` edge and its `kind`, resolved live from the edge catalogue, so a client reads the real wiring rather than reverse-engineering it from behaviour.
+- **Declarative pattern records.** `UPGTreePattern` gains `region` (ties a pattern to its region and that region's `shape`) and `gap_policy` (`required-children-only` or `all-optional`). Helpers `listTreePatternSummaries`, `describeTreePattern`, and `resolveTreePatternEdges` expose the catalogue from core.
+- **A drift-guard test.** Every pattern's every `(parent -> child)` slot must resolve to a canonical edge in the catalogue. A pattern that cites an ungrounded pair fails the build. This makes the whole class of bug structural (it already caught an `aggregate -> read_model` slot in the 0.9.19 architecture sketch that the grammar does not wire).
+
+No entity, domain, region, or edge-count change (entities 315, edges 980); local tools 121 to 123, cloud 95 to 97.
+
+---
+
 ## [0.9.19] - 2026-06-11
 
 **The tree-pattern catalogue covers every tree-shaped region, and `delivery` finally roots at the roadmap.** `get_tree` now offers 11 patterns (was 8), one per hierarchical region.

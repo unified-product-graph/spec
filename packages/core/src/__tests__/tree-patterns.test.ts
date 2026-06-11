@@ -9,8 +9,12 @@ import {
   UPG_TREE_PATTERNS,
   UPG_TREE_PATTERNS_BY_ID,
   getTreePattern,
+  describeTreePattern,
+  listTreePatternSummaries,
+  resolveTreePatternEdges,
   UPG_TYPES_SET,
   UPG_FRAMEWORKS_BY_ID,
+  UPG_REGION_MAP,
 } from '../index.js'
 
 const SLUG = /^[a-z][a-z0-9_]*$/
@@ -103,5 +107,50 @@ describe('UPG_TREE_PATTERNS integrity', () => {
     expect(Object.keys(UPG_TREE_PATTERNS_BY_ID).length).toBe(UPG_TREE_PATTERNS.length)
     expect(getTreePattern('ost')?.anchor_type).toBe('outcome')
     expect(getTreePattern('not-a-pattern')).toBeUndefined()
+  })
+
+  it('every pattern names a real region', () => {
+    for (const p of UPG_TREE_PATTERNS) {
+      expect(UPG_REGION_MAP[p.region], `${p.id} region ${p.region}`).toBeDefined()
+    }
+  })
+
+  it('gap_policy agrees with the required slots', () => {
+    for (const p of UPG_TREE_PATTERNS) {
+      const hasRequired = Object.values(p.child_map).some((cs) => cs.some((c) => c.required))
+      if (p.gap_policy === 'all-optional') {
+        expect(hasRequired, `${p.id} is all-optional but has a required slot`).toBe(false)
+      } else {
+        expect(p.gap_policy, `${p.id} gap_policy`).toBe('required-children-only')
+        expect(hasRequired, `${p.id} is required-children-only but has no required slot`).toBe(true)
+      }
+    }
+  })
+
+  // The structural drift-guard (the point of the introspectable catalogue): a
+  // pattern cannot cite a (parent -> child) pair the edge grammar does not wire.
+  // resolveTreePatternEdges resolves each slot against the live UPG_EDGE_CATALOG;
+  // a null `via` means the grammar has no edge for the pair, so the pattern would
+  // silently render nothing there. This is what would have made G1/G7 (and the
+  // aggregate -> read_model sketch error) unauthorable.
+  it('every child_map slot resolves to a canonical edge (no ungrounded pairs)', () => {
+    for (const p of UPG_TREE_PATTERNS) {
+      const ungrounded = resolveTreePatternEdges(p).filter((e) => e.via === null)
+      expect(
+        ungrounded.map((e) => `${e.parent} -> ${e.child}`),
+        `${p.id} has child_map pairs with no catalogue edge`,
+      ).toEqual([])
+    }
+  })
+
+  it('describeTreePattern resolves edges with via + kind; list summaries cover every pattern', () => {
+    expect(listTreePatternSummaries()).toHaveLength(UPG_TREE_PATTERNS.length)
+    const d = describeTreePattern('delivery')
+    expect(d?.region).toBe('product_delivery')
+    expect(d?.gap_policy).toBe('all-optional')
+    const roadmapRelease = d?.edges.find((e) => e.parent === 'roadmap' && e.child === 'release')
+    expect(roadmapRelease?.via).toBe('roadmap_schedules_release')
+    expect(roadmapRelease?.kind).toBe('hierarchy')
+    expect(describeTreePattern('not-a-pattern')).toBeUndefined()
   })
 })

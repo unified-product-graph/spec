@@ -27,6 +27,8 @@
  * https://unifiedproductgraph.org | MIT
  */
 
+import { UPG_EDGE_CATALOG } from '../catalog/edge-catalog.js'
+
 /** One child slot in a pattern: a child entity type and whether it is gap-worthy. */
 export interface UPGTreeChild {
   /** The child entity type. */
@@ -39,6 +41,9 @@ export interface UPGTreeChild {
   required?: boolean
 }
 
+/** How a pattern decides what counts as a structural gap. */
+export type UPGTreeGapPolicy = 'required-children-only' | 'all-optional'
+
 /** A canonical tree shape for `get_tree`. */
 export interface UPGTreePattern {
   /** Stable id (the `pattern` argument to get_tree). */
@@ -49,6 +54,19 @@ export interface UPGTreePattern {
   description: string
   /** The framework this pattern realises, where one maps (else undefined). */
   framework_id?: string
+  /**
+   * The canonical region this pattern is the tree view of (ties pattern ->
+   * region -> its `shape`). A region may afford several patterns (e.g.
+   * `product_delivery` has product, feature_areas, and delivery).
+   */
+  region: string
+  /**
+   * `required-children-only`: a node missing a required child type is a gap.
+   * `all-optional`: a browse view; nothing is gap-flagged (heterogeneous wiring
+   * where gap-flagging would be noise). Descriptive; the assembler already
+   * derives gaps from the per-child `required` flags.
+   */
+  gap_policy: UPGTreeGapPolicy
   /** Canonical root entity type. */
   anchor_type: string
   /**
@@ -84,6 +102,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     label: 'Opportunity Solution Tree',
     description: 'A desired outcome branching into the opportunities under it, the solutions that address them, and the hypotheses + experiment plans that validate them (Teresa Torres).',
     framework_id: 'opportunity-solution-tree',
+    region: 'discovery_research_validation',
+    gap_policy: 'required-children-only',
     anchor_type: 'outcome',
     fallback_anchors: ['desired_outcome', 'opportunity'],
     child_map: {
@@ -100,6 +120,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     label: 'Objectives and Key Results',
     description: 'Strategic themes containing objectives, each measured by its key results and the metric that quantifies them (John Doerr).',
     framework_id: 'okr-framework',
+    region: 'strategy_outcomes',
+    gap_policy: 'required-children-only',
     anchor_type: 'strategic_theme',
     fallback_anchors: ['objective'],
     child_map: {
@@ -113,6 +135,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     id: 'user',
     label: 'User chain',
     description: 'A persona and the jobs it pursues, branching into the needs and desired outcomes behind them.',
+    region: 'users_needs',
+    gap_policy: 'required-children-only',
     anchor_type: 'persona',
     fallback_anchors: ['job'],
     child_map: {
@@ -125,6 +149,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     id: 'product',
     label: 'Product breakdown',
     description: 'The product organised into feature areas, then features, and the optional epic + user story tiers beneath them.',
+    region: 'product_delivery',
+    gap_policy: 'required-children-only',
     anchor_type: 'product',
     fallback_anchors: ['feature_area', 'feature'],
     child_map: {
@@ -140,6 +166,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     label: 'Validation chain',
     description: 'A hypothesis through its experiment plan, the experiment (or its runs), and the learning it produced.',
     framework_id: 'build-measure-learn',
+    region: 'discovery_research_validation',
+    gap_policy: 'required-children-only',
     anchor_type: 'hypothesis',
     fallback_anchors: ['experiment_plan', 'experiment'],
     child_map: {
@@ -154,6 +182,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     id: 'strategy',
     label: 'Strategy cascade',
     description: 'Vision and mission into the strategic themes (bets), the initiatives that pursue them, and the outcomes they drive. Themes are polymorphically parented: they hang off vision, the product, or a strategic pillar, whichever the graph wired.',
+    region: 'strategy_outcomes',
+    gap_policy: 'required-children-only',
     anchor_type: 'vision',
     fallback_anchors: ['product', 'strategic_theme'],
     child_map: {
@@ -170,6 +200,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     id: 'feature_areas',
     label: 'Feature areas',
     description: 'Feature areas and the features they contain.',
+    region: 'product_delivery',
+    gap_policy: 'all-optional',
     anchor_type: 'feature_area',
     fallback_anchors: ['feature'],
     child_map: {
@@ -181,6 +213,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     id: 'delivery',
     label: 'Delivery roadmap',
     description: 'How product work is scheduled and shipped: the roadmap and its themes/items, the releases they schedule, the features (and the changelog + bugs) those releases deliver, and the feature areas a theme spans. Optional epic + user story tiers appear on request.',
+    region: 'product_delivery',
+    gap_policy: 'all-optional',
     anchor_type: 'roadmap',
     // Fallback is the product alone: a graph with no roadmap roots at the
     // product (product -> release -> feature), reported as anchor_resolved_from:
@@ -209,6 +243,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     id: 'architecture',
     label: 'Architecture',
     description: 'The engineering platform: services and the API contracts, endpoints, schemas, queues, deployments, and dependencies they own, grouped by bounded context, with domain aggregates and their members. A DAG (a schema or queue shared by several services renders once, then as a reference).',
+    region: 'engineering_platform',
+    gap_policy: 'all-optional',
     anchor_type: 'service',
     fallback_anchors: ['bounded_context'],
     child_map: {
@@ -220,7 +256,7 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
         opt('api_contract'), opt('api_endpoint'), opt('database_schema'), opt('queue_topic'),
         opt('deployment'), opt('build_artifact'), opt('library_dependency'), opt('feature_flag'),
       ],
-      aggregate: [opt('domain_entity'), opt('value_object'), opt('command'), opt('read_model'), opt('domain_event')],
+      aggregate: [opt('domain_entity'), opt('value_object'), opt('command'), opt('domain_event')],
     },
     natural_depth: 3,
   },
@@ -228,6 +264,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     id: 'journey',
     label: 'User journey',
     description: 'A user journey over time: its phases and steps, the actions within each step, and the screens those steps surface. Falls back to a user_flow when journeys are not yet mapped.',
+    region: 'experience_design_brand',
+    gap_policy: 'all-optional',
     anchor_type: 'user_journey',
     fallback_anchors: ['user_flow'],
     child_map: {
@@ -243,6 +281,8 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     id: 'design_system',
     label: 'Design system',
     description: 'A design system broken into its components, their nested sub-components (atom to molecule to organism), and the design tokens they consume.',
+    region: 'experience_design_brand',
+    gap_policy: 'all-optional',
     anchor_type: 'design_system',
     fallback_anchors: ['design_component'],
     child_map: {
@@ -261,4 +301,96 @@ export const UPG_TREE_PATTERNS_BY_ID: Record<string, UPGTreePattern> = Object.fr
 /** Look up a tree pattern by id. */
 export function getTreePattern(id: string): UPGTreePattern | undefined {
   return UPG_TREE_PATTERNS_BY_ID[id]
+}
+
+/**
+ * One resolved edge in a pattern's child map: the (parent -> child) pair plus
+ * the canonical edge that wires it, resolved LIVE from the edge catalogue (not
+ * stored on the pattern). `via`/`kind` are null only if the grammar has no edge
+ * for the pair, which the drift-check forbids. A reader gets the real edge
+ * without reverse-engineering it from behaviour.
+ */
+export interface UPGTreePatternEdge {
+  parent: string
+  child: string
+  /** Canonical edge type wiring parent -> child, or null if ungrounded. */
+  via: string | null
+  /** The edge's classification (hierarchy, semantic, cross-domain, ...), or null. */
+  kind: string | null
+  required: boolean
+}
+
+/** A pattern with its child map resolved to concrete edges (for introspection). */
+export interface UPGTreePatternDetail extends UPGTreePattern {
+  /** The child_map flattened to (parent, child, via, kind, required) rows. */
+  edges: UPGTreePatternEdge[]
+}
+
+/** A pattern summary row (no child_map) for list_tree_patterns. */
+export interface UPGTreePatternSummary {
+  id: string
+  label: string
+  description: string
+  framework_id?: string
+  region: string
+  anchor_type: string
+  fallback_anchors: string[]
+  natural_depth: number
+  gap_policy: UPGTreeGapPolicy
+  /** Number of (parent -> child) slots in the child map. */
+  slot_count: number
+}
+
+/**
+ * The canonical edge wiring `source -> target`, resolved from the edge
+ * catalogue. Returns the FIRST catalogue edge whose endpoints match (a pair is
+ * wired by at most one canonical within-product edge). null when the grammar
+ * has no such edge.
+ */
+function resolvePatternEdge(source: string, target: string): { via: string; kind: string } | null {
+  for (const [id, def] of Object.entries(UPG_EDGE_CATALOG)) {
+    if (def.source_type === source && def.target_type === target) {
+      return { via: id, kind: def.classification }
+    }
+  }
+  return null
+}
+
+/** Flatten a pattern's child_map to resolved (parent, child, via, kind) edges. */
+export function resolveTreePatternEdges(pattern: UPGTreePattern): UPGTreePatternEdge[] {
+  const out: UPGTreePatternEdge[] = []
+  for (const [parent, children] of Object.entries(pattern.child_map)) {
+    for (const c of children) {
+      const e = resolvePatternEdge(parent, c.type)
+      out.push({ parent, child: c.type, via: e?.via ?? null, kind: e?.kind ?? null, required: !!c.required })
+    }
+  }
+  return out
+}
+
+/**
+ * The full declarative record for one pattern: the pattern plus its child_map
+ * resolved to concrete edges. The `via`/`kind` are derived from the live edge
+ * catalogue at call time, so they cannot drift from the grammar.
+ */
+export function describeTreePattern(id: string): UPGTreePatternDetail | undefined {
+  const p = getTreePattern(id)
+  if (!p) return undefined
+  return { ...p, fallback_anchors: [...p.fallback_anchors], edges: resolveTreePatternEdges(p) }
+}
+
+/** Every pattern as a summary row (the list_tree_patterns surface). */
+export function listTreePatternSummaries(): UPGTreePatternSummary[] {
+  return UPG_TREE_PATTERNS.map((p) => ({
+    id: p.id,
+    label: p.label,
+    description: p.description,
+    framework_id: p.framework_id,
+    region: p.region,
+    anchor_type: p.anchor_type,
+    fallback_anchors: [...p.fallback_anchors],
+    natural_depth: p.natural_depth,
+    gap_policy: p.gap_policy,
+    slot_count: Object.values(p.child_map).reduce((n, cs) => n + cs.length, 0),
+  }))
 }
