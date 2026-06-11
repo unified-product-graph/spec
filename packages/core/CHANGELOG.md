@@ -7,6 +7,18 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.23] - 2026-06-11
+
+**Closes the duplicate-delivery hole that 0.9.22 only half-fixed, and stops a cross-product write from duplicating on retry.** 0.9.22 deduped a re-delivered mutating call by its JSON-RPC request id, but the real re-delivery carries a *fresh* request id (a client-level re-issue, invisible to a request-id ledger): each create handler re-executed and minted a second copy with new ids. Because the replay lands on the *next* mutating call and never on a read, a "write then recount" check passed falsely — which is why 0.9.22 looked fixed.
+
+### Fixed
+- **Content-level idempotency for mutating MCP calls (`@unified-product-graph/mcp-server`).** The local server adds a second dedup layer keyed on the call's payload (tool + active product + normalised arguments), independent of the request id. A re-delivered mutating call whose payload matches a recent one replays the original result instead of writing a duplicate. The window is bounded by COUNT (the most recent 64 distinct mutating payloads), not wall-clock: the replay lands on the next mutating call, so a sliding count window catches it without timing guesswork. Only successful results are recorded, so a transient error stays retryable. Pass `allow_duplicate: true` on a mutating call to opt out for a deliberate identical re-create. The store was never the source: it dedupes by id and never mints ids, so a fresh-id duplicate can only mean the create path re-ran.
+- **Cross-product edge writes are idempotent and no longer self-corrupt on a tmp-rename race (`@unified-product-graph/sdk`).** `create_cross_product_edge` could throw `ENOENT: rename .../portfolio.upg.tmp -> .../portfolio.upg` even though the edge had already persisted (a debounced save racing an explicit flush on a SHARED tmp path), and a naive retry then appended a second identical edge. The portfolio writer now uses a per-write unique tmp path (cleaned up on any failure), and `addCrossEdge` collapses an identical `(source, target, type)` re-create onto the existing edge, so a retry is a safe no-op.
+
+No entity, domain, region, edge, or tool-count change (entities 315, edges 980, local tools 123). The cloud server (Postgres-backed, separate write path, no file watcher) is unaffected.
+
+---
+
 ## [0.9.22] - 2026-06-11
 
 **Stops silent data duplication from re-delivered MCP writes, and stops dedupe from destroying structure.** Three fixes for a HIGH-severity report where a mutating call was applied twice (the duplicate landing a few calls later, past any immediate recount).

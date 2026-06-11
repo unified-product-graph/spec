@@ -245,8 +245,8 @@ describe('Personas-without-jobs honours v0.2 multi-chain model', () => {
   })
 
   it('condition is a compound and with at least 5 checks (entity_count + 4 chain edges)', () => {
-    expect('operator' in ap.structured_condition).toBe(true)
-    if ('operator' in ap.structured_condition) {
+    expect(ap.structured_condition && 'operator' in ap.structured_condition).toBe(true)
+    if (ap.structured_condition && 'operator' in ap.structured_condition) {
       expect(ap.structured_condition.operator).toBe('and')
       expect(ap.structured_condition.checks.length).toBeGreaterThanOrEqual(5)
     }
@@ -287,8 +287,8 @@ describe('Opportunity-without-need honours v0.2 multi-chain model', () => {
   })
 
   it('condition is a compound and with at least 5 checks (entity_count + 4 chain edges)', () => {
-    expect('operator' in ap.structured_condition).toBe(true)
-    if ('operator' in ap.structured_condition) {
+    expect(ap.structured_condition && 'operator' in ap.structured_condition).toBe(true)
+    if (ap.structured_condition && 'operator' in ap.structured_condition) {
       expect(ap.structured_condition.operator).toBe('and')
       expect(ap.structured_condition.checks.length).toBeGreaterThanOrEqual(5)
     }
@@ -344,8 +344,8 @@ describe('F5 insights-without-evidence enforces evidence-backed insights', () =>
   })
 
   it('is a compound `and` (insight present + all evidence links absent)', () => {
-    expect('operator' in ap.structured_condition).toBe(true)
-    if ('operator' in ap.structured_condition) {
+    expect(ap.structured_condition && 'operator' in ap.structured_condition).toBe(true)
+    if (ap.structured_condition && 'operator' in ap.structured_condition) {
       expect(ap.structured_condition.operator).toBe('and')
       expect(ap.structured_condition.checks.length).toBeGreaterThanOrEqual(4)
     }
@@ -384,8 +384,8 @@ describe('F5 feature-requests-without-provenance enforces sourced requests', () 
   })
 
   it('is a compound `and` (feature_request present + all provenance links absent)', () => {
-    expect('operator' in ap.structured_condition).toBe(true)
-    if ('operator' in ap.structured_condition) {
+    expect(ap.structured_condition && 'operator' in ap.structured_condition).toBe(true)
+    if (ap.structured_condition && 'operator' in ap.structured_condition) {
       expect(ap.structured_condition.operator).toBe('and')
       expect(ap.structured_condition.checks.length).toBeGreaterThanOrEqual(4)
     }
