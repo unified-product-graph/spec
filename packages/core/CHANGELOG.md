@@ -7,6 +7,22 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.15] - 2026-06-11
+
+**get_tree: server-side tree assembly.** Tree views (OST, OKR, user, product, validation, strategy, feature areas) were assembled client-side by the show-tree skill out of multiple query calls and hardcoded edge chains that drifted with the spec. This release relocates assembly to the server, which owns the catalogue.
+
+### Added
+- **`UPG_TREE_PATTERNS`** (core): 7 canonical tree patterns, each an anchor type + a TYPE-DRIVEN `child_map` (parent type to allowed child types), not a list of edge names. A pattern follows the live graph to a neighbour of the next expected type, whatever edge wired them, so a chain refinement in the edge catalogue cannot rot it (the failure mode that drifted the skill's hardcoded chains). Chains authored by resolving every pair against the live catalogue.
+- **`get_tree`** (tools 120 to 121, local only): assembles a pattern from the active product graph and returns NESTED data plus structural `gaps` (a node whose pattern expects children the graph lacks: a bet with no initiative, an objective with no key result). Roots at the pattern anchor, falling back through `fallback_anchors` when the anchor has no nodes or reaches nothing (the "wrong root, empty tree" case), and reports the substitution (`anchor_resolved_from` / `anchor_used`). `max_nodes` summarises rather than silently truncating. Rendering (emoji, ASCII) stays in the client; the tool composes with `query` rather than replacing it.
+
+### Notes
+- `query.traverse` is unchanged: its set-vs-positional semantics is a separate concern, and flipping it would break path-walk callers, so `get_tree` encapsulates the branching multi-pass internally instead.
+- A cloud-server parallel of `get_tree` is a follow-up (it needs a Postgres-store traversal); v1 is local, where the primary consumer (the show-tree skill) runs.
+
+No entity, domain, region, playbook, framework, or edge-count change (entities 315, edges 980, tools 121).
+
+---
+
 ## [0.9.14] - 2026-06-11
 
 **Introspection completeness: make the live surface complete and honest so clients can stop hardcoding.** A diagnostic of the skill suite found shared docs pointing skills at an introspection field that did not exist, two redundant status fields, a silent mis-parenting path, and four expected frameworks that hard-errored. This release closes those gaps.
