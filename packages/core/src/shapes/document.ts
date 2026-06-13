@@ -145,6 +145,12 @@ export type UPGCrossEdgeType =
   // local taxonomy nodes. Dual-registered: a within-graph catalog edge for the
   // local case, here as a cross-edge for the canonical case.
   | 'competitor_classified_as_classification_value'
+  // Generic registry-canonical classification (0.10.3). The polymorphic sibling
+  // of competitor_classified_as_classification_value: ANY node (not just a
+  // competitor) classified against a `registry/{classification_value}` canonical.
+  // Same dual-registration: a polymorphic within-graph catalog edge for the
+  // local case, here as a cross-edge for the canonical case.
+  | 'node_classified_as_classification_value'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -175,6 +181,7 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'competitor_signal_maps_to_feature',
   'competitor_signal_surfaces_opportunity',
   'competitor_classified_as_classification_value',
+  'node_classified_as_classification_value',
 ]
 
 /**

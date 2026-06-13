@@ -233,6 +233,12 @@ export const UPG_EDGE_CATALOG = {
   // canonical, eliminating the per-graph taxonomy node. Within-graph (the catalogue
   // case) here; cross-product against the registry canonical via create_cross_product_edge.
   competitor_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'competitor', target_type: 'classification_value' },
+  // 0.10.3: the polymorphic, type-agnostic sibling. ANY node (a feature, a
+  // product, a market_segment) classified against a classification_value, so
+  // classification is not welded to the competitor type. Also dual-registered as
+  // a cross-edge for the registry-canonical case. source_type:'node' (wildcard);
+  // listed in UPG_POLYMORPHIC_EDGE_KEYS.
+  node_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'node', target_type: 'classification_value' },
   persona_anti_fit_for_classification_value: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'classification_value' },
   persona_anti_fit_for_product: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'product' },
   persona_anti_fit_for_competitor: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'competitor' },
@@ -2211,6 +2217,8 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   'node_belongs_to_bounded_context',
   // Framework exercises (an exercise can include any entity type)
   'framework_exercise_includes_node',
+  // Universal classification (any node classified against a classification_value)
+  'node_classified_as_classification_value',
 ] as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)
