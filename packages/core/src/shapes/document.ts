@@ -139,6 +139,12 @@ export type UPGCrossEdgeType =
   // watched competitor-intelligence graph; these map it onto our product graph.
   | 'competitor_signal_maps_to_feature'
   | 'competitor_signal_surfaces_opportunity'
+  // Registry-canonical classification (0.10.2). A competitor (or other product
+  // node) classified directly against a `registry/{classification_value}`
+  // canonical, so a shared axis lives once in the registry and graphs carry no
+  // local taxonomy nodes. Dual-registered: a within-graph catalog edge for the
+  // local case, here as a cross-edge for the canonical case.
+  | 'competitor_classified_as_classification_value'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -168,6 +174,7 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'feature_rivals_competitor_feature',
   'competitor_signal_maps_to_feature',
   'competitor_signal_surfaces_opportunity',
+  'competitor_classified_as_classification_value',
 ]
 
 /**

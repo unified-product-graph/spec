@@ -27,7 +27,7 @@ const baseDoc = (edges: Array<Record<string, unknown>>) => ({
 })
 
 describe('cross-product edge validation', () => {
-  it('exposes the twenty-two canonical cross-product edge types', () => {
+  it('exposes the twenty-three canonical cross-product edge types', () => {
     expect(UPG_CROSS_EDGE_TYPES).toEqual([
       'shares_persona',
       'shares_competitor',
@@ -51,6 +51,7 @@ describe('cross-product edge validation', () => {
       'feature_rivals_competitor_feature',
       'competitor_signal_maps_to_feature',
       'competitor_signal_surfaces_opportunity',
+      'competitor_classified_as_classification_value',
     ])
   })
 

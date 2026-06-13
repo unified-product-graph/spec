@@ -23,7 +23,7 @@ describe('UPGPropertyMigration discriminated-union shape', () => {
  for (const [version, rules] of Object.entries(UPG_PROPERTY_MIGRATIONS)) {
  for (const rule of rules) {
  expect(rule.kind, `${version} rule missing kind`).toBeTruthy()
- expect(['drop_props', 'rename_top_level', 'lift_property_to_top_level', 'drop_when_self_referential', 'remap_property_value'])
+ expect(['drop_props', 'rename_top_level', 'lift_property_to_top_level', 'drop_when_self_referential', 'remap_property_value', 'reshape_value_to_assessment'])
  .toContain(rule.kind)
  }
  }

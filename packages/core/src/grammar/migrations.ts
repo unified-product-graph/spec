@@ -3,6 +3,8 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
+import { getScale } from './scales.js'
+
 // ─── Migration map per version ─────────────────────────────────────────────────
 
 export interface UPGTypeMigration {
@@ -595,12 +597,62 @@ export type UPGPropertyMigration =
       /** Human-readable explanation surfaced in load-time warnings. */
       reason: string
     }
+  | {
+      /**
+       * Reshape a bare numeric property into a `UPGAssessment` object
+       * (`{ value, label, scale_id }`). For the v0.10.0 property-registry
+       * correction (#43): interfaces that always declared `UPGAssessment` were
+       * generated loosely, so pre-0.10.0 graphs stored a bare number (e.g.
+       * `market_trend.impact: 4`). This wraps that number on its canonical scale,
+       * deriving the qualitative `label` from the scale's points. Idempotent: a
+       * value that is already an object (assessment) passes through untouched.
+       */
+      kind: 'reshape_value_to_assessment'
+      /** The entity type this rule applies to (or `'*'` for all types). */
+      type: string
+      /** Key inside `properties` whose bare number is wrapped (stays in the bag). */
+      property: string
+      /** The assessment scale to label the value on (e.g. `impact_5`, `importance_5`). */
+      scale_id: string
+      /** Human-readable explanation surfaced in load-time warnings. */
+      reason: string
+    }
 
 /**
  * Version-scoped property migrations. Same convention as `UPG_MIGRATIONS`:
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.10.2: market_intelligence number -> assessment reshape ──────────────
+  //
+  // The v0.10.0 property-registry generator fix (#43) corrected several property
+  // types that interfaces already declared as `UPGAssessment` but the generator
+  // had emitted loosely. A pre-0.10.0 graph that stored a bare number for
+  // `market_trend.impact` / `relevance` is now invalid (the schema wants
+  // `{value,label}`). These rules wrap the bare number on its canonical scale so
+  // the migration is one command, not a hand-reshape. The enum tightenings the
+  // same #43 fix surfaced (data_flow.direction, integration_pattern.pattern_type,
+  // api_contract.protocol, service.service_type) already have rules under 0.9.12;
+  // 0.10.2 also makes ALL of them visible to validate_graph (they were applied by
+  // migrate_properties but never surfaced as a fixable drift).
+  '0.10.2': [
+    {
+      kind: 'reshape_value_to_assessment',
+      type: 'market_trend',
+      property: 'impact',
+      scale_id: 'impact_5',
+      reason:
+        'market_trend.impact is a UPGAssessment (impact_5); the 0.10.0 generator fix (#43) tightened it from a bare number. A legacy numeric value wraps to {value,label} on impact_5.',
+    },
+    {
+      kind: 'reshape_value_to_assessment',
+      type: 'market_trend',
+      property: 'relevance',
+      scale_id: 'importance_5',
+      reason:
+        'market_trend.relevance is a UPGAssessment (importance_5); the 0.10.0 generator fix (#43) tightened it from a bare number. A legacy numeric value wraps to {value,label} on importance_5.',
+    },
+  ],
   // ── v0.9.14: drop the key_result kr_status / status twin (A2) ──────────────
   //
   // key_result carried BOTH a lifecycle `status` and a `kr_status` property with
@@ -1092,6 +1144,7 @@ export type UPGPropertyMigrationChange =
   | { kind: 'lifted_to_top_level'; from_property: string; to: string; value_changed: boolean }
   | { kind: 'self_ref_dropped'; field: string }
   | { kind: 'remapped_property_value'; property: string; to_property?: string; value_changed: boolean }
+  | { kind: 'reshaped_to_assessment'; property: string; scale_id: string; value: number; label: string }
 
 /**
  * Apply property migrations to a single node. Returns the (possibly new) node
@@ -1249,6 +1302,29 @@ export function migrateNodeProperties<
           }
           workingNode.properties = nextProps
           mutated = true
+          break
+        }
+
+        case 'reshape_value_to_assessment': {
+          const props = workingNode.properties as Record<string, unknown> | undefined
+          if (!props || !(m.property in props)) break
+          const oldValue = props[m.property]
+          // Idempotent: an existing assessment object (or any non-numeric value)
+          // passes through untouched. Accept a bare number or a numeric string.
+          let num: number | null = null
+          if (typeof oldValue === 'number' && Number.isFinite(oldValue)) num = oldValue
+          else if (typeof oldValue === 'string' && oldValue.trim() !== '' && Number.isFinite(Number(oldValue))) {
+            num = Number(oldValue)
+          }
+          if (num === null) break
+          const label = getScale(m.scale_id)?.points.find((p) => p.value === num)?.label ?? String(num)
+          const nextProps: Record<string, unknown> = {
+            ...props,
+            [m.property]: { value: num, label, scale_id: m.scale_id },
+          }
+          workingNode.properties = nextProps
+          mutated = true
+          changes.push({ kind: 'reshaped_to_assessment', property: m.property, scale_id: m.scale_id, value: num, label })
           break
         }
       }

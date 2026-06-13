@@ -228,6 +228,10 @@ export const UPG_EDGE_CATALOG = {
   // would be a separate catalog-mechanic change).
   competitive_analysis_dimensioned_by_classification_axis: { forward_verb: 'dimensioned_by', reverse_verb: 'dimensions', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'classification_axis' },
   classification_axis_includes_classification_value: { forward_verb: 'includes', reverse_verb: 'value_of', classification: 'hierarchy', source_type: 'classification_axis', target_type: 'classification_value' },
+  // 0.10.2: also dual-registered as a cross-edge (UPG_CROSS_EDGE_TYPES) so a
+  // competitor can be classified directly against a `registry/{classification_value}`
+  // canonical, eliminating the per-graph taxonomy node. Within-graph (the catalogue
+  // case) here; cross-product against the registry canonical via create_cross_product_edge.
   competitor_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'competitor', target_type: 'classification_value' },
   persona_anti_fit_for_classification_value: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'classification_value' },
   persona_anti_fit_for_product: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'product' },
