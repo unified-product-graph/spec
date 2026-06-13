@@ -51,7 +51,26 @@ Open an issue with:
 3. `classification`: one of `hierarchy | causal | semantic | cross-domain`.
 4. Why an existing edge can't express this.
 
-PR touches `src/catalog/edge-catalog.ts` and a test fixture.
+### Implementation checklist (the ripple)
+
+A new edge type is not one edit. A few coordinated sites must move together, or
+the spec-integrity test will fail. Work the list for your case:
+
+**Every edge:**
+1. `src/catalog/edge-catalog.ts` — add the definition (`forward_verb`, `reverse_verb`, `classification`, `source_type`, `target_type`).
+2. Add a fixture instance so the new type has coverage in the saturated graph test (the coverage guard fails on a type with zero instances).
+
+**If the edge is polymorphic** (`source_type` or `target_type` is the `'node'` wildcard):
+3. `UPG_POLYMORPHIC_EDGE_KEYS` in `edge-catalog.ts` — add the key, or the "wildcard-endpoint edge not in allow-list" integrity test fails.
+4. The poly-shape assertion in `src/__tests__/spec-integrity.test.ts` — bump the `toBe(N)` count and the family comment.
+
+**If the edge is dual-registered** (also valid across products, e.g. against a `registry/{node}` target):
+5. `UPGCrossEdgeType` union + `UPG_CROSS_EDGE_TYPES` array in `src/shapes/document.ts` (keep them in lockstep).
+6. The `toEqual([...])` list and the count word in `src/__tests__/cross-product-edges.test.ts`.
+
+Note: `pickCanonicalEdge(concretePair)` returns `null` for polymorphic edges by
+design (they are keyed on `node:<target>`, not the concrete pair), so authors
+pass an explicit `type` rather than relying on inference. That is expected, not a bug.
 
 ---
 

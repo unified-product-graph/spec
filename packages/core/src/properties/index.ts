@@ -55,3 +55,6 @@ export * from './property-map.js'
 
 // ─── Auto-generated schema ───────────────────────────────────────────────────
 export * from './property-schema.js'
+
+// ─── Edge property validation (carries_properties edges) ─────────────────────
+export * from './edge-property-validation.js'

@@ -470,7 +470,7 @@ describe('Polymorphic edge allow-list', () => {
  unregistered.push(key)
  }
  }
- expect(unregistered, `Polymorphic edges missing from UPG_POLYMORPHIC_EDGE_KEYS:\n${unregistered.join('\n')}`).toEqual([])
+ expect(unregistered, `Polymorphic edges missing from UPG_POLYMORPHIC_EDGE_KEYS (see CONTRIBUTING.md, "How to propose a new edge type"):\n${unregistered.join('\n')}`).toEqual([])
  })
 
  it('every key in UPG_POLYMORPHIC_EDGE_KEYS is actually polymorphic', () => {
@@ -494,7 +494,13 @@ describe('Polymorphic edge allow-list', () => {
  })
 
  it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (14 entries, 6 families)', () => {
- expect(UPG_POLYMORPHIC_EDGE_KEYS.length).toBe(14)
+ // Bumping this? You added a polymorphic edge — follow the ripple checklist in
+ // CONTRIBUTING.md ("How to propose a new edge type") so the fixture, cross-edge
+ // registration, and paper move with it.
+ expect(
+ UPG_POLYMORPHIC_EDGE_KEYS.length,
+ 'UPG_POLYMORPHIC_EDGE_KEYS count changed — update this assertion AND see CONTRIBUTING.md edge-add checklist',
+ ).toBe(14)
  })
 })
 

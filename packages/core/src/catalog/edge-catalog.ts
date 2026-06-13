@@ -3,6 +3,8 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
+import type { PropertySchema } from '../properties/property-schema.js'
+
 // ─── Polymorphic endpoint marker ────────────────────────────────────
 
 /**
@@ -47,6 +49,56 @@ export interface UPGEdgeDefinition {
    * that belongs to the relationship rather than to either endpoint.
    */
   carries_properties?: boolean
+  /**
+   * For `carries_properties` edges: the typed shape of the `properties` bag,
+   * keyed by property name (same `PropertyDefinition` shape entity properties
+   * use). When present, the writers reject unknown property keys and validators
+   * range-check typed values (e.g. an `assessment` against its `scale_id`);
+   * when absent, a `carries_properties` edge accepts an unvalidated bag (the
+   * pre-0.10.4 behaviour, still used by `feature_rivals_competitor_feature`).
+   * Discoverable via `get_edge_type`.
+   */
+  property_schema?: PropertySchema
+}
+
+/**
+ * Property schema carried by the two classification cross-edges
+ * (`competitor_classified_as_classification_value` and its polymorphic sibling
+ * `node_classified_as_classification_value`). Identical for both: the metadata a
+ * classification carries does not depend on what is being classified. All keys
+ * are optional (back-compat: the 218 existing classification edges carry none);
+ * the only conditional requirement is internal to `confidence` (value + label),
+ * mirroring the `competitor.confidence` entity precedent. 0.10.4.
+ */
+export const CLASSIFICATION_EDGE_PROPERTY_SCHEMA: PropertySchema = {
+  confidence: {
+    type: 'assessment',
+    scale_id: 'confidence_5',
+    description:
+      'How sure we are this node belongs in this classification cell, on the canonical confidence_5 scale. Numeric value plus a high/medium/low label.',
+    properties: {
+      value: { type: 'number', description: 'Numeric value 1-5 (confidence_5).' },
+      label: { type: 'string', description: 'Qualitative label (Guessing/Hunch/Some evidence/Confident/Data-backed, or high/medium/low).' },
+      scale_id: { type: 'string', description: 'Scale rated on (optional; defaults confidence_5).' },
+      normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
+    },
+    required: ['value', 'label'],
+  },
+  assessed_on: {
+    type: 'string',
+    description:
+      'Provenance: ISO date-time the classification was made or last re-checked. Drives staleness queries. @example "2026-06-13"',
+  },
+  rationale: {
+    type: 'string',
+    description:
+      'Optional. Short note on why this node sits in this cell. Edge-level, distinct from classification_value.rationale (why the value exists as a category).',
+  },
+  evidence: {
+    type: 'string',
+    description:
+      'Optional. A source URL, or a competitor_signal / evidence node id backing the classification. Mirrors feature_rivals_competitor_feature.evidence (free text or a node id).',
+  },
 }
 
 // ─── Registry ─────────────────────────────────────────────────────────────────
@@ -232,13 +284,13 @@ export const UPG_EDGE_CATALOG = {
   // competitor can be classified directly against a `registry/{classification_value}`
   // canonical, eliminating the per-graph taxonomy node. Within-graph (the catalogue
   // case) here; cross-product against the registry canonical via create_cross_product_edge.
-  competitor_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'competitor', target_type: 'classification_value' },
+  competitor_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'competitor', target_type: 'classification_value', carries_properties: true, property_schema: CLASSIFICATION_EDGE_PROPERTY_SCHEMA },
   // 0.10.3: the polymorphic, type-agnostic sibling. ANY node (a feature, a
   // product, a market_segment) classified against a classification_value, so
   // classification is not welded to the competitor type. Also dual-registered as
   // a cross-edge for the registry-canonical case. source_type:'node' (wildcard);
   // listed in UPG_POLYMORPHIC_EDGE_KEYS.
-  node_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'node', target_type: 'classification_value' },
+  node_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'node', target_type: 'classification_value', carries_properties: true, property_schema: CLASSIFICATION_EDGE_PROPERTY_SCHEMA },
   persona_anti_fit_for_classification_value: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'classification_value' },
   persona_anti_fit_for_product: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'product' },
   persona_anti_fit_for_competitor: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'competitor' },
@@ -2264,4 +2316,15 @@ export function isRegisteredPolymorphicEdge(key: _UPGEdgeTypeLocal): boolean {
 export function edgeCarriesProperties(type: string): boolean {
   const def = (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[type]
   return def?.carries_properties === true
+}
+
+/**
+ * The typed property schema for a `carries_properties` edge, or `undefined` if
+ * the edge type declares none (it then accepts an unvalidated `properties` bag).
+ * Writers use this to reject unknown keys; validators use it to range-check
+ * typed values. 0.10.4.
+ */
+export function getEdgePropertySchema(type: string): PropertySchema | undefined {
+  const def = (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[type]
+  return def?.property_schema
 }
