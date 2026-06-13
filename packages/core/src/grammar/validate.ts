@@ -18,6 +18,13 @@ import { getScale } from './scales.js'
  * `migrate_cross_edges` MCP tool moves them to the correct location.
  */
 const crossProductEdgeTypeSet: ReadonlySet<string> = new Set(UPG_CROSS_EDGE_TYPES)
+// A type registered in BOTH the within-product catalogue and the cross-edge
+// registry is dual-registered (e.g. `feature_rivals_competitor_feature`, UPG
+// 0.10.0 #38): it is a legitimate within-product edge AND a cross-product edge.
+// The "must live in portfolio.cross_edges[]" check below applies only to types
+// that are cross-product-ONLY, so a within-product parity edge in product
+// edges[] is not flagged.
+const withinProductEdgeTypeSet: ReadonlySet<string> = new Set(Object.keys(UPG_EDGE_CATALOG))
 
 export interface UPGValidationError {
   /** JSON-path location of the field that failed validation (e.g. `$.nodes[2].type`) */
@@ -231,7 +238,11 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
         if (!e.id || typeof e.id !== 'string') {
           errors.push({ path: `${path}.id`, message: 'Edge id is required and must be a string' })
         }
-        if (typeof e.type === 'string' && crossProductEdgeTypeSet.has(e.type)) {
+        if (
+          typeof e.type === 'string' &&
+          crossProductEdgeTypeSet.has(e.type) &&
+          !withinProductEdgeTypeSet.has(e.type)
+        ) {
           errors.push({
             path: `${path}.type`,
             message: `Cross-product edge type "${e.type}" must live in portfolio.cross_edges[], not product edges[].`,

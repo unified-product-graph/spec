@@ -12,6 +12,7 @@
 import { describe, it, expect } from 'vitest'
 import { validateUPGDocument } from '../grammar/validate.js'
 import { UPG_CROSS_EDGE_TYPES } from '../shapes/document.js'
+import { UPG_EDGE_CATALOG } from '../catalog/edge-catalog.js'
 
 const baseDoc = (edges: Array<Record<string, unknown>>) => ({
   upg_version: '0.2.4',
@@ -72,14 +73,39 @@ describe('cross-product edge validation', () => {
     expect(typeError?.message).toContain('portfolio.cross_edges[]')
   })
 
-  it('rejects all twenty-two cross-product edge types in edges[]', () => {
-    for (const crossType of UPG_CROSS_EDGE_TYPES) {
+  it('rejects the cross-product-only edge types in edges[]', () => {
+    // Dual-registered types (present in BOTH the within-product catalogue and the
+    // cross-edge registry — the parity / signal family from #38/#41) are
+    // legitimate within-product edges and are exempt; see the next test.
+    const catalogTypes = new Set(Object.keys(UPG_EDGE_CATALOG))
+    const crossOnly = UPG_CROSS_EDGE_TYPES.filter((t) => !catalogTypes.has(t))
+    for (const crossType of crossOnly) {
       const doc = baseDoc([
         { id: 'e1', source: 'n1', target: 'n2', type: crossType },
       ])
       const result = validateUPGDocument(doc)
       expect(result.valid).toBe(false)
       expect(result.errors.some((e) => e.message.includes('portfolio.cross_edges'))).toBe(true)
+    }
+  })
+
+  it('accepts dual-registered edge types (catalog + cross-edge) in product edges[]', () => {
+    // feature_rivals_competitor_feature and the competitor_signal cross-mappings
+    // are valid WITHIN a product graph (the catalogue / degenerate case, #38/#41)
+    // as well as cross-product. A within-product instance must NOT trip the
+    // "must live in portfolio.cross_edges[]" check (UPG 0.10.1).
+    const catalogTypes = new Set(Object.keys(UPG_EDGE_CATALOG))
+    const dual = UPG_CROSS_EDGE_TYPES.filter((t) => catalogTypes.has(t))
+    expect(dual.length).toBeGreaterThan(0)
+    for (const dualType of dual) {
+      const doc = baseDoc([
+        { id: 'e1', source: 'n1', target: 'n2', type: dualType },
+      ])
+      const result = validateUPGDocument(doc)
+      expect(
+        result.errors.some((e) => e.message.includes('portfolio.cross_edges')),
+        `${dualType} should be allowed in product edges[]`,
+      ).toBe(false)
     }
   })
 
