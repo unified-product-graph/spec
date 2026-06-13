@@ -71,7 +71,7 @@ export const UPG_DOMAINS = [
     id: 'market_intelligence',
     label: 'Market Intelligence',
     description: 'The competitive landscape your product operates in. Competitors and their competitor features map the field. Market trends track industry shifts. Market segments define addressable audiences. Competitive analyses synthesize the full picture. Classification axes and values express the dimensional structure of the landscape (e.g. CMS Architecture × Editing Paradigm). Informs Strategy (positioning), Go-To-Market (battle cards), and Business Model (differentiation).',
-    types: ['competitor', 'competitor_feature', 'market_trend', 'market_segment', 'competitive_analysis', 'classification_axis', 'classification_value'],
+    types: ['competitor', 'competitor_feature', 'competitor_signal', 'market_trend', 'market_segment', 'competitive_analysis', 'classification_axis', 'classification_value'],
   },
   {
     id: 'user_research',

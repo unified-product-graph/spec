@@ -3671,11 +3671,12 @@ export const UPG_LIFECYCLE_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   // ── User (5): personas and JTBD atoms are reference data ──────────────────
   'persona', 'job', 'job_step', 'desired_outcome', 'switching_cost',
 
-  // ── Market Intelligence (6 of 7): competitor landscape is reference data;
+  // ── Market Intelligence (7 of 8): competitor landscape is reference data;
+  //    competitor_signal is an append-only dated event (no phase ladder);
   //    competitive_analysis shipped PUBLISHING lifecycle in Phase C;
   //    classification_axis and classification_value are reference taxonomy
   //    atoms with no state machine. ─
-  'competitor', 'competitor_feature', 'market_trend', 'market_segment',
+  'competitor', 'competitor_feature', 'competitor_signal', 'market_trend', 'market_segment',
   'classification_axis', 'classification_value',
 
   // ── User Research (5 of 8): participants, quotes, observations,

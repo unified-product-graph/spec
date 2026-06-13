@@ -8,7 +8,7 @@ import type { InsightProperties } from './domains/user-research.js'
 import type { PersonaProperties, JobProperties, NeedProperties, DesiredOutcomeProperties, JobStepProperties, SwitchingCostProperties } from './domains/users.js'
 import type { OpportunityProperties, SolutionProperties, FeasibilityStudyProperties, DesignSprintProperties } from './domains/discovery.js'
 import type { HypothesisProperties, HypothesisEvidenceProperties, ExperimentProperties, ExperimentPlanProperties, ExperimentRunProperties, LearningProperties, EvidenceProperties, ResearchPlanProperties } from './domains/validation.js'
-import type { CompetitorProperties, CompetitorFeatureProperties, MarketTrendProperties, MarketSegmentProperties, CompetitiveAnalysisProperties, ClassificationAxisProperties, ClassificationValueProperties, ClassificationCommitment, ClassificationCapability, ClassificationCapabilitySurface, EmptyCell, EmptyCellRationaleKind } from './domains/market.js'
+import type { CompetitorProperties, CompetitorFeatureProperties, MarketTrendProperties, MarketSegmentProperties, CompetitiveAnalysisProperties, CompetitorSignalProperties, ClassificationAxisProperties, ClassificationValueProperties, ClassificationCommitment, ClassificationCapability, ClassificationCapabilitySurface, EmptyCell, EmptyCellRationaleKind } from './domains/market.js'
 import type { ResearchStudyProperties, ParticipantProperties, ObservationProperties, QuoteProperties, AffinityClusterProperties, ResearchQuestionProperties, InterviewGuideProperties, SurveyResponseProperties } from './domains/user-research.js'
 import type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, AnnotationProperties, InteractionSpecProperties } from './domains/ux-design.js'
 import type { DesignComponentProperties, DesignTokenProperties, DesignSystemProperties, DesignPatternProperties, DesignGuidelineProperties } from './domains/design-system.js'
@@ -50,7 +50,7 @@ export type { InsightProperties }
 export type { PersonaProperties, JobProperties, NeedProperties, DesiredOutcomeProperties, JobStepProperties, SwitchingCostProperties }
 export type { OpportunityProperties, SolutionProperties, FeasibilityStudyProperties, DesignSprintProperties }
 export type { HypothesisProperties, HypothesisEvidenceProperties, ExperimentProperties, ExperimentPlanProperties, ExperimentRunProperties, LearningProperties, EvidenceProperties, ResearchPlanProperties }
-export type { CompetitorProperties, CompetitorFeatureProperties, MarketTrendProperties, MarketSegmentProperties, CompetitiveAnalysisProperties, ClassificationAxisProperties, ClassificationValueProperties, ClassificationCommitment, ClassificationCapability, ClassificationCapabilitySurface, EmptyCell, EmptyCellRationaleKind }
+export type { CompetitorProperties, CompetitorFeatureProperties, MarketTrendProperties, MarketSegmentProperties, CompetitiveAnalysisProperties, CompetitorSignalProperties, ClassificationAxisProperties, ClassificationValueProperties, ClassificationCommitment, ClassificationCapability, ClassificationCapabilitySurface, EmptyCell, EmptyCellRationaleKind }
 export type { ResearchStudyProperties, ParticipantProperties, ObservationProperties, QuoteProperties, AffinityClusterProperties, ResearchQuestionProperties, InterviewGuideProperties, SurveyResponseProperties }
 export type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, AnnotationProperties, InteractionSpecProperties }
 export type { DesignComponentProperties, DesignTokenProperties, DesignSystemProperties, DesignPatternProperties, DesignGuidelineProperties }
@@ -176,6 +176,8 @@ export interface UPGPropertyMap {
   competitor: CompetitorProperties
   /** A specific feature offered by a competitor */
   competitor_feature: CompetitorFeatureProperties
+  /** A dated competitor move (feature launch, pricing change, ...) mapped onto our portfolio */
+  competitor_signal: CompetitorSignalProperties
   /** A market trend that may affect product strategy */
   market_trend: MarketTrendProperties
   /** A segment of the addressable market being targeted */

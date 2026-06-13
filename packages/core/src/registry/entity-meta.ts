@@ -155,6 +155,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   // ── Market Intelligence ──
   { name: 'competitor', type_id: 'ent_033', maturity: 'stable', since: '0.1.0' },
   { name: 'competitor_feature', type_id: 'ent_034', maturity: 'stable', since: '0.1.0' },
+  { name: 'competitor_signal', type_id: 'ent_354', maturity: 'proposed', since: '0.10.0' },
   { name: 'market_trend', type_id: 'ent_035', maturity: 'stable', since: '0.1.0' },
   { name: 'market_segment', type_id: 'ent_036', maturity: 'stable', since: '0.1.0' },
   { name: 'competitive_analysis', type_id: 'ent_037', maturity: 'stable', since: '0.1.0' },

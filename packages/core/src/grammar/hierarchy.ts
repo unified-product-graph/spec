@@ -162,7 +162,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // each axis hosts its values; values are reusable across the row and column
   // dossiers of a 2-axis matrix.
   competitive_analysis: ['competitor', 'market_trend', 'market_segment', 'classification_axis'],
-  competitor: ['competitor_feature'],
+  competitor: ['competitor_feature', 'competitor_signal'],
   classification_axis: ['classification_value'],
 
   // ── UX Research hierarchy ───────────────────────────────────────────────────

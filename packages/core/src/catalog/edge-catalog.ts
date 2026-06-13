@@ -181,6 +181,24 @@ export const UPG_EDGE_CATALOG = {
   // programming concern.
   product_contains_competitive_analysis: { forward_verb: 'contains', reverse_verb: 'contained_by', classification: 'hierarchy', source_type: 'product', target_type: 'competitive_analysis' },
   competitor_offers_competitor_feature: { forward_verb: 'offers', reverse_verb: 'offered_by', classification: 'hierarchy', source_type: 'competitor', target_type: 'competitor_feature' },
+  // 0.10.0 (spec issue #38): parity / rivalry edge. Our `feature` rivals a
+  // `competitor_feature`, carrying the parity assessment as EDGE metadata
+  // (parity_status / quality / is_gap / assessed_on / evidence / confidence) so
+  // "where are we behind, by area?" is one traversal, not a scan over the
+  // free-text `our_equivalent`. `carries_properties` puts the assessment on the
+  // edge; the node `parity_status` stays as a denormalised single-rival cache.
+  // Dual-registered as a cross-edge (UPG_CROSS_EDGE_TYPES) so it also spans our
+  // product graph and a watched competitor-intelligence graph. Distinct from
+  // `competitor_feature_inspires_feature` (ideation lineage, not parity).
+  feature_rivals_competitor_feature: { forward_verb: 'rivals', reverse_verb: 'is_rivalled_by', classification: 'cross-domain', source_type: 'feature', target_type: 'competitor_feature', carries_properties: true },
+  // 0.10.0 (spec issue #41): competitor_signal is a dated competitor move (feature
+  // launch / pricing change / acquisition / partnership / market entry) emitted by a
+  // competitor and mapped onto our portfolio. `emits` is within the watched graph;
+  // `maps_to_feature` / `surfaces_opportunity` cross from the watched signal into our
+  // product graph (dual-registered as cross-edges in UPG_CROSS_EDGE_TYPES).
+  competitor_emits_competitor_signal: { forward_verb: 'emits', reverse_verb: 'emitted_by', classification: 'hierarchy', source_type: 'competitor', target_type: 'competitor_signal' },
+  competitor_signal_maps_to_feature: { forward_verb: 'maps_to', reverse_verb: 'targeted_by_signal', classification: 'cross-domain', source_type: 'competitor_signal', target_type: 'feature' },
+  competitor_signal_surfaces_opportunity: { forward_verb: 'surfaces', reverse_verb: 'prompted_by_signal', classification: 'cross-domain', source_type: 'competitor_signal', target_type: 'opportunity' },
   competitive_analysis_analyses_competitor: { forward_verb: 'analyses', reverse_verb: 'analysed_in', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'competitor' },
   competitive_analysis_identifies_market_trend: { forward_verb: 'identifies', reverse_verb: 'identified_in', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'market_trend' },
   competitive_analysis_scopes_market_segment: { forward_verb: 'scopes', reverse_verb: 'scoped_in', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'market_segment' },

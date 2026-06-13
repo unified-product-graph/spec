@@ -664,6 +664,9 @@ function valueMatchesType(defType: PropertyDefinition['type'], val: unknown): bo
     case 'boolean':
       return kind === 'boolean'
     case 'string[]':
+    case 'object[]':
+      // runtimeKind reports any array as 'string[]'; element types are not
+      // inspected here (the write-time validator does the deeper check).
       return kind === 'string[]'
     case 'object':
     case 'assessment':

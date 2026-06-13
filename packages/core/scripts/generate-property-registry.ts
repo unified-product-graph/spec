@@ -215,6 +215,26 @@ function resolveTypeAlias(node: ts.TypeReferenceNode): InferResult | undefined {
   return undefined
 }
 
+/**
+ * Classify an array element type into the runtime array kind. `string` /
+ * `number` elements and pure string-literal-union elements emit 'string[]'
+ * (carrying the union as `enum`); structural elements (interfaces, inline
+ * object literals) emit 'object[]'.
+ *
+ * Before 0.9.26 every `Array<Object>` collapsed to a scalar 'object', which
+ * made array-valued properties (empty_cells, commitments, capabilities)
+ * un-writable: the property-type validator rejected the array against an
+ * 'object' declaration. Emitting 'object[]' heals that whole class.
+ */
+function inferArrayElement(elementNode: ts.TypeNode): InferResult {
+  const inner = unwrap(elementNode)
+  if (inner.kind === ts.SyntaxKind.StringKeyword) return { type: 'string[]' }
+  if (inner.kind === ts.SyntaxKind.NumberKeyword) return { type: 'string[]' }
+  const literals = collectStringLiteralUnion(inner)
+  if (literals && literals.length > 0) return { type: 'string[]', enum: literals }
+  return { type: 'object[]' }
+}
+
 /** Map a TypeNode to the simplified runtime InferResult. */
 function inferFromNode(node: ts.TypeNode): InferResult {
   node = unwrap(node)
@@ -234,13 +254,7 @@ function inferFromNode(node: ts.TypeNode): InferResult {
   // `string[]` and `number[]` — everything else fell through to the
   // catch-all `string` fallback. Match that behaviour.
   if (ts.isArrayTypeNode(node)) {
-    const inner = unwrap(node.elementType)
-    if (inner.kind === ts.SyntaxKind.StringKeyword) return { type: 'string[]' }
-    if (inner.kind === ts.SyntaxKind.NumberKeyword) return { type: 'string[]' }
-    // Any other array → object (sensible upgrade from the prior `string` fallback;
-    // however the existing schema has no such cases in the domain files, so this
-    // path is unreached by the real generator pass — verified by diff parity).
-    return { type: 'object' }
+    return inferArrayElement(node.elementType)
   }
 
   // Type references — named aliases / interfaces / Records / Arrays-by-name
@@ -252,9 +266,16 @@ function inferFromNode(node: ts.TypeNode): InferResult {
     const named = inferFromTypeName(typeName)
     if (named) return named
 
-    // Record<…> / Array<…> / Map<…> etc. — treat as object
-    if (typeName === 'Record' || typeName === 'Array' || typeName === 'Map' || typeName === 'Set') {
+    // Record<…> / Map<…> — keyed objects.
+    if (typeName === 'Record' || typeName === 'Map') {
       return { type: 'object' }
+    }
+    // Array<T> / Set<T> — inspect the element so arrays of objects emit
+    // 'object[]' instead of collapsing to a scalar 'object' (the pre-0.9.26
+    // lossiness that made empty_cells / commitments / capabilities un-writable).
+    if (typeName === 'Array' || typeName === 'Set') {
+      const arg = node.typeArguments?.[0]
+      return arg ? inferArrayElement(arg) : { type: 'object[]' }
     }
 
     // Q3: follow the alias through the type checker. Recovers enums from
@@ -482,7 +503,7 @@ const lines: string[] = [
   ' */',
   '',
   'export interface PropertyDefinition {',
-  "  type: 'string' | 'number' | 'boolean' | 'string[]' | 'object' | 'assessment'",
+  "  type: 'string' | 'number' | 'boolean' | 'string[]' | 'object' | 'object[]' | 'assessment'",
   '  description?: string',
   '  enum?: string[]',
   "  /** For 'assessment'-typed fields: the canonical UPG scale this property is rated on (e.g. 'confidence_5'). */",

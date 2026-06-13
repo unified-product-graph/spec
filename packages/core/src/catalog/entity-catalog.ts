@@ -33,7 +33,7 @@ export type UPGEntityType =
   | 'experiment' | 'experiment_plan' | 'experiment_run'
   | 'learning' | 'test_plan' | 'evidence' | 'research_plan'
   // Market Intelligence
-  | 'competitor' | 'competitor_feature' | 'market_trend' | 'market_segment' | 'competitive_analysis'
+  | 'competitor' | 'competitor_feature' | 'competitor_signal' | 'market_trend' | 'market_segment' | 'competitive_analysis'
   // Classification: taxonomy axes and their values, hosted by competitive_analysis
   | 'classification_axis' | 'classification_value'
   // User Research

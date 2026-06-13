@@ -4,7 +4,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODate, UPGAssessment } from '../primitives.js'
+import type { ISODate, ISODateTime, UPGAssessment } from '../primitives.js'
 
 // ---------------------------------------------------------------------------
 // MARKET INTELLIGENCE
@@ -38,6 +38,29 @@ export interface CompetitorProperties {
    * @example ['Weak API query capabilities', 'No mobile companion']
    */
   weaknesses?: string[]
+  /**
+   * Provenance: ISO date-time this record was last observed or refreshed.
+   * Lets a stale record be told apart from a fresh one.
+   * @example "2026-06-13"
+   */
+  last_updated?: string
+  /**
+   * Provenance: where this was observed. A changelog, pricing, or docs URL,
+   * an analyst report, or a research note.
+   * @example "https://www.contentful.com/pricing/"
+   */
+  source?: string
+  /**
+   * Provenance: how sure we are, on the canonical confidence_5 scale.
+   * Carries both a numeric value and a high / medium / low label.
+   */
+  confidence?: UPGAssessment
+  /**
+   * Provenance: agent or routine id that last wrote this. Absent when
+   * hand-authored, the signal that a human (not a poller) is the last writer.
+   * @example "competitor-watch-agent"
+   */
+  observed_by?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -78,6 +101,23 @@ export interface CompetitorFeatureProperties {
    * @example "2026-02-15"
    */
   last_updated?: string
+  /**
+   * Provenance: where this was observed. A changelog, pricing, or docs URL,
+   * an analyst report, or a research note.
+   * @example "https://www.contentful.com/changelog/"
+   */
+  source?: string
+  /**
+   * Provenance: how sure we are, on the canonical confidence_5 scale.
+   * Carries both a numeric value and a high / medium / low label.
+   */
+  confidence?: UPGAssessment
+  /**
+   * Provenance: agent or routine id that last wrote this. Absent when
+   * hand-authored, the signal that a human (not a poller) is the last writer.
+   * @example "competitor-watch-agent"
+   */
+  observed_by?: string
 }
 
 /** Market trend.
@@ -104,6 +144,23 @@ export interface MarketTrendProperties {
    * @example "Gartner Hype Cycle 2025", "Observed in user interviews Q1 2026"
    */
   source?: string
+  /**
+   * Provenance: ISO date-time this record was last observed or refreshed.
+   * Lets a stale record be told apart from a fresh one.
+   * @example "2026-06-13"
+   */
+  last_updated?: string
+  /**
+   * Provenance: how sure we are, on the canonical confidence_5 scale.
+   * Carries both a numeric value and a high / medium / low label.
+   */
+  confidence?: UPGAssessment
+  /**
+   * Provenance: agent or routine id that last wrote this. Absent when
+   * hand-authored, the signal that a human (not a poller) is the last writer.
+   * @example "competitor-watch-agent"
+   */
+  observed_by?: string
 }
 
 /** MarketSegment entity.
@@ -181,6 +238,82 @@ export interface CompetitiveAnalysisProperties {
    *   ]
    */
   empty_cells?: Array<EmptyCell>
+  /**
+   * Provenance: ISO date-time this record was last observed or refreshed.
+   * Distinct from `analysis_date` (when the analysis was conducted).
+   * @example "2026-06-13"
+   */
+  last_updated?: string
+  /**
+   * Provenance: where this was observed. A changelog, pricing, or docs URL,
+   * an analyst report, or a research note.
+   * @example "https://www.contentful.com/changelog/"
+   */
+  source?: string
+  /**
+   * Provenance: how sure we are, on the canonical confidence_5 scale.
+   * Carries both a numeric value and a high / medium / low label.
+   */
+  confidence?: UPGAssessment
+  /**
+   * Provenance: agent or routine id that last wrote this. Absent when
+   * hand-authored, the signal that a human (not a poller) is the last writer.
+   * @example "competitor-watch-agent"
+   */
+  observed_by?: string
+}
+
+/** Competitor signal: a dated competitor move mapped onto our portfolio.
+ *
+ * An append-only event (feature launch, pricing change, acquisition, partnership,
+ * market entry) emitted by a competitor. Distinct from `market_trend` (macro,
+ * no single actor) and `launch` (our own ship event).
+ *
+ * @example
+ * const properties: CompetitorSignalProperties = {
+ *   observed_at: '2026-06-10',
+ *   signal_type: 'feature_launch',
+ *   summary: 'Shipped Visual Editor AI Assist',
+ *   impact: 'high',
+ * }
+ */
+export interface CompetitorSignalProperties {
+  /**
+   * ISO date-time the move was observed.
+   * @example "2026-06-10"
+   */
+  observed_at?: ISODateTime
+  /**
+   * Kind of move. `feature_launch` = shipped a feature. `pricing_change` = a plan
+   * or tier change. `acquisition` / `partnership` / `market_entry` = strategic moves.
+   */
+  signal_type?: 'feature_launch' | 'pricing_change' | 'acquisition' | 'partnership' | 'market_entry'
+  /** One-line factual summary of the move (what shipped, not marketing copy). */
+  summary?: string
+  /** Expected impact on our position. */
+  impact?: 'high' | 'medium' | 'low'
+  /**
+   * Provenance: ISO date-time this record was last observed or refreshed.
+   * @example "2026-06-13"
+   */
+  last_updated?: string
+  /**
+   * Provenance: where this was observed. A changelog, pricing, or docs URL,
+   * an analyst report, or a research note.
+   * @example "https://www.contentful.com/changelog/"
+   */
+  source?: string
+  /**
+   * Provenance: how sure we are, on the canonical confidence_5 scale.
+   * Carries both a numeric value and a high / medium / low label.
+   */
+  confidence?: UPGAssessment
+  /**
+   * Provenance: agent or routine id that last wrote this. Absent when
+   * hand-authored, the signal that a human (not a poller) is the last writer.
+   * @example "competitor-watch-agent"
+   */
+  observed_by?: string
 }
 
 // ---------------------------------------------------------------------------

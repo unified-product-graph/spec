@@ -249,8 +249,8 @@ export const MARKET_COMPETITIVE_PLAYBOOK: UPGPlaybook = {
       ['competitive_analysis'],
       'Synthesize into structured comparisons: feature parity matrices, win/loss patterns, positioning maps.'),
     seqStep(6, 'Moves',
-      ['competitive_battle_card'],
-      'Look where competitors are weak and trends are strong. That intersection is where your moves live: arm the team with battle cards that turn each competitor weakness into a position you can win. (Partnership moves belong in the business & GTM playbook, where `partnership` connects.)'),
+      ['competitor_signal', 'competitive_battle_card'],
+      'Capture rivals\' dated moves as competitor_signals (launches, pricing changes, acquisitions) and map each onto the feature it threatens. Then look where competitors are weak and trends are strong: that intersection is where your moves live. Arm the team with battle cards that turn each competitor weakness into a position you can win. (Partnership moves belong in the business & GTM playbook, where `partnership` connects.)'),
   ],
 }
 

@@ -125,7 +125,7 @@ const USER_RESEARCH_GUIDE: UPGDomainUsageGuide = {
 const MARKET_INTELLIGENCE_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'market_intelligence',
   anchor_entity: 'competitive_analysis',
-  creation_sequence: ['competitive_analysis', 'competitor', 'competitor_feature', 'market_trend', 'market_segment', 'classification_axis', 'classification_value'],
+  creation_sequence: ['competitive_analysis', 'competitor', 'competitor_feature', 'competitor_signal', 'market_trend', 'market_segment', 'classification_axis', 'classification_value'],
   patterns: [
     {
       name: 'Competitive Landscape Map',

@@ -26,7 +26,7 @@ const baseDoc = (edges: Array<Record<string, unknown>>) => ({
 })
 
 describe('cross-product edge validation', () => {
-  it('exposes the twelve canonical cross-product edge types', () => {
+  it('exposes the twenty-two canonical cross-product edge types', () => {
     expect(UPG_CROSS_EDGE_TYPES).toEqual([
       'shares_persona',
       'shares_competitor',
@@ -47,6 +47,9 @@ describe('cross-product edge validation', () => {
       'product_exposes_primitive',
       'feature_manipulates_primitive',
       'primitive_stored_as_data_type',
+      'feature_rivals_competitor_feature',
+      'competitor_signal_maps_to_feature',
+      'competitor_signal_surfaces_opportunity',
     ])
   })
 
@@ -69,7 +72,7 @@ describe('cross-product edge validation', () => {
     expect(typeError?.message).toContain('portfolio.cross_edges[]')
   })
 
-  it('rejects all twelve cross-product edge types in edges[]', () => {
+  it('rejects all twenty-two cross-product edge types in edges[]', () => {
     for (const crossType of UPG_CROSS_EDGE_TYPES) {
       const doc = baseDoc([
         { id: 'e1', source: 'n1', target: 'n2', type: crossType },

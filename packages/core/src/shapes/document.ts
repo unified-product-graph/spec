@@ -129,6 +129,16 @@ export type UPGCrossEdgeType =
   | 'product_exposes_primitive'
   | 'feature_manipulates_primitive'
   | 'primitive_stored_as_data_type'
+  // Competitive parity (0.10.0, #38). Our `feature` rivals a `competitor_feature`
+  // that lives in a separate watched competitor-intelligence graph. Dual-registered:
+  // also a catalog edge (so resolve_edge_for_pair resolves it and within-graph is
+  // the degenerate case), here as a cross-edge for the cross-product case. Carries
+  // the parity assessment via `UPGCrossEdge.properties` (carries_properties).
+  | 'feature_rivals_competitor_feature'
+  // Competitor-signal surfacing (0.10.0, #41). A dated competitor move lives in a
+  // watched competitor-intelligence graph; these map it onto our product graph.
+  | 'competitor_signal_maps_to_feature'
+  | 'competitor_signal_surfaces_opportunity'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -155,6 +165,9 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'product_exposes_primitive',
   'feature_manipulates_primitive',
   'primitive_stored_as_data_type',
+  'feature_rivals_competitor_feature',
+  'competitor_signal_maps_to_feature',
+  'competitor_signal_surfaces_opportunity',
 ]
 
 /**
@@ -188,6 +201,14 @@ export interface UPGCrossEdge {
   target_product_id?: string
   /** Confidence level if this edge was inferred during import */
   mapping_confidence?: UPGMappingConfidence
+  /**
+   * Edge metadata, for cross-edge types declared `carries_properties` in the
+   * edge catalogue (0.10.0, #38). A `feature_rivals_competitor_feature` cross-edge
+   * carries the parity assessment here: `parity_status` / `quality` / `is_gap` /
+   * `assessed_on` / `evidence` / `confidence`. Cross-edge types NOT declared
+   * `carries_properties` reject properties at the write surface.
+   */
+  properties?: Record<string, unknown>
   /**
    * Sanctioned divergence marker (`instance_of` only). When true, registry drift
    * detection treats an instance title that differs from its canonical as
@@ -278,6 +299,15 @@ export interface UPGPortfolio {
   parent_portfolio_id?: string | null
   /** How products are structured within this portfolio */
   hierarchy_model?: 'flat' | 'nested' | 'matrix'
+  /**
+   * Investment posture (UPG 0.9.27). `owned` = products we build and manage
+   * (the default: coverage, health, and product-spine anti-patterns apply).
+   * `watched` = an externally-monitored landscape such as competitor
+   * intelligence graphs, which must NOT be judged by product-management
+   * expectations or drag portfolio health. Absent is treated as `owned`
+   * (back-compat: all pre-0.9.27 portfolios are owned).
+   */
+  kind?: 'owned' | 'watched'
   /** Product IDs that belong to this portfolio */
   products?: string[]
 }
@@ -395,6 +425,14 @@ export interface UPGDocument {
   nodes: UPGBaseNode[]
   /** All edges connecting nodes */
   edges: UPGEdge[]
+  /**
+   * Workspace member kind (0.10.0, #45). `product` (default / absent) = a product
+   * under management; `org_rollup` = the company umbrella graph (org-level vision
+   * and OKRs, not a shippable product); `watched` = an externally monitored
+   * intelligence graph (e.g. a competitor). Serialised to `$upg.member_kind`;
+   * cached in workspace.json + the portfolio registry for enumeration and counts.
+   */
+  member_kind?: 'product' | 'org_rollup' | 'watched'
   /** Integrity checksum. Set by the MCP server on save, verified on load. */
   _integrity?: UPGIntegrity
 }

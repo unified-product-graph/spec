@@ -141,7 +141,7 @@ export interface UPGLens {
   perspective: string
 }
 
-// ─── The 8 Lenses ────────────────────────────────────────────────────────────────
+// ─── The 9 Lenses ────────────────────────────────────────────────────────────────
 
 export const UPG_LENSES: readonly UPGLens[] = [
 
@@ -649,7 +649,38 @@ export const UPG_LENSES: readonly UPGLens[] = [
   },
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // 8. FULL LENS - everything, canonical vocabulary (default)
+  // 8. COMPETITIVE LENS - rivals, their dated moves, and where we stand
+  // ═══════════════════════════════════════════════════════════════════════════════
+
+  {
+    id: 'competitive',
+    name: 'Competitive',
+    description: 'The competitive landscape: rivals, their offerings, dated moves, and where we stand',
+    icon: 'swords',
+    visible_domains: ['market_intelligence'],
+    // Parity (#38) and signal (#41) edges reach onto our side of the graph;
+    // surface those endpoints so a parity row or a mapped signal shows both ends.
+    always_show_types: ['feature', 'capability', 'opportunity'],
+    playbook_id: 'playbook:market-competitive',
+    benchmark_domains: ['market_intelligence'],
+    intelligence_prompts: [
+      {
+        condition: 'competitors.length === 0',
+        structured_condition: { check: { type: 'entity_count', entity_type: 'competitor', comparison: 'zero' } },
+        message: 'No competitors mapped yet. Name the 3 to 7 closest alternatives, including the status quo and DIY.',
+      },
+      {
+        condition: 'competitor_signals.length === 0',
+        structured_condition: { check: { type: 'entity_count', entity_type: 'competitor_signal', comparison: 'zero' } },
+        message: 'No competitor signals captured. Log rivals\' dated moves (launches, pricing changes) and map each onto the feature it threatens.',
+      },
+    ],
+    audience: 'Product marketers, strategists, and founders sizing up the field',
+    perspective: 'Sees the product through its rivals: who competes, what they ship, the dated moves they make, and where we lead or trail.',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // 9. FULL LENS - everything, canonical vocabulary (default)
   // ═══════════════════════════════════════════════════════════════════════════════
 
   {

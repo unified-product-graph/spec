@@ -529,6 +529,11 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "competitor_signal",
+        role: "leaf",
+        notes: "a dated competitor move (feature launch, pricing change, ...) emitted by a competitor",
+      },
+      {
         type: "market_trend",
         role: "leaf",
       },
@@ -559,6 +564,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
     },
     intra_edges: [
       "competitor_offers_competitor_feature",
+      "competitor_emits_competitor_signal",
       "competitive_analysis_analyses_competitor",
       "competitive_analysis_dimensioned_by_classification_axis",
       "classification_axis_includes_classification_value",
