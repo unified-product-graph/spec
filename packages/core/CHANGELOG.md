@@ -7,6 +7,103 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.10.7] - 2026-06-14
+
+**Makes the classification landscape renderable: a portfolio tree, title resolution, and projected/paginated cross-edge reads.** 0.10.6 made classifications *queryable* (traversal, distribution, idempotent upsert). But nothing on the MCP surface rendered the result as a tree, and the nearest read overflowed the transport cap and returned opaque ids — the trees were only producible by dropping to `jq` over a dumped portfolio file, a path no fresh agent can find. This release closes that discoverability gap. Read-path only; no schema or data migration.
+
+### Added
+- **`get_portfolio_tree` (new tool, 126 total; local-only).** The portfolio-grain counterpart to `get_tree` (which stays product-scoped). Two shapes: `landscape` (a classification axis to its values to the nodes classified at each, every leaf carrying `confidence` / `assessed_on`; anchorable at one axis or value via `from_id`, or the whole portfolio) and `competitor_profile` (one node's position on every axis it has been graded against). Titles resolve from the registry and `instance_of` registrations, so output names entities (`Sitecore`) rather than `p_…/n_…`. The whole-portfolio landscape is counts-only by default (members inline when anchored, or on `include_members: true`) so it stays under the transport cap. Values whose axis is not wired surface in an explicit `unaxed` bucket rather than vanishing.
+- **`list_portfolio_cross_edges` is now agent-usable.** `resolve_titles` (default on) adds `source_title` / `target_title`; `property_include` trims heavy edge properties (e.g. to `confidence` alone); `limit` / `offset` page the flat list with `returned` / `has_more`. A payload guard estimates from edge rows rather than refusing a routine read. The 218-edge matrix now reads back under the cap with titles, without a shell.
+
+### Fixed
+- **`portfolio_digest`'s classification distribution resolves axes by tag as well as edge.** Axis grouping previously used only `classification_axis_includes_classification_value` registry edges, so a graph that linked values to axes by an `axis:<slug>` tag (the common case) reported every value as unaxed. The shared resolver now tries the registry edge first, then the tag, and the digest carries a `render_with: get_portfolio_tree` pointer so the landscape is discoverable, not just present.
+
+### Changed
+- The competitive lens surfaces `get_portfolio_tree` when a classification landscape exists.
+
+## [0.10.6] - 2026-06-13
+
+**Closes the classification read/write loop: query traversal, a digest distribution, and idempotent property upsert.** With the classification surface in place (0.10.3) and carrying validated properties (0.10.4), three gaps remained between *writing* a classification and *reading it back*. This release closes them.
+
+### Fixed
+- **`portfolio_query` follows a classify cross-edge to its registry target.** A classify edge crosses from a product (or watched) graph into the registry, so a per-product reader never opened the document holding the target and the query reported `total_edges: 0`. When a cross-edge type is named in `traverse[]`, the query now appends the matching portfolio cross-edges and resolves their registry targets as terminal nodes (`registry/{id}` with its title). Within-graph queries that name no cross type are byte-identical to before.
+- **Cross-product edge writers no longer drop properties on an idempotent hit.** `create_cross_product_edge` and `batch_create_cross_product_edges` previously no-op'd when an edge already existed, silently discarding any new `properties` — which blocked backfilling confidence/evidence onto edges created earlier without them. They now **upsert**: an existing edge with new properties is merged (existing id preserved, no duplicate) and reported as `updated`; an identical re-write is `unchanged`. `create_classification_edge` on a qualified cross-product competitor source now resolves the owning product read-only and types the edge as `competitor_classified_as_classification_value` rather than the polymorphic fallback.
+
+### Added
+- **`portfolio_digest` carries a classification distribution.** Alongside the structural counts, the digest now reports, per classification axis, how many members fall on each value — the shape of the competitive field at a glance. Best-effort: a missing or legacy portfolio document never breaks the digest.
+
+No entity, edge, or cross-edge-type change (entities 316, edges 985, cross-edge types 24, local tools 125).
+
+---
+
+## [0.10.5] - 2026-06-13
+
+**CLI parity for classification and edge-carried properties.** The classification/edge-property capability had no `upg` command-line surface; a product creator working a competitive analysis in a terminal could not reach what an agent could.
+
+### Added
+- **`upg portfolio classify <node-id> <classification-value-id>`** with `--confidence`, `--assessed-on`, `--rationale`, `--evidence`, and `--node-product`. Routes within-graph vs cross-product automatically and picks the specialised competitor edge type over the polymorphic one when the source is a competitor.
+- **`--properties <json>` on `connect` and `portfolio connect`.** Properties are validated against the edge type's `property_schema` (unknown key or off-scale value rejected at exit) before the edge is written; a no-op when the type declares no schema.
+- **`--source-product` and `--group-by` on `portfolio edges`** for filtering and grouping the cross-edge listing.
+
+No entity, edge, or tool-count change (entities 316, edges 985, local tools 125).
+
+---
+
+## [0.10.4] - 2026-06-13
+
+**Edge-carried properties become a typed, validated schema; classification edges carry confidence and provenance.** 0.10.0's parity edge already carried its assessment on the edge; this release generalises that into a first-class mechanism and applies it to classification.
+
+### Added
+- **`property_schema` on edge definitions.** An edge type may declare the properties it is allowed to carry, each with its own type (enum, assessment on a named scale, date, provenance mixin). `validateEdgeProperties(type, props)` validates edge-property writes against it exactly as node properties are validated against an entity shape, and `getEdgePropertySchema(type)` exposes the schema for introspection.
+- **`CLASSIFICATION_EDGE_PROPERTY_SCHEMA`.** Classify edges carry a `confidence` assessment on the `confidence_5` scale, an `assessed_on` date, a free-text `rationale`, and `evidence`. A `CLASSIFICATION_CONFIDENCE_MAP` resolves `low`/`medium`/`high` to `confidence_5` assessment values, so a write can name a level and store a structured score.
+
+A classification placement is now structured data rather than a sentence in a notes field: *"every competitor placed as agentic with at least medium confidence"* is a filter, not a re-read.
+
+---
+
+## [0.10.3] - 2026-06-13
+
+**Classification completion: a polymorphic node classifier and a registry-tier axis model.**
+
+### Added
+- **`classification_axis` and `classification_value` registry entities.** A classification axis owns a set of values (*AI maturity* → *agentic*, *integrated*, *bolt-on*), defined once in the shared registry so every product and watched graph in a portfolio is positioned against the same vocabulary. Linked by `classification_axis_includes_classification_value`.
+- **`node_classified_as_classification_value`**, the polymorphic classify cross-edge for any node, alongside the specialised `competitor_classified_as_classification_value` for the common case of placing a rival.
+
+---
+
+## [0.10.2] - 2026-06-13
+
+**A number-to-assessment reshape migration and the registry-canonical classification cross-edge.**
+
+### Added
+- **Value-aware property migration.** A reshape migration lifts a bare numeric property to a structured assessment (`{ value, label, scale_id }`), and migration-drift detection became value-aware so a graph carrying the old shape is flagged and repaired on load rather than silently passing.
+- **Registry-canonical classification cross-edge.** A classify edge can target a canonical `classification_value` in the registry (`{source}/{node} → registry/{value}`), the cross-product form the portfolio tier reads.
+
+---
+
+## [0.10.1] - 2026-06-13
+
+**The competitive-intelligence write surface.**
+
+### Added
+- **Parity-edge writer.** Tooling to create `feature_rivals_competitor_feature` edges carrying the parity assessment (status, relative quality, gap flag, assessed-on, evidence, confidence) on the edge.
+- **`member_kind` setter.** Set a portfolio member's kind (`product`, `org_rollup`, `watched`) so a watched competitor graph can be marked as not-to-be-scored against product-management expectations.
+
+---
+
+## [0.10.0] - 2026-06-13
+
+**The Competitive Intelligence tier.** Extends the portfolio tier from what an organisation *owns* to what it *watches*: one new entity type, a parity edge family, a role lens, a member kind for graphs you do not own, and a property-type addition for structured competitive records.
+
+### Added
+- **`competitor_signal` entity** (Region 4, Market & Competitive): a single dated competitor move — launch, pricing change, acquisition, partnership, market entry — emitted by a `competitor` via `competitor_emits_competitor_signal`.
+- **Parity and signal cross-edges.** `feature_rivals_competitor_feature` (parity carried on the edge), `competitor_signal_maps_to_feature`, and `competitor_signal_surfaces_opportunity`, dual-registered as within-graph catalog edges and cross-product edges.
+- **`competitive` lens and a competitive-intelligence playbook.** The `competitive` lens foregrounds the single `market_intelligence` domain — rivals, their offerings, their dated moves, and where the product leads or trails.
+- **`member_kind` on portfolio members** (`product` | `org_rollup` | `watched`). A `watched` graph sits inside the same portfolio as the products it competes with without dragging their health: `portfolio_validate` and the coverage scorers scope themselves by `member_kind`.
+- **`object[]` property type and a provenance mixin.** A `competitive_analysis` can carry structured `commitments`/`capabilities` lists, and every competitive record carries `source`, `last_updated`, `observed_by`, and a `confidence` assessment, so a stale machine-polled signal is distinguishable from a fresh hand-verified one.
+
+---
+
 ## [0.9.25] - 2026-06-11
 
 **The real fix for the duplicate-write bug: `upg mcp run` was starting TWO servers.** Every mutating call made through the CLI launch (`cli mcp run`, which is how most MCP clients start the server) was applied twice. Root cause: mcp-server's `index.js` is both the library entry (the CLI imports `runMcpServer`) and the bin (it auto-starts when it is the process entrypoint). The CLI bundles that module into its single-file `cli.cjs`, and a bundler rewrites `import.meta.url` to the bundle's own path — so the realpath-only entrypoint guard matched `process.argv[1]` and the inlined branch auto-started a SECOND server alongside the CLI's own `runMcpServer()`. Two servers shared one stdin, so every request was handled by both and every write duplicated. The 0.9.22 to 0.9.24 idempotency work was at the dispatch layer and could not help: the duplication is two whole server processes, whose per-instance ledgers cannot see each other. `node dist/index.js` and `npx @unified-product-graph/mcp-server` launch a single server and were never affected, which is why direct-launch users never saw it.

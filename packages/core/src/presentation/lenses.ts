@@ -674,6 +674,11 @@ export const UPG_LENSES: readonly UPGLens[] = [
         structured_condition: { check: { type: 'entity_count', entity_type: 'competitor_signal', comparison: 'zero' } },
         message: 'No competitor signals captured. Log rivals\' dated moves (launches, pricing changes) and map each onto the feature it threatens.',
       },
+      {
+        condition: 'classification_axes.length > 0',
+        structured_condition: { check: { type: 'entity_count', entity_type: 'classification_axis', comparison: 'nonzero' } },
+        message: 'This portfolio has a classification landscape. Render it with get_portfolio_tree({ shape: "landscape" }) (axis to value to graded competitors), or one rival\'s position with get_portfolio_tree({ shape: "competitor_profile", from_id }).',
+      },
     ],
     audience: 'Product marketers, strategists, and founders sizing up the field',
     perspective: 'Sees the product through its rivals: who competes, what they ship, the dated moves they make, and where we lead or trail.',
