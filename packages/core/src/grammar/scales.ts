@@ -41,6 +41,15 @@ export interface UPGScaleDefinition {
   steps?: number
   /** Each point on the scale */
   points: UPGScalePoint[]
+  /**
+   * Friendly-word aliases that resolve to a canonical point `value` (UPG 0.11.1).
+   * The single, introspectable source of truth so every writer that accepts a
+   * friendly confidence word expands it to the SAME `confidence_5` value (and the
+   * canonical point label), instead of each tool inventing its own mapping. e.g.
+   * `{ low: 2, medium: 3, high: 4 }` — `high` is "Confident" (value 4), reserving
+   * "Data-backed" (5) for genuinely quantified claims. Surfaced via `get_scale`.
+   */
+  friendly_aliases?: Record<string, number>
 }
 
 /** A single point on an assessment scale */
@@ -205,6 +214,10 @@ export const UPG_SCALES: Record<string, UPGScaleDefinition> = {
       { value: 4, label: 'Confident',      description: 'Multiple data sources' },
       { value: 5, label: 'Data-backed',    description: 'Strong quantitative evidence' },
     ],
+    // The pinned friendly mapping (0.11.1). `high` is Confident (4), not
+    // Data-backed (5) — 5 is reserved for genuinely quantified claims. Matches
+    // the existing classify-edge population, so nothing needs re-stamping.
+    friendly_aliases: { low: 2, medium: 3, high: 4 },
   },
 
   // ── Effort ─────────────────────────────────────────────────────────────────
@@ -241,6 +254,28 @@ export const UPG_SCALES: Record<string, UPGScaleDefinition> = {
  */
 export function getScale(scaleId: string): UPGScaleDefinition | undefined {
   return UPG_SCALES[scaleId]
+}
+
+/**
+ * Resolve a friendly word (e.g. `high`) to a canonical assessment on a scale,
+ * using the scale's pinned `friendly_aliases` (UPG 0.11.1). The single source of
+ * truth every writer must use, so `high` is always the same `confidence_5` value
+ * with the canonical point label — no per-tool drift. Returns `null` when the
+ * scale has no aliases or the word is not aliased.
+ *
+ * @example
+ * friendlyToAssessment('confidence_5', 'high')
+ * // => { value: 4, label: 'Confident', scale_id: 'confidence_5' }
+ */
+export function friendlyToAssessment(
+  scaleId: string,
+  word: string,
+): { value: number; label: string; scale_id: string } | null {
+  const scale = UPG_SCALES[scaleId]
+  const value = scale?.friendly_aliases?.[word]
+  if (value === undefined) return null
+  const point = scale!.points.find((p) => p.value === value)
+  return { value, label: point?.label ?? word, scale_id: scaleId }
 }
 
 /**

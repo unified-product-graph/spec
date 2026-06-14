@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.11.1] - 2026-06-14
+
+**Bug fix: the typed classification writer misrouted competitor sources, duplicated instead of upserting, and disagreed with the confidence scale.** The generic cross-edge writers got their in-place upsert in 0.10.6; the typed convenience writer `create_classification_edge` never inherited it, and on a qualified `{product}/{node}` competitor source it wrote the wrong edge type, created a duplicate, and expanded `high` to a different `confidence_5` value than the rest of the graph. Three defects in one call (Data's dogfood brief), all on a path the generic writers already do correctly. No data migration.
+
+### Fixed
+- **`create_classification_edge` now upserts instead of duplicating.** Root cause was the misroute below: a qualified competitor source was mis-typed as the polymorphic `node_classified_as_classification_value`, so the `(source, target, type)` dedup never matched the existing `competitor_…` edge and a second edge was created. Correct routing makes the write land on the existing cell in place (`status: "updated"`).
+- **Qualified-source type routing.** A `{product}/{node}` source whose node is a `competitor` now resolves to `competitor` — via the owning product file, and failing that the portfolio's `instance_of` index (which maps `{pid}/{nid}` to its canonical type without a local product file) — and writes `competitor_classified_as_classification_value`. Bare local sources keep the polymorphic type.
+- **Confidence-scale agreement.** `high` now expands to `confidence_5` value **4** (canonical label `Confident`), not 5 — matching the generic writers and the existing classify-edge population, so two writers can no longer populate the same axis with different numbers for the same word.
+
+### Added
+- **Pinned friendly confidence mapping on the scale (`confidence_5.friendly_aliases = { low: 2, medium: 3, high: 4 }`).** The single, introspectable source of truth — surfaced via `get_scale` — that `create_classification_edge` (and any future friendly-confidence writer) resolves through `friendlyToAssessment(scaleId, word)`. The expansion carries the canonical point label (`Confident`), not the input word.
+
+---
+
 ## [0.11.0] - 2026-06-14
 
 **Self-documenting competitive history: a competitor's classification change records itself.** The 0.10.x tier classifies competitors against axes and values and carries `confidence` / `assessed_on`, but a re-assessment overwrites the prior value — there was no way to ask *what moved*. This release makes the classification landscape remember its own changes. A minor bump: it widens the `competitor_signal.signal_type` enum (union widening), which spec policy treats as a minor; additive, so old graphs still parse.
