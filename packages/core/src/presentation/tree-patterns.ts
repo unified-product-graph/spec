@@ -39,6 +39,25 @@ export interface UPGTreeChild {
    * when present and are silent when absent.
    */
   required?: boolean
+  /**
+   * The node property `get_tree` sorts this slot's children by (ascending,
+   * nodes lacking it last). Ordering is a property of the DATA, not the viewer,
+   * so the server returns children pre-sorted rather than leaving every client
+   * to re-sort ( sequence scalars: `phase_order`, `step_order`,
+   * `action_order`, `state_order`). Omitted -> children keep declared slot order.
+   */
+  order_by?: string
+  /**
+   * Spine resolution for a DAG. When this slot reaches the SAME node redundantly
+   * with a path through a sibling type (e.g. `user_journey -> journey_step`
+   * directly AND `user_journey -> journey_phase -> journey_step`), name that
+   * sibling type here. A child also reachable as a grandchild through a
+   * `prefer_via`-typed child renders under that spine, NOT here -- collapsing the
+   * redundant path so the node is neither silently dropped (G5) nor
+   * double-counted (J1). A child not on the spine still renders here, so the
+   * direct path remains the fallback when the grouping layer is absent.
+   */
+  prefer_via?: string
 }
 
 /** How a pattern decides what counts as a structural gap. */
@@ -86,10 +105,12 @@ export interface UPGTreePattern {
   natural_depth: number
 }
 
-/** Sugar for a required child slot. */
-const req = (type: string): UPGTreeChild => ({ type, required: true })
-/** Sugar for an optional child slot. */
-const opt = (type: string): UPGTreeChild => ({ type })
+/** Sugar for a required child slot (optionally ordered by a node scalar). */
+const req = (type: string, order_by?: string): UPGTreeChild =>
+  order_by ? { type, required: true, order_by } : { type, required: true }
+/** Sugar for an optional child slot (optionally ordered by a node scalar). */
+const opt = (type: string, order_by?: string): UPGTreeChild =>
+  order_by ? { type, order_by } : { type }
 
 /**
  * The canonical tree patterns. Every type referenced is an active UPG entity
@@ -269,11 +290,18 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     anchor_type: 'user_journey',
     fallback_anchors: ['user_flow'],
     child_map: {
-      user_journey: [opt('journey_phase'), opt('journey_step')],
-      journey_phase: [opt('journey_step')],
-      journey_step: [opt('journey_action'), opt('screen')],
+      // The phase is the grouping layer: a step reachable through a phase
+      // renders under the phase, not twice (J1). `prefer_via` collapses the
+      // redundant direct path; a step in NO phase still renders here. Children
+      // are returned in `*_order` sequence (J2), not storage order.
+      user_journey: [
+        opt('journey_phase', 'phase_order'),
+        { type: 'journey_step', prefer_via: 'journey_phase', order_by: 'step_order' },
+      ],
+      journey_phase: [opt('journey_step', 'step_order')],
+      journey_step: [opt('journey_action', 'action_order'), opt('screen')],
       user_flow: [opt('screen')],
-      screen: [opt('screen_state')],
+      screen: [opt('screen_state', 'state_order')],
     },
     natural_depth: 3,
   },
@@ -318,6 +346,10 @@ export interface UPGTreePatternEdge {
   /** The edge's classification (hierarchy, semantic, cross-domain, ...), or null. */
   kind: string | null
   required: boolean
+  /** Node scalar this slot's children are sorted by, when declared (J2). */
+  order_by?: string
+  /** Sibling type whose path is the canonical spine for this child (J1), when declared. */
+  prefer_via?: string
 }
 
 /** A pattern with its child map resolved to concrete edges (for introspection). */
@@ -362,7 +394,10 @@ export function resolveTreePatternEdges(pattern: UPGTreePattern): UPGTreePattern
   for (const [parent, children] of Object.entries(pattern.child_map)) {
     for (const c of children) {
       const e = resolvePatternEdge(parent, c.type)
-      out.push({ parent, child: c.type, via: e?.via ?? null, kind: e?.kind ?? null, required: !!c.required })
+      const row: UPGTreePatternEdge = { parent, child: c.type, via: e?.via ?? null, kind: e?.kind ?? null, required: !!c.required }
+      if (c.order_by) row.order_by = c.order_by
+      if (c.prefer_via) row.prefer_via = c.prefer_via
+      out.push(row)
     }
   }
   return out

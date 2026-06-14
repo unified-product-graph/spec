@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.11.4] - 2026-06-14
+
+**`get_tree` now linearises a DAG into a tree deterministically: no double-counted node, children in canonical order.** Field-testing the `journey` pattern on a fully-wired forest surfaced two structural defects, both Tier-1 (truth, not presentation — two competent agents must get the identical tree). A step reachable both directly (`user_journey -> journey_step`) and through its phase (`-> journey_phase -> journey_step`) rendered twice: once in full, once as a hollow `shared` reference — the exact mirror of the 0.9.17 silent-drop fix (G5), now silent *duplication* (J1). And children came back in storage order, ignoring the `*_order` scalars they carry, so every client had to re-sort (J2). Both are fixed by two declarative slot fields on the pattern child-map; the assembler does the linearisation once, server-side. No new tools (131); a behaviour fix on a young tool = a patch.
+
+### Added
+- **`order_by` on a tree pattern child slot.** Names the node scalar `get_tree` sorts the slot's children by (ascending, nodes lacking it last). Wired on the `journey` pattern: `journey_phase -> phase_order`, `journey_step -> step_order`, `journey_action -> action_order`, `screen_state -> state_order` (the sequence convention). Surfaced on `get_tree_pattern` introspection rows. Ordering is a property of the data, not the viewer — so the server returns children pre-sorted rather than leaving every client to re-sort (J2).
+- **`prefer_via` on a tree pattern child slot.** Names the sibling type whose path is the canonical spine when a slot reaches the same node redundantly by two declared paths. The `journey` pattern's direct `user_journey -> journey_step` slot declares `prefer_via: journey_phase`: a step also reachable through a phase renders under the phase only. A step in no phase still renders directly (the direct path is the fallback, never a silent drop). Surfaced on `get_tree_pattern` rows (J1).
+
+### Changed
+- **`get_tree` returns children in canonical order across every pattern.** Children are grouped by their declared slot position, then sorted by the slot's `order_by` scalar (stable within ties). Previously edge/storage order. A pattern with no `order_by` slots is unaffected beyond the now-deterministic slot grouping.
+- **`get_tree` collapses a redundant DAG path instead of double-counting it.** A node reachable from one parent by two declared paths renders once, under the `prefer_via` spine. Genuine multi-parent sharing (a node under two *different* parents) is unchanged — it still renders once in full and as a `shared` reference elsewhere (the 0.9.17 G5 behaviour). Verified on the saturated journey forest: every redundant direct-plus-phase step now renders once; legitimate cross-parent shares preserved.
+
+---
+
 ## [0.11.3] - 2026-06-14
 
 **A reclassification now supersedes the prior value instead of leaving a stale edge.** 0.11.0 recorded a competitor's move in the reclassification history but kept the old same-axis classify edge, so after a move the competitor was classified as BOTH the old and the new value — `get_portfolio_tree` double-counted it (Data's brief, confirmed live on 0.11.1). This release retires the prior edge as part of the move, keyed off a new axis cardinality field so a genuinely multi-select axis is never collapsed. Property add + behaviour fix = a patch.
