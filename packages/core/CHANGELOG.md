@@ -7,6 +7,17 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.10.8] - 2026-06-14
+
+**Operational tooling for the property layer: coverage audit, write pre-flight, freshness query.** The 218-edge confidence backfill (0.10.6) needed five manual motions the MCP did not expose, mostly `jq` over `portfolio.upg`. This release lands the three near-term ones from Data's tooling-gaps brief. Read-path plus a non-mutating write flag; no schema or data migration.
+
+### Added
+- **`audit_property_coverage` (new tool, 127 total; local-only).** Given an `edge_type` and the `required_keys` that should be present, returns the portfolio cross-edges that lack any of them (`missing: [{ edge_id, source, target, source_title?, target_title?, missing_keys }]`) plus, by default, the edges whose present values fail the type property schema (`malformed`). The completeness check that distinguishes "I ran the writes" from "the data is actually backfilled," with resolved titles, without a shell.
+- **`dry_run` flag on `create_cross_product_edge` and `batch_create_cross_product_edges`.** Forecasts the write (`would: create | update | unchanged`, and `would_counts` for the batch) without mutating the portfolio document. The pre-flight that makes a large backfill safe to reason about before it runs. Backed by a non-mutating `previewCrossEdge` on the portfolio store that mirrors `addCrossEdge`'s create/update/unchanged decision (including the property-upsert merge) exactly.
+
+### Changed
+- **`list_portfolio_cross_edges` gained a freshness filter.** `older_than_days` (relative to now) and `assessed_before` (absolute ISO date) return the stale set: edges whose `properties.assessed_on` is older than the cutoff, or absent entirely (never assessed counts as stalest). The read path for "which cells need re-checking" — the trigger of a self-updating competitive tier.
+
 ## [0.10.7] - 2026-06-14
 
 **Makes the classification landscape renderable: a portfolio tree, title resolution, and projected/paginated cross-edge reads.** 0.10.6 made classifications *queryable* (traversal, distribution, idempotent upsert). But nothing on the MCP surface rendered the result as a tree, and the nearest read overflowed the transport cap and returned opaque ids — the trees were only producible by dropping to `jq` over a dumped portfolio file, a path no fresh agent can find. This release closes that discoverability gap. Read-path only; no schema or data migration.
