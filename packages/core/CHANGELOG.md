@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.11.3] - 2026-06-14
+
+**A reclassification now supersedes the prior value instead of leaving a stale edge.** 0.11.0 recorded a competitor's move in the reclassification history but kept the old same-axis classify edge, so after a move the competitor was classified as BOTH the old and the new value — `get_portfolio_tree` double-counted it (Data's brief, confirmed live on 0.11.1). This release retires the prior edge as part of the move, keyed off a new axis cardinality field so a genuinely multi-select axis is never collapsed. Property add + behaviour fix = a patch.
+
+### Added
+- **`cardinality` on `classification_axis` (`single` | `multi`, default `single`).** Declares whether a subject may hold several values on the axis at once. A separate concern from `axis_kind` (categorical/ordinal/continuous): an axis can be categorical yet single-select. The supersede behaviour keys off it; an axis with no `cardinality` set behaves as `single`.
+- **`audit_axis_overlap` (new tool, 131 total; local-only).** Lists every classified source carrying more than one value on a single-select axis — the stale-edge detector for overlaps already in a graph, and the regression guard once supersede is on. A clean graph returns `overlaps: []`. Multi-select axes are exempt.
+- **`supersede` flag on the classify writers.** `create_classification_edge` / `create_cross_product_edge` / `batch_create_cross_product_edges` (and `upg portfolio classify --no-supersede`) accept `supersede` (default true) to opt out of retiring the prior edge when an additive (multi-cell) write is genuinely wanted.
+
+### Changed
+- **A same-axis classify move on a single-select axis retires the prior edge.** When a classify write supersedes a sibling classification of the same source on the same axis, the portfolio store now removes the prior edge (atomically with recording the move) so the source carries exactly one current value per single-select axis. The reclassification history is recorded either way; the response reports the retired edge under `superseded`. A `multi`-select axis keeps every value (records the move, retires nothing). This makes `diff_classification` (history) and `get_portfolio_tree` (current state) agree across reclassifications.
+
+---
+
 ## [0.11.2] - 2026-06-14
 
 **Two analysis reads over the classification layer: compare two rivals, and digest a property's distribution.** The competitive tier could render the landscape (`get_portfolio_tree`), audit its completeness (`audit_property_coverage`), and diff its history (`diff_classification`), but two by-hand motions from the backfill stayed manual: comparing two competitors axis-by-axis, and counting a property's distribution over the `jq` dump. This release lands both as read tools (Data's tooling-gaps brief #5/#6). Current-state reads, no history substrate, no schema or data migration. New tools are a patch under spec policy.

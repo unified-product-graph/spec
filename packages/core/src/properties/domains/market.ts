@@ -450,6 +450,17 @@ export interface ClassificationAxisProperties {
    * `continuous` = numeric range (latency budget, price points).
    */
   axis_kind?: 'categorical' | 'ordinal' | 'continuous'
+  /**
+   * How many values a subject may hold on this axis at once (UPG 0.11.3).
+   * `single` (default) = a subject sits at exactly one value; a re-classification
+   * to a new value SUPERSEDES the prior one (the classify writer retires the old
+   * same-axis edge and records the move in the reclassification history).
+   * `multi` = a subject may legitimately hold several values at once (e.g. an
+   * axis like "supported frameworks"); re-classifying ADDS a value and does not
+   * supersede. A separate axis from `axis_kind`: an axis can be `categorical`
+   * (unordered) yet `single`-select, or `categorical` yet `multi`-select.
+   */
+  cardinality?: 'single' | 'multi'
   /** Product id when product-specific. Axes are usually product-agnostic; leave empty for shared taxonomies. */
   owner_product?: string
 }
