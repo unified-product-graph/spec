@@ -491,4 +491,16 @@ export interface UPGPortfolioDocument {
    * canonical nodes here via `instance_of` cross-edges (`registry/{node_id}`).
    */
   registry?: UPGRegistry
+  /**
+   * Append-only classification-history stream (UPG 0.11.0). Each entry is a
+   * `competitor_signal` node with `signal_type: 'reclassification'`, auto-emitted
+   * at the classify-write chokepoint when a competitor moves between
+   * classification cells on an axis. Kept here (a portfolio-scoped collection)
+   * rather than in `registry.nodes` so it never pollutes the canonical-vocabulary
+   * tier or the landscape/tree reads, and rather than in a product graph so the
+   * emit stays atomic with the portfolio cross-edge write. Read by
+   * `diff_classification`. Optional and additive: omitted when empty; portfolio
+   * documents without it remain valid.
+   */
+  signals?: UPGBaseNode[]
 }

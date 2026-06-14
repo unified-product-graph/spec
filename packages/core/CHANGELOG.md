@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.11.0] - 2026-06-14
+
+**Self-documenting competitive history: a competitor's classification change records itself.** The 0.10.x tier classifies competitors against axes and values and carries `confidence` / `assessed_on`, but a re-assessment overwrites the prior value — there was no way to ask *what moved*. This release makes the classification landscape remember its own changes. A minor bump: it widens the `competitor_signal.signal_type` enum (union widening), which spec policy treats as a minor; additive, so old graphs still parse.
+
+### Added
+- **`reclassification` shape on `competitor_signal`.** The `signal_type` enum gains `reclassification`, and the type carries four optional transition properties — `competitor` (the classify-edge source, identifying subject + product), `axis`, `from_value`, `to_value`. A reclassification is one more kind of the dated competitor move the entity already models.
+- **Append-only `signals[]` collection on the portfolio document.** A portfolio-scoped, optional, additive collection holding the classification-history stream. Kept here rather than in `registry.nodes` (so it never pollutes the canonical-vocabulary tier or the landscape/tree reads) and rather than in a product graph (so the auto-emit stays atomic with the portfolio cross-edge write). Round-trips through the canonical serializer; portfolios without it stay byte-identical.
+- **`diff_classification` (new tool, 128 total; local-only).** `diff_classification({ product?, competitor?, since? })` reads the reclassification history and projects each move (`from_value` to `to_value` on an axis) with resolved titles, newest first. "Did Sitecore move from integrated to agentic since last quarter" is one call. Pairs with the 0.10.8 freshness filter (which decides *when* to re-assess); this surfaces *what* changed.
+
+### Changed
+- **Classify writes auto-record a move.** When `create_cross_product_edge` / `batch_create_cross_product_edges` create a classify edge that supersedes a sibling classification of the same competitor on the *same axis* (resolved via registry edge or `axis:` tag), the portfolio store appends a `reclassification` signal — completeness by construction, no caller discipline. Record-only and non-destructive: the superseded edge is kept (a `categorical` axis may legitimately carry several values), so current-state reads are untouched. First-time classifications are not moves; unaxed values are skipped (a single-axis move cannot be proven); an identical transition is logged at most once.
+
+---
+
 ## [0.10.8] - 2026-06-14
 
 **Operational tooling for the property layer: coverage audit, write pre-flight, freshness query.** The 218-edge confidence backfill (0.10.6) needed five manual motions the MCP did not expose, mostly `jq` over `portfolio.upg`. This release lands the three near-term ones from Data's tooling-gaps brief. Read-path plus a non-mutating write flag; no schema or data migration.

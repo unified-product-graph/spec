@@ -286,12 +286,39 @@ export interface CompetitorSignalProperties {
   /**
    * Kind of move. `feature_launch` = shipped a feature. `pricing_change` = a plan
    * or tier change. `acquisition` / `partnership` / `market_entry` = strategic moves.
+   * `reclassification` = the competitor moved between classification cells on an
+   * axis (e.g. ai_integrated to ai_agentic); auto-emitted at the classify-write
+   * chokepoint and carries `axis` / `from_value` / `to_value` / `competitor`.
    */
-  signal_type?: 'feature_launch' | 'pricing_change' | 'acquisition' | 'partnership' | 'market_entry'
+  signal_type?: 'feature_launch' | 'pricing_change' | 'acquisition' | 'partnership' | 'market_entry' | 'reclassification'
   /** One-line factual summary of the move (what shipped, not marketing copy). */
   summary?: string
   /** Expected impact on our position. */
   impact?: 'high' | 'medium' | 'low'
+  /**
+   * Reclassification only. The qualified id of the competitor that moved, as the
+   * classify cross-edge source (e.g. `p_rival/n_acme`). Identifies both the
+   * subject and its owning product, so `diff_classification({ product })` can
+   * filter the history stream.
+   */
+  competitor?: string
+  /**
+   * Reclassification only. The `classification_axis` id the move is on (e.g.
+   * `ca_ai_maturity`). Mirrors the axis the superseded and new classify edges
+   * share.
+   */
+  axis?: string
+  /**
+   * Reclassification only. The prior `classification_value` id the competitor
+   * was classified as before this move (the superseded cell). Absent for a
+   * first-time classification (nothing was superseded).
+   */
+  from_value?: string
+  /**
+   * Reclassification only. The new `classification_value` id the competitor is
+   * classified as after this move (the cell the new classify edge points at).
+   */
+  to_value?: string
   /**
    * Provenance: ISO date-time this record was last observed or refreshed.
    * @example "2026-06-13"

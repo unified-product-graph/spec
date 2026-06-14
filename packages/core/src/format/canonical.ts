@@ -342,6 +342,12 @@ function portfolioBody(doc: UPGPortfolioDocument): Record<string, unknown> {
           },
         }
       : {}),
+    // Append-only classification-history stream (0.11.0). Emitted only when
+    // non-empty so existing portfolio files without it stay byte-identical.
+    // Each entry is a competitor_signal node (serialised with the node rules).
+    ...(doc.signals && doc.signals.length > 0
+      ? { signals: sortNodes(doc.signals).map(canonicalNode) }
+      : {}),
   }
 }
 
@@ -525,6 +531,13 @@ export function normalizeDocument(obj: unknown): UPGDocument | UPGPortfolioDocum
         nodes: rawRegistry.nodes.map((n) => repairNodeDrift(n)),
         ...(Array.isArray(rawRegistry.edges) ? { edges: rawRegistry.edges } : {}),
       }
+    }
+    // Append-only classification-history stream (0.11.0). Read back when
+    // present; absent on portfolios that have never recorded a move, so the
+    // field stays optional.
+    const rawSignals = raw.signals as UPGBaseNode[] | undefined
+    if (Array.isArray(rawSignals) && rawSignals.length > 0) {
+      out.signals = rawSignals.map((n) => repairNodeDrift(n))
     }
     return out
   }
