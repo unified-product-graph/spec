@@ -7,6 +7,16 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.11.2] - 2026-06-14
+
+**Two analysis reads over the classification layer: compare two rivals, and digest a property's distribution.** The competitive tier could render the landscape (`get_portfolio_tree`), audit its completeness (`audit_property_coverage`), and diff its history (`diff_classification`), but two by-hand motions from the backfill stayed manual: comparing two competitors axis-by-axis, and counting a property's distribution over the `jq` dump. This release lands both as read tools (Data's tooling-gaps brief #5/#6). Current-state reads, no history substrate, no schema or data migration. New tools are a patch under spec policy.
+
+### Added
+- **`compare_classifications` (new tool, 129 of 130; local-only).** `compare_classifications({ a, b, axis? })` joins two classified nodes axis-by-axis: where they sit at the same value (`agree`), at different values (`diverge`), or where only one has been graded (`a_only` / `b_only`). Divergences are ordered first (the actionable rows). It reuses the same per-node profile assembly as `get_portfolio_tree` competitor_profile, so axis / value / confidence resolution is identical. This is the bridge from the classification layer to the parity layer: `create_parity_edge` is the writer; this derives which axes warrant one.
+- **`aggregate_edge_properties` (new tool, 130 of 130; local-only).** `aggregate_edge_properties({ edge_type, group_by?, property? })` returns the distribution of one edge property across every portfolio cross-edge of a type — overall, or grouped by `axis`, `competitor`, or `value`. `property` defaults to `confidence`, and an assessment-object property buckets by its label, so "165 Confident / 53 Some evidence, the uncertain ones cluster on `ext_api_sdk`" is one call instead of a count over a dump. The digest of the property layer.
+
+---
+
 ## [0.11.1] - 2026-06-14
 
 **Bug fix: the typed classification writer misrouted competitor sources, duplicated instead of upserting, and disagreed with the confidence scale.** The generic cross-edge writers got their in-place upsert in 0.10.6; the typed convenience writer `create_classification_edge` never inherited it, and on a qualified `{product}/{node}` competitor source it wrote the wrong edge type, created a duplicate, and expanded `high` to a different `confidence_5` value than the rest of the graph. Three defects in one call (Data's dogfood brief), all on a path the generic writers already do correctly. No data migration.
