@@ -20,14 +20,14 @@ import {
 const SLUG = /^[a-z][a-z0-9_]*$/
 
 describe('UPG_TREE_PATTERNS integrity', () => {
-  it('has the 11 canonical patterns with unique slug ids', () => {
-    expect(UPG_TREE_PATTERNS.length).toBe(11)
+  it('has the 12 canonical patterns with unique slug ids', () => {
+    expect(UPG_TREE_PATTERNS.length).toBe(12)
     const ids = UPG_TREE_PATTERNS.map((p) => p.id)
     expect(new Set(ids).size).toBe(ids.length)
     for (const id of ids) expect(id, `bad id ${id}`).toMatch(SLUG)
     for (const want of [
       'ost', 'okr', 'user', 'product', 'validation', 'strategy', 'feature_areas',
-      'delivery', 'architecture', 'journey', 'design_system',
+      'delivery', 'architecture', 'journey', 'design_system', 'commercial',
     ]) {
       expect(ids, `missing pattern ${want}`).toContain(want)
     }
@@ -80,7 +80,7 @@ describe('UPG_TREE_PATTERNS integrity', () => {
       // gap-flagging would be noise — a chore release with no changelog, a theme
       // that spans feature_areas instead of features, a service with no queue).
       // The framework patterns each declare at least one gap-worthy required child.
-      const ALL_OPTIONAL = new Set(['feature_areas', 'delivery', 'architecture', 'journey', 'design_system'])
+      const ALL_OPTIONAL = new Set(['feature_areas', 'delivery', 'architecture', 'journey', 'design_system', 'commercial'])
       if (!ALL_OPTIONAL.has(p.id)) {
         expect(requiredCount, `${p.id} has no required child slot`).toBeGreaterThan(0)
       }
@@ -152,5 +152,17 @@ describe('UPG_TREE_PATTERNS integrity', () => {
     expect(roadmapRelease?.via).toBe('roadmap_schedules_release')
     expect(roadmapRelease?.kind).toBe('hierarchy')
     expect(describeTreePattern('not-a-pattern')).toBeUndefined()
+
+    // commercial: the dual-parent pricing_tier (reached from both its stream and
+    // its pricing strategy) and the self-nesting metric waterfall both ground.
+    const c = describeTreePattern('commercial')
+    expect(c?.region).toBe('business_gtm_growth')
+    expect(c?.gap_policy).toBe('all-optional')
+    expect(c?.edges.find((e) => e.parent === 'revenue_stream' && e.child === 'pricing_tier')?.via)
+      .toBe('revenue_stream_tiered_as_pricing_tier')
+    expect(c?.edges.find((e) => e.parent === 'pricing_strategy' && e.child === 'pricing_tier')?.via)
+      .toBe('pricing_strategy_offers_pricing_tier')
+    expect(c?.edges.find((e) => e.parent === 'metric' && e.child === 'metric')?.via)
+      .toBe('metric_decomposes_into_metric')
   })
 })

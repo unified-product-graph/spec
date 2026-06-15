@@ -7,6 +7,15 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.11.5] - 2026-06-15
+
+**`get_tree` gains a `commercial` pattern: the business-model spine as a one-call tree.** The monetisation axis was the one populated, tree-shaped region with no pattern — *"show me the money model: streams, costs, tiers, and the metrics that measure them"* meant a hand-authored `query`. `commercial` roots at `business_model` and walks its revenue streams, cost structure, and unit economics; a stream into its pricing tiers, the metrics that measure it, and the pricing strategy that prices it; and metrics decompose into their components (the MRR waterfall). A pricing tier reached from both its stream and its pricing strategy renders once, then as a shared reference — the same multi-parent (G5) path `delivery` relies on. It is a curated spanning tree over the containment subset of the multi-hub `business_gtm_growth` region (the GTM/value flow stays excluded — a tree would misrepresent it); company-grain financials (CAC, LTV, runway) hang off the product, not a single stream, and remain an okr/strategy concern. Declarative child-map record, no engine work, all-optional (a stream without a metric is not a structural hole). 12 patterns now; no new tools (131). A new pattern on a young tool = a patch.
+
+### Added
+- **`commercial` tree pattern** (a.k.a. business / money model). Anchor `business_model`, fallback `product`, region `business_gtm_growth`, natural depth 3, all-optional gap policy. Child map: `business_model -> {revenue_stream, cost_structure, unit_economics}`; `revenue_stream -> {pricing_tier, metric, pricing_strategy}`; `cost_structure -> {metric}`; `pricing_strategy -> {pricing_tier}`; `metric -> {metric}` (the self-nesting decomposition waterfall, cycle-terminated by the assembler's shared-reference guard). Surfaced on `list_tree_patterns` / `get_tree_pattern` introspection and the `/upg-show-tree` skill.
+
+---
+
 ## [0.11.4] - 2026-06-14
 
 **`get_tree` now linearises a DAG into a tree deterministically: no double-counted node, children in canonical order.** Field-testing the `journey` pattern on a fully-wired forest surfaced two structural defects, both Tier-1 (truth, not presentation — two competent agents must get the identical tree). A step reachable both directly (`user_journey -> journey_step`) and through its phase (`-> journey_phase -> journey_step`) rendered twice: once in full, once as a hollow `shared` reference — the exact mirror of the 0.9.17 silent-drop fix (G5), now silent *duplication* (J1). And children came back in storage order, ignoring the `*_order` scalars they carry, so every client had to re-sort (J2). Both are fixed by two declarative slot fields on the pattern child-map; the assembler does the linearisation once, server-side. No new tools (131); a behaviour fix on a young tool = a patch.

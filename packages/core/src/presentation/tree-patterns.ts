@@ -1,7 +1,9 @@
 /**
  * UPG canonical tree patterns: the named, server-owned shapes the `get_tree`
  * tool assembles (OST, OKR, user, product, validation, strategy, feature areas,
- * delivery, architecture, journey, design system) — one per tree-shaped region.
+ * delivery, architecture, journey, design system, commercial) — one per
+ * tree-shaped region (or, for `architecture`/`commercial`, the tree-shaped
+ * containment subset of a DAG/multi-hub region).
  *
  * A tree pattern is anchor + a TYPE-DRIVEN child map, NOT a list of edge names.
  * `get_tree` roots at `anchor_type` (falling back through `fallback_anchors` when
@@ -317,6 +319,43 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
       design_system: [opt('design_component'), opt('design_token')],
       design_component: [opt('design_component'), opt('design_token')],
     },
+    natural_depth: 3,
+  },
+  {
+    id: 'commercial',
+    label: 'Commercial / money model',
+    description: 'The business-model spine: how the product captures value. The business model branches into its revenue streams, cost structure, and unit economics; a stream into its pricing tiers, the metrics that measure it, and the pricing strategy that prices it; and metrics decompose into their components (the MRR waterfall, NRR composition). A pricing tier reached from both its stream and its pricing strategy renders once, then as a shared reference.',
+    // The sustaining money-model captures value as a containment hierarchy, so it
+    // earns a tree even though business_gtm_growth is a multi-hub region: a pattern
+    // is a curated spanning tree over a SUBSET of a region (cf. `architecture` over
+    // the engineering_platform DAG). The GTM/value flow (positioning -> messaging
+    // -> funnel) is deliberately NOT here — a tree would misrepresent it; it wants
+    // sibling flow instruments. Company-grain financial metrics (CAC, LTV, runway)
+    // hang off the product, not a single stream/cost, so they live in the okr/
+    // strategy views, not this money-structure spine.
+    region: 'business_gtm_growth',
+    gap_policy: 'all-optional',
+    anchor_type: 'business_model',
+    // Fallback is the product alone, and product is deliberately NOT a child_map
+    // parent: were business_model listed under product, the product would be a
+    // superset of the money spine and the most-nodes anchor rule would root there
+    // (the same trap delivery hit with product -> roadmap). With product childless,
+    // business_model always out-nodes it and wins; a graph with no business_model
+    // falls back to a bare product root, reported anchor_resolved_from: business_model.
+    fallback_anchors: ['product'],
+    child_map: {
+      business_model: [opt('revenue_stream'), opt('cost_structure'), opt('unit_economics')],
+      revenue_stream: [opt('pricing_tier'), opt('metric'), opt('pricing_strategy')],
+      cost_structure: [opt('metric')],
+      pricing_strategy: [opt('pricing_tier')],
+      // Self-nesting: a metric decomposes into its component metrics (Net New MRR ->
+      // New/Expansion/Contraction/Churned). The assembler's `seen` set terminates
+      // the recursion for free (a metric met again becomes a shared reference).
+      metric: [opt('metric')],
+    },
+    // Default to 3 tiers (business_model -> stream/cost -> tier/metric) for a
+    // readable money-model overview; `depth` extends into the metric -> metric
+    // decomposition waterfall.
     natural_depth: 3,
   },
 ] as const
