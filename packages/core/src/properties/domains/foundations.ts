@@ -80,17 +80,14 @@ export interface PrimitiveProperties {
  *
  * @example
  * const properties: OperatingLifecycleProperties = {
- *   label: 'Sanity Content Operations',
  *   cyclic: true,
  *   source: 'Sanity official 5-stage content-ops lifecycle',
  * }
  */
 export interface OperatingLifecycleProperties {
-  /** Human-readable name of the operating process. */
-  label?: string
-  /** True if the process loops (e.g. Analyze → Extend → Plan). Rendered linearly by `stage_order` with the wrap on the final stage's `next_stage`. */
+  /** True if the process loops (e.g. Analyze → Extend → Plan). The sequence is fully expressed by the stages' `stage_order`; `cyclic` adds the wrap from the last stage back to the first. */
   cyclic?: boolean
-  /** Origin of the canonical model (e.g. "Sanity official content-ops lifecycle"). */
+  /** Origin of the canonical model (e.g. "Sanity official content-ops lifecycle"). Optional provenance; promote to an edge if it names a real `specification`/`document`. */
   source?: string
 }
 
@@ -101,22 +98,14 @@ export interface OperatingLifecycleProperties {
  * @example
  * const properties: OperatingStageProperties = {
  *   stage_order: 1,
- *   label: 'Create & Manage',
  *   goal: 'Model, create, and review content',
- *   os_analogy: 'The shell / GUI + file formats',
  * }
  */
 export interface OperatingStageProperties {
-  /** Ordered position within the lifecycle, 0-indexed. */
+  /** Ordered position within the lifecycle, 0-indexed. The source of truth for sequence (pairs with `phase_order`/`step_order`/`action_order`). */
   stage_order?: number
-  /** Human-readable stage name. */
-  label?: string
   /** What this stage accomplishes. */
   goal?: string
-  /** Role that owns the stage (free-text role label). */
+  /** Role that owns the stage (free-text role label). Optional; promote to a `node_owned_by_role` edge if ownership must be queryable across stages. */
   owner_role?: string
-  /** The Content-OS analogy from the source volume (e.g. "Drivers + daemons / cron"). */
-  os_analogy?: string
-  /** Label of the next stage; on the final stage of a cyclic lifecycle this carries the wrap. */
-  next_stage?: string
 }

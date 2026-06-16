@@ -2245,6 +2245,9 @@ export const UPG_EDGE_CATALOG = {
   specification_competes_with_specification: { forward_verb: 'competes_with', reverse_verb: 'competes_with', classification: 'semantic', source_type: 'specification', target_type: 'specification' },
   primitive_defined_by_specification: { forward_verb: 'defined_by', reverse_verb: 'defines', classification: 'semantic', source_type: 'primitive', target_type: 'specification' },
   primitive_composes_primitive: { forward_verb: 'composes', reverse_verb: 'composed_by', classification: 'hierarchy', source_type: 'primitive', target_type: 'primitive' },
+  // A canonical specification defines the operating lifecycle (mirrors primitive_defined_by_specification),
+  // so the lifecycle is governed rather than a standalone root (0.12.1 refinement).
+  operating_lifecycle_defined_by_specification: { forward_verb: 'defined_by', reverse_verb: 'defines', classification: 'semantic', source_type: 'operating_lifecycle', target_type: 'specification' },
   operating_lifecycle_contains_operating_stage: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'operating_lifecycle', target_type: 'operating_stage' },
   // Stewardship: a registry specification is governed by a (registry-hostable) organization (0.9.13).
   specification_governed_by_organization: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'semantic', source_type: 'specification', target_type: 'organization' },

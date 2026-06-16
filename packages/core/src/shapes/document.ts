@@ -151,6 +151,13 @@ export type UPGCrossEdgeType =
   // Same dual-registration: a polymorphic within-graph catalog edge for the
   // local case, here as a cross-edge for the canonical case.
   | 'node_classified_as_classification_value'
+  // Operating-lifecycle rollup (0.12.1). A product's `journey_phase` realises ONE
+  // canonical `operating_stage` that lives in the registry (`registry/{node_id}`).
+  // Dual-registered: the within-graph `journey_phase_realises_operating_stage`
+  // catalog edge for the local case, here as the cross-edge so 49 phases across 6
+  // product graphs roll up to one canonical lifecycle (~7 registry nodes + 49
+  // cross-edges) instead of minting per-product stage duplicates.
+  | 'journey_phase_realises_operating_stage'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -182,6 +189,7 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'competitor_signal_surfaces_opportunity',
   'competitor_classified_as_classification_value',
   'node_classified_as_classification_value',
+  'journey_phase_realises_operating_stage',
 ]
 
 /**

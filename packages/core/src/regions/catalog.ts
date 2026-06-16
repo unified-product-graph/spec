@@ -2251,6 +2251,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "specification_competes_with_specification",
       "primitive_defined_by_specification",
       "primitive_composes_primitive",
+      "operating_lifecycle_defined_by_specification",
       "operating_lifecycle_contains_operating_stage",
     ],
     boundary_edges: [

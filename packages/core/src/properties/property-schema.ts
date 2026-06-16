@@ -2222,18 +2222,14 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // OperatingLifecycleProperties: a canonical ordered (often cyclic) operating process products' journey phases map onto.
   operating_lifecycle: {
-    label: { type: 'string', description: 'Human-readable name of the operating process.' },
-    cyclic: { type: 'boolean', description: 'True if the process loops (e.g. Analyze → Extend → Plan). Rendered linearly by stage_order with the wrap on the final stage.' },
-    source: { type: 'string', description: 'Origin of the canonical model (e.g. "Sanity official content-ops lifecycle").' },
+    cyclic: { type: 'boolean', description: 'True if the process loops (e.g. Analyze → Extend → Plan). The sequence is expressed by the stages\' stage_order; cyclic adds the wrap from last stage back to first.' },
+    source: { type: 'string', description: 'Origin of the canonical model (e.g. "Sanity official content-ops lifecycle"). Optional provenance; promote to an edge if it names a real specification/document.' },
   },
   // OperatingStageProperties: one ordered stage of an operating_lifecycle.
   operating_stage: {
-    stage_order: { type: 'number', description: 'Ordered position within the lifecycle, 0-indexed.' },
-    label: { type: 'string', description: 'Human-readable stage name.' },
+    stage_order: { type: 'number', description: 'Ordered position within the lifecycle, 0-indexed. Source of truth for sequence.' },
     goal: { type: 'string', description: 'What this stage accomplishes.' },
-    owner_role: { type: 'string', description: 'Role that owns the stage (free-text role label).' },
-    os_analogy: { type: 'string', description: 'The Content-OS analogy from the source volume (e.g. "Drivers + daemons / cron").' },
-    next_stage: { type: 'string', description: 'Label of the next stage; on the final stage of a cyclic lifecycle this carries the wrap.' },
+    owner_role: { type: 'string', description: 'Role that owns the stage (free-text role label). Optional; promote to a node_owned_by_role edge if ownership must be queryable.' },
   },
   // PrivacyPolicyProperties: Privacy policy.
   privacy_policy: {
