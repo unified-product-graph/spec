@@ -2798,7 +2798,16 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // SwitchingCostProperties: SwitchingCost entity.
   switching_cost: {
     cost_type: { type: 'string', enum: ['financial', 'learning', 'data', 'relationship', 'procedural'], description: 'Type of switching cost' },
-    magnitude: { type: 'string', enum: ['high', 'medium', 'low'], description: 'How large the barrier is' },
+    magnitude: {
+      type: 'assessment', scale_id: 'severity_5', description: 'How large the switching barrier is (UPGAssessment on the `severity_5` scale). Steered onto the canonical scale to match sibling assessments. Migrated from the `high | medium | low` enum ( Option C): map `high` -> 4, `medium` -> 3, `low` -> 2; carry the old word in `label`.',
+      properties: {
+        value: { type: 'number', description: 'The numeric value, used for computation.' },
+        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
+        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
+        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
+      },
+      required: ['value', 'label'],
+    },
     barrier_description: { type: 'string', description: 'Free-text description of the barrier' },
   },
   // SymptomProperties: Observable behaviour produced by a root cause.

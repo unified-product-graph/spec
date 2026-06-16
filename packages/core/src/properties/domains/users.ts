@@ -151,15 +151,15 @@ export interface JobStepProperties {
  * @example
  * const properties: SwitchingCostProperties = {
  *   cost_type: 'financial',
- *   magnitude: 'high',
+ *   magnitude: { value: 4, label: 'high' },
  *   barrier_description: 'Extensive Notion workspace with years of history; migration feels daunting.',
  * }
  */
 export interface SwitchingCostProperties {
   /** Type of switching cost */
   cost_type?: 'financial' | 'learning' | 'data' | 'relationship' | 'procedural'
-  /** How large the barrier is */
-  magnitude?: 'high' | 'medium' | 'low'
+  /** How large the barrier is (UPGAssessment on the `severity_5` scale). */
+  magnitude?: UPGAssessment
   /** Free-text description of the barrier */
   barrier_description?: string
 }
