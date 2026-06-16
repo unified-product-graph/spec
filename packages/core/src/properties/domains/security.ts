@@ -294,7 +294,7 @@ export interface DataClassificationProperties {
   /** Handling rules */
   handling_requirements?: string
   /** Example data covered */
-  examples?: string
+  examples?: string[]
   /** Retention period */
   retention_period?: string
   /** Whether encryption is mandatory */

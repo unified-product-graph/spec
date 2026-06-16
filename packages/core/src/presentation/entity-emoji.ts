@@ -235,6 +235,8 @@ export const ENTITY_EMOJI: Record<string, string> = {
   pricing_strategy: "💱",
   pricing_tier: "🥉",
   primitive: "📋",
+  operating_lifecycle: "🔄",
+  operating_stage: "🔹",
   privacy_policy: "🛡️",
   product: "🧬",
   product_area: "🪀",

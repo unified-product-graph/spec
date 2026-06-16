@@ -71,3 +71,52 @@ export interface PrimitiveProperties {
   /** Year or version the primitive was introduced. */
   since?: string
 }
+
+/** An operating_lifecycle: a canonical, ordered (often cyclic) operating process
+ * that many products' journey phases map onto — e.g. Sanity's content-operations
+ * lifecycle. Registry-hostable like a `specification`; the cross-product join key
+ * that turns per-surface journeys into one operation. Distinct from the per-entity
+ * status `lifecycle` grammar concept (this is an entity, not a state machine).
+ *
+ * @example
+ * const properties: OperatingLifecycleProperties = {
+ *   label: 'Sanity Content Operations',
+ *   cyclic: true,
+ *   source: 'Sanity official 5-stage content-ops lifecycle',
+ * }
+ */
+export interface OperatingLifecycleProperties {
+  /** Human-readable name of the operating process. */
+  label?: string
+  /** True if the process loops (e.g. Analyze → Extend → Plan). Rendered linearly by `stage_order` with the wrap on the final stage's `next_stage`. */
+  cyclic?: boolean
+  /** Origin of the canonical model (e.g. "Sanity official content-ops lifecycle"). */
+  source?: string
+}
+
+/** An operating_stage: one ordered stage of an `operating_lifecycle`. A product's
+ * `journey_phase` resolves to a stage via `journey_phase_realises_operating_stage`,
+ * so the end-to-end operation is derived from the join key rather than stored.
+ *
+ * @example
+ * const properties: OperatingStageProperties = {
+ *   stage_order: 1,
+ *   label: 'Create & Manage',
+ *   goal: 'Model, create, and review content',
+ *   os_analogy: 'The shell / GUI + file formats',
+ * }
+ */
+export interface OperatingStageProperties {
+  /** Ordered position within the lifecycle, 0-indexed. */
+  stage_order?: number
+  /** Human-readable stage name. */
+  label?: string
+  /** What this stage accomplishes. */
+  goal?: string
+  /** Role that owns the stage (free-text role label). */
+  owner_role?: string
+  /** The Content-OS analogy from the source volume (e.g. "Drivers + daemons / cron"). */
+  os_analogy?: string
+  /** Label of the next stage; on the final stage of a cyclic lifecycle this carries the wrap. */
+  next_stage?: string
+}

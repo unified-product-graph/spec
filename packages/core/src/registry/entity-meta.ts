@@ -80,6 +80,8 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   // Foundations (0.9.12): shared specifications + the primitives they define.
   { name: 'specification', type_id: 'ent_352', maturity: 'proposed', since: '0.9.12' },
   { name: 'primitive', type_id: 'ent_353', maturity: 'proposed', since: '0.9.12' },
+  { name: 'operating_lifecycle', type_id: 'ent_355', maturity: 'proposed', since: '0.11.6' },
+  { name: 'operating_stage', type_id: 'ent_356', maturity: 'proposed', since: '0.11.6' },
 
   // ── Strategic ──
   { name: 'product', type_id: 'ent_001', maturity: 'stable', since: '0.1.0' },

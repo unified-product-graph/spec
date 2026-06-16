@@ -42,7 +42,7 @@ import type { LocaleProperties, TranslationKeyProperties, TranslationBundlePrope
 import type { EducationProgramProperties, TutorialProperties, WalkthroughProperties, WebinarProperties, CertificationProperties, HelpVideoProperties, LearningPathProperties } from './domains/education.js'
 import type { PartnerProgramProperties, PartnerTierProperties, ApiEcosystemProperties, MarketplaceListingProperties, DeveloperPortalProperties, IntegrationPartnerProperties, PartnerRevenueShareProperties } from './domains/ecosystem.js'
 import type { ProductProperties, VisionProperties, MissionProperties, StrategicThemeProperties, InitiativeProperties, CapabilityProperties, ValueStreamProperties, StrategicPillarProperties, AssumptionProperties, DecisionProperties, ConstraintProperties } from './domains/strategy.js'
-import type { SpecificationProperties, PrimitiveProperties } from './domains/foundations.js'
+import type { SpecificationProperties, PrimitiveProperties, OperatingLifecycleProperties, OperatingStageProperties } from './domains/foundations.js'
 
 // ─── Re-export everything so consumers can import from one place ──────────────
 
@@ -58,7 +58,7 @@ export type { BrandIdentityProperties, BrandColourProperties, BrandTypographyPro
 export type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, UserStoryProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, RoadmapThemeProperties, ChangelogProperties }
 export type { MetricProperties, MetricQualityAssessmentProperties }
 export type { BoundedContextProperties, ServiceProperties, DomainEventProperties, ApiContractProperties, TechnicalDebtItemProperties, FeatureFlagProperties, DeploymentProperties, AggregateProperties, DomainEntityProperties, ValueObjectProperties, CommandProperties, ReadModelProperties, ApiEndpointProperties, DatabaseSchemaProperties, QueueTopicProperties, BuildArtifactProperties, CodeRepositoryProperties, LibraryDependencyProperties, IntegrationPatternProperties, ExternalApiProperties, DataFlowProperties, InvestigationProperties, RootCauseProperties, SymptomProperties, FixProperties }
-export type { SpecificationProperties, PrimitiveProperties }
+export type { SpecificationProperties, PrimitiveProperties, OperatingLifecycleProperties, OperatingStageProperties }
 export type { FunnelProperties, FunnelStepProperties, AcquisitionChannelProperties, GrowthCampaignProperties, CohortProperties, BehavioralSegmentProperties, GrowthLoopProperties, VariantProperties, AttributionModelProperties }
 export type { BusinessModelProperties, ValuePropositionProperties, RevenueStreamProperties, PricingTierProperties, CostStructureProperties, UnitEconomicsProperties, PartnershipProperties, KeyResourceProperties, KeyActivityProperties, TargetCustomerSegmentProperties,CustomerRelationshipProperties, DistributionChannelProperties }
 export type { GtmStrategyProperties, IdealCustomerProfileProperties, PositioningProperties, MessagingProperties, LaunchProperties, ContentStrategyProperties, SalesMotionProperties, CompetitiveBattleCardProperties, DemandGenProgramProperties, TerritoryProperties, ObjectionProperties, RebuttalProperties, ProofPointProperties }
@@ -299,6 +299,10 @@ export interface UPGPropertyMap {
   specification: SpecificationProperties
   /** A foundational compositional unit a specification defines (a block, a reference, a query value) */
   primitive: PrimitiveProperties
+  /** A canonical ordered (often cyclic) operating process products' journey phases map onto */
+  operating_lifecycle: OperatingLifecycleProperties
+  /** One ordered stage of an operating_lifecycle */
+  operating_stage: OperatingStageProperties
   // ─── Engineering ─────────────────────────────────────────────────────────────
   /** A bounded context defining the scope of a domain model */
   bounded_context: BoundedContextProperties

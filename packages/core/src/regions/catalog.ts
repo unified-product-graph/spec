@@ -210,6 +210,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "persona_experiences_need",
       "persona_aspires_to_desired_outcome",
       "persona_incurs_switching_cost",
+      "persona_delegates_to_persona",
       "job_surfaces_need",
     ],
     boundary_edges: [
@@ -2230,6 +2231,14 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         type: "primitive",
         role: "container",
       },
+      {
+        type: "operating_lifecycle",
+        role: "container",
+      },
+      {
+        type: "operating_stage",
+        role: "leaf",
+      },
     ],
     anchor: {
       type: "specification",
@@ -2242,8 +2251,20 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "specification_competes_with_specification",
       "primitive_defined_by_specification",
       "primitive_composes_primitive",
+      "operating_lifecycle_contains_operating_stage",
     ],
-    boundary_edges: [],
+    boundary_edges: [
+      {
+        direction: "import",
+        edge_id: "journey_phase_realises_operating_stage",
+        crosses_into: "experience_design_brand",
+      },
+      {
+        direction: "export",
+        edge_id: "operating_stage_measured_by_metric",
+        crosses_into: "analytics_data",
+      },
+    ],
   },
 ] as const
 

@@ -116,7 +116,7 @@ export interface EvalBenchmarkProperties {
   /** Minimum passing score */
   passing_threshold?: number
   /** ISO date of the most recent run */
-  last_run?: string
+  last_run?: ISODate
 }
 
 /** Evaluation run.

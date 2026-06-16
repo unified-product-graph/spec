@@ -14,6 +14,9 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   //    primitive_composes_primitive catalog edges.
   specification: ['specification'],
   primitive: ['primitive'],
+  // An operating_lifecycle (e.g. the content-ops lifecycle) contains its ordered
+  // operating_stage children. Backs the operating_lifecycle_contains_operating_stage edge.
+  operating_lifecycle: ['operating_stage'],
   // ── Product (root) ─────────────────────────────────────────────────────────
   product: [
     // Strategy

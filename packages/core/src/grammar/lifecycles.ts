@@ -3664,9 +3664,11 @@ export function getLifecycleForType(entityType: string): UPGLifecycle | undefine
  * type into UPG_LIFECYCLES, remove it from here.
  */
 export const UPG_LIFECYCLE_FREE_TYPES: ReadonlySet<string> = new Set<string>([
-  // ── Foundations (1 of 2): a primitive either exists or is deprecated; no
-  //    phase ladder (like metric). `specification` carries a lifecycle. ──
-  'primitive',
+  // ── Foundations (3 of 4): a primitive either exists or is deprecated; no
+  //    phase ladder (like metric). `operating_lifecycle`/`operating_stage` are
+  //    static ordered reference data (the loop is a `cyclic` flag, not a state
+  //    machine). `specification` carries a lifecycle. ──
+  'primitive', 'operating_lifecycle', 'operating_stage',
 
   // ── User (5): personas and JTBD atoms are reference data ──────────────────
   'persona', 'job', 'job_step', 'desired_outcome', 'switching_cost',

@@ -44,6 +44,16 @@ export interface PersonaProperties {
    * @example "buyer"
    */
   audience_role?: 'buyer' | 'user' | 'champion' | 'influencer' | 'partner'
+  /**
+   * Who performs the work: a human archetype (default), an autonomous AI agent
+   * (e.g. Content Agent), or a non-agentic platform service. Absent = `human`, so
+   * existing personas need no migration. An `agent` persona is a first-class actor
+   * that participates in journeys via the same persona machinery and that humans
+   * delegate to via `persona_delegates_to_persona`. Human-coverage / segmentation
+   * metrics count `human` only; agent/system are opt-in.
+   * @example "agent"
+   */
+  actor_kind?: 'human' | 'agent' | 'system'
 }
 
 /** Job-to-be-Done: the underlying goal a user is trying to accomplish.

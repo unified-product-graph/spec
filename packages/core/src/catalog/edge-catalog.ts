@@ -121,6 +121,9 @@ export const UPG_EDGE_CATALOG = {
   persona_pursues_job: { forward_verb: 'pursues', reverse_verb: 'pursued_by', classification: 'semantic', source_type: 'persona', target_type: 'job' },
   persona_experiences_need: { forward_verb: 'experiences', reverse_verb: 'experienced_by', classification: 'semantic', source_type: 'persona', target_type: 'need' },
   persona_aspires_to_desired_outcome: { forward_verb: 'aspires_to', reverse_verb: 'aspirational_for', classification: 'hierarchy', source_type: 'persona', target_type: 'desired_outcome' },
+  // Delegation (0.11.6): a persona delegates work to another. The common case is human -> agent
+  // (Content Ops Lead -> Content Agent), but it also expresses human -> human (editor -> reviewer).
+  persona_delegates_to_persona: { forward_verb: 'delegates_to', reverse_verb: 'delegated_by', classification: 'semantic', source_type: 'persona', target_type: 'persona' },
   persona_incurs_switching_cost: { forward_verb: 'incurs', reverse_verb: 'incurred_by', classification: 'hierarchy', source_type: 'persona', target_type: 'switching_cost' },
   job_surfaces_need: { forward_verb: 'surfaces', reverse_verb: 'surfaces_from', classification: 'causal', source_type: 'job', target_type: 'need' },
   job_motivates_desired_outcome: { forward_verb: 'motivates', reverse_verb: 'motivated_by', classification: 'causal', source_type: 'job', target_type: 'desired_outcome' },
@@ -2215,8 +2218,13 @@ export const UPG_EDGE_CATALOG = {
   specification_competes_with_specification: { forward_verb: 'competes_with', reverse_verb: 'competes_with', classification: 'semantic', source_type: 'specification', target_type: 'specification' },
   primitive_defined_by_specification: { forward_verb: 'defined_by', reverse_verb: 'defines', classification: 'semantic', source_type: 'primitive', target_type: 'specification' },
   primitive_composes_primitive: { forward_verb: 'composes', reverse_verb: 'composed_by', classification: 'hierarchy', source_type: 'primitive', target_type: 'primitive' },
+  operating_lifecycle_contains_operating_stage: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'operating_lifecycle', target_type: 'operating_stage' },
   // Stewardship: a registry specification is governed by a (registry-hostable) organization (0.9.13).
   specification_governed_by_organization: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'semantic', source_type: 'specification', target_type: 'organization' },
+  // Operating-lifecycle cross-edges (0.11.6): a product's journey phase realises a canonical
+  // operating stage (the cross-surface join key); a stage is measured by a rollup metric (loop close).
+  journey_phase_realises_operating_stage: { forward_verb: 'realises', reverse_verb: 'realised_by', classification: 'cross-domain', source_type: 'journey_phase', target_type: 'operating_stage' },
+  operating_stage_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'cross-domain', source_type: 'operating_stage', target_type: 'metric' },
 
 } satisfies Record<string, UPGEdgeDefinition>
 

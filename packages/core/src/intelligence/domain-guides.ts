@@ -983,7 +983,7 @@ const WORKSPACE_GUIDE: UPGDomainUsageGuide = {
 const FOUNDATIONS_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'foundations',
   anchor_entity: 'specification',
-  creation_sequence: ['specification', 'primitive'],
+  creation_sequence: ['specification', 'primitive', 'operating_lifecycle', 'operating_stage'],
   patterns: [
     {
       name: 'Specification defines primitives',

@@ -18,6 +18,19 @@ export interface PropertyDefinition {
   properties?: Record<string, PropertyDefinition>
   /** For object/assessment fields: required keys within `properties`. */
   required?: string[]
+  /**
+   * Provenance / volatility modifier (property-fit audit, 2026-06-16). Marks a property
+   * whose value is not authored-and-stable, so tooling (`validate_graph`, renderers, export)
+   * can treat it accordingly:
+   *  - `'derived'`  — computed from edges/children at read-time; never hand-authored.
+   *                   `validate_graph` flags a stored value that contradicts the graph.
+   *  - `'snapshot'` — a stale-stamped cache of a live reading; SHOULD pair with a `*_as_of`
+   *                   timestamp. Definition entities carry live state only as a snapshot.
+   *  - `'volatile'` — an environment-specific pointer (URL / path / id) that may rot or be
+   *                   stripped on export; not portable modeling knowledge (open-standard
+   *                   data-boundary ADR). Enforcement lands in `validate_graph` (mcp-server).
+   */
+  modifier?: 'derived' | 'snapshot' | 'volatile'
 }
 
 export type PropertySchema = Record<string, PropertyDefinition>
@@ -547,7 +560,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // CodeRepositoryProperties: Code repository.
   code_repository: {
-    repo_url: { type: 'string', description: 'URL' },
+    repo_url: { type: 'string', description: 'URL', modifier: 'volatile' },
     default_branch: { type: 'string', description: 'Default branch' },
     language: { type: 'string', description: 'Primary programming language' },
     ci_status: { type: 'string', enum: ['passing', 'failing', 'unknown'], description: 'Current CI status' },
@@ -798,7 +811,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   data_classification: {
     level: { type: 'string', enum: ['public', 'internal', 'confidential', 'restricted'], description: 'Sensitivity level' },
     handling_requirements: { type: 'string', description: 'Handling rules' },
-    examples: { type: 'string', description: 'Example data covered' },
+    examples: { type: 'string[]', description: 'Example data covered' },
     retention_period: { type: 'string', description: 'Retention period' },
     encryption_required: { type: 'boolean', description: 'Whether encryption is mandatory' },
   },
@@ -1272,7 +1285,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   feature_area: {
     scope_summary: { type: 'string', description: 'One-line scope description. Disambiguates from sibling areas at a glance.' },
     owning_team: { type: 'string', description: 'Team identifier or slug. Free-form display. Canonical relationship is the `team_owns_feature_area` edge.' },
-    feature_count: { type: 'number', description: 'Approximate feature count under this area. Snapshot; `feature_area_contains_feature` edges are the source of truth.' },
+    feature_count: { type: 'number', description: 'Approximate feature count under this area. Snapshot; `feature_area_contains_feature` edges are the source of truth.', modifier: 'derived' },
     owner: { type: 'string', description: 'Area owner (handle or email)' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Importance to the product overall' },
     maturity: { type: 'string', enum: ['nascent', 'growing', 'mature', 'legacy'], description: 'Maturity. `nascent` = newly-formed grouping. `mature` = established surface. `legacy` = being phased out for a successor.' },
@@ -1381,7 +1394,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // FunnelProperties: Funnel entity.
   funnel: {
     funnel_type: { type: 'string', enum: ['acquisition', 'activation', 'retention', 'revenue', 'referral', 'custom'], description: 'Which stage of the customer lifecycle this funnel measures' },
-    step_count: { type: 'number', description: 'Number of steps in the funnel' },
+    step_count: { type: 'number', description: 'Number of steps in the funnel', modifier: 'derived' },
     overall_conversion_rate: { type: 'number', description: 'End-to-end conversion rate through the funnel (0-1)' },
   },
   // FunnelStepProperties: FunnelStep entity.
@@ -1526,7 +1539,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       },
       required: ['value', 'label'],
     },
-    evidence_count: { type: 'number', description: 'Supporting observations, quotes, or evidence items. Higher counts increase confidence.' },
+    evidence_count: { type: 'number', description: 'Supporting observations, quotes, or evidence items. Higher counts increase confidence.', modifier: 'derived' },
     novelty: { type: 'string', enum: ['known', 'surprising', 'contradictory'], description: 'Novelty against existing knowledge. `known` = confirms what we already believed. `surprising` = challenges or extends our understanding. `contradictory` = directly conflicts with a prior assumption.' },
     actionability: { type: 'string', enum: ['immediate', 'needs_validation', 'informational'], description: 'Current actionability. `immediate` = clear action, no further research needed. `needs_validation` = promising but requires more evidence. `informational` = important context, no direct action.' },
     source_method: { type: 'string', description: 'Producing research method. @example "usability_study", "interview_series", "survey"' },
@@ -2161,6 +2174,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     tech_comfort: { type: 'string', enum: ['low', 'medium', 'high', 'expert', 'other'], description: 'Tech comfort. Closed set so personas across products compare on the same axis. Free-text colour belongs in `context` or `motivation`.' },
     domain_expertise: { type: 'string', description: 'Industry or domain knowledge this persona brings @example "10+ years SaaS experience", "New to healthcare IT"' },
     audience_role: { type: 'string', enum: ['buyer', 'user', 'champion', 'influencer', 'partner'], description: 'Role in the buying / adoption decision (the decision-making-unit split): who signs (buyer) vs who uses (user) vs who advocates internally (champion) vs who shapes the choice (influencer) vs who delivers / implements (partner). A portfolio must separate the economic buyer from the practitioner user; they are distinct personas with distinct jobs. Closed set so roles compare across products. @example "buyer"' },
+    actor_kind: { type: 'string', enum: ['human', 'agent', 'system'], description: 'Who performs the work: a human archetype (default; absent = human, no migration), an autonomous AI agent (e.g. Content Agent), or a non-agentic platform service. An agent persona participates in journeys via the same persona machinery and is delegated to via persona_delegates_to_persona. Human-coverage / segmentation metrics count human only; agent/system opt-in.' },
   },
   // PipelineSalesProperties: Sales pipeline.
   pipeline_sales: {
@@ -2222,6 +2236,21 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     primitive_kind: { type: 'string', enum: ['data_type', 'object', 'block', 'unit'], description: 'The shape of the thing products pass around.' },
     defined_by: { type: 'string', description: 'The `specification/<slug>` this primitive comes from; nullable for spec-less internal primitives. Mirrors the `primitive_defined_by_specification` edge for quick lookup.' },
     since: { type: 'string', description: 'Year or version the primitive was introduced.' },
+  },
+  // OperatingLifecycleProperties: a canonical ordered (often cyclic) operating process products' journey phases map onto.
+  operating_lifecycle: {
+    label: { type: 'string', description: 'Human-readable name of the operating process.' },
+    cyclic: { type: 'boolean', description: 'True if the process loops (e.g. Analyze → Extend → Plan). Rendered linearly by stage_order with the wrap on the final stage.' },
+    source: { type: 'string', description: 'Origin of the canonical model (e.g. "Sanity official content-ops lifecycle").' },
+  },
+  // OperatingStageProperties: one ordered stage of an operating_lifecycle.
+  operating_stage: {
+    stage_order: { type: 'number', description: 'Ordered position within the lifecycle, 0-indexed.' },
+    label: { type: 'string', description: 'Human-readable stage name.' },
+    goal: { type: 'string', description: 'What this stage accomplishes.' },
+    owner_role: { type: 'string', description: 'Role that owns the stage (free-text role label).' },
+    os_analogy: { type: 'string', description: 'The Content-OS analogy from the source volume (e.g. "Drivers + daemons / cron").' },
+    next_stage: { type: 'string', description: 'Label of the next stage; on the final stage of a cyclic lifecycle this carries the wrap.' },
   },
   // PrivacyPolicyProperties: Privacy policy.
   privacy_policy: {
@@ -2611,7 +2640,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   service_level_indicator: {
     metric_name: { type: 'string', description: 'Indicator metric name. @example "Request latency p99", "Error rate", "Availability"' },
     threshold: { type: 'number', description: 'Threshold that defines a "good" event. @example 200 (ms latency), 0.01 (1% error rate), 99.9 (% availability)' },
-    current_value: { type: 'number', description: 'Current observed value. Compared against `threshold` for SLO compliance. @example 150 (ms), 0.003 (0.3% error rate)' },
+    current_value: { type: 'number', description: 'Current observed value. Compared against `threshold` for SLO compliance. @example 150 (ms), 0.003 (0.3% error rate)', modifier: 'snapshot' },
     unit: { type: 'string', description: 'Unit of measurement. Required to interpret `threshold` and `current_value`. @example "ms", "%", "req/s", "errors/min"' },
     aggregation: { type: 'string', enum: ['avg', 'sum', 'max', 'min', 'p50', 'p95', 'p99', 'count'], description: 'Aggregation over the evaluation window. p99 and avg tell different stories. @example "p99" for tail latency, "avg" for mean throughput, "count" for total events' },
     measurement_query: { type: 'string', description: 'Query expression that produces `current_value`. Free-form to fit PromQL, Datadog query strings, SQL, or vendor-specific DSLs. @example \'sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))\'' },
@@ -3129,7 +3158,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     completed_at: { type: 'string', description: 'ISO timestamp when the run completed' },
     run_status: { type: 'string', enum: ['pending', 'running', 'completed', 'failed', 'canceled'], description: 'Current execution status of the run' },
     triggering_event: { type: 'string', description: 'Event or action that triggered this run' },
-    step_count: { type: 'number', description: 'Number of steps executed in this run' },
+    step_count: { type: 'number', description: 'Number of steps executed in this run', modifier: 'derived' },
     total_tokens: { type: 'number', description: 'Total tokens consumed across all steps' },
     total_cost: { type: 'number', description: 'Total monetary cost of the run' },
     error_message: { type: 'string', description: 'Error message if the run failed' },
@@ -3137,8 +3166,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // WorkflowTemplateProperties: Workflow template.
   workflow_template: {
     template_type: { type: 'string', enum: ['sequential', 'parallel', 'conditional', 'loop'], description: 'Execution pattern for the workflow steps' },
-    step_count: { type: 'number', description: 'Number of steps in the workflow' },
-    agent_count: { type: 'number', description: 'Number of agents involved in the workflow' },
+    step_count: { type: 'number', description: 'Number of steps in the workflow', modifier: 'derived' },
+    agent_count: { type: 'number', description: 'Number of agents involved in the workflow', modifier: 'derived' },
     estimated_duration: { type: 'string', description: 'Estimated wall-clock duration of a full run' },
     state_schema: { type: 'string', description: 'Schema describing the workflow\'s state object' },
     checkpoint_enabled: { type: 'boolean', description: 'Whether the workflow supports checkpointing for recovery' },

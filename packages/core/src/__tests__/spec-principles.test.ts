@@ -227,6 +227,32 @@ describe('P14 — Foreign Keys Are Edges', () => {
     }
     expect(violations, `Potential FK-as-property violations:\n${violations.join('\n')}`).toEqual([])
   })
+
+  // Scalar-vs-edge ADR (2026-06-16): a property whose name resolves to a canonical
+  // entity type is an entity reference and must be an edge, not a scalar. SKIPPED until
+  // the 0.12.0 P14-conformance pass removes the Bucket A offenders. Tune false positives
+  // and the @p14-exempt / display-cache allowlist when activating.
+  it.skip('no property names a first-class entity as a scalar (use an edge)', async () => {
+    const { UPG_ENTITY_META } = await import('../registry/entity-meta.js')
+    const names = new Set(UPG_ENTITY_META.filter((e) => e.maturity !== 'removed').map((e) => e.name))
+    const propsDir = join(__dirname, '..', 'properties', 'domains')
+    const exempt = new Set(['competitor', 'axis', 'from_value', 'to_value']) // competitor_signal snapshot
+    const violations: string[] = []
+    for (const file of readdirSync(propsDir).filter((f) => f.endsWith('.ts'))) {
+      readFileSync(join(propsDir, file), 'utf-8')
+        .split('\n')
+        .forEach((line, i) => {
+          const m = line.match(/(\w+)\??:\s*(string|string\[\])\b/)
+          if (!m) return
+          const prop = m[1]
+          const named = names.has(prop) || [...names].some((n) => prop.endsWith(`_${n}`))
+          if (!named || exempt.has(prop)) return
+          if (line.includes('@p14-exempt') || line.includes('display-cache')) return
+          violations.push(`${file}:${i + 1} — ${prop}`)
+        })
+    }
+    expect(violations, `entity-name scalars (should be edges):\n${violations.join('\n')}`).toEqual([])
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
