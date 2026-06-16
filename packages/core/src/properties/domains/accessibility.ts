@@ -115,8 +115,6 @@ export interface A11yIssueProperties {
   remediation?: string
   /** Description of the user impact */
   impact_description?: string
-  /** Page or component where the issue was found */
-  discovered_in?: string
 }
 
 /** Accessibility annotation.
@@ -134,8 +132,6 @@ export interface A11yAnnotationProperties {
    * Expanded from the original 5-value enum to cover the full range of a11y annotation types.
    */
   category?: 'focus_order' | 'alt_text' | 'heading_level' | 'aria_label' | 'colour_contrast' | 'keyboard_nav' | 'screen_reader' | 'motion_preference' | 'other'
-  /** Component or element this annotation applies to */
-  target_component?: string
   /** Specific accessibility requirement described */
   requirement?: string
   /** WCAG success criterion this annotation relates to */

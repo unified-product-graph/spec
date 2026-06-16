@@ -125,8 +125,6 @@ export interface LaunchProperties {
   launch_type?: 'soft' | 'beta' | 'public' | 'feature'
   /** Planned launch date (ISO format) */
   target_date?: ISODate
-  /** Metrics that define launch success */
-  success_metrics?: string[]
 }
 
 /** ContentStrategy entity.
@@ -217,8 +215,6 @@ export interface RebuttalProperties {
   statement?: string
   /** How convincing this rebuttal is (1-5) */
   strength?: UPGAssessment
-  /** References to supporting evidence */
-  evidence_refs?: string[]
 }
 
 /** ProofPoint entity.

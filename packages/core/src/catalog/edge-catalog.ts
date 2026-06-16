@@ -1336,6 +1336,33 @@ export const UPG_EDGE_CATALOG = {
   changelog_includes_feature: { forward_verb: 'includes', reverse_verb: 'included_in', classification: 'semantic', source_type: 'changelog', target_type: 'feature' },
   ai_trace_spawns_ai_trace: { forward_verb: 'spawns', reverse_verb: 'spawned_by', classification: 'hierarchy', source_type: 'ai_trace', target_type: 'ai_trace' },
 
+  // ── P14 conformance edges (0.12.0) — promote orphan entity-reference scalars ──
+  // Each replaces a string property that named a first-class entity. The matching
+  // `UPGScalarToEdgeMigration['0.12.0']` rule losslessly mints/links + drops the
+  // scalar. See the P14 string-reference sweep.
+  business_model_guided_by_metric: { forward_verb: 'guided_by', reverse_verb: 'guides', classification: 'cross-domain', source_type: 'business_model', target_type: 'metric' },
+  vision_anchored_by_metric: { forward_verb: 'anchored_by', reverse_verb: 'anchors', classification: 'cross-domain', source_type: 'vision', target_type: 'metric' },
+  metric_fed_by_data_source: { forward_verb: 'fed_by', reverse_verb: 'feeds', classification: 'cross-domain', source_type: 'metric', target_type: 'data_source' },
+  hallucination_report_has_root_cause: { forward_verb: 'has_root_cause', reverse_verb: 'root_cause_of', classification: 'causal', source_type: 'hallucination_report', target_type: 'root_cause' },
+  model_comparison_compares_ai_model: { forward_verb: 'compares', reverse_verb: 'compared_in', classification: 'semantic', source_type: 'model_comparison', target_type: 'ai_model' },
+  launch_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'cross-domain', source_type: 'launch', target_type: 'metric' },
+  wireframe_depicts_screen: { forward_verb: 'depicts', reverse_verb: 'depicted_by', classification: 'semantic', source_type: 'wireframe', target_type: 'screen' },
+  service_level_indicator_measures_metric: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'service_level_indicator', target_type: 'metric' },
+  agent_definition_uses_ai_model: { forward_verb: 'uses', reverse_verb: 'used_by', classification: 'semantic', source_type: 'agent_definition', target_type: 'ai_model' },
+  privacy_policy_governs_compliance_requirement: { forward_verb: 'governs', reverse_verb: 'governed_by', classification: 'semantic', source_type: 'privacy_policy', target_type: 'compliance_requirement' },
+  a11y_annotation_targets_design_component: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'a11y_annotation', target_type: 'design_component' },
+  metric_quality_assessment_considers_proxy_metric: { forward_verb: 'considers_proxy', reverse_verb: 'proxy_for', classification: 'semantic', source_type: 'metric_quality_assessment', target_type: 'metric' },
+  ai_experiment_based_on_ai_model: { forward_verb: 'based_on', reverse_verb: 'basis_for', classification: 'semantic', source_type: 'ai_experiment', target_type: 'ai_model' },
+  rebuttal_supported_by_evidence: { forward_verb: 'supported_by', reverse_verb: 'supports', classification: 'cross-domain', source_type: 'rebuttal', target_type: 'evidence' },
+  bug_observed_in_release: { forward_verb: 'observed_in', reverse_verb: 'exhibits', classification: 'semantic', source_type: 'bug', target_type: 'release' },
+  vulnerability_affects_library_dependency: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'vulnerability', target_type: 'library_dependency' },
+  a11y_issue_found_in_screen: { forward_verb: 'found_in', reverse_verb: 'site_of', classification: 'cross-domain', source_type: 'a11y_issue', target_type: 'screen' },
+  team_okr_cascades_from_team_okr: { forward_verb: 'cascades_from', reverse_verb: 'cascades_to', classification: 'semantic', source_type: 'team_okr', target_type: 'team_okr' },
+  agent_session_invoked_agent_skill: { forward_verb: 'invoked', reverse_verb: 'invoked_by', classification: 'semantic', source_type: 'agent_session', target_type: 'agent_skill' },
+  agent_task_uses_agent_skill: { forward_verb: 'uses', reverse_verb: 'used_by', classification: 'semantic', source_type: 'agent_task', target_type: 'agent_skill' },
+  participant_belongs_to_behavioral_segment: { forward_verb: 'belongs_to', reverse_verb: 'includes', classification: 'cross-domain', source_type: 'participant', target_type: 'behavioral_segment' },
+  classification_axis_owned_by_product: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'classification_axis', target_type: 'product' },
+
   // ── Part 9: Cross-Layer Influence Edges ────────────────────────────────────
 
   product_expressed_as_design_component: { forward_verb: 'expressed_as', reverse_verb: 'expresses', classification: 'cross-domain', source_type: 'product', target_type: 'design_component' },

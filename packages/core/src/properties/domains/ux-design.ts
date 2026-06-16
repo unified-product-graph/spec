@@ -112,15 +112,6 @@ export interface JourneyStepProperties {
    * explicit `journey_step_precedes_journey_step` edge captures the chain.
    */
   step_order?: number
-  /**
-   * @deprecated since v0.9.9. Touchpoints are modelled in two places,
-   * neither of which is this string: the `touchpoint` *entity* is the
-   * cross-channel customer-success layer (`touchpoint_occurs_in_journey_step`),
-   * and `journey_action` is the in-product blueprint layer (the finest band of
-   * a `journey_step`). Use one of those rather than a free-text string here.
-   * Removed in a future major.
-   */
-  touchpoint?: string
   /** Channel (e.g. "web", "email", "in-store") */
   channel?: string
   /** User emotion (1 = very negative, 5 = very positive) */
@@ -289,8 +280,6 @@ export interface PrototypeProperties {
 export interface WireframeProperties {
   /** Detail level */
   fidelity?: 'low' | 'medium' | 'high'
-  /** Represented screen name */
-  screen_name?: string
   /** Version or iteration (e.g. "v2", "2026-04-B") */
   version?: string
   /**

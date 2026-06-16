@@ -85,9 +85,6 @@ export interface AgentDefinitionProperties {
   goal?: string
   /** Context or persona narrative for the agent */
   backstory?: string
-  /** List of tool names the agent can invoke */
-  /** Reference to the AI model powering this agent */
-  model_ref?: string
   /** Whether the agent can delegate tasks to other agents */
   allow_delegation?: boolean
   /** Whether the agent retains memory across sessions */
@@ -126,8 +123,6 @@ export interface AgentSessionProperties {
   tokens_used?: number
   /** Total monetary cost of the session */
   cost?: number
-  /** List of tools invoked during the session */
-  tools_invoked?: string[]
   /** Number of errors encountered during the session */
   error_count?: number
   /** Current status of the session */
@@ -152,8 +147,6 @@ export interface AgentTaskProperties {
   expected_output?: string
   /** Additional context provided to the agent for this task */
   context?: string
-  /** Tools the agent may use for this task */
-  tools?: string[]
   /** File path where the agent should write output */
   output_file?: string
   /** Whether this task blocks downstream tasks */

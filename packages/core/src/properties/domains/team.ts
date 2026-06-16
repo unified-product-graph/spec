@@ -115,8 +115,6 @@ export interface TeamOkrProperties {
   progress?: number
   /** The team-level objective statement (key results live in child entities) */
   objective_statement?: string
-  /** Higher-level objective this OKR cascades from (company or department OKR) */
-  cascade_from?: string
 }
 
 /** Retrospective entity.

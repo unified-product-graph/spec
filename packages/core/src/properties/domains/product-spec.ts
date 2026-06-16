@@ -319,8 +319,6 @@ export interface BugProperties {
   priority?: Priority
   /** Assigned person */
   assignee?: string
-  /** Product version where first observed. Helps triage regressions. */
-  affected_version?: string
   /** ISO date due. Often tied to a release gate or SLA. */
   due_date?: ISODate
   /** Free-form classification tags. Applied uniformly across work item types. */

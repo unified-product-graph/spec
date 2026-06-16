@@ -623,6 +623,21 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.12.0: P14 Bucket C — drop the one non-derived denormalized aggregate ──
+  //
+  // The count caches (feature_count, evidence_count, workflow step_count /
+  // agent_count) are KEPT — 0.11.6 marked them `modifier:'derived'` (the
+  // sanctioned "derived cache" reframe), so tooling knows to recompute rather
+  // than removing them. `business_model.monetisation_basis` is NOT a count: it's
+  // a categorical rollup of the model's revenue_stream.billing_model children, so
+  // it drops here. `pattern` stays (a chosen archetype, not a rollup).
+  // (customer_health_score.metrics — a metric→value map — is deferred: dropping
+  // it is lossy until the per-metric values move onto the composed_of_metric
+  // edges; tracked as a follow-up.)
+  '0.12.0': [
+    { kind: 'drop_props', type: 'business_model', drop_props: ['monetisation_basis'],
+      reason: 'P14 Bucket C: monetisation_basis is a categorical rollup of the model’s revenue_stream.billing_model children, not a first-class attribute. Drop it; KEEP `pattern` (a chosen archetype).' },
+  ],
   // ── v0.10.2: market_intelligence number -> assessment reshape ──────────────
   //
   // The v0.10.0 property-registry generator fix (#43) corrected several property
@@ -1665,6 +1680,164 @@ export function getSplitMigrations(
 ): UPGSplitMigration[] {
   const result: UPGSplitMigration[] = []
   for (const [version, migrations] of Object.entries(UPG_SPLIT_MIGRATIONS)) {
+    if (versionInRange(version, fromVersion, toVersion)) {
+      result.push(...migrations)
+    }
+  }
+  return result
+}
+
+// ─── Scalar → edge promotions (P14 conformance) ─────────────────────
+//
+// When a scalar property holds the *identity of a first-class entity* — one
+// you would query, aggregate, or compare across instances — principle P14
+// ("Foreign Keys Are Edges") says it should be a canonical edge, not a string.
+// `UPGScalarToEdgeMigration` records the lossless promotion: find-or-create the
+// referenced entity by title, link it with the canonical edge, then (usually)
+// drop the now-redundant scalar.
+//
+// **Why a new migration family (not a `UPGPropertyMigration`).** The property
+// union is consumed by `migrateNodeProperties`, which is per-node and stateless
+// — it cannot see sibling nodes or mint edges. Minting a target node + an edge
+// is a **graph-level** operation, like `UPGSplitMigration`. So this is a sibling
+// graph-level family: declared here as a versioned contract; applied by a
+// graph-aware consumer (`UPGFileStore.applyScalarToEdgeMigrations`, the CLI, or
+// any adapter that walks this data). Tests in `@unified-product-graph/core`
+// validate the rule SHAPE (every edge/entity type referenced exists); the SDK
+// owns the apply ENGINE and its round-trip tests.
+//
+// **Lossless (Path B), idempotent, reversible.** The scalar's value becomes (or
+// links to) a real node — nothing is discarded. Re-running links/mints nothing
+// new (title already indexed, edge already present). A pre-apply snapshot makes
+// it reversible.
+
+/**
+ * Promote a scalar property that names a first-class entity into a canonical edge.
+ * Graph-level (mints/links nodes) — NOT applied by `migrateNodeProperties`.
+ */
+export interface UPGScalarToEdgeMigration {
+  /** Source entity type carrying the scalar. */
+  from_type: string
+  /** Property key holding the entity identity (inside `properties`, or top-level if `top_level`). */
+  scalar_property: string
+  /** Whether the scalar lives at top-level instead of inside `properties`. */
+  top_level?: boolean
+  /** Canonical target entity type to find-or-create. */
+  target_type: string
+  /** Canonical edge to create. Must exist in `UPG_EDGE_CATALOG`. */
+  edge_type: string
+  /**
+   * Edge orientation. Default `false`: the `from_type` node is the edge SOURCE
+   * (`from → target`). `true`: the resolved target entity is the edge source
+   * (`target → from`) — use when an EXISTING edge's canonical direction runs
+   * target_type → from_type (e.g. `acquisition_channel_runs_growth_campaign`,
+   * whose scalar lives on `growth_campaign`).
+   */
+  reverse?: boolean
+  /** How to resolve an existing target before minting: normalized title (default) or exact id. */
+  target_match?: 'title' | 'id'
+  /** Default properties merged onto a freshly-minted target (e.g. `{ designation: 'north_star' }`). */
+  target_defaults?: Record<string, unknown>
+  /** `string[]` scalars (e.g. `success_metrics`) → one edge per element. */
+  multi?: boolean
+  /** Drop the scalar after linking. `true` for orphans/shadows; `false` to keep an actor display-cache. */
+  drop_scalar: boolean
+  /** Human-readable explanation surfaced in load-time warnings + changelog. */
+  reason: string
+}
+
+/**
+ * Version-scoped scalar→edge promotions. Same convention as `UPG_MIGRATIONS` /
+ * `UPG_SPLIT_MIGRATIONS`: the key is the version that introduces the rule.
+ */
+export const UPG_SCALAR_TO_EDGE_MIGRATIONS: Record<string, UPGScalarToEdgeMigration[]> = {
+  '0.12.0': [
+    // ── Bucket A1 — orphan scalars (no edge existed): add edge + migrate + drop ──
+    {
+      from_type: 'business_model', scalar_property: 'north_star_metric',
+      target_type: 'metric', edge_type: 'business_model_guided_by_metric',
+      target_match: 'title', target_defaults: { designation: 'north_star' },
+      drop_scalar: true,
+      reason:
+        'P14: the optimised metric is a first-class entity you query across business models ("which models optimise for this metric"), not a label. Mint metric{designation:north_star} + link via business_model_guided_by_metric; drop the orphan string.',
+    },
+    // NOTE: revenue_stream.forecast is NOT promoted — its JSDoc ("Free-text
+    // forecast or projection") is narrative prose, not a ref to a forecast
+    // entity. The additive revenue_stream_projected_by_forecast edge exists for
+    // an explicit stream→forecast link; the free-text field stays.
+    { from_type: 'metric', scalar_property: 'data_source', target_type: 'data_source', edge_type: 'metric_fed_by_data_source', drop_scalar: true,
+      reason: 'P14: the data source feeding a metric is queryable across metrics ("everything fed by this source"); promote the string to a metric_fed_by_data_source edge.' },
+    { from_type: 'hallucination_report', scalar_property: 'root_cause', target_type: 'root_cause', edge_type: 'hallucination_report_has_root_cause', drop_scalar: true,
+      reason: 'P14: a root_cause is a first-class entity reused across reports; link it rather than restating the cause as a string.' },
+    // NOTE: prompt_version.template is NOT promoted — its JSDoc ("Template body
+    // with variable placeholders") is the prompt CONTENT, not a ref to a
+    // prompt_template entity. The additive prompt_version_child_of_prompt_template
+    // edge exists for an explicit version→template link; the content field stays.
+    { from_type: 'model_comparison', scalar_property: 'model_ids', target_type: 'ai_model', edge_type: 'model_comparison_compares_ai_model', multi: true, drop_scalar: true,
+      reason: 'P14: the models being compared are first-class ai_model entities; one compares edge per model replaces the id-string list.' },
+    { from_type: 'launch', scalar_property: 'success_metrics', target_type: 'metric', edge_type: 'launch_measured_by_metric', multi: true, drop_scalar: true,
+      reason: 'P14: success metrics are first-class metric entities measured across launches; one measured_by edge per metric replaces the string list.' },
+    // NOTE: user_story.as_a is NOT promoted — it is a load-bearing field of the
+    // user_story → story_statement split (the "As a <persona>" templated promise),
+    // and the value is often a role descriptor, not a persona node. Left in place.
+    { from_type: 'wireframe', scalar_property: 'screen_name', target_type: 'screen', edge_type: 'wireframe_depicts_screen', drop_scalar: true,
+      reason: 'P14: the depicted screen is a first-class entity; link it via wireframe_depicts_screen rather than naming it in a string.' },
+    { from_type: 'service_level_indicator', scalar_property: 'metric_name', target_type: 'metric', edge_type: 'service_level_indicator_measures_metric', drop_scalar: true,
+      reason: 'P14: the SLI’s metric is a first-class entity; link it via service_level_indicator_measures_metric rather than naming it in a string.' },
+    { from_type: 'agent_definition', scalar_property: 'model_ref', target_type: 'ai_model', edge_type: 'agent_definition_uses_ai_model', drop_scalar: true,
+      reason: 'P14: the model an agent uses is a first-class ai_model entity ("every agent on this model"); promote the ref string to a uses edge.' },
+    { from_type: 'privacy_policy', scalar_property: 'regulations', target_type: 'compliance_requirement', edge_type: 'privacy_policy_governs_compliance_requirement', multi: true, drop_scalar: true,
+      reason: 'P14: each regulation is a first-class compliance_requirement entity tracked across policies; one governs edge per requirement replaces the string list.' },
+    { from_type: 'a11y_annotation', scalar_property: 'target_component', target_type: 'design_component', edge_type: 'a11y_annotation_targets_design_component', drop_scalar: true,
+      reason: 'P14: the annotated component is a real design_component entity; link it so accessibility coverage rolls up by component.' },
+    { from_type: 'metric_quality_assessment', scalar_property: 'proxy_alternatives', target_type: 'metric', edge_type: 'metric_quality_assessment_considers_proxy_metric', multi: true, drop_scalar: true,
+      reason: 'P14: proxy alternatives are first-class metric entities; one considers_proxy edge per metric replaces the name list.' },
+    { from_type: 'ai_experiment', scalar_property: 'foundation_model', target_type: 'ai_model', edge_type: 'ai_experiment_based_on_ai_model', drop_scalar: true,
+      reason: 'P14: the foundation model is a first-class ai_model entity reused across experiments; promote the string to a based_on edge.' },
+    { from_type: 'rebuttal', scalar_property: 'evidence_refs', target_type: 'evidence', edge_type: 'rebuttal_supported_by_evidence', multi: true, drop_scalar: true,
+      reason: 'P14: each evidence ref is a first-class evidence entity; one supported_by edge per item replaces the ref-string list.' },
+    { from_type: 'bug', scalar_property: 'affected_version', target_type: 'release', edge_type: 'bug_observed_in_release', drop_scalar: true,
+      reason: 'P14: the affected version is a first-class release entity ("every bug in this release"); promote the version string to an observed_in edge.' },
+    { from_type: 'vulnerability', scalar_property: 'affected_package', target_type: 'library_dependency', edge_type: 'vulnerability_affects_library_dependency', drop_scalar: true,
+      reason: 'P14: the affected package is a first-class library_dependency entity; link it so vulnerabilities roll up by dependency.' },
+    { from_type: 'a11y_issue', scalar_property: 'discovered_in', target_type: 'screen', edge_type: 'a11y_issue_found_in_screen', drop_scalar: true,
+      reason: 'P14: the screen an issue was found in is a real screen entity; link it so issues roll up by screen rather than naming it in a string.' },
+    { from_type: 'team_okr', scalar_property: 'cascade_from', target_type: 'team_okr', edge_type: 'team_okr_cascades_from_team_okr', drop_scalar: true,
+      reason: 'P14: a cascaded OKR points at its parent OKR (a real entity); the cascade is a self-referential edge, not a name string.' },
+    { from_type: 'agent_session', scalar_property: 'tools_invoked', target_type: 'agent_skill', edge_type: 'agent_session_invoked_agent_skill', multi: true, drop_scalar: true,
+      reason: 'P14: invoked tools are first-class agent_skill entities tracked across sessions; one invoked edge per skill replaces the string list.' },
+    { from_type: 'agent_task', scalar_property: 'tools', target_type: 'agent_skill', edge_type: 'agent_task_uses_agent_skill', multi: true, drop_scalar: true,
+      reason: 'P14: the tools a task uses are first-class agent_skill entities; one uses edge per skill replaces the string list.' },
+    { from_type: 'participant', scalar_property: 'segment', target_type: 'behavioral_segment', edge_type: 'participant_belongs_to_behavioral_segment', drop_scalar: true,
+      reason: 'P14: a participant’s segment is a first-class behavioral_segment entity queried across studies; promote the string to a belongs_to edge.' },
+    { from_type: 'classification_axis', scalar_property: 'owner_product', target_type: 'product', edge_type: 'classification_axis_owned_by_product', target_match: 'id', drop_scalar: true,
+      reason: 'P14: the product that owns an axis is a first-class entity; link it via classification_axis_owned_by_product. The scalar holds a product id, so match by id (no mint).' },
+
+    // ── Bucket A2 — shadow scalars (the canonical edge ALREADY exists): backfill + drop ──
+    { from_type: 'growth_campaign', scalar_property: 'channels_targeted', target_type: 'acquisition_channel', edge_type: 'acquisition_channel_runs_growth_campaign', reverse: true, multi: true, drop_scalar: true,
+      reason: 'P14 shadow: the acquisition_channel_runs_growth_campaign edge already exists (channel→campaign). Backfill any string-only channels as edges, then drop the drift-prone list.' },
+    { from_type: 'journey_step', scalar_property: 'touchpoint', target_type: 'touchpoint', edge_type: 'touchpoint_occurs_in_journey_step', reverse: true, drop_scalar: true,
+      reason: 'P14 shadow: the touchpoint_occurs_in_journey_step edge already exists (touchpoint→journey_step) and the field was @deprecated 0.9.9. Backfill + finish the drop.' },
+    { from_type: 'decision', scalar_property: 'superseded_by', target_type: 'decision', edge_type: 'decision_superseded_by_decision', drop_scalar: true,
+      reason: 'P14 shadow: the decision_superseded_by_decision edge already exists. Backfill the superseding decision as an edge, then drop the reference string.' },
+    { from_type: 'subscription', scalar_property: 'plan_name', target_type: 'pricing_tier', edge_type: 'subscription_subscribes_to_pricing_tier', drop_scalar: true,
+      reason: 'P14 shadow: the subscription_subscribes_to_pricing_tier edge already exists. Backfill the plan as a pricing_tier edge, then drop the name string.' },
+  ],
+}
+
+/**
+ * Get all scalar→edge promotions between two versions. Mirrors `getSplitMigrations`.
+ *
+ * @example
+ * const rules = getScalarToEdgeMigrations('0.11.6', '0.12.0')
+ * // rules[0].from_type === 'business_model'
+ */
+export function getScalarToEdgeMigrations(
+  fromVersion: string,
+  toVersion: string,
+): UPGScalarToEdgeMigration[] {
+  const result: UPGScalarToEdgeMigration[] = []
+  for (const [version, migrations] of Object.entries(UPG_SCALAR_TO_EDGE_MIGRATIONS)) {
     if (versionInRange(version, fromVersion, toVersion)) {
       result.push(...migrations)
     }

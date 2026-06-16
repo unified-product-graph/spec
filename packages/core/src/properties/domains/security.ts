@@ -144,11 +144,6 @@ export interface VulnerabilityProperties {
    */
   affected_component?: string
   /**
-   * Affected package with version. More precise than `affected_component`.
-   * @example "lodash@4.17.20", "openssl@1.1.1q"
-   */
-  affected_package?: string
-  /**
    * Exploit maturity. Primary prioritisation factor after severity.
    * `no_known_exploit` = theoretical. `proof_of_concept` = exploit code exists, not weaponised.
    * `functional_exploit` = working exploit available. `active_exploitation` = active in the wild.

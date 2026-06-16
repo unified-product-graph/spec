@@ -328,7 +328,11 @@ describe('Edge pair uniqueness', () => {
  // lowered 35 → 27 by the duplicate-collapse (13 shadow / near-synonym
  // / inverse edges retired; the inverse flips removed two source:target pairs).
  // 0.9.12 added specification:specification (extends + competes_with) → 28.
- expect(multiPairs.length).toMatchInlineSnapshot(`28`)
+ // 0.12.0 P14 conformance added 4 same-pair/different-verb pairs (e.g.
+ // model_comparison→ai_model {compares, winner_is}; ai_experiment→ai_model
+ // {based_on, uses}; X→metric measurement pairs). Distinct relationships;
+ // duplicate + near-synonym gates pass. → 32.
+ expect(multiPairs.length).toMatchInlineSnapshot(`32`)
  })
 })
 

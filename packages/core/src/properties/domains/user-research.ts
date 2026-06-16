@@ -43,8 +43,6 @@ export interface ResearchStudyProperties {
 export interface ParticipantProperties {
   /** Anonymous alias for privacy (e.g. "P01") */
   alias?: string
-  /** User segment this participant belongs to */
-  segment?: string
   /** How the participant was recruited */
   recruit_source?: string
   /** Current consent status for data usage */

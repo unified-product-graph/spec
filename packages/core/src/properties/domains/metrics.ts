@@ -127,8 +127,6 @@ export interface MetricProperties {
    * `'realtime'` migrates to `'continuous'`; all other values 1:1.
    */
   cadence?: Cadence
-  /** Data source or tool that feeds this metric (e.g. "PostHog", "Stripe") */
-  data_source?: string
   /** Person or team responsible for tracking this metric */
   owner?: string
 
@@ -204,6 +202,4 @@ export interface MetricQualityAssessmentProperties {
   proxy_reason?: ProxyReason
   /** How strongly this metric predicts the direct measure */
   proxy_confidence?: ProxyConfidence
-  /** Other metrics considered as proxy candidates */
-  proxy_alternatives?: string[]
 }

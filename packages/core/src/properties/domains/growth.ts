@@ -103,8 +103,6 @@ export interface GrowthCampaignProperties {
   budget_amount?: number
   /** ISO 4217 currency code (e.g. "USD", "EUR", "GBP") */
   budget_currency?: string
-  /** Channels the campaign runs across. Free-form so partner channels and ad networks both fit (e.g. "google_ads", "linkedin", "podcast_sponsorship"). */
-  channels_targeted?: string[]
   /** Primary KPI optimised for (e.g. "qualified_signups", "MQL_volume", "activated_teams") */
   primary_kpi?: string
   /** Numeric target for `primary_kpi` over the campaign window */

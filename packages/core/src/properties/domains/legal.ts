@@ -143,6 +143,4 @@ export interface PrivacyPolicyProperties {
   effective_date?: ISODate
   /** URL where the policy is published */
   url?: string
-  /** Regulations this policy addresses (e.g. "GDPR", "CCPA") */
-  regulations?: string[]
 }

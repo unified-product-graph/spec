@@ -229,9 +229,24 @@ describe('P14 — Foreign Keys Are Edges', () => {
   })
 
   // Scalar-vs-edge ADR (2026-06-16): a property whose name resolves to a canonical
-  // entity type is an entity reference and must be an edge, not a scalar. SKIPPED until
-  // the 0.12.0 P14-conformance pass removes the Bucket A offenders. Tune false positives
-  // and the @p14-exempt / display-cache allowlist when activating.
+  // entity type is an entity reference and should be an edge, not a scalar.
+  //
+  // KEPT SKIPPED after the 0.12.0 P14-conformance sweep (Buckets A1/A2 removed the
+  // real orphan/shadow offenders). The name-based heuristic below is too coarse to
+  // be a hard gate: run against current source it flags ~23 hits, but ~20 are false
+  // positives the rule cannot tell apart by name alone — content fields *named after
+  // a concept that is also an entity* (`hypothesis`, `objective`, `mission`, `theme`,
+  // `evidence`, `learning`, `positioning`) and compound descriptors that merely *end*
+  // with an entity token (`agent_role`, `decision_outcome`, `triggering_event`,
+  // `capacity_constraint`, `owning_team`). A field holding hypothesis *prose* is
+  // indistinguishable from one holding a hypothesis *reference* without semantics.
+  //
+  // The real enforcement is therefore (a) the audit + the UPG_SCALAR_TO_EDGE_MIGRATIONS
+  // registry (every conversion is recorded there), and (b) a future curated
+  // `entity-reference-as-scalar` anti-pattern whose graph-instance detector needs a new
+  // `dangling_scalar_reference` IntelligenceCondition check (value equals another node's
+  // title with no edge between them) — deferred until that check primitive lands. This
+  // block stays as a discovery aid for the next sweep, not a CI gate.
   it.skip('no property names a first-class entity as a scalar (use an edge)', async () => {
     const { UPG_ENTITY_META } = await import('../registry/entity-meta.js')
     const names = new Set(UPG_ENTITY_META.filter((e) => e.maturity !== 'removed').map((e) => e.name))

@@ -56,7 +56,11 @@ export interface VisionProperties {
    * @example "3 years"
    */
   timeframe?: string
-  /** Single north-star metric or statement */
+  /**
+   * The north-star statement — a prose slogan of the future the product steers
+   * toward. Legitimately free-text (graph-vs-prose). To link the *metric* a
+   * vision optimises for, use the `vision_anchored_by_metric` edge (P14 0.12.0).
+   */
   north_star?: string
   /** Narrative of what success looks like */
   success_looks_like?: string
@@ -275,8 +279,6 @@ export interface DecisionProperties {
    * @example ["must work offline", "team has no Go expertise", "cost < $500/mo"]
    */
   decision_drivers?: string[]
-  /** Reference to the superseding decision, if any. */
-  superseded_by?: string
 }
 
 // ---------------------------------------------------------------------------

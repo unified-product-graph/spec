@@ -461,8 +461,6 @@ export interface ClassificationAxisProperties {
    * (unordered) yet `single`-select, or `categorical` yet `multi`-select.
    */
   cardinality?: 'single' | 'multi'
-  /** Product id when product-specific. Axes are usually product-agnostic; leave empty for shared taxonomies. */
-  owner_product?: string
 }
 
 /** ClassificationValue: a value on a classification axis.

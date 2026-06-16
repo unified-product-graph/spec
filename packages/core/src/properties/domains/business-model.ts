@@ -31,10 +31,11 @@ export interface BusinessModelProperties {
   stage?: 'draft' | 'validated' | 'active'
   /** Canonical pattern. Useful for benchmarking against peer businesses with the same shape. */
   pattern?: 'freemium' | 'marketplace' | 'saas' | 'subscription' | 'transactional' | 'advertising' | 'licensing' | 'hybrid'
-  /** Primary monetisation unit */
-  monetisation_basis?: 'usage' | 'seat' | 'outcome' | 'transaction' | 'flat'
-  /** The single metric the business optimises for */
-  north_star_metric?: string
+  // monetisation_basis removed in 0.12.0 (P14 Bucket C): derivable from the
+  // model's revenue_stream.billing_model children. `pattern` kept (archetype).
+  // north_star_metric removed in 0.12.0 (P14): the optimised metric is a
+  // first-class entity — see `business_model_guided_by_metric` edge +
+  // UPG_SCALAR_TO_EDGE_MIGRATIONS['0.12.0'].
 }
 
 /** ValueProposition. Most relationships expressed as edges.

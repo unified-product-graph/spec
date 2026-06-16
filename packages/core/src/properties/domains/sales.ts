@@ -151,8 +151,6 @@ export interface QuoteDocumentProperties {
  * }
  */
 export interface SubscriptionProperties {
-  /** Name of the subscribed plan */
-  plan_name?: string
   /** Monthly recurring revenue from this subscription */
   monthly_recurring_revenue?: number
   /** Subscription start date (ISO format) */

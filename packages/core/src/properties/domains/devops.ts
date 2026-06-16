@@ -23,11 +23,6 @@ import type { IncidentSeverity, ISODateTime, LogLevel, SignalUrgency } from '../
  */
 export interface ServiceLevelIndicatorProperties {
   /**
-   * Indicator metric name.
-   * @example "Request latency p99", "Error rate", "Availability"
-   */
-  metric_name?: string
-  /**
    * Threshold that defines a "good" event.
    * @example 200 (ms latency), 0.01 (1% error rate), 99.9 (% availability)
    */

@@ -43,7 +43,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // A11yAnnotationProperties: Accessibility annotation.
   a11y_annotation: {
     category: { type: 'string', enum: ['focus_order', 'alt_text', 'heading_level', 'aria_label', 'colour_contrast', 'keyboard_nav', 'screen_reader', 'motion_preference', 'other'], description: 'Category of accessibility annotation. Expanded from the original 5-value enum to cover the full range of a11y annotation types.' },
-    target_component: { type: 'string', description: 'Component or element this annotation applies to' },
     requirement: { type: 'string', description: 'Specific accessibility requirement described' },
     wcag_criterion: { type: 'string', description: 'WCAG success criterion this annotation relates to' },
     annotation_priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Priority for implementing this annotation' },
@@ -91,7 +90,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     tags: { type: 'string[]', description: 'Tags from the audit tool (e.g. "wcag2aa", "cat.color")' },
     remediation: { type: 'string', description: 'Recommended fix for the issue' },
     impact_description: { type: 'string', description: 'Description of the user impact' },
-    discovered_in: { type: 'string', description: 'Page or component where the issue was found' },
   },
   // A11yStandardProperties: Accessibility standard.
   a11y_standard: {
@@ -155,7 +153,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     agent_scope: { type: 'string', description: 'Boundaries of what this agent can act on' },
     goal: { type: 'string', description: 'Primary objective the agent is trying to achieve' },
     backstory: { type: 'string', description: 'Context or persona narrative for the agent' },
-    model_ref: { type: 'string', description: 'Reference to the AI model powering this agent' },
     allow_delegation: { type: 'boolean', description: 'Whether the agent can delegate tasks to other agents' },
     memory_enabled: { type: 'boolean', description: 'Whether the agent retains memory across sessions' },
     max_iterations: { type: 'number', description: 'Maximum number of reasoning iterations allowed' },
@@ -179,7 +176,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     turns: { type: 'number', description: 'Number of conversational turns in the session' },
     tokens_used: { type: 'number', description: 'Total tokens consumed during the session' },
     cost: { type: 'number', description: 'Total monetary cost of the session' },
-    tools_invoked: { type: 'string[]', description: 'List of tools invoked during the session' },
     error_count: { type: 'number', description: 'Number of errors encountered during the session' },
     session_status: { type: 'string', enum: ['active', 'completed', 'errored', 'timed_out'], description: 'Current status of the session' },
     output_summary: { type: 'string', description: 'Brief summary of the session\'s output' },
@@ -195,7 +191,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     description: { type: 'string', description: 'What the agent should accomplish' },
     expected_output: { type: 'string', description: 'Description of the expected output format or content' },
     context: { type: 'string', description: 'Additional context provided to the agent for this task' },
-    tools: { type: 'string[]', description: 'Tools the agent may use for this task' },
     output_file: { type: 'string', description: 'File path where the agent should write output' },
     blocking: { type: 'boolean', description: 'Whether this task blocks downstream tasks' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Relative priority of this task' },
@@ -237,7 +232,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     summary_metrics: { type: 'string', description: 'Key-metric summary' },
     started_at: { type: 'string', description: 'ISO timestamp started' },
     completed_at: { type: 'string', description: 'ISO timestamp completed' },
-    foundation_model: { type: 'string', description: 'Foundation starting model' },
     training_steps: { type: 'number', description: 'Training steps or epochs completed' },
     artifact_uri: { type: 'string', description: 'Produced artifact URI' },
     notes: { type: 'string', description: 'Free-text notes' },
@@ -462,7 +456,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     environment: { type: 'string', description: 'Observed environment (e.g. "prod", "staging", "iOS 17.4")' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Urgency relative to other work. Independent of `bug_severity` (a critical bug can have low priority if rare).' },
     assignee: { type: 'string', description: 'Assigned person' },
-    affected_version: { type: 'string', description: 'Product version where first observed. Helps triage regressions.' },
     due_date: { type: 'string', description: 'ISO date due. Often tied to a release gate or SLA.' },
     labels: { type: 'string[]', description: 'Free-form classification tags. Applied uniformly across work item types.' },
   },
@@ -479,8 +472,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     framework_id: { type: 'string', description: 'Framework ID (references `UPGFramework.id`)' },
     stage: { type: 'string', enum: ['draft', 'validated', 'active'], description: 'Maturity' },
     pattern: { type: 'string', enum: ['freemium', 'marketplace', 'saas', 'subscription', 'transactional', 'advertising', 'licensing', 'hybrid'], description: 'Canonical pattern. Useful for benchmarking against peer businesses with the same shape.' },
-    monetisation_basis: { type: 'string', enum: ['usage', 'seat', 'outcome', 'transaction', 'flat'], description: 'Primary monetisation unit' },
-    north_star_metric: { type: 'string', description: 'The single metric the business optimises for' },
+    // monetisation_basis removed in 0.12.0 (P14 Bucket C) — categorical rollup of revenue_stream.billing_model.
+    // north_star_metric removed in 0.12.0 (P14) → `business_model_guided_by_metric` edge.
   },
   // CapabilityProperties: Capability entity.
   capability: {
@@ -549,7 +542,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   classification_axis: {
     axis_kind: { type: 'string', enum: ['categorical', 'ordinal', 'continuous'], description: 'Structural kind of values on this axis. `categorical` = discrete, unordered (most common; CMS architectures). `ordinal` = discrete, ordered (maturity tiers, T-shirt sizes). `continuous` = numeric range (latency budget, price points).' },
     cardinality: { type: 'string', enum: ['single', 'multi'], description: 'How many values a subject may hold on this axis at once (UPG 0.11.3). `single` (default) = a subject sits at exactly one value; a re-classification to a new value SUPERSEDES the prior one (the classify writer retires the old same-axis edge and records the move in the reclassification history). `multi` = a subject may legitimately hold several values at once (e.g. an axis like "supported frameworks"); re-classifying ADDS a value and does not supersede. A separate axis from `axis_kind`: an axis can be `categorical` (unordered) yet `single`-select, or `categorical` yet `multi`-select.' },
-    owner_product: { type: 'string', description: 'Product id when product-specific. Axes are usually product-agnostic; leave empty for shared taxonomies.' },
   },
   // ClassificationValueProperties: ClassificationValue: a value on a classification axis.
   classification_value: {
@@ -909,7 +901,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     consequences: { type: 'string', description: 'Known positive and negative consequences. Mirrors MADR\'s "Consequences" section.' },
     decision_makers: { type: 'string[]', description: 'People who made the decision. Mirrors MADR\'s "Deciders" field.' },
     decision_drivers: { type: 'string[]', description: 'Forces, constraints, and goals that shaped the decision. Mirrors MADR\'s "Decision Drivers" section. @example ["must work offline", "team has no Go expertise", "cost < $500/mo"]' },
-    superseded_by: { type: 'string', description: 'Reference to the superseding decision, if any.' },
   },
   // DeliverableProperties: Deliverable.
   deliverable: {
@@ -1415,7 +1406,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     end_date: { type: 'string', description: 'ISO end date' },
     budget_amount: { type: 'number', description: 'Total allocated budget. Use with `budget_currency`.' },
     budget_currency: { type: 'string', description: 'ISO 4217 currency code (e.g. "USD", "EUR", "GBP")' },
-    channels_targeted: { type: 'string[]', description: 'Channels the campaign runs across. Free-form so partner channels and ad networks both fit (e.g. "google_ads", "linkedin", "podcast_sponsorship").' },
     primary_kpi: { type: 'string', description: 'Primary KPI optimised for (e.g. "qualified_signups", "MQL_volume", "activated_teams")' },
     kpi_target: { type: 'number', description: 'Numeric target for `primary_kpi` over the campaign window' },
     utm_parameters: { type: 'string', description: 'UTM tracking parameters for this campaign' },
@@ -1447,7 +1437,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       required: ['value', 'label'],
     },
     user_facing: { type: 'boolean', description: 'Visible to end users' },
-    root_cause: { type: 'string', description: 'Identified cause' },
     remediation: { type: 'string', description: 'Remediation steps' },
   },
   // HelpVideoProperties: Help video.
@@ -1685,7 +1674,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // JourneyStepProperties: Single step within a user journey. A user-moment on the journey's single
   journey_step: {
     step_order: { type: 'number', description: 'Display order within the journey\'s step timeline (0-indexed). The scalar ordering convention shared with `journey_phase.phase_order` and `journey_action.action_order`. For branching journeys, the explicit `journey_step_precedes_journey_step` edge captures the chain.' },
-    touchpoint: { type: 'string', description: '@deprecated since v0.9.9. Touchpoints are modelled in two places, neither of which is this string: the `touchpoint` *entity* is the cross-channel customer-success layer (`touchpoint_occurs_in_journey_step`), and `journey_action` is the in-product blueprint layer (the finest band of a `journey_step`). Use one of those rather than a free-text string here. Removed in a future major.' },
     channel: { type: 'string', description: 'Channel (e.g. "web", "email", "in-store")' },
     emotion_score: {
       type: 'assessment', scale_id: 'satisfaction_5', description: 'User emotion (1 = very negative, 5 = very positive)',
@@ -1753,7 +1741,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   launch: {
     launch_type: { type: 'string', enum: ['soft', 'beta', 'public', 'feature'], description: 'Scale and audience of the launch' },
     target_date: { type: 'string', description: 'Planned launch date (ISO format)' },
-    success_metrics: { type: 'string[]', description: 'Metrics that define launch success' },
   },
   // LeadProperties: Lead.
   lead: {
@@ -1907,7 +1894,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     range_min: { type: 'number', description: 'Minimum expected or baseline value' },
     range_max: { type: 'number', description: 'Maximum expected or ceiling value' },
     cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'Measurement cadence. Canonical `Cadence` since v0.4.0. `\'realtime\'` migrates to `\'continuous\'`; all other values 1:1.' },
-    data_source: { type: 'string', description: 'Data source or tool that feeds this metric (e.g. "PostHog", "Stripe")' },
     owner: { type: 'string', description: 'Person or team responsible for tracking this metric' },
     metric_health: { type: 'string', enum: ['healthy', 'at_risk', 'unhealthy', 'unknown'], description: 'Universal health rollup. Orthogonal to lifecycle and `guardrail_status`. Applies to every metric regardless of `designation`. `healthy` = trending well against target / inside safe range. `at_risk` = drifting, approaching breach or target shortfall. `unhealthy` = missed target or breached; action needed. `unknown` = no current reading or not yet measured. For guardrails specifically, `guardrail_status` remains the breach-specific signal (`safe`/`warning`/`breached`).' },
     guardrail_threshold_min: { type: 'number', description: 'Lower bound for guardrail safety (below this = breach)' },
@@ -1926,7 +1912,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     quality_score: { type: 'number', description: 'Computed quality score across all quality signals (0–5)' },
     proxy_reason: { type: 'string', enum: ['qualitative', 'no_direct_measure', 'not_yet_instrumented', 'too_expensive'], description: 'Why this metric is used as a proxy instead of measuring directly' },
     proxy_confidence: { type: 'string', enum: ['strong', 'moderate', 'weak'], description: 'How strongly this metric predicts the direct measure' },
-    proxy_alternatives: { type: 'string[]', description: 'Other metrics considered as proxy candidates' },
   },
   // MilestoneProperties: Milestone.
   milestone: {
@@ -1942,7 +1927,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // ModelComparisonProperties: Model comparison.
   model_comparison: {
-    model_ids: { type: 'string[]', description: 'Compared model identifiers' },
     comparison_criteria: { type: 'string[]', description: 'Comparison dimensions (e.g. "accuracy", "cost", "latency")' },
     comparison_date: { type: 'string', description: 'ISO conduct date' },
   },
@@ -2103,7 +2087,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ParticipantProperties: Research participant.
   participant: {
     alias: { type: 'string', description: 'Anonymous alias for privacy (e.g. "P01")' },
-    segment: { type: 'string', description: 'User segment this participant belongs to' },
     recruit_source: { type: 'string', description: 'How the participant was recruited' },
     consent_status: { type: 'string', enum: ['pending', 'given', 'withdrawn'], description: 'Current consent status for data usage' },
   },
@@ -2258,7 +2241,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     last_updated: { type: 'string', description: 'Date the policy was last updated (ISO format)' },
     effective_date: { type: 'string', description: 'Date the policy takes effect (ISO format)' },
     url: { type: 'string', description: 'URL where the policy is published' },
-    regulations: { type: 'string[]', description: 'Regulations this policy addresses (e.g. "GDPR", "CCPA")' },
   },
   // ProductProperties: The product being created. Root of the graph.
   product: {
@@ -2638,7 +2620,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // ServiceLevelIndicatorProperties: Service Level Indicator.
   service_level_indicator: {
-    metric_name: { type: 'string', description: 'Indicator metric name. @example "Request latency p99", "Error rate", "Availability"' },
     threshold: { type: 'number', description: 'Threshold that defines a "good" event. @example 200 (ms latency), 0.01 (1% error rate), 99.9 (% availability)' },
     current_value: { type: 'number', description: 'Current observed value. Compared against `threshold` for SLO compliance. @example 150 (ms), 0.003 (0.3% error rate)', modifier: 'snapshot' },
     unit: { type: 'string', description: 'Unit of measurement. Required to interpret `threshold` and `current_value`. @example "ms", "%", "req/s", "errors/min"' },
@@ -2782,7 +2763,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // SubscriptionProperties: Subscription.
   subscription: {
-    plan_name: { type: 'string', description: 'Name of the subscribed plan' },
     monthly_recurring_revenue: { type: 'number', description: 'Monthly recurring revenue from this subscription' },
     start_date: { type: 'string', description: 'Subscription start date (ISO format)' },
     renewal_date: { type: 'string', description: 'Next renewal date (ISO format)' },
@@ -2872,7 +2852,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     period: { type: 'string', description: 'Time period for the OKR (e.g. "Q2 2026")' },
     progress: { type: 'number', description: 'Overall progress toward the objective (0-100%)' },
     objective_statement: { type: 'string', description: 'The team-level objective statement (key results live in child entities)' },
-    cascade_from: { type: 'string', description: 'Higher-level objective this OKR cascades from (company or department OKR)' },
   },
   // TechnicalDebtItemProperties: Technical debt item.
   technical_debt_item: {
@@ -3115,7 +3094,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     },
     cvss_version: { type: 'string', enum: ['v3.1', 'v4.0'], description: 'CVSS scoring version. v3.1 and v4.0 differ significantly for the same vulnerability. @example "v4.0" for vulnerabilities scored after the v4.0 release in 2023' },
     affected_component: { type: 'string', description: 'Affected component, library, or system. @example "lodash", "openssl", "login service"' },
-    affected_package: { type: 'string', description: 'Affected package with version. More precise than `affected_component`. @example "lodash@4.17.20", "openssl@1.1.1q"' },
     exploit_maturity: { type: 'string', enum: ['no_known_exploit', 'proof_of_concept', 'functional_exploit', 'active_exploitation'], description: 'Exploit maturity. Primary prioritisation factor after severity. `no_known_exploit` = theoretical. `proof_of_concept` = exploit code exists, not weaponised. `functional_exploit` = working exploit available. `active_exploitation` = active in the wild. @example "active_exploitation" demands immediate response regardless of severity score' },
     fix_available: { type: 'boolean', description: 'Patch availability. Common triage question after severity. @example false for a zero-day with no available patch' },
     disclosed_at: { type: 'string', description: 'ISO date publicly disclosed. Time since disclosure matters for SLA. @example "2024-03-15"' },
@@ -3140,7 +3118,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // WireframeProperties: Wireframe.
   wireframe: {
     fidelity: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Detail level' },
-    screen_name: { type: 'string', description: 'Represented screen name' },
     version: { type: 'string', description: 'Version or iteration (e.g. "v2", "2026-04-B")' },
     tool: { type: 'string', description: 'Authoring tool. @example "Figma", "Balsamiq", "pen and paper"' },
     review_status: { type: 'string', enum: ['draft', 'in_review', 'approved', 'rejected'], description: 'Review gate status' },

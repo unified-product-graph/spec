@@ -35,10 +35,11 @@ describe('Metric decomposition', () => {
     expect(edge?.classification).toBe('hierarchy')
   })
 
-  it('metric_quality_assessment carries the 9 quality/proxy props + provenance', () => {
+  it('metric_quality_assessment carries the quality/proxy props + provenance', () => {
     const props = UPG_PROPERTY_SCHEMA.metric_quality_assessment
     expect(props).toBeDefined()
     if (!props) return
+    // proxy_alternatives removed in 0.12.0 (P14) → metric_quality_assessment_considers_proxy_metric edge.
     const expected = [
       'assessed_at',
       'assessor',
@@ -50,7 +51,6 @@ describe('Metric decomposition', () => {
       'quality_score',
       'proxy_reason',
       'proxy_confidence',
-      'proxy_alternatives',
     ]
     for (const key of expected) {
       expect(props, `expected ${key} on metric_quality_assessment`).toHaveProperty(key)

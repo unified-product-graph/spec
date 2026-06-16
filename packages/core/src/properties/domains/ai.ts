@@ -197,8 +197,6 @@ export interface HallucinationReportProperties {
   severity?: UPGAssessment
   /** Visible to end users */
   user_facing?: boolean
-  /** Identified cause */
-  root_cause?: string
   /** Remediation steps */
   remediation?: string
 }
@@ -231,8 +229,6 @@ export interface AiGuardrailProperties {
  * }
  */
 export interface ModelComparisonProperties {
-  /** Compared model identifiers */
-  model_ids?: string[]
   /** Comparison dimensions (e.g. "accuracy", "cost", "latency") */
   comparison_criteria?: string[]
   /** ISO conduct date */
@@ -261,8 +257,6 @@ export interface AiExperimentProperties {
   started_at?: ISODateTime
   /** ISO timestamp completed */
   completed_at?: ISODateTime
-  /** Foundation starting model */
-  foundation_model?: string
   /** Training steps or epochs completed */
   training_steps?: number
   /** Produced artifact URI */
