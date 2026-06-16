@@ -67,6 +67,6 @@ export interface ProductAreaProperties {
   strategic_priority?: Priority
   /** Narrative description of what this area covers */
   description?: string
-  /** Person or team that owns this area */
+  /** Person or team that owns this area. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   owner?: string
 }

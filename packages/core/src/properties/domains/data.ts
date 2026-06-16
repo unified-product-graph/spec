@@ -212,7 +212,7 @@ export interface GlossaryTermProperties {
  * }
  */
 export interface DataDomainProperties {
-  /** Accountable person or team */
+  /** Accountable person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   steward?: string
   /**
    * Domain contents classification.

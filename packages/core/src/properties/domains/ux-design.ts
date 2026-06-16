@@ -120,7 +120,7 @@ export interface JourneyStepProperties {
   friction_score?: UPGAssessment
   /** What the user is thinking */
   thought?: string
-  /** Responsible owner */
+  /** Responsible owner. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
 }
 
@@ -246,7 +246,7 @@ export interface DesignConceptProperties {
   concept_status?: 'exploring' | 'validated' | 'selected' | 'rejected'
   /** Development stage, from rough idea to presentation-ready */
   maturity?: 'sketch' | 'refined' | 'final'
-  /** Shepherding designer or researcher */
+  /** Shepherding designer or researcher. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
 }
 

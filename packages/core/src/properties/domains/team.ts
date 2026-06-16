@@ -185,7 +185,7 @@ export interface DepartmentProperties {
   budget?: number
   /** Charter / purpose statement for the department */
   department_mission?: string
-  /** Department leader (person or role reference) */
+  /** Department leader (person or role reference). Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   leader?: string
   /** Fiscal year the headcount / budget numbers apply to */
   fiscal_year?: string
@@ -229,7 +229,7 @@ export interface CeremonyProperties {
   cadence?: Cadence
   /** Typical duration of the meeting in minutes */
   duration_minutes?: number
-  /** People or roles who attend */
+  /** People or roles who attend. Promote individuals to `node_owned_by_person` edges if participation must be queryable. */
   participants?: string
 }
 

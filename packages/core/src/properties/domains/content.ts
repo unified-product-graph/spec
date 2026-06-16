@@ -111,7 +111,7 @@ export interface DocumentProperties {
   platform?: 'markdown' | 'notion' | 'figma' | 'google_docs' | 'confluence' | 'github' | 'linear' | 'other'
   /** Purpose classification */
   document_type?: 'vision' | 'plan' | 'decision' | 'research' | 'spec' | 'audit' | 'session' | 'feedback' | 'case-study' | 'narrative' | 'bug-report' | 'archive-collection' | 'rfc' | 'runbook' | 'guide' | 'onboarding' | 'brief' | 'report' | 'reference'
-  /** Author (free-form: name, email, or handle) */
+  /** Author (free-form: name, email, or handle). Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   author?: string
   /** ISO 8601 last-meaningful-update */
   last_updated?: ISODateTime

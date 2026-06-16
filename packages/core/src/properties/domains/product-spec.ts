@@ -26,7 +26,7 @@ import type { HealthStatus, ISODate, Priority, UPGAssessment } from '../primitiv
 export interface OutcomeProperties {
   /** Target timeframe (e.g. "Q2 2026", "12 months") */
   timeline?: string
-  /** Accountable person or team */
+  /** Accountable person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /**
    * What "achieved" looks like, concretely. Pairs with `measurement_method`.
@@ -130,7 +130,7 @@ export interface FeatureAreaProperties {
   owning_team?: string
   /** Approximate feature count under this area. Snapshot; `feature_area_contains_feature` edges are the source of truth. */
   feature_count?: number
-  /** Area owner (handle or email) */
+  /** Area owner (handle or email). Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   owner?: string
   /** Importance to the product overall */
   priority?: Priority
@@ -156,7 +156,7 @@ export interface FeatureAreaProperties {
 export interface FeatureProperties {
   /** Task-level priority */
   priority?: Priority
-  /** Responsible person or team */
+  /** Responsible person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /** ISO date work begins */
   start_date?: ISODate
@@ -180,7 +180,7 @@ export interface EpicProperties {
   estimate?: string
   /** Task-level priority */
   priority?: Priority
-  /** Responsible person or team */
+  /** Responsible person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /** ISO date work begins */
   start_date?: ISODate
@@ -263,7 +263,7 @@ export interface ReleaseProperties {
   version?: string
   /** ISO date work begins */
   start_date?: ISODate
-  /** Responsible person or team */
+  /** Responsible person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
 }
 
@@ -276,7 +276,7 @@ export interface ReleaseProperties {
  * }
  */
 export interface TaskProperties {
-  /** Assigned person */
+  /** Assigned person. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   assignee?: string
   /** Effort estimate (e.g. "2h", "1d", "3 points"). Use a consistent unit within your team. */
   effort?: string
@@ -317,7 +317,7 @@ export interface BugProperties {
   environment?: string
   /** Urgency relative to other work. Independent of `bug_severity` (a critical bug can have low priority if rare). */
   priority?: Priority
-  /** Assigned person */
+  /** Assigned person. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   assignee?: string
   /** ISO date due. Often tied to a release gate or SLA. */
   due_date?: ISODate
@@ -339,7 +339,7 @@ export interface RoadmapProperties {
   roadmap_type?: 'now_next_later' | 'quarterly' | 'release_based' | 'theme_based'
   /** Covered timeframe */
   timeframe?: string
-  /** Owning person or team */
+  /** Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
 }
 

@@ -1823,6 +1823,91 @@ export const UPG_SCALAR_TO_EDGE_MIGRATIONS: Record<string, UPGScalarToEdgeMigrat
     { from_type: 'subscription', scalar_property: 'plan_name', target_type: 'pricing_tier', edge_type: 'subscription_subscribes_to_pricing_tier', drop_scalar: true,
       reason: 'P14 shadow: the subscription_subscribes_to_pricing_tier edge already exists. Backfill the plan as a pricing_tier edge, then drop the name string.' },
   ],
+  '0.12.4': [
+    // ── Bucket B — actor-as-string (ADDITIVE: add the ownership edge, KEEP the display string) ──
+    // Per the scalar-vs-edge ADR display-cache rule (2026-06-16) and T3.1 (reuse the
+    // polymorphic node_owned_by_* family; do NOT mint typed actor edges). `drop_scalar`
+    // is FALSE for every entry: the string stays as a human-readable display-cache, and
+    // the edge makes "everything owned by X" queryable across instances. OPT-IN — consumers
+    // run promote_scalars_to_edges when they want the edges; nothing is forced on upgrade.
+    // person-vs-team is the field-level call (ratified 2026-06-16): org units + durable
+    // platform/components → team (9); work items, authored artifacts, and DRIs → person.
+    // Two single-string participant fields (threat_model.participants, ceremony.participants)
+    // are intentionally NOT here: a free-text name list cannot be promoted to one edge
+    // without guessing — they are re-doc'd as display-cache only.
+
+    // ── owned by a team (org units + durable platform/components) ──
+    { from_type: 'feature_area', scalar_property: 'owner', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: a feature area is owned by a team; link node_owned_by_team so "everything this team owns" is queryable. Display string kept as a cache.' },
+    { from_type: 'bounded_context', scalar_property: 'team_owner', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: the owning team is a first-class entity; link node_owned_by_team. Display string kept as a cache.' },
+    { from_type: 'service', scalar_property: 'owner', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: Backstage-style service ownership rolls up by team; link node_owned_by_team. Display string kept as a cache.' },
+    { from_type: 'product_area', scalar_property: 'owner', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: a product area is an org unit owned by a team; link node_owned_by_team. Display string kept as a cache.' },
+    { from_type: 'api_contract', scalar_property: 'owner', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: an API contract is a service-interface component owned by the team that owns the service (Backstage); link node_owned_by_team. Display string kept as a cache.' },
+    { from_type: 'database_schema', scalar_property: 'owner', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: a database schema is a data component owned by the team responsible for it; link node_owned_by_team. Display string kept as a cache.' },
+    { from_type: 'design_system', scalar_property: 'maintainer', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: a design system is a shared platform maintained by a team; link node_owned_by_team. Display string kept as a cache.' },
+    { from_type: 'service_level_agreement', scalar_property: 'owner', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: an SLA is a service-provider-side commitment owned by a team; link node_owned_by_team. Display string kept as a cache.' },
+    { from_type: 'key_activity', scalar_property: 'operational_owner', target_type: 'team', edge_type: 'node_owned_by_team', drop_scalar: false,
+      reason: 'P14 actor: the operationally accountable owner of a recurring activity is a team; link node_owned_by_team. Display string kept as a cache.' },
+
+    // ── owned by a person (DRIs, work items, authored artifacts; the string is a name, handle, or email) ──
+    { from_type: 'strategic_theme', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the theme owner is a first-class person; link node_owned_by_person so cross-theme ownership is queryable. Display string kept.' },
+    { from_type: 'initiative', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the initiative owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'strategic_pillar', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the pillar owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'metric', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the metric owner is a first-class person ("every metric this person owns"); link node_owned_by_person. Display string kept.' },
+    { from_type: 'data_domain', scalar_property: 'steward', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the data steward is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'partnership', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the partnership owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'key_resource', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the resource owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'document', scalar_property: 'author', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the author is a first-class person ("every document by this author"); link node_owned_by_person. Display string kept.' },
+    { from_type: 'outcome', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the outcome owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'feature', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the feature owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'epic', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the epic owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'release', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the release owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'task', scalar_property: 'assignee', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the assignee is a first-class person ("every task assigned to this person"); link node_owned_by_person. Display string kept.' },
+    { from_type: 'bug', scalar_property: 'assignee', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the assignee is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'roadmap', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the roadmap owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'journey_step', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the journey-step owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'design_concept', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the design-concept owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'technical_debt_item', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the debt-item owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'feature_flag', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the flag owner is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'deployment', scalar_property: 'deployer', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the deployer is a first-class person ("every deployment by this person"); link node_owned_by_person. Display string kept.' },
+    { from_type: 'investigation', scalar_property: 'lead_investigator', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the lead investigator is a first-class person; link node_owned_by_person. Display string kept.' },
+    { from_type: 'department', scalar_property: 'leader', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
+      reason: 'P14 actor: the department leader is a first-class person; link node_owned_by_person. Display string kept.' },
+
+    // ── owned by people (multi: string[] of names) ──
+    { from_type: 'decision', scalar_property: 'decision_makers', target_type: 'person', edge_type: 'node_owned_by_person', multi: true, drop_scalar: false,
+      reason: 'P14 actor: each decision-maker is a first-class person; one node_owned_by_person edge per name. Display list kept as a cache.' },
+    { from_type: 'review_gate', scalar_property: 'required_approvers', target_type: 'person', edge_type: 'node_owned_by_person', multi: true, drop_scalar: false,
+      reason: 'P14 actor: each required approver is a first-class person; one node_owned_by_person edge per name. Display list kept as a cache.' },
+  ],
 }
 
 /**

@@ -43,7 +43,7 @@ export interface ThreatModelProperties {
    */
   last_reviewed?: string
   /**
-   * Participants in the exercise.
+   * Participants in the exercise. Promote individuals to `node_owned_by_person` edges if participation must be queryable.
    * @example "Alice Chen (security lead), Bob Park (backend engineer), Carol Liu (architect)"
    */
   participants?: string

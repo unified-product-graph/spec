@@ -157,7 +157,7 @@ export interface ServiceLevelAgreementProperties {
   effective_date?: ISODate
   /** ISO date expires. Pairs with `agreement_term` for renewal logic. */
   expiry_date?: ISODate
-  /** Party accountable on the service provider side */
+  /** Party accountable on the service provider side. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   owner?: string
   /** What happens if the SLA is breached (credits, penalties, escalation path) */
   consequence_of_breach?: string

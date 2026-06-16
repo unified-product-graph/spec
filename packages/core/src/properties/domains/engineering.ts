@@ -22,7 +22,7 @@ import type { CauseConfidence, Confidence, Duration, FrequencyRating, ISODate, I
  * }
  */
 export interface BoundedContextProperties {
-  /** Owning team */
+  /** Owning team. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   team_owner?: string
   /** Technologies used within this context */
   tech_stack?: string[]
@@ -43,7 +43,7 @@ export interface ServiceProperties {
   service_type?: 'web' | 'api' | 'worker' | 'db' | 'queue' | 'library' | 'mobile' | 'docs' | 'lambda' | 'cli'
   /** Technologies used (e.g. ["TypeScript", "Postgres", "Redis"]) */
   tech_stack?: string[]
-  /** Owning person or team. Backstage marks this required; strongly recommended. */
+  /** Owning person or team. Backstage marks this required; strongly recommended. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   owner?: string
   /**
    * Service maturity. Answers "how mature is it?".
@@ -91,7 +91,7 @@ export interface ApiContractProperties {
   protocol?: 'REST' | 'GraphQL' | 'gRPC' | 'AsyncAPI' | 'SOAP' | 'WebSocket' | 'MQTT' | 'SSE' | 'other'
   /** API version */
   version?: string
-  /** Maintaining person or team. */
+  /** Maintaining person or team. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   owner?: string
 }
 
@@ -116,7 +116,7 @@ export interface TechnicalDebtItemProperties {
   severity?: UPGAssessment
   /** Estimated effort to resolve. Requires team knowledge of the codebase. */
   effort_to_fix?: UPGAssessment
-  /** Owning person or team responsible for paydown. */
+  /** Owning person or team responsible for paydown. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /**
    * Codebase location, service, or module.
@@ -159,7 +159,7 @@ export interface FeatureFlagProperties {
   rollout_pct?: number
   /** Human-readable targeting rules. Full rule evaluation happens in the flag service. */
   targeting_rules?: string
-  /** Owning person or team responsible for the flag's lifecycle. */
+  /** Owning person or team responsible for the flag's lifecycle. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /**
    * Lifecycle classification.
@@ -197,7 +197,7 @@ export interface DeploymentProperties {
   sha?: string
   /** Wall-clock duration in seconds. Tracks deployment speed trends. */
   duration_seconds?: number
-  /** Triggering person or system. */
+  /** Triggering person or system. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   deployer?: string
 }
 
@@ -314,7 +314,7 @@ export interface DatabaseSchemaProperties {
   schema_version?: string
   /** Pending-migration status */
   migration_status?: 'current' | 'pending' | 'failed'
-  /** Owning person or team responsible for design and migrations. */
+  /** Owning person or team responsible for design and migrations. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   owner?: string
   /** Tables or collections in this schema. Useful for migration scope estimation. */
   table_count?: number
@@ -528,7 +528,7 @@ export interface InvestigationProperties {
   started_at?: ISODateTime
   /** ISO timestamp the investigation was concluded. Pairs with `status === 'resolved' | 'abandoned'`. */
   resolved_at?: ISODateTime
-  /** Lead investigator (email or handle). Distinct from the team owning the affected service. */
+  /** Lead investigator (email or handle). Distinct from the team owning the affected service. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   lead_investigator?: string
   /** Originating session */
   session_id?: string

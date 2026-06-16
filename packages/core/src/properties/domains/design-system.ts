@@ -66,7 +66,7 @@ export interface DesignSystemProperties {
   version?: string
   /** Code repository or package path */
   repo_path?: string
-  /** Maintaining person or team */
+  /** Maintaining person or team. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   maintainer?: string
   /** Open-source license, if public */
   license?: string

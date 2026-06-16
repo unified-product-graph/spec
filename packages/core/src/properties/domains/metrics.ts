@@ -127,7 +127,7 @@ export interface MetricProperties {
    * `'realtime'` migrates to `'continuous'`; all other values 1:1.
    */
   cadence?: Cadence
-  /** Person or team responsible for tracking this metric */
+  /** Person or team responsible for tracking this metric. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
 
   // ── Health ──

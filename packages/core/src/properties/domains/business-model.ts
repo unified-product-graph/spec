@@ -183,7 +183,7 @@ export interface PartnershipProperties {
   partnership_tier?: 'strategic' | 'preferred' | 'standard' | 'trial'
   /** Exposure if the partnership fails (concentration risk, IP risk, etc.) */
   risk_level?: UPGAssessment
-  /** Internal owner */
+  /** Internal owner. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /** Date the partnership became effective (ISO 8601) */
   start_date?: ISODate
@@ -203,7 +203,7 @@ export interface KeyResourceProperties {
   resource_type?: 'physical' | 'intellectual' | 'human' | 'financial'
   /** Criticality to the business model */
   criticality?: Priority
-  /** Accountable person or team */
+  /** Accountable person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /** Replacement difficulty */
   scarcity_risk?: UPGAssessment
@@ -235,7 +235,7 @@ export interface KeyActivityProperties {
   frequency_period?: Duration
   /** Qualitative tier. Use when an exact rate is unknown. */
   frequency_rating?: FrequencyRating
-  /** Operationally accountable team or individual */
+  /** Operationally accountable team or individual. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   operational_owner?: string
   /** Bottleneck or scaling constraint */
   capacity_constraint?: string

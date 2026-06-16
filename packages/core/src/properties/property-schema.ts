@@ -291,7 +291,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     spec_url: { type: 'string', description: 'URL of the specification document' },
     protocol: { type: 'string', enum: ['REST', 'GraphQL', 'gRPC', 'AsyncAPI', 'SOAP', 'WebSocket', 'MQTT', 'SSE', 'other'], description: 'Communication protocol. `SSE` (server-sent events) added in 0.9.12.' },
     version: { type: 'string', description: 'API version' },
-    owner: { type: 'string', description: 'Maintaining person or team.' },
+    owner: { type: 'string', description: 'Maintaining person or team. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
   },
   // ApiEcosystemProperties: API ecosystem.
   api_ecosystem: {
@@ -368,7 +368,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // BoundedContextProperties: DDD bounded context.
   bounded_context: {
-    team_owner: { type: 'string', description: 'Owning team' },
+    team_owner: { type: 'string', description: 'Owning team. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     tech_stack: { type: 'string[]', description: 'Technologies used within this context' },
     ubiquitous_language: { type: 'string', description: 'Key terms and their definitions' },
   },
@@ -455,7 +455,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     steps_to_reproduce: { type: 'string', description: 'Step-by-step reproduction' },
     environment: { type: 'string', description: 'Observed environment (e.g. "prod", "staging", "iOS 17.4")' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Urgency relative to other work. Independent of `bug_severity` (a critical bug can have low priority if rare).' },
-    assignee: { type: 'string', description: 'Assigned person' },
+    assignee: { type: 'string', description: 'Assigned person. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     due_date: { type: 'string', description: 'ISO date due. Often tied to a release gate or SLA.' },
     labels: { type: 'string[]', description: 'Free-form classification tags. Applied uniformly across work item types.' },
   },
@@ -495,7 +495,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     ceremony_type: { type: 'string', enum: ['standup', 'planning', 'review', 'retro', 'sync', 'demo', 'other'], description: 'Kind of recurring meeting' },
     cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'How often the ceremony occurs. Uses the shared `Cadence` scale.' },
     duration_minutes: { type: 'number', description: 'Typical duration of the meeting in minutes' },
-    participants: { type: 'string', description: 'People or roles who attend' },
+    participants: { type: 'string', description: 'People or roles who attend. Promote individuals to `node_owned_by_person` edges if participation must be queryable.' },
   },
   // CertificationProperties: Certification.
   certification: {
@@ -815,7 +815,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // DataDomainProperties: DataDomain. A coarse-grained grouping of related data assets (sources,
   data_domain: {
-    steward: { type: 'string', description: 'Accountable person or team' },
+    steward: { type: 'string', description: 'Accountable person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     domain_type: { type: 'string', enum: ['master', 'operational', 'analytical', 'reference'], description: 'Domain contents classification. `master` = canonical entity data (customers, products). `operational` = live transactional data. `analytical` = warehouse / BI data. `reference` = slow-changing lookup data.' },
     sensitivity: { type: 'string', enum: ['public', 'internal', 'confidential', 'restricted'], description: 'Sensitivity band applied across the domain' },
   },
@@ -881,7 +881,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     db_type: { type: 'string', enum: ['postgres', 'mysql', 'mongodb', 'redis', 'other'], description: 'Engine' },
     schema_version: { type: 'string', description: 'Current schema version' },
     migration_status: { type: 'string', enum: ['current', 'pending', 'failed'], description: 'Pending-migration status' },
-    owner: { type: 'string', description: 'Owning person or team responsible for design and migrations.' },
+    owner: { type: 'string', description: 'Owning person or team responsible for design and migrations. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     table_count: { type: 'number', description: 'Tables or collections in this schema. Useful for migration scope estimation.' },
   },
   // DealProperties: Deal.
@@ -899,7 +899,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     date: { type: 'string', description: 'ISO date the decision was made or last meaningfully updated.' },
     decision_outcome: { type: 'string', description: 'Outcome text. What was decided. Separate from `rationale` (which explains why).' },
     consequences: { type: 'string', description: 'Known positive and negative consequences. Mirrors MADR\'s "Consequences" section.' },
-    decision_makers: { type: 'string[]', description: 'People who made the decision. Mirrors MADR\'s "Deciders" field.' },
+    decision_makers: { type: 'string[]', description: 'People who made the decision. Mirrors MADR\'s "Deciders" field. Promote to `node_owned_by_person` edges (one per name) if ownership must be queryable.' },
     decision_drivers: { type: 'string[]', description: 'Forces, constraints, and goals that shaped the decision. Mirrors MADR\'s "Decision Drivers" section. @example ["must work offline", "team has no Go expertise", "cost < $500/mo"]' },
   },
   // DeliverableProperties: Deliverable.
@@ -920,7 +920,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     headcount: { type: 'number', description: 'Total number of people in the department' },
     budget: { type: 'number', description: 'Annual budget allocated to the department' },
     department_mission: { type: 'string', description: 'Charter / purpose statement for the department' },
-    leader: { type: 'string', description: 'Department leader (person or role reference)' },
+    leader: { type: 'string', description: 'Department leader (person or role reference). Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     fiscal_year: { type: 'string', description: 'Fiscal year the headcount / budget numbers apply to' },
   },
   // DependencyProperties: Dependency entity.
@@ -938,7 +938,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     deploy_status: { type: 'string', enum: ['success', 'failure', 'rolling'], description: 'Current status' },
     sha: { type: 'string', description: 'Git SHA of the deployed commit' },
     duration_seconds: { type: 'number', description: 'Wall-clock duration in seconds. Tracks deployment speed trends.' },
-    deployer: { type: 'string', description: 'Triggering person or system.' },
+    deployer: { type: 'string', description: 'Triggering person or system. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
   },
   // DesignComponentProperties: Design system component.
   design_component: {
@@ -955,7 +955,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     rationale: { type: 'string', description: 'Selection or rejection rationale' },
     concept_status: { type: 'string', enum: ['exploring', 'validated', 'selected', 'rejected'], description: 'Current selection status' },
     maturity: { type: 'string', enum: ['sketch', 'refined', 'final'], description: 'Development stage, from rough idea to presentation-ready' },
-    owner: { type: 'string', description: 'Shepherding designer or researcher' },
+    owner: { type: 'string', description: 'Shepherding designer or researcher. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
   },
   // DesignGuidelineProperties: Design guideline.
   design_guideline: {
@@ -1004,7 +1004,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   design_system: {
     version: { type: 'string', description: 'Current version' },
     repo_path: { type: 'string', description: 'Code repository or package path' },
-    maintainer: { type: 'string', description: 'Maintaining person or team' },
+    maintainer: { type: 'string', description: 'Maintaining person or team. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     license: { type: 'string', description: 'Open-source license, if public' },
     homepage_url: { type: 'string', description: 'Documentation homepage. Public-facing entry point.' },
   },
@@ -1063,7 +1063,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     source_url: { type: 'string', description: 'Canonical retrievable URL' },
     platform: { type: 'string', enum: ['markdown', 'notion', 'figma', 'google_docs', 'confluence', 'github', 'linear', 'other'], description: 'Hosting platform' },
     document_type: { type: 'string', enum: ['vision', 'plan', 'decision', 'research', 'spec', 'audit', 'session', 'feedback', 'case-study', 'narrative', 'bug-report', 'archive-collection', 'rfc', 'runbook', 'guide', 'onboarding', 'brief', 'report', 'reference'], description: 'Purpose classification' },
-    author: { type: 'string', description: 'Author (free-form: name, email, or handle)' },
+    author: { type: 'string', description: 'Author (free-form: name, email, or handle). Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     last_updated: { type: 'string', description: 'ISO 8601 last-meaningful-update' },
     word_count: { type: 'number', description: 'Approximate word count. Useful for planning, indexing, summarisation.' },
     content_summary: { type: 'string', description: '1–3 sentence summary. Drives previews, search snippets, embedding context.' },
@@ -1101,7 +1101,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   epic: {
     estimate: { type: 'string', description: 'Rough size estimate (e.g. "3 sprints", "L", "13 points")' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Task-level priority' },
-    owner: { type: 'string', description: 'Responsible person or team' },
+    owner: { type: 'string', description: 'Responsible person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     start_date: { type: 'string', description: 'ISO date work begins' },
     target_date: { type: 'string', description: 'ISO date work completes' },
   },
@@ -1267,7 +1267,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // FeatureProperties: A discrete, user-facing capability of the product.
   feature: {
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Task-level priority' },
-    owner: { type: 'string', description: 'Responsible person or team' },
+    owner: { type: 'string', description: 'Responsible person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     start_date: { type: 'string', description: 'ISO date work begins' },
     target_date: { type: 'string', description: 'ISO date work completes' },
     health: { type: 'string', enum: ['on_track', 'at_risk', 'off_track'], description: 'Delivery health' },
@@ -1277,7 +1277,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     scope_summary: { type: 'string', description: 'One-line scope description. Disambiguates from sibling areas at a glance.' },
     owning_team: { type: 'string', description: 'Team identifier or slug. Free-form display. Canonical relationship is the `team_owns_feature_area` edge.' },
     feature_count: { type: 'number', description: 'Approximate feature count under this area. Snapshot; `feature_area_contains_feature` edges are the source of truth.', modifier: 'derived' },
-    owner: { type: 'string', description: 'Area owner (handle or email)' },
+    owner: { type: 'string', description: 'Area owner (handle or email). Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Importance to the product overall' },
     maturity: { type: 'string', enum: ['nascent', 'growing', 'mature', 'legacy'], description: 'Maturity. `nascent` = newly-formed grouping. `mature` = established surface. `legacy` = being phased out for a successor.' },
     area_status: { type: 'string', enum: ['active', 'planned', 'deprecated'], description: 'Status in the product structure' },
@@ -1288,7 +1288,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     flag_status: { type: 'string', enum: ['on', 'off', 'rollout'], description: 'Activation state. `on` = enabled for all. `off` = disabled for all. `rollout` = partial via targeting_rules.' },
     rollout_pct: { type: 'number', description: 'Percentage enabled (0–100). Meaningful when `flag_status === \'rollout\'`.' },
     targeting_rules: { type: 'string', description: 'Human-readable targeting rules. Full rule evaluation happens in the flag service.' },
-    owner: { type: 'string', description: 'Owning person or team responsible for the flag\'s lifecycle.' },
+    owner: { type: 'string', description: 'Owning person or team responsible for the flag\'s lifecycle. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     flag_type: { type: 'string', enum: ['temporary', 'permanent', 'experiment'], description: 'Lifecycle classification. `temporary` = should be removed after rollout (kill switch, gradual rollout). `permanent` = long-lived feature gate (entitlement flag). `experiment` = A/B test with a defined end condition.' },
     expiry_date: { type: 'string', description: 'ISO date after which this flag should be cleaned up. A temporary flag without an `expiry_date` is a code smell.' },
     created_date: { type: 'string', description: 'Creation date. Useful for flag age and stale-flag detection.' },
@@ -1513,7 +1513,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     start_date: { type: 'string', description: 'ISO start date. @example "2026-04-01"' },
     end_date: { type: 'string', description: 'ISO end date. @example "2026-09-30"' },
     budget: { type: 'number', description: 'Budget allocated (base currency units)' },
-    owner: { type: 'string', description: 'Owning person or team' },
+    owner: { type: 'string', description: 'Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
   },
   // InsightProperties: Unified insight, synthesised from evidence and observations.
   insight: {
@@ -1578,7 +1578,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     findings: { type: 'string', description: 'Findings discovered so far' },
     started_at: { type: 'string', description: 'ISO timestamp the investigation began' },
     resolved_at: { type: 'string', description: 'ISO timestamp the investigation was concluded. Pairs with `status === \'resolved\' | \'abandoned\'`.' },
-    lead_investigator: { type: 'string', description: 'Lead investigator (email or handle). Distinct from the team owning the affected service.' },
+    lead_investigator: { type: 'string', description: 'Lead investigator (email or handle). Distinct from the team owning the affected service. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     session_id: { type: 'string', description: 'Originating session' },
     category: { type: 'string', enum: ['performance', 'security', 'data_quality', 'reliability', 'cost', 'compliance', 'other'], description: 'Kind of issue under investigation. Distinct from `RootCauseProperties.cause_category`, which captures *why something went wrong*.' },
   },
@@ -1696,7 +1696,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       required: ['value', 'label'],
     },
     thought: { type: 'string', description: 'What the user is thinking' },
-    owner: { type: 'string', description: 'Responsible owner' },
+    owner: { type: 'string', description: 'Responsible owner. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
   },
   // KeyActivityProperties: KeyActivity.
   key_activity: {
@@ -1705,7 +1705,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     frequency_count: { type: 'number', description: 'Exact count of runs in the period. Pairs with `frequency_period`.' },
     frequency_period: { type: 'string', description: 'Recurrence period (ISO-8601 `Duration`, e.g. `\'P7D\'`)' },
     frequency_rating: { type: 'string', enum: ['constant', 'regular', 'occasional', 'rare', 'other'], description: 'Qualitative tier. Use when an exact rate is unknown.' },
-    operational_owner: { type: 'string', description: 'Operationally accountable team or individual' },
+    operational_owner: { type: 'string', description: 'Operationally accountable team or individual. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     capacity_constraint: { type: 'string', description: 'Bottleneck or scaling constraint' },
     automation_level: { type: 'string', enum: ['manual', 'assisted', 'automated'], description: 'How much runs without human intervention' },
   },
@@ -1713,7 +1713,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   key_resource: {
     resource_type: { type: 'string', enum: ['physical', 'intellectual', 'human', 'financial'], description: 'Category' },
     criticality: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Criticality to the business model' },
-    owner: { type: 'string', description: 'Accountable person or team' },
+    owner: { type: 'string', description: 'Accountable person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     scarcity_risk: {
       type: 'assessment', scale_id: 'severity_5', description: 'Replacement difficulty',
       properties: {
@@ -1894,7 +1894,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     range_min: { type: 'number', description: 'Minimum expected or baseline value' },
     range_max: { type: 'number', description: 'Maximum expected or ceiling value' },
     cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'Measurement cadence. Canonical `Cadence` since v0.4.0. `\'realtime\'` migrates to `\'continuous\'`; all other values 1:1.' },
-    owner: { type: 'string', description: 'Person or team responsible for tracking this metric' },
+    owner: { type: 'string', description: 'Person or team responsible for tracking this metric. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     metric_health: { type: 'string', enum: ['healthy', 'at_risk', 'unhealthy', 'unknown'], description: 'Universal health rollup. Orthogonal to lifecycle and `guardrail_status`. Applies to every metric regardless of `designation`. `healthy` = trending well against target / inside safe range. `at_risk` = drifting, approaching breach or target shortfall. `unhealthy` = missed target or breached; action needed. `unknown` = no current reading or not yet measured. For guardrails specifically, `guardrail_status` remains the breach-specific signal (`safe`/`warning`/`breached`).' },
     guardrail_threshold_min: { type: 'number', description: 'Lower bound for guardrail safety (below this = breach)' },
     guardrail_threshold_max: { type: 'number', description: 'Upper bound for guardrail safety (above this = breach)' },
@@ -2067,7 +2067,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // OutcomeProperties: A measurable change in user or business state the product drives.
   outcome: {
     timeline: { type: 'string', description: 'Target timeframe (e.g. "Q2 2026", "12 months")' },
-    owner: { type: 'string', description: 'Accountable person or team' },
+    owner: { type: 'string', description: 'Accountable person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     success_criteria: { type: 'string', description: 'What "achieved" looks like, concretely. Pairs with `measurement_method`. @example "30-day retention above 40% for new signups"' },
     measurement_method: { type: 'string', enum: ['quantitative', 'qualitative', 'mixed'], description: 'Assessment approach. `quantitative` = metrics drive the call. `qualitative` = observation / interviews. `mixed` = both, weighted case-by-case.' },
     current_state: { type: 'string', description: 'Baseline or latest read' },
@@ -2122,7 +2122,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       },
       required: ['value', 'label'],
     },
-    owner: { type: 'string', description: 'Internal owner' },
+    owner: { type: 'string', description: 'Internal owner. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     start_date: { type: 'string', description: 'Date the partnership became effective (ISO 8601)' },
   },
   // PaywallProperties: Paywall.
@@ -2250,7 +2250,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   product_area: {
     strategic_priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Strategic priority assigned to this area' },
     description: { type: 'string', description: 'Narrative description of what this area covers' },
-    owner: { type: 'string', description: 'Person or team that owns this area' },
+    owner: { type: 'string', description: 'Person or team that owns this area. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
   },
   // ProgramProperties: Program.
   program: {
@@ -2359,7 +2359,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     release_date: { type: 'string', description: 'Scheduled or actual release date (ISO)' },
     version: { type: 'string', description: 'Semver or named version (e.g. "v2.1.0", "Beta 3")' },
     start_date: { type: 'string', description: 'ISO date work begins' },
-    owner: { type: 'string', description: 'Responsible person or team' },
+    owner: { type: 'string', description: 'Responsible person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
   },
   // ReleaseStrategyProperties: Release strategy.
   release_strategy: {
@@ -2420,7 +2420,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ReviewGateProperties: Review gate.
   review_gate: {
     gate_type: { type: 'string', enum: ['human_review', 'automated_check', 'approval'], description: 'Kind of review required at this gate' },
-    required_approvers: { type: 'string[]', description: 'People or roles that must approve' },
+    required_approvers: { type: 'string[]', description: 'People or roles that must approve. Promote to `node_owned_by_person` edges (one per name) if ownership must be queryable.' },
     gate_status: { type: 'string', enum: ['pending', 'approved', 'rejected', 'bypassed'], description: 'Current approval status of the gate' },
   },
   // RiskProperties: Risk.
@@ -2456,7 +2456,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   roadmap: {
     roadmap_type: { type: 'string', enum: ['now_next_later', 'quarterly', 'release_based', 'theme_based'], description: 'Structure' },
     timeframe: { type: 'string', description: 'Covered timeframe' },
-    owner: { type: 'string', description: 'Owning person or team' },
+    owner: { type: 'string', description: 'Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
   },
   // RoadmapItemProperties: Roadmap item.
   roadmap_item: {
@@ -2590,7 +2590,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   service: {
     service_type: { type: 'string', enum: ['web', 'api', 'worker', 'db', 'queue', 'library', 'mobile', 'docs', 'lambda', 'cli'], description: 'Functional classification. Expanded from Backstage\'s component type vocabulary. `cli` added in 0.9.12.' },
     tech_stack: { type: 'string[]', description: 'Technologies used (e.g. ["TypeScript", "Postgres", "Redis"])' },
-    owner: { type: 'string', description: 'Owning person or team. Backstage marks this required; strongly recommended.' },
+    owner: { type: 'string', description: 'Owning person or team. Backstage marks this required; strongly recommended. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     lifecycle: { type: 'string', enum: ['experimental', 'production', 'deprecated'], description: 'Service maturity. Answers "how mature is it?". `experimental` = early-stage. `production` = battle-tested. `deprecated` = being phased out.' },
     tags: { type: 'string[]', description: 'Free-form filter tags (e.g. ["payments", "critical-path", "team-alpha"]).' },
     links: { type: 'object[]', description: 'Named URLs for documentation, dashboards, runbooks.' },
@@ -2611,7 +2611,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     agreement_term: { type: 'string', description: 'Effective term of the agreement (e.g. "12 months", "auto-renewing annual")' },
     effective_date: { type: 'string', description: 'ISO date effective' },
     expiry_date: { type: 'string', description: 'ISO date expires. Pairs with `agreement_term` for renewal logic.' },
-    owner: { type: 'string', description: 'Party accountable on the service provider side' },
+    owner: { type: 'string', description: 'Party accountable on the service provider side. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     consequence_of_breach: { type: 'string', description: 'What happens if the SLA is breached (credits, penalties, escalation path)' },
   },
   // ServiceLevelIndicatorProperties: Service Level Indicator.
@@ -2744,7 +2744,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // StrategicPillarProperties: StrategicPillar entity. Durable multi-year direction the product commits to.
   strategic_pillar: {
-    owner: { type: 'string', description: 'Owning person or team' },
+    owner: { type: 'string', description: 'Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     description: { type: 'string', description: 'Narrative of the pillar\'s intent' },
     scope: { type: 'string', description: 'What this pillar covers' },
     time_horizon: { type: 'string', description: 'Planning horizon. Typically multi-year. @example "3 years", "2026-2028"' },
@@ -2752,7 +2752,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // StrategicThemeProperties: StrategicTheme entity.
   strategic_theme: {
-    owner: { type: 'string', description: 'Owning person or team' },
+    owner: { type: 'string', description: 'Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     time_horizon: { type: 'string', description: 'Planning horizon. @example "Q1 2026", "FY26"' },
     description: { type: 'string', description: 'Short narrative of what the theme is about' },
     scope: { type: 'string', description: 'What the theme explicitly includes or excludes' },
@@ -2839,7 +2839,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // TaskProperties: Task: a discrete unit of work, smaller than a story.
   task: {
-    assignee: { type: 'string', description: 'Assigned person' },
+    assignee: { type: 'string', description: 'Assigned person. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     effort: { type: 'string', description: 'Effort estimate (e.g. "2h", "1d", "3 points"). Use a consistent unit within your team.' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Relative importance against other tasks' },
     due_date: { type: 'string', description: 'ISO date due. Typically bounded by the containing story\'s due date.' },
@@ -2881,7 +2881,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       },
       required: ['value', 'label'],
     },
-    owner: { type: 'string', description: 'Owning person or team responsible for paydown.' },
+    owner: { type: 'string', description: 'Owning person or team responsible for paydown. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     affected_area: { type: 'string', description: 'Codebase location, service, or module. @example "apps/graph/src/canvas/", "UserService", "auth module"' },
     interest: { type: 'string', description: 'Ongoing cost of leaving it unresolved (the "interest" in the financial metaphor). @example "~2h/sprint of workarounds", "blocks type-safe refactor of checkout"' },
     intentionality: { type: 'string', enum: ['deliberate', 'inadvertent'], description: 'Origin of the debt. `deliberate` = conscious decision to ship something imperfect (prudent or reckless). `inadvertent` = discovered after the fact. Based on Fowler\'s Technical Debt Quadrant.' },
@@ -2985,7 +2985,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     methodology: { type: 'string', enum: ['stride', 'dread', 'pasta', 'attack_tree', 'other'], description: 'Methodology. `stride` = Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation of Privilege (OWASP standard). `dread` = Damage, Reproducibility, Exploitability, Affected users, Discoverability (numeric scoring). `pasta` = Process for Attack Simulation and Threat Analysis (7-stage). `attack_tree` = hierarchical tree of attack paths. @example "stride" is the most widely used methodology for web applications' },
     scope: { type: 'string', description: 'What system, feature, or data flow is being analysed. @example "user authentication", "payment processing", "admin API"' },
     last_reviewed: { type: 'string', description: 'ISO date last reviewed. Models become stale as systems evolve. @example "2026-03-01"' },
-    participants: { type: 'string', description: 'Participants in the exercise. @example "Alice Chen (security lead), Bob Park (backend engineer), Carol Liu (architect)"' },
+    participants: { type: 'string', description: 'Participants in the exercise. @example "Alice Chen (security lead), Bob Park (backend engineer), Carol Liu (architect)". Promote individuals to `node_owned_by_person` edges if participation must be queryable.' },
     threat_count: { type: 'number', description: 'Threats identified. Key metric for scope and completeness. @example 12' },
   },
   // TouchpointProperties: Customer touchpoint.

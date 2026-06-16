@@ -94,7 +94,7 @@ export interface MissionProperties {
  * }
  */
 export interface StrategicThemeProperties {
-  /** Owning person or team */
+  /** Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /**
    * Planning horizon.
@@ -129,7 +129,7 @@ export interface InitiativeProperties {
   end_date?: ISODate
   /** Budget allocated (base currency units) */
   budget?: number
-  /** Owning person or team */
+  /** Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
 }
 
@@ -207,7 +207,7 @@ export interface ValueStreamProperties {
  * }
  */
 export interface StrategicPillarProperties {
-  /** Owning person or team */
+  /** Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /** Narrative of the pillar's intent */
   description?: string
@@ -271,7 +271,7 @@ export interface DecisionProperties {
   decision_outcome?: string
   /** Known positive and negative consequences. Mirrors MADR's "Consequences" section. */
   consequences?: string
-  /** People who made the decision. Mirrors MADR's "Deciders" field. */
+  /** People who made the decision. Mirrors MADR's "Deciders" field. Promote to `node_owned_by_person` edges (one per name) if ownership must be queryable. */
   decision_makers?: string[]
   /**
    * Forces, constraints, and goals that shaped the decision. Mirrors MADR's
