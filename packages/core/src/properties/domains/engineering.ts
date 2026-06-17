@@ -515,8 +515,6 @@ export interface InvestigationProperties {
   resolved_at?: ISODateTime
   /** Lead investigator (email or handle). Distinct from the team owning the affected service. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   lead_investigator?: string
-  /** Originating session */
-  session_id?: string
   /**
    * Kind of issue under investigation. Distinct from `RootCauseProperties.cause_category`,
    * which captures *why something went wrong*.

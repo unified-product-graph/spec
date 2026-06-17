@@ -96,7 +96,6 @@ export interface InternalDocProperties {
  *   source_url: 'https://github.com/unified-product-graph/core/blob/main/spec/v0.2/upg-core.md',
  *   platform: 'markdown',
  *   document_type: 'spec',
- *   author: 'fraan@theproductcreator.com',
  *   last_updated: '2026-04-28T13:27:08Z',
  *   word_count: 2480,
  *   content_summary: 'Defines the v0.2 entity catalogue, edge catalogue, and migration adapters.',
@@ -111,8 +110,6 @@ export interface DocumentProperties {
   platform?: 'markdown' | 'notion' | 'figma' | 'google_docs' | 'confluence' | 'github' | 'linear' | 'other'
   /** Purpose classification */
   document_type?: 'vision' | 'plan' | 'decision' | 'research' | 'spec' | 'audit' | 'session' | 'feedback' | 'case-study' | 'narrative' | 'bug-report' | 'archive-collection' | 'rfc' | 'runbook' | 'guide' | 'onboarding' | 'brief' | 'report' | 'reference'
-  /** Author (free-form: name, email, or handle). Promote to a `node_owned_by_person` edge if ownership must be queryable. */
-  author?: string
   /** ISO 8601 last-meaningful-update */
   last_updated?: ISODateTime
   /** Approximate word count. Useful for planning, indexing, summarisation. */

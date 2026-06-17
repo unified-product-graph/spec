@@ -623,6 +623,39 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.16.0: Pattern G — open-standard data boundary ───────────────
+  //
+  // The portable graph holds modeling knowledge, not PII, registry filings,
+  // app-session ids, or live vendor figures. These flowed through every export /
+  // snapshot / sync. They are dropped from the body and belong to the hosting
+  // app's identity / tenancy / measurement layer instead (boundary ADR
+  // 2026-06-16-open-standard-data-boundary). The infra-pointer URLs that stay
+  // (repo_url, storage_uri, *.logo_url, help_video.url, ...) were marked
+  // `modifier:'volatile'` in this release rather than dropped, so a consumer
+  // knows they are environment-specific and may be stripped on export. The
+  // `owner: string` -> ownership-edge migration (C1) is a separate, larger wave
+  // (0.17.0). (FALSE-POSITIVE guard kept: specification.spec_url, design_token.value,
+  // vulnerability.cve_id, screen.route, bug.environment -- content / standard refs.)
+  '0.16.0': [
+    { kind: 'drop_props', type: 'person', drop_props: ['email'],
+      reason: ' boundary: person.email is PII for the hosting app identity layer, not the portable graph. Reference the modeled actor by edge; do not inline contact details.' },
+    { kind: 'drop_props', type: 'contact', drop_props: ['email', 'phone'],
+      reason: ' boundary: contact.email / contact.phone are PII for the app identity layer, not the portable graph.' },
+    { kind: 'drop_props', type: 'document', drop_props: ['author'],
+      reason: ' boundary: document.author was free-text name/email (PII). The authoring actor is referenced by edge, not inlined.' },
+    { kind: 'drop_props', type: 'legal_entity', drop_props: ['tax_id', 'registration_number', 'principal_address'],
+      reason: ' boundary: government / registry identifiers belong to the tenancy / records system, not the open interchange body.' },
+    { kind: 'drop_props', type: 'investigation', drop_props: ['session_id'],
+      reason: ' boundary: investigation.session_id is an app-runtime / routing artifact, not modeling knowledge.' },
+    { kind: 'drop_props', type: 'workspace', drop_props: ['slug'],
+      reason: ' boundary: workspace.slug is an app-routing artifact, not modeling knowledge.' },
+    { kind: 'drop_props', type: 'organization', drop_props: ['billing_plan'],
+      reason: ' boundary: organization.billing_plan is a SaaS-account/tenancy concept. Model it via subscription / pricing_tier, not on the structural entity.' },
+    { kind: 'drop_props', type: 'account', drop_props: ['annual_revenue'],
+      reason: ' boundary: account.annual_revenue is live firmographic vendor data. Route live figures to a metric node, not the definition entity.' },
+    { kind: 'drop_props', type: 'ai_model', drop_props: ['cost_per_1k_tokens'],
+      reason: ' boundary: ai_model.cost_per_1k_tokens is a live vendor price. Route it to a metric / record entity, not the model definition.' },
+  ],
   // ── v0.15.0: Pattern D — collapse *_status shadows into the lifecycle ─────────
   //
   // 14 `*_status` enum properties whose values ARE the entity's own lifecycle

@@ -21,7 +21,6 @@ import type { ISODateTime } from '../primitives.js'
  *
  * @example
  * const properties: WorkspaceProperties = {
- *   slug: 'q2-discovery',
  *   visibility: 'shared',
  *   purpose: 'Arrange personas, jobs, and opportunities for the Q2 discovery sprint.',
  *   workspace_purpose: 'discovery',
@@ -33,8 +32,6 @@ import type { ISODateTime } from '../primitives.js'
  * }
  */
 export interface WorkspaceProperties {
-  /** URL-friendly identifier */
-  slug?: string
   /** Who can see this workspace */
   visibility?: 'private' | 'shared' | 'public'
   /** Free-text description. Pairs with the closed-enum `workspace_purpose`. */

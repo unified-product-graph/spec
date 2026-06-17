@@ -85,8 +85,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     rule_id: { type: 'string', description: 'Identifier of the rule that flagged the issue' },
     help_url: { type: 'string', description: 'URL to documentation explaining the issue and how to fix it' },
     affected_element: { type: 'string', description: 'Description of the affected UI element' },
-    css_selector: { type: 'string', description: 'CSS selector targeting the affected element' },
-    html_snippet: { type: 'string', description: 'HTML snippet containing the violation' },
+    css_selector: { type: 'string', description: 'CSS selector targeting the affected element', modifier: 'volatile' },
+    html_snippet: { type: 'string', description: 'HTML snippet containing the violation', modifier: 'volatile' },
     tags: { type: 'string[]', description: 'Tags from the audit tool (e.g. "wcag2aa", "cat.color")' },
     remediation: { type: 'string', description: 'Recommended fix for the issue' },
     impact_description: { type: 'string', description: 'Description of the user impact' },
@@ -114,7 +114,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     account_type: { type: 'string', enum: ['prospect', 'customer', 'partner', 'churned'], description: 'Relationship status of this account' },
     industry: { type: 'string', description: 'Industry vertical the account operates in' },
     employee_count: { type: 'number', description: 'Number of employees at the account', modifier: 'snapshot' },
-    annual_revenue: { type: 'number', description: 'Annual revenue of the account' },
   },
   // AcquisitionChannelProperties: AcquisitionChannel entity.
   acquisition_channel: {
@@ -217,7 +216,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     version: { type: 'string', description: 'Version' },
     record_count: { type: 'number', description: 'Records', modifier: 'snapshot' },
     format: { type: 'string', description: 'Format (e.g. "jsonl", "csv", "parquet")' },
-    storage_uri: { type: 'string', description: 'Storage URI' },
+    storage_uri: { type: 'string', description: 'Storage URI', modifier: 'volatile' },
     checksum: { type: 'string', description: 'Integrity hash' },
     provenance: { type: 'string', enum: ['human_labelled', 'synthetic', 'scraped', 'converted', 'mixed'], description: 'Origin' },
     license: { type: 'string', description: 'SPDX license identifier' },
@@ -232,7 +231,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     started_at: { type: 'string', description: 'ISO timestamp started' },
     completed_at: { type: 'string', description: 'ISO timestamp completed' },
     training_steps: { type: 'number', description: 'Training steps or epochs completed' },
-    artifact_uri: { type: 'string', description: 'Produced artifact URI' },
+    artifact_uri: { type: 'string', description: 'Produced artifact URI', modifier: 'volatile' },
     notes: { type: 'string', description: 'Free-text notes' },
     tags: { type: 'string[]', description: 'Free-form classification tags' },
   },
@@ -245,10 +244,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // AiModelProperties: AI model.
   ai_model: {
     model_provider: { type: 'string', enum: ['anthropic', 'openai', 'google', 'meta', 'mistral', 'custom'], description: 'Provider or vendor' },
-    model_id: { type: 'string', description: 'Unique model identifier (e.g. "claude-sonnet-4-20250514")' },
+    model_id: { type: 'string', description: 'Unique model identifier (e.g. "claude-sonnet-4-20250514")', modifier: 'volatile' },
     model_version: { type: 'string', description: 'Specific version' },
     model_purpose: { type: 'string', description: 'Intended use case' },
-    cost_per_1k_tokens: { type: 'number', description: 'Cost per 1,000 tokens', modifier: 'snapshot' },
     context_window: { type: 'number', description: 'Maximum context window (tokens)' },
     latency_p50_ms: { type: 'number', description: 'Median latency (p50, ms)', modifier: 'snapshot' },
     latency_p99_ms: { type: 'number', description: 'Tail latency (p99, ms)', modifier: 'snapshot' },
@@ -287,7 +285,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // ApiContractProperties: API contract.
   api_contract: {
-    spec_url: { type: 'string', description: 'URL of the specification document' },
+    spec_url: { type: 'string', description: 'URL of the specification document', modifier: 'volatile' },
     protocol: { type: 'string', enum: ['REST', 'GraphQL', 'gRPC', 'AsyncAPI', 'SOAP', 'WebSocket', 'MQTT', 'SSE', 'other'], description: 'Communication protocol. `SSE` (server-sent events) added in 0.9.12.' },
     version: { type: 'string', description: 'API version' },
     owner: { type: 'string', description: 'Maintaining person or team. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
@@ -373,7 +371,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // BrandAssetProperties: Brand asset.
   brand_asset: {
     asset_type: { type: 'string', enum: ['logo', 'icon', 'illustration', 'photo', 'video', 'template'], description: 'Category of the brand asset' },
-    url: { type: 'string', description: 'URL or path to the asset file' },
+    url: { type: 'string', description: 'URL or path to the asset file', modifier: 'volatile' },
     usage_rights: { type: 'string', description: 'Usage rights or licensing restrictions' },
   },
   // BrandColourProperties: Brand colour. A single colour in the brand palette.
@@ -415,7 +413,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     approved_backgrounds: { type: 'string[]', description: 'Background colours the logo is approved for use on. @example ["#FFFFFF", "#1A1A1A", "#F5F5F5"]' },
     forbidden_backgrounds: { type: 'string[]', description: 'Background colours or contexts where the logo must NOT be placed. @example ["busy photography", "low-contrast surfaces"]' },
     file_formats: { type: 'string[]', description: 'File formats this logo variant is available in. @example ["svg", "png", "eps", "pdf"]' },
-    asset_url: { type: 'string', description: 'URL to the logo asset file or asset library entry.' },
+    asset_url: { type: 'string', description: 'URL to the logo asset file or asset library entry.', modifier: 'volatile' },
   },
   // BrandTypographyProperties: Brand typography. A font family and its usage rules.
   brand_typography: {
@@ -462,8 +460,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     artifact_type: { type: 'string', enum: ['docker_image', 'npm_package', 'binary', 'static_assets', 'other'], description: 'Type' },
     version: { type: 'string', description: 'Version' },
     size: { type: 'string', description: 'Human-readable size (e.g. "12.4 MB")' },
-    registry: { type: 'string', description: 'Registry or storage location' },
-    build_url: { type: 'string', description: 'URL of the producing CI/CD build run (GitHub Actions, CircleCI, etc.).' },
+    registry: { type: 'string', description: 'Registry or storage location', modifier: 'volatile' },
+    build_url: { type: 'string', description: 'URL of the producing CI/CD build run (GitHub Actions, CircleCI, etc.).', modifier: 'volatile' },
   },
   // BusinessModelProperties: BusinessModel: root of a BMC-style model.
   business_model: {
@@ -688,8 +686,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ContactProperties: Contact.
   contact: {
     contact_role: { type: 'string', description: 'Job title or role within the account' },
-    email: { type: 'string', description: 'Email address' },
-    phone: { type: 'string', description: 'Phone number' },
     is_decision_maker: { type: 'boolean', description: 'Whether this person has purchasing authority' },
   },
   // ContentCalendarProperties: Content calendar.
@@ -791,7 +787,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // DashboardProperties: Dashboard entity.
   dashboard: {
     tool: { type: 'string', enum: ['looker', 'amplitude', 'mixpanel', 'posthog', 'custom'], description: 'Analytics tool hosting this dashboard' },
-    url: { type: 'string', description: 'URL to the live dashboard' },
+    url: { type: 'string', description: 'URL to the live dashboard', modifier: 'volatile' },
     audience: { type: 'string', description: 'Intended audience for this dashboard' },
     element_count: { type: 'number', description: 'Number of widgets or panels on the dashboard', modifier: 'derived' },
     refresh_cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'How often the dashboard data refreshes. Uses the shared `Cadence` scale.' },
@@ -946,7 +942,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // DesignConceptProperties: Design concept being explored.
   design_concept: {
-    sketch_url: { type: 'string', description: 'URL of the sketch or visual' },
+    sketch_url: { type: 'string', description: 'URL of the sketch or visual', modifier: 'volatile' },
     rationale: { type: 'string', description: 'Selection or rejection rationale' },
     concept_status: { type: 'string', enum: ['exploring', 'validated', 'selected', 'rejected'], description: 'Current selection status' },
     maturity: { type: 'string', enum: ['sketch', 'refined', 'final'], description: 'Development stage, from rough idea to presentation-ready' },
@@ -1034,7 +1030,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // DeveloperPortalProperties: Developer portal.
   developer_portal: {
-    portal_url: { type: 'string', description: 'URL of the developer portal' },
+    portal_url: { type: 'string', description: 'URL of the developer portal', modifier: 'volatile' },
     doc_count: { type: 'number', description: 'Number of documentation pages', modifier: 'derived' },
     sandbox_available: { type: 'boolean', description: 'Whether a sandbox environment is available' },
   },
@@ -1057,7 +1053,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     source_url: { type: 'string', description: 'Canonical retrievable URL' },
     platform: { type: 'string', enum: ['markdown', 'notion', 'figma', 'google_docs', 'confluence', 'github', 'linear', 'other'], description: 'Hosting platform' },
     document_type: { type: 'string', enum: ['vision', 'plan', 'decision', 'research', 'spec', 'audit', 'session', 'feedback', 'case-study', 'narrative', 'bug-report', 'archive-collection', 'rfc', 'runbook', 'guide', 'onboarding', 'brief', 'report', 'reference'], description: 'Purpose classification' },
-    author: { type: 'string', description: 'Author (free-form: name, email, or handle). Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     last_updated: { type: 'string', description: 'ISO 8601 last-meaningful-update' },
     word_count: { type: 'number', description: 'Approximate word count. Useful for planning, indexing, summarisation.', modifier: 'snapshot' },
     content_summary: { type: 'string', description: '1–3 sentence summary. Drives previews, search snippets, embedding context.' },
@@ -1346,7 +1341,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   fix: {
     fix_type: { type: 'string', enum: ['hotfix', 'permanent', 'workaround', 'configuration', 'process_change'], description: 'Kind of fix. `hotfix` = urgent patch. `permanent` = proper structural fix. `workaround` = mitigates symptom without addressing root cause; should track a follow-up.' },
     commit: { type: 'string', description: 'Git commit SHA' },
-    files_changed: { type: 'string[]', description: 'Files changed' },
+    files_changed: { type: 'string[]', description: 'Files changed', modifier: 'volatile' },
     deployed_at: { type: 'string', description: 'ISO timestamp landed in the target environment.' },
     fixed_date: { type: 'string', description: 'Application date (ISO date). Coarser-grained complement to `deployed_at`.' },
     verified: { type: 'boolean', description: 'Verified in production' },
@@ -1435,7 +1430,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     video_type: { type: 'string', enum: ['how_to', 'overview', 'troubleshooting', 'best_practice'], description: 'Purpose of the video' },
     duration_seconds: { type: 'number', description: 'Duration of the video in seconds' },
     views: { type: 'number', description: 'Total number of views' },
-    url: { type: 'string', description: 'URL where the video is hosted' },
+    url: { type: 'string', description: 'URL where the video is hosted', modifier: 'volatile' },
   },
   // HypothesisProperties: A testable belief. The canonical design artefact for validating product assumptions.
   hypothesis: {
@@ -1570,7 +1565,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     started_at: { type: 'string', description: 'ISO timestamp the investigation began' },
     resolved_at: { type: 'string', description: 'ISO timestamp the investigation was concluded. Pairs with `status === \'resolved\' | \'abandoned\'`.' },
     lead_investigator: { type: 'string', description: 'Lead investigator (email or handle). Distinct from the team owning the affected service. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
-    session_id: { type: 'string', description: 'Originating session' },
     category: { type: 'string', enum: ['performance', 'security', 'data_quality', 'reliability', 'cost', 'compliance', 'other'], description: 'Kind of issue under investigation. Distinct from `RootCauseProperties.cause_category`, which captures *why something went wrong*.' },
   },
   // InvoiceProperties: Invoice.
@@ -1761,9 +1755,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     entity_type: { type: 'string', enum: ['corporation', 'llc', 'partnership', 'sole_proprietor', 'nonprofit'], description: 'Legal structure of the entity' },
     jurisdiction: { type: 'string', description: 'Jurisdiction where the entity is registered' },
     ip_ownership: { type: 'string', description: 'Description of intellectual property ownership' },
-    principal_address: { type: 'string', description: 'Principal business address' },
-    tax_id: { type: 'string', description: 'Tax identification number' },
-    registration_number: { type: 'string', description: 'Official registration or incorporation number' },
     date_incorporated: { type: 'string', description: 'Date the entity was incorporated (ISO format)' },
   },
   // LibraryDependencyProperties: Library or package dependency.
@@ -2020,8 +2011,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   opportunity: {},
   // OrganizationProperties: Organization entity.
   organization: {
-    logo_url: { type: 'string', description: 'URL of the organisation\'s logo' },
-    billing_plan: { type: 'string', description: 'Current billing / subscription plan' },
+    logo_url: { type: 'string', description: 'URL of the organisation\'s logo', modifier: 'volatile' },
     industry: { type: 'string', description: 'Industry vertical the organisation operates in' },
   },
   // OutcomeProperties: A measurable change in user or business state the product drives.
@@ -2103,7 +2093,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // PersonProperties: Person entity. A named, accountable individual.
   person: {
-    email: { type: 'string', description: 'Primary contact email. Stable identifier for de-duplication.' },
     role_title: { type: 'string', description: 'Free-text job title. Distinct from the structured `role` entity.' },
     time_zone: { type: 'string', description: 'IANA time zone (e.g. "Europe/Berlin"). Useful for capacity / on-call planning.' },
   },
@@ -2201,8 +2190,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   product: {
     stage: { type: 'string', enum: ['concept', 'validation', 'build', 'beta', 'launch', 'growth', 'mature', 'maintenance', 'sunset'], description: 'Lifecycle stage' },
     health_status: { type: 'string', enum: ['on_track', 'at_risk', 'off_track'], description: 'Overall health' },
-    url: { type: 'string', description: 'Where the product lives. Marketing site, app store URL, etc.' },
-    logo_url: { type: 'string', description: 'Logo or icon URL. Used to render product cards and lists.' },
+    url: { type: 'string', description: 'Where the product lives. Marketing site, app store URL, etc.', modifier: 'volatile' },
+    logo_url: { type: 'string', description: 'Logo or icon URL. Used to render product cards and lists.', modifier: 'volatile' },
     launched_at: { type: 'string', description: 'When the product became generally available (ISO 8601)' },
   },
   // ProductAreaProperties: ProductArea entity.
@@ -3044,7 +3033,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     version: { type: 'string', description: 'Version or iteration (e.g. "v2", "2026-04-B")' },
     tool: { type: 'string', description: 'Authoring tool. @example "Figma", "Balsamiq", "pen and paper"' },
     review_status: { type: 'string', enum: ['draft', 'in_review', 'approved', 'rejected'], description: 'Review gate status' },
-    linked_prototype_url: { type: 'string', description: 'URL of the corresponding interactive prototype' },
+    linked_prototype_url: { type: 'string', description: 'URL of the corresponding interactive prototype', modifier: 'volatile' },
   },
   // WorkflowArtifactProperties: Workflow artifact.
   workflow_artifact: {
@@ -3076,7 +3065,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // WorkspaceProperties: Workspace: a spatial thinking space for arranging entities.
   workspace: {
-    slug: { type: 'string', description: 'URL-friendly identifier' },
     visibility: { type: 'string', enum: ['private', 'shared', 'public'], description: 'Who can see this workspace' },
     purpose: { type: 'string', description: 'Free-text description. Pairs with the closed-enum `workspace_purpose`.' },
     workspace_purpose: { type: 'string', enum: ['discovery', 'planning', 'retrospective', 'design', 'research', 'strategy', 'general'], description: 'Closed-enum classifier. Drives template suggestions and surfaces in workspace browsers. `discovery` = persona/job/opportunity exploration. `planning` = roadmap and decision sessions. `retrospective` = reflection on shipped work. `design` = experience or UI exploration. `research` = organising study data and synthesis. `strategy` = high-level direction setting. `general` = catch-all.' },

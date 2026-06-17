@@ -27,8 +27,6 @@ export interface AccountProperties {
   industry?: string
   /** Number of employees at the account */
   employee_count?: number
-  /** Annual revenue of the account */
-  annual_revenue?: number
 }
 
 /** Contact.
@@ -36,17 +34,11 @@ export interface AccountProperties {
  * @example
  * const properties: ContactProperties = {
  *   contact_role: 'champion',
- *   email: 'sam.patel@arkheiev.com',
- *   phone: '+49 30 123456',
  * }
  */
 export interface ContactProperties {
   /** Job title or role within the account */
   contact_role?: string
-  /** Email address */
-  email?: string
-  /** Phone number */
-  phone?: string
   /** Whether this person has purchasing authority */
   is_decision_maker?: boolean
 }

@@ -67,14 +67,11 @@ export interface RoleProperties {
  *
  * @example
  * const properties: PersonProperties = {
- *   email: 'ada@example.com',
  *   role_title: 'Product Engineer',
  *   time_zone: 'Europe/Berlin',
  * }
  */
 export interface PersonProperties {
-  /** Primary contact email. Stable identifier for de-duplication. */
-  email?: string
   /** Free-text job title. Distinct from the structured `role` entity. */
   role_title?: string
   /** IANA time zone (e.g. "Europe/Berlin"). Useful for capacity / on-call planning. */

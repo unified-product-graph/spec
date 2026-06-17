@@ -204,8 +204,9 @@ describe('P14 — Foreign Keys Are Edges', () => {
 
     // Known acceptable _id fields (external system IDs, not graph FKs)
     const allowlist = new Set([
-      'tax_id', 'model_id', 'cve_id', 'rule_id', 'external_metric_id',
-      'session_id', 'trace_id', 'run_id', 'benchmark_id', 'dataset_id',
+      // tax_id + session_id removed in 0.16.0 (Pattern G boundary sweep).
+      'model_id', 'cve_id', 'rule_id', 'external_metric_id',
+      'trace_id', 'run_id', 'benchmark_id', 'dataset_id',
       'pipeline_id', 'template_id', 'workflow_id', 'agent_id',
       'scale_id', 'bundle_id', 'locale_id', 'framework_id',
     ])

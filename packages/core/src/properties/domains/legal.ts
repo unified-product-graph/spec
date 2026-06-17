@@ -26,12 +26,6 @@ export interface LegalEntityProperties {
   jurisdiction?: string
   /** Description of intellectual property ownership */
   ip_ownership?: string
-  /** Principal business address */
-  principal_address?: string
-  /** Tax identification number */
-  tax_id?: string
-  /** Official registration or incorporation number */
-  registration_number?: string
   /** Date the entity was incorporated (ISO format) */
   date_incorporated?: string
 }

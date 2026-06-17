@@ -31,8 +31,6 @@ export interface AiModelProperties {
   model_version?: string
   /** Intended use case */
   model_purpose?: string
-  /** Cost per 1,000 tokens */
-  cost_per_1k_tokens?: number
   /** Maximum context window (tokens) */
   context_window?: number
   /** Median latency (p50, ms) */

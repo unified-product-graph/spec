@@ -19,15 +19,12 @@ import type { Priority } from '../primitives.js'
  * @example
  * const properties: OrganizationProperties = {
  *   logo_url: 'https://arkheiev.com/logo.svg',
- *   billing_plan: 'business-annual',
  *   industry: 'Developer Tools',
  * }
  */
 export interface OrganizationProperties {
   /** URL of the organisation's logo */
   logo_url?: string
-  /** Current billing / subscription plan */
-  billing_plan?: string
   /** Industry vertical the organisation operates in */
   industry?: string
 }
