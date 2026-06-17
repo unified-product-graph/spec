@@ -362,7 +362,10 @@ describe('Edge pair uniqueness', () => {
  // product's own brand), expresses (semantic, references the shared brand
  // singleton)} — distinct relationship + distinct classification, so the
  // duplicate gate is not tripped. → 33.
- expect(multiPairs.length).toMatchInlineSnapshot(`33`)
+ // 0.13.1 (Data's connective brief, B1) added product→design_system {systematised_in
+ // (hierarchy, design structured within the system), implements (semantic, the product
+ // adopts the shared design system)} — same brand pattern, distinct classification. → 34.
+ expect(multiPairs.length).toMatchInlineSnapshot(`34`)
  })
 })
 

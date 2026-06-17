@@ -172,6 +172,30 @@ export type UPGCrossEdgeType =
   | 'screen_markets_product'
   | 'screen_renders_design_component'
   | 'product_expresses_brand_identity'
+  // Connective cross-product layer (0.13.1, Data's connective-layer brief). Additive.
+  //   - shares_job / shares_need: the job/need siblings of shares_persona/competitor/metric.
+  //     Symmetric peer overlap ("these overlap") without a canonical instance_of identity;
+  //     used job -> job / need -> need across products.
+  //   - persona_delegates_to_persona: cross-product delegation (a human persona in one
+  //     product delegates to an agent persona in another, or a registry agent persona).
+  //     Dual-registered: the within-graph delegation is the existing catalog edge.
+  //   - screen_targets_competitor: a comparison / "vs" / positioning screen targets a
+  //     competitor (typically in a watched competitor-intel graph). Dual-registered.
+  //   - feature_surfaces_product: a feature surfaces / embeds another product (the
+  //     feature-granular sibling of depends_on_product; wires the portfolio into a mesh).
+  //     Dual-registered.
+  //   - feature_uses_design_component: a feature consumes a shared design_component from the
+  //     design-system graph (the feature sibling of screen_renders_design_component). Dual-registered.
+  //   - product_implements_design_system: a product adopts the shared design system (adoption
+  //     semantic, mirroring product_implements_specification; distinct from the hierarchy
+  //     product_systematised_in_design_system). Dual-registered.
+  | 'shares_job'
+  | 'shares_need'
+  | 'persona_delegates_to_persona'
+  | 'screen_targets_competitor'
+  | 'feature_surfaces_product'
+  | 'feature_uses_design_component'
+  | 'product_implements_design_system'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -207,6 +231,14 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'screen_markets_product',
   'screen_renders_design_component',
   'product_expresses_brand_identity',
+  // Connective cross-product layer (0.13.1) — see UPGCrossEdgeType above.
+  'shares_job',
+  'shares_need',
+  'persona_delegates_to_persona',
+  'screen_targets_competitor',
+  'feature_surfaces_product',
+  'feature_uses_design_component',
+  'product_implements_design_system',
 ]
 
 /**

@@ -574,6 +574,25 @@ export const UPG_EDGE_CATALOG = {
   // the common case where the product lives in another graph; this catalog entry is
   // the within-graph degenerate case (a product's own landing page).
   screen_markets_product: { forward_verb: 'markets', reverse_verb: 'marketed_by', classification: 'semantic', source_type: 'screen', target_type: 'product' },
+  // Connective cross-product references (0.13.1, Data's connective-layer brief).
+  // Dual-registered (also in UPG_CROSS_EDGE_TYPES) for the common cross-graph case;
+  // these catalog entries are the within-graph degenerate case.
+  //   - screen_targets_competitor: a comparison / "vs" / positioning screen targets a
+  //     competitor (the competitor typically lives in a watched competitor-intel graph).
+  //   - feature_surfaces_product: a feature surfaces / embeds another product (a "Canvas"
+  //     feature that IS the Canvas product embedded). The feature-granular sibling of
+  //     depends_on_product; wires the portfolio from islands into a mesh.
+  //   - feature_uses_design_component: a feature consumes a shared design_component (the
+  //     feature sibling of screen_renders_design_component; the component lives in the
+  //     design-system product graph).
+  //   - product_implements_design_system: a product adopts / implements the shared design
+  //     system (the adoption semantic, mirroring product_implements_specification). Distinct
+  //     from the hierarchy `product_systematised_in_design_system` (structural containment):
+  //     same pattern as brand (branded_as = hierarchy, expresses = semantic).
+  screen_targets_competitor: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'semantic', source_type: 'screen', target_type: 'competitor' },
+  feature_surfaces_product: { forward_verb: 'surfaces', reverse_verb: 'surfaced_by', classification: 'semantic', source_type: 'feature', target_type: 'product' },
+  feature_uses_design_component: { forward_verb: 'uses', reverse_verb: 'used_by', classification: 'semantic', source_type: 'feature', target_type: 'design_component' },
+  product_implements_design_system: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'semantic', source_type: 'product', target_type: 'design_system' },
   screen_navigates_to_screen: { forward_verb: 'navigates_to', reverse_verb: 'navigated_from', classification: 'hierarchy', source_type: 'screen', target_type: 'screen' },
   screen_surfaces_feature: { forward_verb: 'surfaces', reverse_verb: 'surfaced_on', classification: 'cross-domain', source_type: 'screen', target_type: 'feature' },
   screen_wireframed_as_wireframe: { forward_verb: 'wireframed_as', reverse_verb: 'wireframes', classification: 'hierarchy', source_type: 'screen', target_type: 'wireframe' },
