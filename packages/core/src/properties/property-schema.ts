@@ -2745,16 +2745,18 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // StrategicPillarProperties: StrategicPillar entity. Durable multi-year direction the product commits to.
   strategic_pillar: {
     owner: { type: 'string', description: 'Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
-    description: { type: 'string', description: 'Narrative of the pillar\'s intent' },
-    scope: { type: 'string', description: 'What this pillar covers' },
-    time_horizon: { type: 'string', description: 'Planning horizon. Typically multi-year. @example "3 years", "2026-2028"' },
-    success_indicator: { type: 'string', description: 'How the business knows the pillar is on track. Narrative, not a metric edge.' },
+    description: { type: 'string', description: 'Narrative of the pillar\'s intent as a durable strategic area' },
+    scope: { type: 'string', description: 'The standing organisational area this pillar owns' },
+    time_horizon: { type: 'string', description: 'Standing / multi-year horizon, often open-ended (a pillar is durable). @example "3 years", "2026-2028", "ongoing"' },
+    success_indicator: { type: 'string', description: 'How the business knows this durable pillar is on track. Narrative, not a metric edge. A strategic_theme deliberately has no success_indicator: it is measured through its child objectives, not on its own.' },
   },
-  // StrategicThemeProperties: StrategicTheme entity.
+  // StrategicThemeProperties: StrategicTheme entity. A time-bound thrust WITHIN a
+  // strategic_pillar (distinct cascade level T3.3) — measured through its
+  // child objectives, so it carries no success_indicator of its own.
   strategic_theme: {
     owner: { type: 'string', description: 'Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
-    time_horizon: { type: 'string', description: 'Planning horizon. @example "Q1 2026", "FY26"' },
-    description: { type: 'string', description: 'Short narrative of what the theme is about' },
+    time_horizon: { type: 'string', description: 'Bounded period this theme is active (a theme is time-bound, within a pillar). @example "Q1 2026", "FY26"' },
+    description: { type: 'string', description: 'Short narrative of this time-bound thrust within its pillar' },
     scope: { type: 'string', description: 'What the theme explicitly includes or excludes' },
   },
   // SubscriptionProperties: Subscription.

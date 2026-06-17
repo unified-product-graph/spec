@@ -142,7 +142,20 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   objective: ['key_result', 'metric'],
   key_result: ['metric'],
 
-  // ── Strategic cascade: vision → mission → strategic_pillar → … ─────────────
+  // ── Strategic cascade: vision → mission → strategic_pillar → strategic_theme →
+  //    { initiative, objective } ───────────────────────────────────────────────
+  //
+  // strategic_pillar vs strategic_theme ( T3.3 — distinct cascade levels,
+  // NOT duplicates; sharpened rather than merged):
+  //   - strategic_pillar = a DURABLE structural division of the strategy. A
+  //     standing area the org organises around for years (e.g. "Structured
+  //     content", "Developer experience"). Few, long-lived; time_horizon is
+  //     multi-year / open-ended; carries its own `success_indicator`.
+  //   - strategic_theme = a TIME-BOUND thrust WITHIN a pillar. The current bet
+  //     for a period (e.g. "Go AI-native this year"). More numerous, rotates;
+  //     time_horizon is bounded (Q / FY); has NO `success_indicator` because it
+  //     is measured through its child objectives (strategic_theme_contains_objective).
+  //     That success-measurement asymmetry is the load-bearing distinction.
   vision: ['mission'],
   mission: ['strategic_pillar'],
   strategic_pillar: ['strategic_theme', 'capability', 'value_stream', 'decision'],

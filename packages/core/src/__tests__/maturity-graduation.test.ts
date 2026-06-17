@@ -10,12 +10,12 @@
  *   - classification_axis, classification_value (market intelligence, since 0.4.0)
  *   - brand_logo, brand_imagery (brand, since 0.2.0)
  *   - metric_quality_assessment (strategy, since 0.2.2)
+ *   - user_story (since 0.1.0) — freeze LIFTED in 0.12.6 (Captain); the
+ *     re-canon is settled and the type is in active use.
+ *   - experiment_run (since 0.2.6) — defer LIFTED in 0.12.6 (Captain);
+ *     it passes the rubric and is in active use.
  *
  * Deferred (kept proposed by contract / open ADR):
- *   - user_story — frozen `proposed` by the v0.7.0 re-canon contract;
- *     `user-story-split.test.ts` asserts the invariant.
- *   - experiment_run — kept proposed (the optional multi-run / replication child;
- *     graduated experiment_plan to stable but left the run proposed).
  *   - ai_experiment / ai_dataset / ai_trace — entangled with (open ADR).
  *
  * experiment_plan graduated proposed → stable as the canonical
@@ -31,6 +31,8 @@ const GRADUATED = [
   'brand_logo',
   'brand_imagery',
   'metric_quality_assessment',
+  'user_story', // freeze lifted, 0.12.6
+  'experiment_run', // defer lifted, 0.12.6
 ] as const
 
 // Sourced from the canonical contract registry in entity-meta.ts (each entry

@@ -49,9 +49,10 @@ describe('Entity registration', () => {
  expect(run.since).toBe('0.2.6')
  // experiment_plan graduated proposed → stable: it is the canonical
  // validation PLAN type (absorbed test_plan's planning props). experiment_run
- // stays proposed (the optional multi-run / replication child).
+ // graduated proposed → stable in 0.12.6 (Captain lifted the defer; it
+ // passes the rubric and is in active use).
  expect(plan.maturity).toBe('stable')
- expect(run.maturity).toBe('proposed')
+ expect(run.maturity).toBe('stable')
  })
 
  it('experiment is canonical (— stable, no replacement)', () => {

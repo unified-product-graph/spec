@@ -59,10 +59,13 @@ describe('Entity registration', () => {
  expect(names.has('story_task')).toBe(true)
  })
 
- it('user_story is canonical again (ent_073, proposed, not deprecated) —', () => {
+ it('user_story is canonical again (ent_073, stable, not deprecated) —, graduated 0.12.6', () => {
  const userStory = UPG_ENTITY_META.find((m) => m.name === 'user_story')!
  expect(userStory.type_id).toBe('ent_073')
- expect(userStory.maturity).toBe('proposed')
+ // Graduated proposed -> stable in 0.12.6 (Captain lifted the freeze; the
+ // re-canon is settled and the type is in active use). Canonical + not-deprecated
+ // remains the load-bearing invariant.
+ expect(userStory.maturity).toBe('stable')
  expect(isDeprecatedType('user_story')).toBe(false)
  expect(userStory.deprecated_in).toBeUndefined()
  expect(userStory.replacement).toBeUndefined()

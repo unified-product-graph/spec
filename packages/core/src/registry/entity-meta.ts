@@ -145,7 +145,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   // (method / success_criteria / sample_size) when `test_plan` re-homed to the
   // QA/testing domain.
   { name: 'experiment_plan', type_id: 'ent_340', maturity: 'stable', since: '0.2.6' },
-  { name: 'experiment_run', type_id: 'ent_341', maturity: 'proposed', since: '0.2.6' },
+  { name: 'experiment_run', type_id: 'ent_341', maturity: 'stable', since: '0.2.6' },
   { name: 'learning', type_id: 'ent_029', maturity: 'stable', since: '0.1.0' },
   // test_plan re-homed validation → testing/QA. It is the QA
   // verification-procedure plan (test scope / environments / pass criteria);
@@ -237,7 +237,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   // asserts `proposed` as the post-re-canon invariant. Graduating here would
   // break that contract; promotion is a separate, ticketed decision once the
   // story_statement → user_story migration has fully aged out.
-  { name: 'user_story', type_id: 'ent_073', maturity: 'proposed', since: '0.1.0' },
+  { name: 'user_story', type_id: 'ent_073', maturity: 'stable', since: '0.1.0' },
   { name: 'story_statement', type_id: 'ent_342', maturity: 'deprecated', since: '0.2.7', deprecated_in: '0.7.0', replacement: 'user_story' },
   { name: 'story_task', type_id: 'ent_343', maturity: 'deprecated', since: '0.2.7', deprecated_in: '0.4.0', replacement: 'task' },
   { name: 'acceptance_criterion', type_id: 'ent_074', maturity: 'stable', since: '0.1.0' },
@@ -562,10 +562,9 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
  * graduation a contract forbids. Maps each type to its governing decision.
  */
 export const DEFERRED_PROPOSED_BY_CONTRACT: Readonly<Record<string, string>> = {
-  user_story:
-    ': frozen proposed by the v0.7.0 re-canon contract (story_statement to user_story); user-story-split.test.ts asserts the invariant.',
-  experiment_run:
-    ': the optional multi-run / replication child; experiment_plan graduated to stable, the run stays proposed.',
+  // user_story and experiment_run graduated to stable in
+  // 0.12.6 — Captain lifted both freezes ("we are using them"). Their contracts
+  // are settled; they are now stable, not deferred.
   ai_experiment: ': AI prompt/model restructure (open ADR).',
   ai_dataset: ': AI prompt/model restructure (open ADR).',
   ai_trace: ': AI prompt/model restructure (open ADR).',
