@@ -53,9 +53,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     method: { type: 'string', enum: ['automated', 'manual', 'assistive_tech', 'expert'], description: 'How the audit was conducted' },
     scope: { type: 'string', description: 'What was audited (e.g. "homepage", "checkout flow")' },
     conformance_result: { type: 'string', enum: ['pass', 'partial', 'fail'], description: 'Overall conformance result' },
-    violations_count: { type: 'number', description: 'Number of accessibility violations found' },
-    passes_count: { type: 'number', description: 'Number of checks that passed' },
-    incomplete_count: { type: 'number', description: 'Number of checks that could not be completed' },
+    violations_count: { type: 'number', description: 'Number of accessibility violations found', modifier: 'derived' },
+    passes_count: { type: 'number', description: 'Number of checks that passed', modifier: 'derived' },
+    incomplete_count: { type: 'number', description: 'Number of checks that could not be completed', modifier: 'derived' },
     score: { type: 'number', description: 'Aggregate accessibility score (0-100)' },
     tool: { type: 'string', enum: ['axe-core', 'lighthouse', 'wave', 'manual', 'other'], description: 'Tool used to perform the audit' },
     tool_version: { type: 'string', description: 'Version of the audit tool' },
@@ -113,14 +113,14 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   account: {
     account_type: { type: 'string', enum: ['prospect', 'customer', 'partner', 'churned'], description: 'Relationship status of this account' },
     industry: { type: 'string', description: 'Industry vertical the account operates in' },
-    employee_count: { type: 'number', description: 'Number of employees at the account' },
+    employee_count: { type: 'number', description: 'Number of employees at the account', modifier: 'snapshot' },
     annual_revenue: { type: 'number', description: 'Annual revenue of the account' },
   },
   // AcquisitionChannelProperties: AcquisitionChannel entity.
   acquisition_channel: {
     channel_type: { type: 'string', enum: ['seo', 'paid', 'social', 'referral', 'direct', 'content'], description: 'Category of the acquisition channel' },
     customer_acquisition_cost: { type: 'number', description: 'Customer acquisition cost for this channel' },
-    monthly_volume: { type: 'number', description: 'Monthly volume of new users from this channel' },
+    monthly_volume: { type: 'number', description: 'Monthly volume of new users from this channel', modifier: 'snapshot' },
   },
   // AdCreativeProperties: Ad creative.
   ad_creative: {
@@ -135,7 +135,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // AffinityClusterProperties: Affinity cluster grouping observations.
   affinity_cluster: {
     theme: { type: 'string', description: 'Emergent theme label' },
-    child_observation_count: { type: 'number', description: 'Observations in this cluster' },
+    child_observation_count: { type: 'number', description: 'Observations in this cluster', modifier: 'derived' },
     confidence: {
       type: 'assessment', scale_id: 'confidence_5', description: 'Confidence in the theme\'s validity (UPGAssessment on `confidence_5`).',
       properties: {
@@ -167,7 +167,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     hook_event: { type: 'string', description: 'Event that triggers this hook' },
     hook_action: { type: 'string', description: 'Action performed when the hook fires' },
     hook_status: { type: 'string', enum: ['active', 'disabled', 'error'], description: 'Operational status of the hook' },
-    execution_count: { type: 'number', description: 'Number of times this hook has fired' },
+    execution_count: { type: 'number', description: 'Number of times this hook has fired', modifier: 'snapshot' },
   },
   // AgentSessionProperties: Agent session.
   agent_session: {
@@ -184,7 +184,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   agent_skill: {
     skill_trigger: { type: 'string', description: 'Event or command that activates this skill' },
     skill_description: { type: 'string', description: 'Human-readable description of what the skill does' },
-    invocation_count: { type: 'number', description: 'Number of times this skill has been invoked' },
+    invocation_count: { type: 'number', description: 'Number of times this skill has been invoked', modifier: 'snapshot' },
   },
   // AgentTaskProperties: Agent task. A discrete task assigned to an agent.
   agent_task: {
@@ -216,7 +216,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   ai_dataset: {
     dataset_type: { type: 'string', enum: ['training', 'evaluation', 'fine_tuning', 'rlhf', 'synthetic'], description: 'Purpose' },
     version: { type: 'string', description: 'Version' },
-    record_count: { type: 'number', description: 'Records' },
+    record_count: { type: 'number', description: 'Records', modifier: 'snapshot' },
     format: { type: 'string', description: 'Format (e.g. "jsonl", "csv", "parquet")' },
     storage_uri: { type: 'string', description: 'Storage URI' },
     checksum: { type: 'string', description: 'Integrity hash' },
@@ -241,7 +241,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   ai_guardrail: {
     guardrail_type: { type: 'string', enum: ['content_filter', 'rate_limit', 'token_limit', 'safety', 'custom'], description: 'Protection category' },
     enforcement: { type: 'string', enum: ['block', 'warn', 'log'], description: 'Action when triggered' },
-    trigger_count: { type: 'number', description: 'Times triggered' },
+    trigger_count: { type: 'number', description: 'Times triggered', modifier: 'snapshot' },
   },
   // AiModelProperties: AI model.
   ai_model: {
@@ -249,10 +249,10 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     model_id: { type: 'string', description: 'Unique model identifier (e.g. "claude-sonnet-4-20250514")' },
     model_version: { type: 'string', description: 'Specific version' },
     model_purpose: { type: 'string', description: 'Intended use case' },
-    cost_per_1k_tokens: { type: 'number', description: 'Cost per 1,000 tokens' },
+    cost_per_1k_tokens: { type: 'number', description: 'Cost per 1,000 tokens', modifier: 'snapshot' },
     context_window: { type: 'number', description: 'Maximum context window (tokens)' },
-    latency_p50_ms: { type: 'number', description: 'Median latency (p50, ms)' },
-    latency_p99_ms: { type: 'number', description: 'Tail latency (p99, ms)' },
+    latency_p50_ms: { type: 'number', description: 'Median latency (p50, ms)', modifier: 'snapshot' },
+    latency_p99_ms: { type: 'number', description: 'Tail latency (p99, ms)', modifier: 'snapshot' },
     input_schema: { type: 'string', description: 'Expected input format or schema' },
     output_schema: { type: 'string', description: 'Expected output format or schema' },
     aliases: { type: 'string[]', description: 'Alternative names' },
@@ -296,8 +296,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ApiEcosystemProperties: API ecosystem.
   api_ecosystem: {
     api_style: { type: 'string', enum: ['rest', 'graphql', 'grpc', 'webhook', 'mixed'], description: 'Primary API architecture style' },
-    developer_count: { type: 'number', description: 'Number of registered developers' },
-    app_count: { type: 'number', description: 'Number of apps built on the API' },
+    developer_count: { type: 'number', description: 'Number of registered developers', modifier: 'snapshot' },
+    app_count: { type: 'number', description: 'Number of apps built on the API', modifier: 'derived' },
   },
   // ApiEndpointProperties: API endpoint.
   api_endpoint: {
@@ -364,7 +364,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // BetaProgramProperties: Beta program.
   beta_program: {
     beta_type: { type: 'string', enum: ['closed', 'open', 'invite_only'], description: 'Access model for the beta' },
-    participant_count: { type: 'number', description: 'Number of users participating in the beta' },
+    participant_count: { type: 'number', description: 'Number of users participating in the beta', modifier: 'snapshot' },
   },
   // BoundedContextProperties: DDD bounded context.
   bounded_context: {
@@ -520,7 +520,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ChurnReasonProperties: Churn reason.
   churn_reason: {
     category: { type: 'string', description: 'High-level category of the churn reason' },
-    frequency_count: { type: 'number', description: 'Exact count of times this reason has been cited in `frequency_period`' },
+    frequency_count: { type: 'number', description: 'Exact count of times this reason has been cited in `frequency_period`', modifier: 'snapshot' },
     frequency_period: { type: 'string', description: 'The recurrence period the count is measured over (ISO-8601 `Duration`, e.g. `\'P30D\'`)' },
     frequency_rating: { type: 'string', enum: ['constant', 'regular', 'occasional', 'rare', 'other'], description: 'Qualitative frequency tier when an exact count is not known' },
     contributing_factors: { type: 'string[]', description: 'Other factors that contributed to the churn' },
@@ -535,8 +535,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     avg_duration: { type: 'string', description: 'Average run duration across recent executions. @example "4m 30s", "12 minutes"' },
     last_run_status: { type: 'string', enum: ['success', 'failure', 'cancelled', 'skipped', 'in_progress'], description: 'Result of the most recent run. Current health indicator.' },
     target_branch: { type: 'string', description: 'Primary branch. The branch that triggers production deployments. @example "main", "release/*"' },
-    run_count: { type: 'number', description: 'Total runs since creation. Indicates activity level. @example 1452' },
-    success_rate: { type: 'number', description: 'Reliability metric for the pipeline itself: % of runs that succeed. @example 94.3' },
+    run_count: { type: 'number', description: 'Total runs since creation. Indicates activity level. @example 1452', modifier: 'snapshot' },
+    success_rate: { type: 'number', description: 'Reliability metric for the pipeline itself: % of runs that succeed. @example 94.3', modifier: 'snapshot' },
   },
   // ClassificationAxisProperties: ClassificationAxis: a dimension along which subjects are classified.
   classification_axis: {
@@ -575,8 +575,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // CommunityInitiativeProperties: Community initiative.
   community_initiative: {
     initiative_type: { type: 'string', enum: ['forum', 'discord', 'slack', 'meetup', 'ambassador', 'other'], description: 'Platform or format for the community' },
-    member_count: { type: 'number', description: 'Current number of community members' },
-    engagement_rate: { type: 'number', description: 'Percentage of members actively participating' },
+    member_count: { type: 'number', description: 'Current number of community members', modifier: 'snapshot' },
+    engagement_rate: { type: 'number', description: 'Percentage of members actively participating', modifier: 'snapshot' },
   },
   // CompetitiveAnalysisProperties: Competitive analysis exercise or snapshot.
   competitive_analysis: {
@@ -600,7 +600,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // CompetitiveBattleCardProperties: CompetitiveBattleCard entity.
   competitive_battle_card: {
-    win_rate: { type: 'number', description: 'Historical win rate against this competitor (0-100%)' },
+    win_rate: { type: 'number', description: 'Historical win rate against this competitor (0-100%)', modifier: 'snapshot' },
     key_differentiators: { type: 'string', description: 'Summary of key differentiators versus this competitor' },
   },
   // CompetitorProperties: A product or approach competing for the same user need.
@@ -698,7 +698,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   content_calendar: {
     calendar_period: { type: 'string', description: 'Covered period (e.g. "Q2 2026")' },
     publish_cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'Publishing cadence (canonical `Cadence` since v0.4.0). Retyped from the legacy free-form `publish_cadence: string`. For exact rates ("3 per week"), set `frequency_count` + `frequency_period`. BREAKING in v0.4.0: previous string values like `"3x/week"` no longer type-check. Map to `\'weekly\'` + `frequency_count: 3` + `frequency_period: \'P7D\'`.' },
-    frequency_count: { type: 'number', description: 'Exact count in the period. Pairs with `frequency_period`.' },
+    frequency_count: { type: 'number', description: 'Exact count in the period. Pairs with `frequency_period`.', modifier: 'snapshot' },
     frequency_period: { type: 'string', description: 'Recurrence period (ISO-8601 `Duration`, e.g. `\'P7D\'`)' },
     frequency_rating: { type: 'string', enum: ['constant', 'regular', 'occasional', 'rare', 'other'], description: 'Qualitative rate tier when an exact rate is unknown' },
   },
@@ -713,7 +713,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     content_types: { type: 'string[]', description: 'Types of content to produce' },
     distribution_channels: { type: 'string[]', description: 'Channels where content will be distributed' },
     cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'Publishing cadence (canonical `Cadence` since v0.4.0). Retyped from the legacy free-form `cadence: string` (e.g. "2x/week"). For exact rates, set `frequency_count` + `frequency_period`. BREAKING in v0.4.0: previous string values like `"2x/week"` no longer type-check. Map to `\'weekly\'` + `frequency_count: 2` + `frequency_period: \'P7D\'`.' },
-    frequency_count: { type: 'number', description: 'Exact count of publications in the period. Pairs with `frequency_period`.' },
+    frequency_count: { type: 'number', description: 'Exact count of publications in the period. Pairs with `frequency_period`.', modifier: 'snapshot' },
     frequency_period: { type: 'string', description: 'Recurrence period (ISO-8601 `Duration`, e.g. `\'P7D\'`)' },
     frequency_rating: { type: 'string', enum: ['constant', 'regular', 'occasional', 'rare', 'other'], description: 'Qualitative rate tier when an exact rate is unknown' },
   },
@@ -782,7 +782,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     stage_type: { type: 'string', enum: ['awareness', 'acquisition', 'activation', 'retention', 'revenue', 'referral'], description: 'Which pirate metric (AAARRR) this stage maps to' },
     stage_order: { type: 'number', description: 'Display order along the lifecycle timeline (0-indexed). The `*_order` convention shared with `journey_phase.phase_order` and `journey_step.step_order` ( / CS-8), so two same-`stage_type` stages are orderable.' },
     avg_duration: { type: 'string', description: 'Average time a customer spends in this stage' },
-    conversion_rate: { type: 'number', description: 'Percentage of customers who advance to the next stage' },
+    conversion_rate: { type: 'number', description: 'Percentage of customers who advance to the next stage', modifier: 'snapshot' },
   },
   // CustomerRelationshipProperties: CustomerRelationship.
   customer_relationship: {
@@ -795,9 +795,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     tool: { type: 'string', enum: ['looker', 'amplitude', 'mixpanel', 'posthog', 'custom'], description: 'Analytics tool hosting this dashboard' },
     url: { type: 'string', description: 'URL to the live dashboard' },
     audience: { type: 'string', description: 'Intended audience for this dashboard' },
-    element_count: { type: 'number', description: 'Number of widgets or panels on the dashboard' },
+    element_count: { type: 'number', description: 'Number of widgets or panels on the dashboard', modifier: 'derived' },
     refresh_cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'How often the dashboard data refreshes. Uses the shared `Cadence` scale.' },
-    filter_count: { type: 'number', description: 'Number of user-configurable filters' },
+    filter_count: { type: 'number', description: 'Number of user-configurable filters', modifier: 'derived' },
   },
   // DataClassificationProperties: Data classification.
   data_classification: {
@@ -835,9 +835,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   data_model: {
     schema_name: { type: 'string', description: 'Name of the schema this model belongs to' },
     database_name: { type: 'string', description: 'Name of the database containing this model' },
-    table_count: { type: 'number', description: 'Number of tables in the model' },
-    column_count: { type: 'number', description: 'Total number of columns across all tables' },
-    test_count: { type: 'number', description: 'Number of data tests defined for this model' },
+    table_count: { type: 'number', description: 'Number of tables in the model', modifier: 'derived' },
+    column_count: { type: 'number', description: 'Total number of columns across all tables', modifier: 'derived' },
+    test_count: { type: 'number', description: 'Number of data tests defined for this model', modifier: 'derived' },
     model_type: { type: 'string', enum: ['relational', 'document', 'graph', 'time_series'], description: 'Database paradigm used' },
     materialization: { type: 'string', enum: ['view', 'table', 'incremental', 'ephemeral', 'materialized_view'], description: 'How the model is materialised in the warehouse' },
     meta: { type: 'object', description: 'Arbitrary metadata key-value pairs' },
@@ -849,7 +849,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     schedule: { type: 'string', description: 'Cron or scheduling expression' },
     avg_runtime: { type: 'string', description: 'Average wall-clock runtime per execution' },
     orchestrator: { type: 'string', description: 'Orchestration tool (e.g. "Airflow", "Dagster", "dbt Cloud")' },
-    retry_count: { type: 'number', description: 'Number of automatic retries on failure' },
+    retry_count: { type: 'number', description: 'Number of automatic retries on failure', modifier: 'snapshot' },
     retry_delay_seconds: { type: 'number', description: 'Delay between retries in seconds' },
     timeout_seconds: { type: 'number', description: 'Maximum allowed runtime in seconds before timeout' },
     trigger_rule: { type: 'string', description: 'Rule that determines when this pipeline triggers' },
@@ -882,7 +882,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     schema_version: { type: 'string', description: 'Current schema version' },
     migration_status: { type: 'string', enum: ['current', 'pending', 'failed'], description: 'Pending-migration status' },
     owner: { type: 'string', description: 'Owning person or team responsible for design and migrations. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
-    table_count: { type: 'number', description: 'Tables or collections in this schema. Useful for migration scope estimation.' },
+    table_count: { type: 'number', description: 'Tables or collections in this schema. Useful for migration scope estimation.', modifier: 'derived' },
   },
   // DealProperties: Deal.
   deal: {
@@ -917,7 +917,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // DepartmentProperties: Department entity.
   department: {
-    headcount: { type: 'number', description: 'Total number of people in the department' },
+    headcount: { type: 'number', description: 'Total number of people in the department', modifier: 'snapshot' },
     budget: { type: 'number', description: 'Annual budget allocated to the department' },
     department_mission: { type: 'string', description: 'Charter / purpose statement for the department' },
     leader: { type: 'string', description: 'Department leader (person or role reference). Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
@@ -1041,7 +1041,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // DeveloperPortalProperties: Developer portal.
   developer_portal: {
     portal_url: { type: 'string', description: 'URL of the developer portal' },
-    doc_count: { type: 'number', description: 'Number of documentation pages' },
+    doc_count: { type: 'number', description: 'Number of documentation pages', modifier: 'derived' },
     sandbox_available: { type: 'boolean', description: 'Whether a sandbox environment is available' },
   },
   // DiscountStrategyProperties: Discount strategy.
@@ -1049,7 +1049,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     discount_type: { type: 'string', enum: ['percentage', 'fixed', 'tiered', 'bundle'], description: 'How the discount is applied' },
     discount_percentage: { type: 'number', description: 'Discount amount as a percentage (0-100)' },
     valid_until: { type: 'string', description: 'Expiration date of the discount (ISO format)' },
-    redemption_count: { type: 'number', description: 'Number of times this discount has been redeemed' },
+    redemption_count: { type: 'number', description: 'Number of times this discount has been redeemed', modifier: 'snapshot' },
   },
   // DistributionChannelProperties: DistributionChannel.
   distribution_channel: {
@@ -1065,7 +1065,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     document_type: { type: 'string', enum: ['vision', 'plan', 'decision', 'research', 'spec', 'audit', 'session', 'feedback', 'case-study', 'narrative', 'bug-report', 'archive-collection', 'rfc', 'runbook', 'guide', 'onboarding', 'brief', 'report', 'reference'], description: 'Purpose classification' },
     author: { type: 'string', description: 'Author (free-form: name, email, or handle). Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     last_updated: { type: 'string', description: 'ISO 8601 last-meaningful-update' },
-    word_count: { type: 'number', description: 'Approximate word count. Useful for planning, indexing, summarisation.' },
+    word_count: { type: 'number', description: 'Approximate word count. Useful for planning, indexing, summarisation.', modifier: 'snapshot' },
     content_summary: { type: 'string', description: '1–3 sentence summary. Drives previews, search snippets, embedding context.' },
     language: { type: 'string', description: 'Primary language (BCP 47 tag, e.g. "en", "en-GB", "fr")' },
   },
@@ -1093,9 +1093,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // EmailSequenceProperties: Email sequence.
   email_sequence: {
     sequence_type: { type: 'string', enum: ['onboarding', 'nurture', 're_engagement', 'sales', 'other'], description: 'Purpose of the email sequence' },
-    email_count: { type: 'number', description: 'Number of emails in the sequence' },
-    open_rate: { type: 'number', description: 'Average open rate across the sequence (0-1)' },
-    click_rate: { type: 'number', description: 'Average click-through rate across the sequence (0-1)' },
+    email_count: { type: 'number', description: 'Number of emails in the sequence', modifier: 'derived' },
+    open_rate: { type: 'number', description: 'Average open rate across the sequence (0-1)', modifier: 'snapshot' },
+    click_rate: { type: 'number', description: 'Average click-through rate across the sequence (0-1)', modifier: 'snapshot' },
   },
   // EpicProperties: A collection of related user stories that delivers a feature or capability.
   epic: {
@@ -1107,15 +1107,15 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // ErrorBudgetProperties: Error budget.
   error_budget: {
-    budget_remaining: { type: 'number', description: 'Remaining budget percentage (0–100). @example 45.2 (45.2% remaining, 54.8% used)' },
-    burn_rate: { type: 'number', description: 'Consumption rate as a multiplier against sustainable burn. 1.0 = on track. 2.5 = consuming 2.5x faster than sustainable.' },
+    budget_remaining: { type: 'number', description: 'Remaining budget percentage (0–100). @example 45.2 (45.2% remaining, 54.8% used)', modifier: 'snapshot' },
+    burn_rate: { type: 'number', description: 'Consumption rate as a multiplier against sustainable burn. 1.0 = on track. 2.5 = consuming 2.5x faster than sustainable.', modifier: 'snapshot' },
     policy: { type: 'string', description: 'Policy when the budget hits 0%. @example "Freeze all non-reliability deploys", "Page engineering lead immediately"' },
     budget_window: { type: 'string', description: 'Budget window. Defines reset cadence. @example "30 days", "rolling 28 days"' },
   },
   // EvalBenchmarkProperties: Evaluation benchmark.
   eval_benchmark: {
     benchmark_type: { type: 'string', enum: ['accuracy', 'latency', 'cost', 'safety', 'custom'], description: 'Measured dimension' },
-    test_case_count: { type: 'number', description: 'Test cases in the suite' },
+    test_case_count: { type: 'number', description: 'Test cases in the suite', modifier: 'derived' },
     passing_threshold: { type: 'number', description: 'Minimum passing score' },
     last_run: { type: 'string', description: 'ISO date of the most recent run' },
   },
@@ -1137,7 +1137,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     event_type: { type: 'string', enum: ['conference', 'webinar', 'meetup', 'workshop', 'trade_show', 'other'], description: 'Format of the event' },
     event_date: { type: 'string', description: 'Date of the event (ISO format)' },
     location: { type: 'string', description: 'Venue or virtual platform' },
-    attendee_count: { type: 'number', description: 'Number of attendees' },
+    attendee_count: { type: 'number', description: 'Number of attendees', modifier: 'snapshot' },
   },
   // EventSchemaProperties: EventSchema entity.
   event_schema: {
@@ -1286,7 +1286,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   feature_flag: {
     key: { type: 'string', description: 'Required. Stable flag key used in code (e.g. "new-checkout-flow").' },
     flag_status: { type: 'string', enum: ['on', 'off', 'rollout'], description: 'Activation state. `on` = enabled for all. `off` = disabled for all. `rollout` = partial via targeting_rules.' },
-    rollout_pct: { type: 'number', description: 'Percentage enabled (0–100). Meaningful when `flag_status === \'rollout\'`.' },
+    rollout_pct: { type: 'number', description: 'Percentage enabled (0–100). Meaningful when `flag_status === \'rollout\'`.', modifier: 'snapshot' },
     targeting_rules: { type: 'string', description: 'Human-readable targeting rules. Full rule evaluation happens in the flag service.' },
     owner: { type: 'string', description: 'Owning person or team responsible for the flag\'s lifecycle. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     flag_type: { type: 'string', enum: ['temporary', 'permanent', 'experiment'], description: 'Lifecycle classification. `temporary` = should be removed after rollout (kill switch, gradual rollout). `permanent` = long-lived feature gate (entitlement flag). `experiment` = A/B test with a defined end condition.' },
@@ -1296,7 +1296,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // FeatureRequestProperties: Feature request raised by customer, prospect, or internal stakeholder.
   feature_request: {
     request_source: { type: 'string', enum: ['customer', 'internal', 'prospect', 'support', 'community'], description: 'Where the request originated' },
-    vote_count: { type: 'number', description: 'Number of votes or upvotes from users' },
+    vote_count: { type: 'number', description: 'Number of votes or upvotes from users', modifier: 'snapshot' },
     signal_sentiment: { type: 'string', enum: ['positive', 'neutral', 'negative', 'mixed'], description: 'Detected sentiment of the request' },
     signal_channel: { type: 'string', description: 'Channel through which the request was received' },
     signal_urgency: { type: 'string', enum: ['low', 'medium', 'high', 'critical'], description: 'Perceived urgency of the request' },
@@ -1348,7 +1348,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // FeedbackVoteProperties: Feedback vote.
   feedback_vote: {
-    vote_count: { type: 'number', description: 'Total number of votes cast' },
+    vote_count: { type: 'number', description: 'Total number of votes cast', modifier: 'snapshot' },
     mrr_impact: { type: 'number', description: 'Combined MRR of voting accounts' },
   },
   // FixProperties: Specific change that resolved an issue.
@@ -1386,13 +1386,13 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   funnel: {
     funnel_type: { type: 'string', enum: ['acquisition', 'activation', 'retention', 'revenue', 'referral', 'custom'], description: 'Which stage of the customer lifecycle this funnel measures' },
     step_count: { type: 'number', description: 'Number of steps in the funnel', modifier: 'derived' },
-    overall_conversion_rate: { type: 'number', description: 'End-to-end conversion rate through the funnel (0-1)' },
+    overall_conversion_rate: { type: 'number', description: 'End-to-end conversion rate through the funnel (0-1)', modifier: 'snapshot' },
   },
   // FunnelStepProperties: FunnelStep entity.
   funnel_step: {
     step_index: { type: 'number', description: 'Position of this step in the funnel (0-indexed)' },
-    conversion_rate: { type: 'number', description: 'Percentage of users who advance from this step' },
-    drop_off_rate: { type: 'number', description: 'Percentage of users who leave at this step' },
+    conversion_rate: { type: 'number', description: 'Percentage of users who advance from this step', modifier: 'snapshot' },
+    drop_off_rate: { type: 'number', description: 'Percentage of users who leave at this step', modifier: 'snapshot' },
   },
   // GlossaryTermProperties: GlossaryTerm entity.
   glossary_term: {
@@ -1559,7 +1559,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // InterviewGuideProperties: Interview guide document.
   interview_guide: {
     guide_type: { type: 'string', enum: ['structured', 'semi_structured', 'unstructured'], description: 'Format structure' },
-    question_count: { type: 'number', description: 'Total questions' },
+    question_count: { type: 'number', description: 'Total questions', modifier: 'derived' },
     duration_minutes: { type: 'number', description: 'Expected length (minutes)' },
   },
   // InvestigationProperties: Active thread of inquiry: debugging, architecture exploration, RCA.
@@ -1702,7 +1702,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   key_activity: {
     activity_type: { type: 'string', enum: ['production', 'problem_solving', 'platform', 'network'], description: 'Activity nature' },
     cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'Canonical `Cadence`. Replaces the legacy free-form `frequency: string` in v0.4.0. For exact rates (e.g. "3 times per week") set `frequency_count` + `frequency_period`. For qualitative tiers ("rare" → "constant") use `frequency_rating`.' },
-    frequency_count: { type: 'number', description: 'Exact count of runs in the period. Pairs with `frequency_period`.' },
+    frequency_count: { type: 'number', description: 'Exact count of runs in the period. Pairs with `frequency_period`.', modifier: 'snapshot' },
     frequency_period: { type: 'string', description: 'Recurrence period (ISO-8601 `Duration`, e.g. `\'P7D\'`)' },
     frequency_rating: { type: 'string', enum: ['constant', 'regular', 'occasional', 'rare', 'other'], description: 'Qualitative tier. Use when an exact rate is unknown.' },
     operational_owner: { type: 'string', description: 'Operationally accountable team or individual. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
@@ -1728,7 +1728,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // KeyResultProperties: A measurable result under an objective. The KR in OKR.
   key_result: {
-    current_value: { type: 'number', description: 'Most recent observed value' },
+    current_value: { type: 'number', description: 'Most recent observed value', modifier: 'snapshot' },
     target_value: { type: 'number', description: 'Value for full achievement' },
     unit: { type: 'string', description: 'Display unit (e.g. "%", "users", "£")' },
   },
@@ -1761,9 +1761,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   learning_path: {
     path_order: { type: 'number', description: 'Display order of this path within a curriculum or program (0-indexed). The scalar ordering convention shared with `journey_step.step_order` and `journey_action.action_order` ( /). Makes a learning_path a deterministically orderable sequence among sibling paths rather than a star.' },
     path_difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'], description: 'Overall difficulty level of the learning path' },
-    item_count: { type: 'number', description: 'Number of items (tutorials, videos, etc.) in the path' },
+    item_count: { type: 'number', description: 'Number of items (tutorials, videos, etc.) in the path', modifier: 'derived' },
     estimated_hours: { type: 'number', description: 'Estimated total hours to complete the path' },
-    completion_rate: { type: 'number', description: 'Percentage of users who complete the full path' },
+    completion_rate: { type: 'number', description: 'Percentage of users who complete the full path', modifier: 'snapshot' },
   },
   // LegalEntityProperties: Legal entity.
   legal_entity: {
@@ -1781,7 +1781,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     dep_type: { type: 'string', enum: ['runtime', 'dev', 'peer', 'optional'], description: 'Dependency classification' },
     license: { type: 'string', description: 'SPDX license identifier' },
     is_outdated: { type: 'boolean', description: 'Whether a newer version is available' },
-    vulnerability_count: { type: 'number', description: 'Known vulnerabilities in the installed version. Populated from npm audit, Snyk, etc.' },
+    vulnerability_count: { type: 'number', description: 'Known vulnerabilities in the installed version. Populated from npm audit, Snyk, etc.', modifier: 'snapshot' },
   },
   // LocaleProperties: Locale.
   locale: {
@@ -1801,7 +1801,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // MarketSegmentProperties: MarketSegment entity.
   market_segment: {
     segment_size: { type: 'number', description: 'Potential customers in this segment' },
-    growth_rate: { type: 'number', description: 'YoY growth rate as a decimal. @example 0.15 represents 15%' },
+    growth_rate: { type: 'number', description: 'YoY growth rate as a decimal. @example 0.15 represents 15%', modifier: 'snapshot' },
     tam: { type: 'number', description: 'Total Addressable Market (currency units)' },
     sam: { type: 'number', description: 'Serviceable Addressable Market (currency units)' },
   },
@@ -1853,7 +1853,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // MarketingChannelProperties: Marketing channel.
   marketing_channel: {
     channel_type: { type: 'string', enum: ['social', 'email', 'seo', 'sem', 'content', 'events', 'other'], description: 'Category of marketing channel' },
-    monthly_budget: { type: 'number', description: 'Monthly spend allocated to this channel' },
+    monthly_budget: { type: 'number', description: 'Monthly spend allocated to this channel', modifier: 'snapshot' },
     roi: { type: 'number', description: 'Return on investment ratio' },
     channel_status: { type: 'string', enum: ['active', 'paused', 'deprecated'], description: 'Operational status of the channel' },
   },
@@ -1888,7 +1888,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     impact_level: { type: 'string', enum: ['impact', 'outcome', 'output'], description: 'Where this metric sits in the impact hierarchy' },
     indicator_direction: { type: 'string', enum: ['leading', 'lagging'], description: 'Whether this metric leads or lags the behaviour it measures' },
     metric_category: { type: 'string', enum: ['acquisition', 'activation', 'retention', 'referral', 'revenue', 'engagement', 'happiness', 'task_success', 'adoption', 'other'], description: 'AARRR or HEART category this metric belongs to' },
-    current_value: { type: 'number', description: 'Most recent observed value' },
+    current_value: { type: 'number', description: 'Most recent observed value', modifier: 'snapshot' },
     target_value: { type: 'number', description: 'Value we are aiming to reach' },
     unit: { type: 'string', description: 'Display unit for the metric value (e.g. "%", "ms", "£")' },
     range_min: { type: 'number', description: 'Minimum expected or baseline value' },
@@ -1980,11 +1980,11 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   nps_campaign: {
     campaign_type: { type: 'string', enum: ['relationship', 'transactional', 'feature'], description: 'What triggers the NPS survey' },
     send_date: { type: 'string', description: 'Date the survey was sent (ISO format)' },
-    response_count: { type: 'number', description: 'Number of responses received' },
-    response_rate: { type: 'number', description: 'Percentage of recipients who responded' },
+    response_count: { type: 'number', description: 'Number of responses received', modifier: 'snapshot' },
+    response_rate: { type: 'number', description: 'Percentage of recipients who responded', modifier: 'snapshot' },
     score: { type: 'number', description: 'Net Promoter Score (-100 to 100)' },
-    promoters_pct: { type: 'number', description: 'Percentage of respondents who are promoters (9-10)' },
-    detractors_pct: { type: 'number', description: 'Percentage of respondents who are detractors (0-6)' },
+    promoters_pct: { type: 'number', description: 'Percentage of respondents who are promoters (9-10)', modifier: 'snapshot' },
+    detractors_pct: { type: 'number', description: 'Percentage of respondents who are detractors (0-6)', modifier: 'snapshot' },
   },
   // ObjectionProperties: Objection entity.
   objection: {
@@ -2129,14 +2129,14 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   paywall: {
     paywall_type: { type: 'string', enum: ['hard', 'soft', 'metered', 'freemium_gate'], description: 'How restrictive the paywall is' },
     trigger: { type: 'string', description: 'User action or threshold that triggers the paywall' },
-    conversion_rate: { type: 'number', description: 'Percentage of users who convert at this paywall' },
+    conversion_rate: { type: 'number', description: 'Percentage of users who convert at this paywall', modifier: 'snapshot' },
   },
   // PenetrationTestProperties: Penetration test.
   penetration_test: {
     category: { type: 'string', enum: ['external', 'internal', 'web_app', 'api', 'mobile'], description: 'Test type' },
     scope: { type: 'string', description: 'Systems or features in scope' },
-    findings_count: { type: 'number', description: 'Total findings' },
-    critical_count: { type: 'number', description: 'Critical-severity findings' },
+    findings_count: { type: 'number', description: 'Total findings', modifier: 'derived' },
+    critical_count: { type: 'number', description: 'Critical-severity findings', modifier: 'derived' },
     start_date: { type: 'string', description: 'ISO start date' },
     end_date: { type: 'string', description: 'ISO end date' },
     report_url: { type: 'string', description: 'Full report URL' },
@@ -2167,7 +2167,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // PipelineStageProperties: Pipeline stage.
   pipeline_stage: {
     stage_order: { type: 'number', description: 'Position of this stage in the pipeline sequence' },
-    conversion_rate: { type: 'number', description: 'Percentage of deals that advance from this stage' },
+    conversion_rate: { type: 'number', description: 'Percentage of deals that advance from this stage', modifier: 'snapshot' },
     avg_days_in_stage: { type: 'number', description: 'Average number of days deals spend in this stage' },
   },
   // PlaybookProperties: Customer success playbook.
@@ -2390,7 +2390,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ResearchStudyProperties: Structured user research activity.
   research_study: {
     method: { type: 'string', enum: ['interview', 'usability', 'survey', 'diary', 'analytics'], description: 'Research method used to conduct the study' },
-    participant_count: { type: 'number', description: 'Number of participants recruited or observed' },
+    participant_count: { type: 'number', description: 'Number of participants recruited or observed', modifier: 'snapshot' },
     start_date: { type: 'string', description: 'ISO date when the study starts' },
     end_date: { type: 'string', description: 'ISO date when the study ends' },
   },
@@ -2414,7 +2414,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     recurring_revenue: { type: 'number', description: 'Monthly or annual recurring revenue from this stream' },
     billing_model: { type: 'string', enum: ['subscription', 'usage', 'one_time', 'tiered', 'freemium', 'other'], description: 'Billing mechanics. May differ from `stream_type`.' },
     recognition_basis: { type: 'string', enum: ['accrual', 'cash', 'deferred'], description: 'Accounting basis for revenue recognition' },
-    arr_contribution_pct: { type: 'number', description: 'Share of total ARR contributed (0–100)' },
+    arr_contribution_pct: { type: 'number', description: 'Share of total ARR contributed (0–100)', modifier: 'snapshot' },
     forecast: { type: 'string', description: 'Free-text forecast or projection' },
   },
   // ReviewGateProperties: Review gate.
@@ -2540,7 +2540,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   security_audit: {
     audit_scope: { type: 'string', description: 'Systems or processes covered by the audit' },
     audit_status: { type: 'string', enum: ['scheduled', 'in_progress', 'completed'], description: 'Current progress of the audit' },
-    findings_count: { type: 'number', description: 'Total number of findings' },
+    findings_count: { type: 'number', description: 'Total number of findings', modifier: 'derived' },
     critical_findings: { type: 'number', description: 'Number of critical-severity findings' },
   },
   // SecurityControlProperties: Security control.
@@ -2583,7 +2583,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     search_volume: { type: 'number', description: 'Estimated monthly search volume' },
     difficulty: { type: 'number', description: 'Keyword difficulty score (0-100)' },
     intent: { type: 'string', enum: ['informational', 'navigational', 'commercial', 'transactional'], description: 'Search intent behind the keyword' },
-    current_rank: { type: 'number', description: 'Current SERP ranking position' },
+    current_rank: { type: 'number', description: 'Current SERP ranking position', modifier: 'snapshot' },
     target_rank: { type: 'number', description: 'Desired ranking position' },
   },
   // ServiceProperties: Service or microservice.
@@ -2627,7 +2627,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   service_level_objective: {
     target_percentage: { type: 'number', description: 'Target percentage. The reliability commitment. @example 99.9 (three nines), 99.95, 99.99 (four nines)' },
     window: { type: 'string', description: 'Evaluation window. @example "30 days", "rolling 28 days", "calendar quarter"' },
-    current_percentage: { type: 'number', description: 'Current achieved percentage. Compared against `target_percentage` for health. @example 99.92 (above a 99.9 target)' },
+    current_percentage: { type: 'number', description: 'Current achieved percentage. Compared against `target_percentage` for health. @example 99.92 (above a 99.9 target)', modifier: 'snapshot' },
     slo_type: { type: 'string', enum: ['metric', 'monitor', 'time_slice'], description: 'Measurement mechanism. `metric` = ratio (good/total). `monitor` = monitor-based. `time_slice` = uptime windows.' },
     warning_threshold: { type: 'number', description: 'Soft alert threshold before the target breaches. Gives teams time to act. @example 99.95 (warn at 99.95% when target is 99.9%)' },
   },
@@ -2761,7 +2761,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // SubscriptionProperties: Subscription.
   subscription: {
-    monthly_recurring_revenue: { type: 'number', description: 'Monthly recurring revenue from this subscription' },
+    monthly_recurring_revenue: { type: 'number', description: 'Monthly recurring revenue from this subscription', modifier: 'snapshot' },
     start_date: { type: 'string', description: 'Subscription start date (ISO format)' },
     renewal_date: { type: 'string', description: 'Next renewal date (ISO format)' },
     subscription_status: { type: 'string', enum: ['active', 'trialing', 'past_due', 'cancelled', 'paused'], description: 'Current status of the subscription' },
@@ -2793,8 +2793,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // SurveyResponseProperties: Aggregated survey response data.
   survey_response: {
-    response_count: { type: 'number', description: 'Total responses' },
-    completion_rate: { type: 'number', description: 'Completion (0–1)' },
+    response_count: { type: 'number', description: 'Total responses', modifier: 'snapshot' },
+    completion_rate: { type: 'number', description: 'Completion (0–1)', modifier: 'snapshot' },
     method: { type: 'string', enum: ['email', 'in_app', 'phone', 'other'], description: 'Distribution method' },
   },
   // SwitchingCostProperties: SwitchingCost entity.
@@ -2826,7 +2826,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       },
       required: ['value', 'label'],
     },
-    frequency_count: { type: 'number', description: 'Exact observation count in the period. Pairs with `frequency_period` for a precise rate.' },
+    frequency_count: { type: 'number', description: 'Exact observation count in the period. Pairs with `frequency_period` for a precise rate.', modifier: 'snapshot' },
     frequency_period: { type: 'string', description: 'Recurrence period (ISO-8601 `Duration`). @example \'P7D\' (per week), \'P1D\' (per day), \'PT1H\' (per hour)' },
     frequency_rating: { type: 'string', enum: ['constant', 'regular', 'occasional', 'rare', 'other'], description: 'Qualitative frequency tier. Canonical replacement for the legacy `\'once\' | \'sporadic\' | \'frequent\' | \'constant\' | string` shape. Use when an exact rate is unknown. Migration: `once → rare`, `sporadic → occasional`, `frequent → regular`, `constant → constant`.' },
     affected_users_estimate: { type: 'number', description: 'Approximate count of users affected. Snapshot estimate.' },
@@ -2946,13 +2946,13 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // TestSuiteProperties: Test suite.
   test_suite: {
     suite_type: { type: 'string', enum: ['unit', 'integration', 'e2e', 'performance', 'security', 'accessibility'], description: 'Category of test suite' },
-    test_count: { type: 'number', description: 'Number of tests in the suite' },
-    pass_rate: { type: 'number', description: 'Percentage of tests passing (0-100)' },
+    test_count: { type: 'number', description: 'Number of tests in the suite', modifier: 'derived' },
+    pass_rate: { type: 'number', description: 'Percentage of tests passing (0-100)', modifier: 'snapshot' },
     last_run: { type: 'string', description: 'ISO date of last execution' },
     total_duration_ms: { type: 'number', description: 'Total execution time for the last run, in milliseconds' },
-    failed_count: { type: 'number', description: 'Number of tests that failed in the last run' },
-    skipped_count: { type: 'number', description: 'Number of tests that were skipped in the last run' },
-    flaky_count: { type: 'number', description: 'Number of tests that passed only on retry (flaky) in the last run' },
+    failed_count: { type: 'number', description: 'Number of tests that failed in the last run', modifier: 'snapshot' },
+    skipped_count: { type: 'number', description: 'Number of tests that were skipped in the last run', modifier: 'snapshot' },
+    flaky_count: { type: 'number', description: 'Number of tests that passed only on retry (flaky) in the last run', modifier: 'snapshot' },
   },
   // ThreatProperties: Threat.
   threat: {
@@ -2988,7 +2988,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     scope: { type: 'string', description: 'What system, feature, or data flow is being analysed. @example "user authentication", "payment processing", "admin API"' },
     last_reviewed: { type: 'string', description: 'ISO date last reviewed. Models become stale as systems evolve. @example "2026-03-01"' },
     participants: { type: 'string', description: 'Participants in the exercise. @example "Alice Chen (security lead), Bob Park (backend engineer), Carol Liu (architect)". Promote individuals to `node_owned_by_person` edges if participation must be queryable.' },
-    threat_count: { type: 'number', description: 'Threats identified. Key metric for scope and completeness. @example 12' },
+    threat_count: { type: 'number', description: 'Threats identified. Key metric for scope and completeness. @example 12', modifier: 'derived' },
   },
   // TouchpointProperties: Customer touchpoint.
   touchpoint: {
@@ -3012,14 +3012,14 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   trial_config: {
     trial_type: { type: 'string', enum: ['time_limited', 'feature_limited', 'usage_limited', 'reverse'], description: 'How the trial is limited' },
     duration_days: { type: 'number', description: 'Length of the trial period in days' },
-    conversion_rate: { type: 'number', description: 'Percentage of trial users who convert to paid' },
+    conversion_rate: { type: 'number', description: 'Percentage of trial users who convert to paid', modifier: 'snapshot' },
   },
   // TutorialProperties: Tutorial.
   tutorial: {
     tutorial_format: { type: 'string', enum: ['written', 'video', 'interactive', 'code_along'], description: 'Delivery format of the tutorial' },
     difficulty: { type: 'string', enum: ['beginner', 'intermediate', 'advanced'], description: 'Skill level required to follow the tutorial' },
     duration_minutes: { type: 'number', description: 'Estimated time to complete in minutes' },
-    completion_rate: { type: 'number', description: 'Percentage of users who complete the tutorial' },
+    completion_rate: { type: 'number', description: 'Percentage of users who complete the tutorial', modifier: 'snapshot' },
   },
   // UnitEconomicsProperties: UnitEconomics.
   unit_economics: {
@@ -3030,7 +3030,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // UserAdvisoryBoardProperties: User advisory board.
   user_advisory_board: {
-    member_count: { type: 'number', description: 'Number of members on the board' },
+    member_count: { type: 'number', description: 'Number of members on the board', modifier: 'snapshot' },
     meeting_cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'How often the board meets. Uses the shared `Cadence` scale.' },
     board_focus: { type: 'string', description: 'Primary topic or area the board advises on' },
   },
@@ -3110,9 +3110,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // WalkthroughProperties: Product walkthrough.
   walkthrough: {
     walkthrough_type: { type: 'string', enum: ['product_tour', 'feature_intro', 'tooltip_sequence', 'checklist'], description: 'Format of the in-product walkthrough' },
-    step_count: { type: 'number', description: 'Number of steps in the walkthrough' },
+    step_count: { type: 'number', description: 'Number of steps in the walkthrough', modifier: 'derived' },
     trigger: { type: 'string', description: 'User action or event that starts the walkthrough' },
-    completion_rate: { type: 'number', description: 'Percentage of users who complete the walkthrough' },
+    completion_rate: { type: 'number', description: 'Percentage of users who complete the walkthrough', modifier: 'snapshot' },
   },
   // WebinarProperties: Webinar.
   webinar: {
@@ -3165,7 +3165,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     purpose: { type: 'string', description: 'Free-text description. Pairs with the closed-enum `workspace_purpose`.' },
     workspace_purpose: { type: 'string', enum: ['discovery', 'planning', 'retrospective', 'design', 'research', 'strategy', 'general'], description: 'Closed-enum classifier. Drives template suggestions and surfaces in workspace browsers. `discovery` = persona/job/opportunity exploration. `planning` = roadmap and decision sessions. `retrospective` = reflection on shipped work. `design` = experience or UI exploration. `research` = organising study data and synthesis. `strategy` = high-level direction setting. `general` = catch-all.' },
     owner: { type: 'string', description: 'Workspace owner (handle or email). Display label; canonical owner is `team_owns_workspace` or `persona_owns_workspace`.' },
-    member_count: { type: 'number', description: 'Snapshot count. `team_works_in_workspace` edges are the source of truth.' },
+    member_count: { type: 'number', description: 'Snapshot count. `team_works_in_workspace` edges are the source of truth.', modifier: 'derived' },
     archived: { type: 'boolean', description: 'Archived. Archived workspaces remain queryable but hidden from default views.' },
     archived_at: { type: 'string', description: 'ISO timestamp archived. Pairs with `archived === true`.' },
     icon: { type: 'string', description: 'Display icon (emoji or icon name)' },

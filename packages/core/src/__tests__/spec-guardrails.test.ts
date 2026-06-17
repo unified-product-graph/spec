@@ -166,22 +166,27 @@ describe('T1.2 spec guardrail — derivable aggregates are marked @derived', () 
     if (isRecordEntity(type)) continue
     for (const [name, def] of Object.entries(props as Record<string, PropertyDefinition>)) {
       if (!isAggregateShapedProperty(name, def)) continue
-      if (def.modifier === 'derived') continue
+      // @derived = a graph rollup (computed from edges/children); @snapshot = a
+      // measured/observed count (e.g. responses received, executions run) — a live
+      // reading, not a stored *derivable* aggregate. Either modifier discharges the
+      // smell; an untagged `*_count` is the violation.
+      if (def.modifier === 'derived' || def.modifier === 'snapshot') continue
       storedAggregates.push(`${type}.${name}`)
     }
   }
 
   it('the count of untagged stored-aggregate properties has not grown beyond the baseline', () => {
-    // Baseline 52 frozen 2026-06-17 ( T1.2, 0.13.0 Wave 0). A `*_count` /
-    // `headcount` numeric is a rollup of edges or children — mark it
-    // `modifier: 'derived'` (or drop it) and let tooling compute at read-time.
-    // Lower this as tags/removes the offenders; it must not grow.
+    // Baseline 52 (0.13.0 Wave 0) → 0 on 2026-06-17 (0.13.2): every
+    // `*_count` / `headcount` numeric on a definition entity now carries a modifier
+    // — @derived for graph rollups, @snapshot for measured counts. The debt is paid;
+    // the guardrail is now strict (any NEW untagged aggregate fails). Keep it at 0.
     expect(
       storedAggregates.length,
       `NEW derivable aggregate stored as a plain scalar. A count/rollup belongs to the ` +
-        `graph (edges/children) — mark it \`modifier: 'derived'\` so a stored value can no ` +
-        `longer contradict the graph. Offenders:\n${storedAggregates.sort().join('\n')}`,
-    ).toBeLessThanOrEqual(52)
+        `graph (edges/children) — mark it \`modifier: 'derived'\` (graph rollup) or ` +
+        `\`'snapshot'\` (measured count) so a stored value can no longer silently drift. ` +
+        `Offenders:\n${storedAggregates.sort().join('\n')}`,
+    ).toBeLessThanOrEqual(0)
   })
 })
 
@@ -206,15 +211,15 @@ describe('T1.3 spec guardrail — live readings on definition entities are marke
   }
 
   it('the count of untagged runtime-state properties on definition entities has not grown beyond the baseline', () => {
-    // Baseline 35 frozen 2026-06-17 ( T1.3, 0.13.0 Wave 0). A live reading
-    // on a definition entity belongs on a `metric` node (by edge) or must be marked
-    // `modifier: 'snapshot'` with a paired `*_as_of` stamp. Add a genuine
-    // execution/record entity to `RECORD_ENTITY_TYPES` rather than mistag it.
-    // Lower as re-homes the offenders; it must not grow.
+    // Baseline 35 (0.13.0 Wave 0) → 0 on 2026-06-17 (0.13.2): every live
+    // numeric reading on a definition entity now carries `@snapshot`. The debt is
+    // paid; the guardrail is strict (any NEW untagged live reading fails). Keep at 0.
+    // (The heavier re-home-to-`metric`-node refactor stays parked; tagging is the
+    // audit-sanctioned lighter fix and is what makes staleness machine-visible.)
     expect(
       runtimeState.length,
       `NEW live reading on a definition entity. Route it to a \`metric\` node (by edge), or ` +
         `mark it \`modifier: 'snapshot'\` / \`'volatile'\` with a \`*_as_of\` stamp. Offenders:\n${runtimeState.sort().join('\n')}`,
-    ).toBeLessThanOrEqual(35)
+    ).toBeLessThanOrEqual(0)
   })
 })
