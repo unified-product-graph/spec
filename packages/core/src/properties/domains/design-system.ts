@@ -112,10 +112,8 @@ export interface DesignGuidelineProperties {
   applies_to?: string
   /** Reasoning. Why this rule exists. */
   rationale?: string
-  /** Imperative force. Supersedes `strictness`. */
+  /** Imperative force. (Superseded the removed `strictness` field in 0.14.0.) */
   rule_strength?: RuleStrength
-  /** RFC-2119-flavoured binding strength */
-  strictness?: 'must' | 'should' | 'may'
   /** Exception request or documentation process */
   exception_policy?: string
 }

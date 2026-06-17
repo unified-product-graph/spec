@@ -286,12 +286,7 @@ export interface TaskProperties {
   due_date?: ISODate
   /** Free-form classification tags. Applied uniformly across work item types. */
   labels?: string[]
-  /**
-   * Story-point or sizing estimate. String to support fibonacci, t-shirt sizes,
-   * or custom scales (e.g. "5", "M", "3 pts"). Absorbed from `StoryTaskProperties`
-   * when `story_task` collapsed into `task` (v0.4.0).
-   */
-  estimate?: string
+  // `estimate` (story_task collapse relic, duplicated `effort`) removed in 0.14.0.
 }
 
 /** Bug report.

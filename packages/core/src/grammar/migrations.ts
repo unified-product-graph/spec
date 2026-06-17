@@ -623,6 +623,29 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.14.0: Pattern E — remove deprecated/ghost properties ────────
+  //
+  // Properties marked deprecated (some "Removed in 0.9.1") that were never
+  // actually removed, plus superseded soft-aliases. The RICE / opportunity-sizing
+  // scoring inputs were framework-scoped from 0.9.0: their value lives on the
+  // `framework_exercise` includes-edge of the rice-scoring / opportunity-sizing
+  // framework, not on the entity. The remaining four are superseded by a sibling
+  // (cause_category, rule_strength, size_estimate, effort). Loaders drop the
+  // stranded keys; the values were never canonical on the entity.
+  '0.14.0': [
+    { kind: 'drop_props', type: 'opportunity', drop_props: ['reach', 'frequency', 'pain', 'opportunity_score'],
+      reason: ': opportunity scoring (reach/frequency/pain/opportunity_score) was framework-scoped from 0.9.0 (opportunity-sizing). Apply the framework and read the value off the framework_exercise edge; the entity props are removed in 0.14.0.' },
+    { kind: 'drop_props', type: 'solution', drop_props: ['reach', 'impact', 'confidence', 'effort', 'rice_score'],
+      reason: ': RICE inputs (reach/impact/confidence/effort) and the computed rice_score were framework-scoped from 0.9.0 (rice-scoring). Apply the framework and read the score off the framework_exercise edge; the entity props are removed in 0.14.0.' },
+    { kind: 'drop_props', type: 'root_cause', drop_props: ['category', 'verified'],
+      reason: ': root_cause.category was a legacy free-form field superseded by the closed-enum cause_category; verified duplicated cause_confidence === confirmed. Both removed in 0.14.0.' },
+    { kind: 'drop_props', type: 'design_guideline', drop_props: ['strictness'],
+      reason: ': design_guideline.strictness was superseded by rule_strength (a richer imperative-force enum). Removed in 0.14.0.' },
+    { kind: 'drop_props', type: 'behavioral_segment', drop_props: ['size'],
+      reason: ': behavioral_segment.size was a v0.2 alias for size_estimate. Removed in 0.14.0; use size_estimate.' },
+    { kind: 'drop_props', type: 'task', drop_props: ['estimate'],
+      reason: ': task.estimate was a story_task-collapse relic that duplicated effort. Removed in 0.14.0; use effort.' },
+  ],
   // ── v0.12.0: P14 Bucket C — drop the one non-derived denormalized aggregate ──
   //
   // The count caches (feature_count, evidence_count, workflow step_count /

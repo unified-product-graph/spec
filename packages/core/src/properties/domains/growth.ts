@@ -177,10 +177,8 @@ export interface BehavioralSegmentProperties {
   included_behaviors?: string[]
   /** Excluding behaviours (negative criteria, free-text labels) */
   excluded_behaviors?: string[]
-  /** Estimated current size. Snapshot value. */
+  /** Estimated current size. Snapshot value. (`size`, the v0.2 alias, removed in 0.14.0.) */
   size_estimate?: number
-  /** Size. Alias retained for the v0.2 baseline. */
-  size?: number
   /** ISO start of the validity window. Behavioural definitions decay; outside the window the snapshot should be re-computed. */
   validity_period_start?: ISODate
   /** End of the window over which the segment definition is considered valid (ISO format) */

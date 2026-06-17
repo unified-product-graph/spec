@@ -356,8 +356,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     source: { type: 'string', enum: ['clickstream', 'survey', 'interview', 'mixed', 'inferred', 'imported'], description: 'Membership data source. Drives confidence weighting and refresh policy.' },
     included_behaviors: { type: 'string[]', description: 'Qualifying behaviours (positive criteria, free-text labels)' },
     excluded_behaviors: { type: 'string[]', description: 'Excluding behaviours (negative criteria, free-text labels)' },
-    size_estimate: { type: 'number', description: 'Estimated current size. Snapshot value.' },
-    size: { type: 'number', description: 'Size. Alias retained for the v0.2 baseline.' },
+    size_estimate: { type: 'number', description: 'Estimated current size. Snapshot value. (`size`, the v0.2 alias, removed in 0.14.0.)' },
     validity_period_start: { type: 'string', description: 'ISO start of the validity window. Behavioural definitions decay; outside the window the snapshot should be re-computed.' },
     validity_period_end: { type: 'string', description: 'End of the window over which the segment definition is considered valid (ISO format)' },
   },
@@ -962,8 +961,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     guideline_category: { type: 'string', enum: ['spacing', 'color', 'typography', 'layout', 'interaction', 'content'], description: 'Category covered' },
     applies_to: { type: 'string', description: 'Applicable elements or contexts' },
     rationale: { type: 'string', description: 'Reasoning. Why this rule exists.' },
-    rule_strength: { type: 'string', enum: ['must', 'must_not', 'exception', 'warning', 'guideline'], description: 'Imperative force. Supersedes `strictness`.' },
-    strictness: { type: 'string', enum: ['must', 'should', 'may'], description: 'RFC-2119-flavoured binding strength' },
+    rule_strength: { type: 'string', enum: ['must', 'must_not', 'exception', 'warning', 'guideline'], description: 'Imperative force. (Superseded the removed `strictness` field in 0.14.0.)' },
     exception_policy: { type: 'string', description: 'Exception request or documentation process' },
   },
   // DesignPatternProperties: Reusable design pattern.
@@ -2024,40 +2022,11 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     rotation_cadence: { type: 'string', enum: ['daily', 'weekly', 'biweekly', 'custom'], description: 'Cycle cadence. `weekly` for standard team rotations. `daily` for high-incident-volume teams.' },
     handoff_time: { type: 'string', description: 'Shift handoff time. Affects team coordination and sleep. @example "09:00 UTC", "17:00 local"' },
   },
-  // OpportunityProperties: A problem worth solving, grounded in user need and business value
-  opportunity: {
-    reach: {
-      type: 'assessment', scale_id: 'reach_5', description: 'How many users experience this problem. @deprecated 0.9.0:a framework-scoped scoring input, not an intrinsic property. Apply the `opportunity-sizing` framework; the value lives on the framework_exercise includes-edge. Removed in 0.9.1.',
-      properties: {
-        value: { type: 'number', description: 'The numeric value, used for computation.' },
-        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
-        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
-        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
-      },
-      required: ['value', 'label'],
-    },
-    frequency: {
-      type: 'assessment', scale_id: 'frequency_5', description: 'How often users experience this problem. @deprecated 0.9.0:framework-scoped (opportunity-sizing). Removed in 0.9.1.',
-      properties: {
-        value: { type: 'number', description: 'The numeric value, used for computation.' },
-        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
-        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
-        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
-      },
-      required: ['value', 'label'],
-    },
-    pain: {
-      type: 'assessment', scale_id: 'pain_5', description: 'How painful it is when unaddressed. @deprecated 0.9.0:framework-scoped (opportunity-sizing). Removed in 0.9.1.',
-      properties: {
-        value: { type: 'number', description: 'The numeric value, used for computation.' },
-        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
-        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
-        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
-      },
-      required: ['value', 'label'],
-    },
-    opportunity_score: { type: 'number', description: 'Computed: normalized_reach x normalized_frequency x normalized_pain (0-1). @deprecated 0.9.0:computed by the `opportunity-sizing` framework on its application edge, not stored on the entity. Removed in 0.9.1.' },
-  },
+  // OpportunityProperties: A problem worth solving, grounded in user need and business value.
+  // No intrinsic scalar properties — defined by edges + framework-scoped scoring
+  // (reach/frequency/pain/opportunity_score live on the `opportunity-sizing`
+  // framework_exercise edge). Former props removed in 0.14.0.
+  opportunity: {},
   // OrganizationProperties: Organization entity.
   organization: {
     logo_url: { type: 'string', description: 'URL of the organisation\'s logo' },
@@ -2503,9 +2472,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     cause_category: { type: 'string', enum: ['code', 'config', 'process', 'dependency', 'data', 'infrastructure', 'human_error', 'other'], description: 'Closed-enum cause category for RCA reporting and dashboards. Distinct from the legacy free-form `category`.' },
     cause_confidence: { type: 'string', enum: ['hypothesised', 'likely', 'confirmed'], description: 'Team certainty about this cause. `hypothesised` = educated guess. `likely` = evidence points here. `confirmed` = reproduced. Renamed from `confidence` in v0.4.0 to disambiguate from the entity-wide `UPGAssessment`-typed epistemic confidence used elsewhere. The 3-tier shape stays as a discrete RCA-lifecycle marker.' },
     evidence_summary: { type: 'string', description: 'One-paragraph evidence summary. Log lines, traces, repro steps. Detailed artefacts go on linked `evidence` nodes.' },
-    category: { type: 'string', enum: ['architecture', 'design', 'data', 'infrastructure', 'process', 'dependency', 'other'], description: 'Legacy free-form category. Retained for v0.2 baseline; new graphs prefer `cause_category`.' },
     affected_area: { type: 'string', description: 'Affected area of the system' },
-    verified: { type: 'boolean', description: 'Verified through investigation' },
+    // `category` (legacy, -> `cause_category`) and `verified` (= `cause_confidence === 'confirmed'`) removed in 0.14.0.
   },
   // RunbookProperties: Runbook.
   runbook: {
@@ -2654,50 +2622,12 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     post_type: { type: 'string', enum: ['text', 'image', 'video', 'carousel', 'story'], description: 'Format of the post' },
     scheduled_date: { type: 'string', description: 'Date the post is scheduled to publish (ISO format)' },
   },
-  // SolutionProperties: A proposed response to an opportunity
+  // SolutionProperties: A proposed response to an opportunity.
+  // RICE scoring inputs (reach/impact/confidence/effort) + computed rice_score
+  // were framework-scoped from 0.9.0 and removed in 0.14.0: they live
+  // on the `rice-scoring` framework_exercise edge, not the entity.
   solution: {
     timeline: { type: 'string', description: 'Estimated delivery or target timeline' },
-    reach: {
-      type: 'assessment', scale_id: 'reach_5', description: 'How many users this solution reaches (1 = few, 5 = most). @deprecated 0.9.0:a framework-scoped scoring input, not an intrinsic property. Apply the `rice-scoring` framework; the value lives on the framework_exercise includes-edge. Removed in 0.9.1.',
-      properties: {
-        value: { type: 'number', description: 'The numeric value, used for computation.' },
-        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
-        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
-        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
-      },
-      required: ['value', 'label'],
-    },
-    impact: {
-      type: 'assessment', scale_id: 'impact_5', description: 'Expected impact on the target outcome (1 = minimal, 5 = transformative). @deprecated 0.9.0:framework-scoped (rice-scoring). Removed in 0.9.1.',
-      properties: {
-        value: { type: 'number', description: 'The numeric value, used for computation.' },
-        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
-        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
-        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
-      },
-      required: ['value', 'label'],
-    },
-    confidence: {
-      type: 'assessment', scale_id: 'confidence_5', description: 'How confident the team is in this solution (1 = speculative, 5 = proven). @deprecated 0.9.0:framework-scoped (rice-scoring). Removed in 0.9.1.',
-      properties: {
-        value: { type: 'number', description: 'The numeric value, used for computation.' },
-        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
-        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
-        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
-      },
-      required: ['value', 'label'],
-    },
-    effort: {
-      type: 'assessment', scale_id: 'effort_5', description: 'Level of effort required to implement (1 = trivial, 5 = very large). @deprecated 0.9.0:effort is a framework-scoped scoring input (it varies by assessor and method), not an intrinsic property. Removed in 0.9.1.',
-      properties: {
-        value: { type: 'number', description: 'The numeric value, used for computation.' },
-        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
-        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
-        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
-      },
-      required: ['value', 'label'],
-    },
-    rice_score: { type: 'number', description: 'Computed: (reach × impact × confidence) / effort. @deprecated 0.9.0:computed by the `rice-scoring` framework on its application edge, not stored on the entity. Removed in 0.9.1.' },
   },
   // SpecificationProperties: A governed specification: a query language, protocol, data format, encoding,
   specification: {
@@ -2846,7 +2776,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Relative importance against other tasks' },
     due_date: { type: 'string', description: 'ISO date due. Typically bounded by the containing story\'s due date.' },
     labels: { type: 'string[]', description: 'Free-form classification tags. Applied uniformly across work item types.' },
-    estimate: { type: 'string', description: 'Story-point or sizing estimate. String to support fibonacci, t-shirt sizes, or custom scales (e.g. "5", "M", "3 pts"). Absorbed from `StoryTaskProperties` when `story_task` collapsed into `task` (v0.4.0).' },
+    // `estimate` (story_task collapse relic, duplicated `effort`) removed in 0.14.0.
   },
   // TeamProperties: Team entity.
   team: {

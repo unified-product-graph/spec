@@ -111,17 +111,20 @@ describe('Property interfaces', () => {
  expect(UPG_PROPERTY_SCHEMA['story_statement']).toBeUndefined()
  })
 
- it('task schema absorbed estimate from story_task (v0.4.0)', () => {
+ it('task no longer carries estimate (removed in 0.14.0 — it duplicated effort)', () => {
  const schema = UPG_PROPERTY_SCHEMA['task']
  expect(schema).toBeDefined()
- expect(Object.keys(schema!)).toContain('estimate')
+ // `estimate` was absorbed from story_task in v0.4.0, but duplicated `effort`;
+ // removed in 0.14.0. `effort` is the single canonical sizing field.
+ expect(Object.keys(schema!)).not.toContain('estimate')
+ expect(Object.keys(schema!)).toContain('effort')
  })
 
  it('statement and task schemas do not overlap on shape-determining fields', () => {
  const statementFields = new Set(Object.keys(UPG_PROPERTY_SCHEMA['user_story'] ?? {}))
  const taskFields = new Set(Object.keys(UPG_PROPERTY_SCHEMA['task'] ?? {}))
  const statementOnly = ['as_a', 'i_want_to', 'so_that', 'text']
- const taskOnly = ['estimate', 'effort', 'priority']
+ const taskOnly = ['effort', 'priority']
  for (const f of statementOnly) {
  expect(statementFields.has(f), `statement should carry ${f}`).toBe(true)
  expect(taskFields.has(f), `task must NOT carry ${f}`).toBe(false)

@@ -562,9 +562,7 @@ export interface InvestigationProperties {
  *   severity: 4,
  *   cause_confidence: 'confirmed',
  *   evidence_summary: 'Trace shows retry loop on 4xx responses; reproduced in staging with synthetic 401.',
- *   category: 'architecture',
  *   affected_area: 'Billing settlement service',
- *   verified: true,
  * }
  */
 export interface RootCauseProperties {
@@ -587,12 +585,10 @@ export interface RootCauseProperties {
   cause_confidence?: CauseConfidence
   /** One-paragraph evidence summary. Log lines, traces, repro steps. Detailed artefacts go on linked `evidence` nodes. */
   evidence_summary?: string
-  /** Legacy free-form category. Retained for v0.2 baseline; new graphs prefer `cause_category`. */
-  category?: 'architecture' | 'design' | 'data' | 'infrastructure' | 'process' | 'dependency' | 'other'
   /** Affected area of the system */
   affected_area?: string
-  /** Verified through investigation */
-  verified?: boolean
+  // `category` (legacy free-form, superseded by `cause_category`) and `verified`
+  // (= `cause_confidence === 'confirmed'`) removed in 0.14.0.
 }
 
 /** Observable behaviour produced by a root cause.

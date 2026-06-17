@@ -15,6 +15,8 @@
  *   - T1.3 runtime-state-on-definition-entity (baseline below)
  *   - T1.6 hierarchy<->edge-classification (28 baseline)
  *   - T1.7 cross-domain-endpoints-recompute (65 baseline)
+ *   - T1.8 no past-window deprecated-property ghosts (zero-tolerance; the
+ *     schema-time complement to T1.5. Added with the removal, 0.14.0.)
  *
  * T1.2 / T1.3 read the 0.11.6 `@derived` / `@snapshot` / `@volatile` modifiers
  * through the queryable surface in `properties/property-modifiers.ts` (0.13.0
@@ -82,6 +84,36 @@ describe('T1.1 spec guardrail — *_status enums do not newly shadow a lifecycle
         `lifecycle phase ladder duplicates the base-node \`status\` field — drop it and let the ` +
         `lifecycle carry the phase. Offenders:\n${shadows.sort().join('\n')}`,
     ).toBeLessThanOrEqual(14)
+  })
+})
+
+// ─── T1.8 — no past-window deprecated-property ghosts ─────────────────────────
+//
+// The schema-time complement to the (instance-time) T1.5. The 0.9.0 RICE /
+// opportunity-sizing scoring inputs were marked "@deprecated 0.9.0 ... Removed
+// in 0.9.1" yet sat live in the schema until 0.14.0 — four minor
+// versions of ghost. This guard forbids the recurrence: a property whose
+// description announces it was "Removed in <version>" must actually be gone.
+// (A genuine deprecation notice for a FUTURE removal reads "will be removed in
+// <version>" and is not matched.)
+describe('T1.8 spec guardrail — no property announces a past-window removal yet lingers', () => {
+  const REMOVED_MARKER = /\bRemoved in \d+\.\d+/
+
+  const ghosts: string[] = []
+  for (const [type, props] of Object.entries(UPG_PROPERTY_SCHEMA)) {
+    for (const [name, def] of Object.entries(props as Record<string, { description?: string }>)) {
+      if (REMOVED_MARKER.test(def?.description ?? '')) ghosts.push(`${type}.${name}`)
+    }
+  }
+
+  it('zero properties carry a "Removed in <version>" marker', () => {
+    expect(
+      ghosts.length,
+      `A property announces it was "Removed in <version>" but is still present in the schema. ` +
+        `Either delete it (interface + const + fixture + UPG_PROPERTY_MIGRATIONS drop_props) or, ` +
+        `if it is a future-dated deprecation, phrase it "will be removed in <version>". ` +
+        `Offenders:\n${ghosts.sort().join('\n')}`,
+    ).toBe(0)
   })
 })
 
