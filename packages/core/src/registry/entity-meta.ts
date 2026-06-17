@@ -551,6 +551,26 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'framework_exercise', type_id: 'ent_350', maturity: 'proposed', since: '0.8.4' },
 ] as const
 
+/**
+ * Proposed entity types deliberately HELD at `proposed` by an open contract or
+ * ADR, even where the mechanical promotion rubric (≥2 framework refs, ≥3
+ * properties, lifecycle-or-free) would otherwise pass them. The freeze is a
+ * decision, not an oversight: graduating one means deciding its contract is
+ * settled enough to lift. Single source of truth for both the graduation test
+ * (`maturity-graduation.test.ts`) and the promotion auditor
+ * (`scripts/audit-proposed-promotion.ts`), so the rubric checker never invites a
+ * graduation a contract forbids. Maps each type to its governing decision.
+ */
+export const DEFERRED_PROPOSED_BY_CONTRACT: Readonly<Record<string, string>> = {
+  user_story:
+    ': frozen proposed by the v0.7.0 re-canon contract (story_statement to user_story); user-story-split.test.ts asserts the invariant.',
+  experiment_run:
+    ': the optional multi-run / replication child; experiment_plan graduated to stable, the run stays proposed.',
+  ai_experiment: ': AI prompt/model restructure (open ADR).',
+  ai_dataset: ': AI prompt/model restructure (open ADR).',
+  ai_trace: ': AI prompt/model restructure (open ADR).',
+}
+
 // ─── Lookup helpers ────────────────────────────────────────────────────────────
 
 /** O(1) lookup: type name → metadata */

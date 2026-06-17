@@ -124,6 +124,32 @@ describe('Entity Type ↔ Domain consistency', () => {
  expect(Object.keys(UPG_ENTITY_TO_DOMAIN).length).toBe(allDomainTypes.length)
  })
 
+ // T0.6: the active entity-type count is single-sourced. The roster
+ // audit found three surfaces reporting different totals (312 / 316 / 318). The
+ // two that independently enumerate "active entity types" — the domain union
+ // (`getTypes()`, what get_spec_version and UPG_ENTITY_COUNT derive from) and the
+ // registry (`UPG_ENTITY_META` non-deprecated) — must agree, so there is only one
+ // number and a future type added to one but not the other fails loudly here.
+ it('the active entity-type count is single-sourced (domain union === entity-meta active)', () => {
+ const unionSet = new Set(allDomainTypes)
+ const metaActive = UPG_ENTITY_META.filter(
+ (m) => m.maturity === 'stable' || m.maturity === 'proposed',
+ ).map((m) => m.name)
+ const metaActiveSet = new Set(metaActive)
+ expect(metaActive.length, 'duplicate active entries in UPG_ENTITY_META').toBe(metaActiveSet.size)
+ const inMetaNotUnion = [...metaActiveSet].filter((n) => !unionSet.has(n))
+ const inUnionNotMeta = [...unionSet].filter((n) => !metaActiveSet.has(n))
+ expect(
+ inMetaNotUnion,
+ `active in UPG_ENTITY_META but missing from the domain union (add it to a domain): ${inMetaNotUnion.join(', ')}`,
+ ).toEqual([])
+ expect(
+ inUnionNotMeta,
+ `in the domain union but not active in UPG_ENTITY_META (register it / fix maturity): ${inUnionNotMeta.join(', ')}`,
+ ).toEqual([])
+ expect(metaActiveSet.size).toBe(unionSet.size)
+ })
+
  it('UPG_ENTITY_TO_DOMAIN maps every active entity type to its declared domain', () => {
  const bad: string[] = []
  for (const domain of UPG_DOMAINS) {

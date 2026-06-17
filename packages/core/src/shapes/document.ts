@@ -158,6 +158,13 @@ export type UPGCrossEdgeType =
   // product graphs roll up to one canonical lifecycle (~7 registry nodes + 49
   // cross-edges) instead of minting per-product stage duplicates.
   | 'journey_phase_realises_operating_stage'
+  // Marketing surface to product (0.12.5). A marketing/landing `screen`
+  // in one product graph (e.g. the website) markets a `product` that lives in its
+  // own graph: "this page is about / promotes that product." Cross-only — distinct
+  // from `depends_on_product` (the built-on / dogfood relationship between two
+  // products) and from any within-graph edge; the marketing surface is not the
+  // product it markets, and the product node lives in a different product file.
+  | 'screen_markets_product'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -190,6 +197,7 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'competitor_classified_as_classification_value',
   'node_classified_as_classification_value',
   'journey_phase_realises_operating_stage',
+  'screen_markets_product',
 ]
 
 /**

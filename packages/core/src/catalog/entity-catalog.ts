@@ -6,8 +6,9 @@
 // ─── Unified entity type ──────────────────────────────────────────────────────
 
 /**
- * The union of every active entity type, across 36 flat domains.
- * Count is computed at module init as `UPG_TYPES.length` (currently 312).
+ * The union of every active entity type, across the flat domain registry.
+ * Count is computed at module init as `UPG_TYPES.length` (see `UPG_ENTITY_COUNT`);
+ * no hard-coded total is kept here, so the comment can't drift from the catalog.
  *
  * @see registry/domains.ts for domain groupings
  * @see registry/entity-meta.ts for type IDs and maturity

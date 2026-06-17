@@ -23,7 +23,7 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { UPG_ENTITY_META_BY_NAME } from '../registry/entity-meta.js'
+import { UPG_ENTITY_META_BY_NAME, DEFERRED_PROPOSED_BY_CONTRACT } from '../registry/entity-meta.js'
 
 const GRADUATED = [
   'classification_axis',
@@ -33,13 +33,10 @@ const GRADUATED = [
   'metric_quality_assessment',
 ] as const
 
-const DEFERRED_PROPOSED = [
-  'user_story', // re-canon contract
-  'experiment_run', // — optional multi-run / replication child (experiment_plan graduated to stable)
-  'ai_experiment', //
-  'ai_dataset', //
-  'ai_trace', //
-] as const
+// Sourced from the canonical contract registry in entity-meta.ts (each entry
+// carries its governing decision). Keeping the list there, not here, means the
+// promotion auditor and this invariant test can never drift apart.
+const DEFERRED_PROPOSED = Object.keys(DEFERRED_PROPOSED_BY_CONTRACT)
 
 describe('F7 maturity graduation', () => {
   for (const name of GRADUATED) {
