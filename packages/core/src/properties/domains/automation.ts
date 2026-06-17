@@ -97,8 +97,6 @@ export interface AgentDefinitionProperties {
   allow_code_execution?: boolean
   /** Whether the agent can process images and other media */
   multimodal?: boolean
-  /** Operational status of this agent definition */
-  agent_status?: 'active' | 'disabled' | 'testing'
   /** Version label for this agent definition (e.g. "1.4.2") */
   version?: string
 }
@@ -161,7 +159,6 @@ export interface AgentTaskProperties {
  * const properties: ReviewGateProperties = {
  *   gate_type: 'human_review',
  *   required_approvers: ['eng-lead', 'security-reviewer'],
- *   gate_status: 'pending',
  * }
  */
 export interface ReviewGateProperties {
@@ -169,8 +166,6 @@ export interface ReviewGateProperties {
   gate_type?: 'human_review' | 'automated_check' | 'approval'
   /** People or roles that must approve. Promote to `node_owned_by_person` edges (one per name) if ownership must be queryable. */
   required_approvers?: string[]
-  /** Current approval status of the gate */
-  gate_status?: 'pending' | 'approved' | 'rejected' | 'bypassed'
 }
 
 /** Approval record.

@@ -255,15 +255,12 @@ export interface DesignConceptProperties {
  * @example
  * const properties: PrototypeProperties = {
  *   fidelity: 'low',
- *   test_status: 'untested',
  *   tool: 'entopo',
  * }
  */
 export interface PrototypeProperties {
   /** Detail level */
   fidelity?: 'low' | 'medium' | 'high'
-  /** User-test status */
-  test_status?: 'untested' | 'testing' | 'passed' | 'failed'
   /** Authoring tool */
   tool?: string
 }

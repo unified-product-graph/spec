@@ -159,7 +159,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     max_execution_time_seconds: { type: 'number', description: 'Hard timeout for agent execution in seconds' },
     allow_code_execution: { type: 'boolean', description: 'Whether the agent can execute generated code' },
     multimodal: { type: 'boolean', description: 'Whether the agent can process images and other media' },
-    agent_status: { type: 'string', enum: ['active', 'disabled', 'testing'], description: 'Operational status of this agent definition' },
     version: { type: 'string', description: 'Version label for this agent definition (e.g. "1.4.2")' },
   },
   // AgentHookProperties: Agent hook.
@@ -844,7 +843,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // DataPipelineProperties: DataPipeline entity.
   data_pipeline: {
-    pipeline_status: { type: 'string', enum: ['active', 'paused', 'failed', 'deprecated'], description: 'Operational status of the pipeline' },
     schedule: { type: 'string', description: 'Cron or scheduling expression' },
     avg_runtime: { type: 'string', description: 'Average wall-clock runtime per execution' },
     orchestrator: { type: 'string', description: 'Orchestration tool (e.g. "Airflow", "Dagster", "dbt Cloud")' },
@@ -879,7 +877,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   database_schema: {
     db_type: { type: 'string', enum: ['postgres', 'mysql', 'mongodb', 'redis', 'other'], description: 'Engine' },
     schema_version: { type: 'string', description: 'Current schema version' },
-    migration_status: { type: 'string', enum: ['current', 'pending', 'failed'], description: 'Pending-migration status' },
     owner: { type: 'string', description: 'Owning person or team responsible for design and migrations. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     table_count: { type: 'number', description: 'Tables or collections in this schema. Useful for migration scope estimation.', modifier: 'derived' },
   },
@@ -934,7 +931,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   deployment: {
     environment: { type: 'string', enum: ['dev', 'staging', 'prod'], description: 'Target environment' },
     timestamp: { type: 'string', description: 'ISO timestamp' },
-    deploy_status: { type: 'string', enum: ['success', 'failure', 'rolling'], description: 'Current status' },
     sha: { type: 'string', description: 'Git SHA of the deployed commit' },
     duration_seconds: { type: 'number', description: 'Wall-clock duration in seconds. Tracks deployment speed trends.' },
     deployer: { type: 'string', description: 'Triggering person or system. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
@@ -1245,7 +1241,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     base_url: { type: 'string', description: 'Base URL' },
     auth_type: { type: 'string', enum: ['api_key', 'oauth2', 'jwt', 'basic', 'none'], description: 'Authentication method' },
     rate_limits: { type: 'string', description: 'Rate limit description' },
-    api_status: { type: 'string', enum: ['active', 'deprecated', 'beta', 'unavailable'], description: 'Availability' },
   },
   // FeasibilityStudyProperties: FeasibilityStudy entity.
   feasibility_study: {
@@ -1278,12 +1273,10 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     owner: { type: 'string', description: 'Area owner (handle or email). Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Importance to the product overall' },
     maturity: { type: 'string', enum: ['nascent', 'growing', 'mature', 'legacy'], description: 'Maturity. `nascent` = newly-formed grouping. `mature` = established surface. `legacy` = being phased out for a successor.' },
-    area_status: { type: 'string', enum: ['active', 'planned', 'deprecated'], description: 'Status in the product structure' },
   },
   // FeatureFlagProperties: Feature flag.
   feature_flag: {
     key: { type: 'string', description: 'Required. Stable flag key used in code (e.g. "new-checkout-flow").' },
-    flag_status: { type: 'string', enum: ['on', 'off', 'rollout'], description: 'Activation state. `on` = enabled for all. `off` = disabled for all. `rollout` = partial via targeting_rules.' },
     rollout_pct: { type: 'number', description: 'Percentage enabled (0–100). Meaningful when `flag_status === \'rollout\'`.', modifier: 'snapshot' },
     targeting_rules: { type: 'string', description: 'Human-readable targeting rules. Full rule evaluation happens in the flag service.' },
     owner: { type: 'string', description: 'Owning person or team responsible for the flag\'s lifecycle. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
@@ -1853,7 +1846,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     channel_type: { type: 'string', enum: ['social', 'email', 'seo', 'sem', 'content', 'events', 'other'], description: 'Category of marketing channel' },
     monthly_budget: { type: 'number', description: 'Monthly spend allocated to this channel', modifier: 'snapshot' },
     roi: { type: 'number', description: 'Return on investment ratio' },
-    channel_status: { type: 'string', enum: ['active', 'paused', 'deprecated'], description: 'Operational status of the channel' },
   },
   // MarketingStrategyProperties: Marketing strategy.
   marketing_strategy: {
@@ -2003,7 +1995,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ObjectiveProperties: A high-level strategic goal. The O in OKR.
   objective: {
     timeframe: { type: 'string', description: 'Planning timeframe (e.g. "Q1 2026", "H1 2026")' },
-    objective_status: { type: 'string', enum: ['active', 'achieved', 'deferred'], description: 'Current status' },
     progress: { type: 'number', description: 'Overall progress (0–100)' },
   },
   // ObservationProperties: Discrete observation captured during research. Absorbed from the deprecated Highlight entity.
@@ -2051,7 +2042,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       },
       required: ['value', 'label'],
     },
-    outcome_status: { type: 'string', enum: ['identified', 'measuring', 'achieved', 'abandoned'], description: 'Current lifecycle phase, mirroring the `outcome` lifecycle in `grammar/lifecycles.ts` ( Option B): `identified` -> `measuring` -> `achieved` | `abandoned`.' },
   },
   // ParticipantProperties: Research participant.
   participant: {
@@ -2261,7 +2251,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // PrototypeProperties: Prototype.
   prototype: {
     fidelity: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Detail level' },
-    test_status: { type: 'string', enum: ['untested', 'testing', 'passed', 'failed'], description: 'User-test status' },
     tool: { type: 'string', description: 'Authoring tool' },
   },
   // QaSessionProperties: QA session.
@@ -2390,7 +2379,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   review_gate: {
     gate_type: { type: 'string', enum: ['human_review', 'automated_check', 'approval'], description: 'Kind of review required at this gate' },
     required_approvers: { type: 'string[]', description: 'People or roles that must approve. Promote to `node_owned_by_person` edges (one per name) if ownership must be queryable.' },
-    gate_status: { type: 'string', enum: ['pending', 'approved', 'rejected', 'bypassed'], description: 'Current approval status of the gate' },
   },
   // RiskProperties: Risk.
   risk: {
@@ -2431,7 +2419,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   roadmap_item: {
     quarter: { type: 'string', description: 'Planning quarter (e.g. "Q2 2026"). Pair with `start_date`/`target_date` for precise scheduling.' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Importance against other items' },
-    item_status: { type: 'string', enum: ['planned', 'in_progress', 'shipped', 'deferred'], description: 'Status. `deferred` = explicitly pushed to a later period.' },
     confidence: {
       type: 'assessment', scale_id: 'confidence_5', description: 'Delivery confidence within the planned period (UPGAssessment on `confidence_5`).',
       properties: {
@@ -2507,7 +2494,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // SecurityAuditProperties: Security audit.
   security_audit: {
     audit_scope: { type: 'string', description: 'Systems or processes covered by the audit' },
-    audit_status: { type: 'string', enum: ['scheduled', 'in_progress', 'completed'], description: 'Current progress of the audit' },
     findings_count: { type: 'number', description: 'Total number of findings', modifier: 'derived' },
     critical_findings: { type: 'number', description: 'Number of critical-severity findings' },
   },

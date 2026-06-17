@@ -623,6 +623,48 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.15.0: Pattern D — collapse *_status shadows into the lifecycle ─────────
+  //
+  // 14 `*_status` enum properties whose values ARE the entity's own lifecycle
+  // phase set ( Pattern D, the T1.1 guardrail set). They re-encoded the
+  // lifecycle as a property, shadowing the base-node `status` field that the
+  // lifecycle already drives. Each property is removed and any authored value
+  // LIFTS to `UPGBaseNode.status` (same convention as 0.9.14 kr_status). Two
+  // diverge in vocabulary from their own lifecycle and remap on lift:
+  //   - marketing_channel.channel_status: deprecated -> sunset
+  //   - security_audit.audit_status: scheduled -> planning, in_progress -> active
+  '0.15.0': [
+    { kind: 'lift_property_to_top_level', type: 'agent_definition', from_property: 'agent_status', to: 'status',
+      reason: ' Pattern D: agent_status duplicated the agent_definition lifecycle (testing/active/disabled). Removed in 0.15.0; the authored value lifts to UPGBaseNode.status.' },
+    { kind: 'lift_property_to_top_level', type: 'data_pipeline', from_property: 'pipeline_status', to: 'status',
+      reason: ' Pattern D: pipeline_status duplicated the data_pipeline lifecycle (active/paused/failed/deprecated). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'database_schema', from_property: 'migration_status', to: 'status',
+      reason: ' Pattern D: migration_status duplicated the database_schema lifecycle (current/pending/failed). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'deployment', from_property: 'deploy_status', to: 'status',
+      reason: ' Pattern D: deploy_status duplicated the deployment lifecycle (rolling/success/failure). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'external_api', from_property: 'api_status', to: 'status',
+      reason: ' Pattern D: api_status duplicated the external_api lifecycle (beta/active/deprecated/unavailable). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'feature_area', from_property: 'area_status', to: 'status',
+      reason: ' Pattern D: area_status duplicated the feature_area lifecycle (planned/active/deprecated). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'feature_flag', from_property: 'flag_status', to: 'status',
+      reason: ' Pattern D: flag_status duplicated the feature_flag lifecycle (off/rollout/on). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'objective', from_property: 'objective_status', to: 'status',
+      reason: ' Pattern D: objective_status duplicated the objective lifecycle (active/achieved/deferred). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'outcome', from_property: 'outcome_status', to: 'status',
+      reason: ' Pattern D: outcome_status duplicated the outcome lifecycle (identified/measuring/achieved/abandoned). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'prototype', from_property: 'test_status', to: 'status',
+      reason: ' Pattern D: test_status duplicated the prototype lifecycle (untested/testing/passed/failed). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'review_gate', from_property: 'gate_status', to: 'status',
+      reason: ' Pattern D: gate_status duplicated the review_gate lifecycle (pending/approved/rejected/bypassed). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'roadmap_item', from_property: 'item_status', to: 'status',
+      reason: ' Pattern D: item_status duplicated the roadmap_item lifecycle (planned/in_progress/shipped/deferred). Removed in 0.15.0; lifts to status.' },
+    { kind: 'lift_property_to_top_level', type: 'marketing_channel', from_property: 'channel_status', to: 'status',
+      value_map: { deprecated: 'sunset' },
+      reason: ' Pattern D: channel_status (active/paused/deprecated) re-encoded the marketing_channel lifecycle (planning/active/paused/completed/sunset). Removed in 0.15.0; lifts to status with deprecated -> sunset.' },
+    { kind: 'lift_property_to_top_level', type: 'security_audit', from_property: 'audit_status', to: 'status',
+      value_map: { scheduled: 'planning', in_progress: 'active' },
+      reason: ' Pattern D: audit_status (scheduled/in_progress/completed) re-encoded the security_audit lifecycle (planning/active/paused/completed/sunset). Removed in 0.15.0; lifts to status with scheduled -> planning, in_progress -> active.' },
+  ],
   // ── v0.14.0: Pattern E — remove deprecated/ghost properties ────────
   //
   // Properties marked deprecated (some "Removed in 0.9.1") that were never

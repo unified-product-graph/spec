@@ -103,15 +103,12 @@ export interface ComplianceFrameworkProperties {
  * @example
  * const properties: SecurityAuditProperties = {
  *   audit_scope: 'All customer-facing APIs and the billing service.',
- *   audit_status: 'scheduled',
  *   findings_count: 42,
  * }
  */
 export interface SecurityAuditProperties {
   /** Systems or processes covered by the audit */
   audit_scope?: string
-  /** Current progress of the audit */
-  audit_status?: 'scheduled' | 'in_progress' | 'completed'
   /** Total number of findings */
   findings_count?: number
   /** Number of critical-severity findings */

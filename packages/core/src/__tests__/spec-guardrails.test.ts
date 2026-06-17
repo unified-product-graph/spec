@@ -75,15 +75,18 @@ describe('T1.1 spec guardrail — *_status enums do not newly shadow a lifecycle
     }
   }
 
-  it('the count of status-shadows-phase properties has not grown beyond the baseline', () => {
-    // Baseline 14 at 2026-06-16. Lower this as shadows are collapsed
-    // into the base-node `status` field; it must not silently grow.
+  it('no *_status enum shadows a lifecycle phase set', () => {
+    // Baseline 14 (2026-06-16) ratcheted to 0 in 0.15.0 (
+    // Pattern D): all 14 shadows were collapsed into the base-node `status`
+    // field (UPG_PROPERTY_MIGRATIONS['0.15.0'] lifts authored values). This is
+    // now zero-tolerance — a new *_status enum that mirrors a lifecycle phase
+    // ladder must instead let the lifecycle carry the phase via `status`.
     expect(
       shadows.length,
       `NEW *_status enum shadowing a lifecycle phase set. A status property that mirrors a ` +
         `lifecycle phase ladder duplicates the base-node \`status\` field — drop it and let the ` +
         `lifecycle carry the phase. Offenders:\n${shadows.sort().join('\n')}`,
-    ).toBeLessThanOrEqual(14)
+    ).toBe(0)
   })
 })
 

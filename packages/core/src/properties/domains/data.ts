@@ -147,14 +147,11 @@ export interface DataProductProperties {
  *
  * @example
  * const properties: DataPipelineProperties = {
- *   pipeline_status: 'active',
  *   schedule: '0 2 * * *',
  *   avg_runtime: '3m 20s',
  * }
  */
 export interface DataPipelineProperties {
-  /** Operational status of the pipeline */
-  pipeline_status?: 'active' | 'paused' | 'failed' | 'deprecated'
   /** Cron or scheduling expression */
   schedule?: string
   /** Average wall-clock runtime per execution */

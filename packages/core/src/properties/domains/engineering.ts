@@ -142,20 +142,13 @@ export interface TechnicalDebtItemProperties {
  * @example
  * const properties: FeatureFlagProperties = {
  *   key: 'cta.primary.signup',
- *   flag_status: 'on',
  *   rollout_pct: 42,
  * }
  */
 export interface FeatureFlagProperties {
   /** Required. Stable flag key used in code (e.g. "new-checkout-flow"). */
   key: string
-  /**
-   * Activation state.
-   * `on` = enabled for all. `off` = disabled for all.
-   * `rollout` = partial via targeting_rules.
-   */
-  flag_status?: 'on' | 'off' | 'rollout'
-  /** Percentage enabled (0–100). Meaningful when `flag_status === 'rollout'`. */
+  /** Percentage enabled (0–100). Meaningful when the flag's `status === 'rollout'`. */
   rollout_pct?: number
   /** Human-readable targeting rules. Full rule evaluation happens in the flag service. */
   targeting_rules?: string
@@ -183,7 +176,6 @@ export interface FeatureFlagProperties {
  * const properties: DeploymentProperties = {
  *   environment: 'prod',
  *   timestamp: '2026-04-17T09:00:00Z',
- *   deploy_status: 'success',
  * }
  */
 export interface DeploymentProperties {
@@ -191,8 +183,6 @@ export interface DeploymentProperties {
   environment?: 'dev' | 'staging' | 'prod'
   /** ISO timestamp */
   timestamp?: string
-  /** Current status */
-  deploy_status?: 'success' | 'failure' | 'rolling'
   /** Git SHA of the deployed commit */
   sha?: string
   /** Wall-clock duration in seconds. Tracks deployment speed trends. */
@@ -304,7 +294,6 @@ export interface ApiEndpointProperties {
  * const properties: DatabaseSchemaProperties = {
  *   db_type: 'postgres',
  *   schema_version: '1.3.0',
- *   migration_status: 'current',
  * }
  */
 export interface DatabaseSchemaProperties {
@@ -312,8 +301,6 @@ export interface DatabaseSchemaProperties {
   db_type?: 'postgres' | 'mysql' | 'mongodb' | 'redis' | 'other'
   /** Current schema version */
   schema_version?: string
-  /** Pending-migration status */
-  migration_status?: 'current' | 'pending' | 'failed'
   /** Owning person or team responsible for design and migrations. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
   owner?: string
   /** Tables or collections in this schema. Useful for migration scope estimation. */
@@ -455,8 +442,6 @@ export interface ExternalApiProperties {
   auth_type?: 'api_key' | 'oauth2' | 'jwt' | 'basic' | 'none'
   /** Rate limit description */
   rate_limits?: string
-  /** Availability */
-  api_status?: 'active' | 'deprecated' | 'beta' | 'unavailable'
 }
 
 /** Data flow between services.

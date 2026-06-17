@@ -44,8 +44,6 @@ export interface MarketingChannelProperties {
   monthly_budget?: number
   /** Return on investment ratio */
   roi?: number
-  /** Operational status of the channel */
-  channel_status?: 'active' | 'paused' | 'deprecated'
 }
 
 /** Marketing campaign plan.

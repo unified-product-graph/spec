@@ -46,12 +46,6 @@ export interface OutcomeProperties {
   evidence_summary?: string
   /** Confidence this is the right outcome to pursue */
   confidence?: UPGAssessment
-  /**
-   * Current lifecycle phase, mirroring the `outcome` lifecycle in
-   * `grammar/lifecycles.ts` ( Option B): `identified` -> `measuring` ->
-   * `achieved` | `abandoned`.
-   */
-  outcome_status?: 'identified' | 'measuring' | 'achieved' | 'abandoned'
 }
 
 /** A high-level strategic goal. The O in OKR.
@@ -59,15 +53,12 @@ export interface OutcomeProperties {
  * @example
  * const properties: ObjectiveProperties = {
  *   timeframe: '12-18 months',
- *   objective_status: 'active',
  *   progress: 42,
  * }
  */
 export interface ObjectiveProperties {
   /** Planning timeframe (e.g. "Q1 2026", "H1 2026") */
   timeframe?: string
-  /** Current status */
-  objective_status?: 'active' | 'achieved' | 'deferred'
   /** Overall progress (0–100) */
   progress?: number
 }
@@ -103,7 +94,8 @@ export interface KeyResultProperties {
  * A semantic container (e.g. "Canvas & Visualisation", "AI & Intelligence",
  * "Onboarding") that gathers features under a shared product surface, owning
  * team, or capability. Lifecycle (planned → active → deprecated) is governed
- * by `area_status`.
+ * by the base-node `status` field (the former `area_status` property was
+ * collapsed into it in 0.15.0 Pattern D).
  *
  * Per UPG principle P14, structural relationships are edges:
  *   parent product: `product_organised_by_feature_area`
@@ -120,7 +112,6 @@ export interface KeyResultProperties {
  *   priority: 'high',
  *   maturity: 'mature',
  *   owner: 'sam.patel@arkheiev.com',
- *   area_status: 'active',
  * }
  */
 export interface FeatureAreaProperties {
@@ -140,8 +131,6 @@ export interface FeatureAreaProperties {
    * `legacy` = being phased out for a successor.
    */
   maturity?: 'nascent' | 'growing' | 'mature' | 'legacy'
-  /** Status in the product structure */
-  area_status?: 'active' | 'planned' | 'deprecated'
 }
 
 /** A discrete, user-facing capability of the product.
@@ -344,7 +333,6 @@ export interface RoadmapProperties {
  * const properties: RoadmapItemProperties = {
  *   quarter: '2026-Q2',
  *   priority: 'high',
- *   item_status: 'planned',
  * }
  */
 export interface RoadmapItemProperties {
@@ -352,8 +340,6 @@ export interface RoadmapItemProperties {
   quarter?: string
   /** Importance against other items */
   priority?: Priority
-  /** Status. `deferred` = explicitly pushed to a later period. */
-  item_status?: 'planned' | 'in_progress' | 'shipped' | 'deferred'
   /** Delivery confidence within the planned period (UPGAssessment on `confidence_5`). */
   confidence?: UPGAssessment
   /** ISO date work begins. More precise than `quarter` for continuous planning. */
