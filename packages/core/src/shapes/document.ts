@@ -158,13 +158,20 @@ export type UPGCrossEdgeType =
   // product graphs roll up to one canonical lifecycle (~7 registry nodes + 49
   // cross-edges) instead of minting per-product stage duplicates.
   | 'journey_phase_realises_operating_stage'
-  // Marketing surface to product (0.12.5). A marketing/landing `screen`
-  // in one product graph (e.g. the website) markets a `product` that lives in its
-  // own graph: "this page is about / promotes that product." Cross-only — distinct
-  // from `depends_on_product` (the built-on / dogfood relationship between two
-  // products) and from any within-graph edge; the marketing surface is not the
-  // product it markets, and the product node lives in a different product file.
+  // Cross-product reference family (0.12.7/698). A product-graph entity
+  // references a fact in another graph. Dual-registered (also in UPG_EDGE_CATALOG):
+  // the cross-edge is the common cross-graph case, the catalog entry the within-graph
+  // degenerate case. Distinct from `depends_on_product` (the built-on / dogfood
+  // relationship between two products).
+  //   - `screen_markets_product`: a marketing/landing screen markets a product
+  //     (e.g. the website's product pages; product node may live in another graph).
+  //   - `screen_renders_design_component`: a screen renders a component from the
+  //     shared design-system graph (the registry/foundation library, referenced once).
+  //   - `product_expresses_brand_identity`: a product expresses the shared brand
+  //     (a registry singleton; expressed, not instance_of-d).
   | 'screen_markets_product'
+  | 'screen_renders_design_component'
+  | 'product_expresses_brand_identity'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -198,6 +205,8 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'node_classified_as_classification_value',
   'journey_phase_realises_operating_stage',
   'screen_markets_product',
+  'screen_renders_design_component',
+  'product_expresses_brand_identity',
 ]
 
 /**

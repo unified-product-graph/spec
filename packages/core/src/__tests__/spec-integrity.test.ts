@@ -358,7 +358,11 @@ describe('Edge pair uniqueness', () => {
  // model_comparison→ai_model {compares, winner_is}; ai_experiment→ai_model
  // {based_on, uses}; X→metric measurement pairs). Distinct relationships;
  // duplicate + near-synonym gates pass. → 32.
- expect(multiPairs.length).toMatchInlineSnapshot(`32`)
+ // 0.12.7 added product→brand_identity {branded_as (hierarchy, a
+ // product's own brand), expresses (semantic, references the shared brand
+ // singleton)} — distinct relationship + distinct classification, so the
+ // duplicate gate is not tripped. → 33.
+ expect(multiPairs.length).toMatchInlineSnapshot(`33`)
  })
 })
 

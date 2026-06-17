@@ -552,6 +552,11 @@ export const UPG_EDGE_CATALOG = {
   design_system_defines_design_token: { forward_verb: 'defines', reverse_verb: 'defined_in', classification: 'hierarchy', source_type: 'design_system', target_type: 'design_token' },
   design_system_codified_in_design_guideline: { forward_verb: 'codified_in', reverse_verb: 'codifies', classification: 'hierarchy', source_type: 'design_system', target_type: 'design_guideline' },
   design_system_expresses_brand_identity: { forward_verb: 'expresses', reverse_verb: 'expressed_in', classification: 'hierarchy', source_type: 'design_system', target_type: 'brand_identity' },
+  // Product expresses the brand (0.12.7). A product references the shared
+  // brand_identity. Dual-registered: also a cross-edge for the common case where the
+  // brand is a registry singleton in another graph (the ratified pattern: brand is a
+  // singleton expressed, not instance_of-d); this catalog entry is the within-graph case.
+  product_expresses_brand_identity: { forward_verb: 'expresses', reverse_verb: 'expressed_by', classification: 'semantic', source_type: 'product', target_type: 'brand_identity' },
   design_system_encompasses_user_journey: { forward_verb: 'encompasses', reverse_verb: 'encompassed_in', classification: 'hierarchy', source_type: 'design_system', target_type: 'user_journey' },
   design_system_encompasses_user_flow: { forward_verb: 'encompasses', reverse_verb: 'encompassed_in', classification: 'hierarchy', source_type: 'design_system', target_type: 'user_flow' },
   design_system_informed_by_insight: { forward_verb: 'informed_by', reverse_verb: 'informs', classification: 'hierarchy', source_type: 'design_system', target_type: 'insight' },
@@ -564,6 +569,11 @@ export const UPG_EDGE_CATALOG = {
   design_component_composes_design_component: { forward_verb: 'composes', reverse_verb: 'composed_in', classification: 'hierarchy', source_type: 'design_component', target_type: 'design_component' },
   prototype_annotated_with_annotation: { forward_verb: 'annotated_with', reverse_verb: 'annotates', classification: 'hierarchy', source_type: 'prototype', target_type: 'annotation' },
   screen_renders_design_component: { forward_verb: 'renders', reverse_verb: 'rendered_on', classification: 'hierarchy', source_type: 'screen', target_type: 'design_component' },
+  // Marketing surface to product (0.12.7/698). A marketing/landing screen
+  // markets a product. Dual-registered: also a cross-edge (UPG_CROSS_EDGE_TYPES) for
+  // the common case where the product lives in another graph; this catalog entry is
+  // the within-graph degenerate case (a product's own landing page).
+  screen_markets_product: { forward_verb: 'markets', reverse_verb: 'marketed_by', classification: 'semantic', source_type: 'screen', target_type: 'product' },
   screen_navigates_to_screen: { forward_verb: 'navigates_to', reverse_verb: 'navigated_from', classification: 'hierarchy', source_type: 'screen', target_type: 'screen' },
   screen_surfaces_feature: { forward_verb: 'surfaces', reverse_verb: 'surfaced_on', classification: 'cross-domain', source_type: 'screen', target_type: 'feature' },
   screen_wireframed_as_wireframe: { forward_verb: 'wireframed_as', reverse_verb: 'wireframes', classification: 'hierarchy', source_type: 'screen', target_type: 'wireframe' },
