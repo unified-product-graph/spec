@@ -56,5 +56,8 @@ export * from './property-map.js'
 // ─── Auto-generated schema ───────────────────────────────────────────────────
 export * from './property-schema.js'
 
+// ─── Property modifiers: queryable surface + governance line ─────────────────
+export * from './property-modifiers.js'
+
 // ─── Edge property validation (carries_properties edges) ─────────────────────
 export * from './edge-property-validation.js'

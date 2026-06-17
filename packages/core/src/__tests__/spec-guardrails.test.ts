@@ -9,17 +9,21 @@
  * baseline as the debt is paid down (a reclassification / recompute pass) is
  * expected and welcome — drop the number then.
  *
- * Shipped here (deterministic, pure-catalog checks, no modifier dependency):
- *   - T1.1 status-shadows-phase          (14 baseline)
+ * Shipped here (deterministic, pure-catalog checks):
+ *   - T1.1 status-shadows-phase            (14 baseline)
+ *   - T1.2 stored-aggregate                (baseline below)
+ *   - T1.3 runtime-state-on-definition-entity (baseline below)
  *   - T1.6 hierarchy<->edge-classification (28 baseline)
  *   - T1.7 cross-domain-endpoints-recompute (65 baseline)
  *
+ * T1.2 / T1.3 read the 0.11.6 `@derived` / `@snapshot` / `@volatile` modifiers
+ * through the queryable surface in `properties/property-modifiers.ts` (0.13.0
+ * Wave 0): the shape detectors locate derivable / live-shaped properties, and a
+ * property carrying the appropriate modifier — or sitting on a record entity —
+ * is exempt. Lowering their baselines is the / (Wave 2) ratchet.
+ *
  * Deferred (tracked on, not yet enforced — each needs machinery this
  * mechanical gate wave doesn't have):
- *   - T1.2 stored-aggregate / T1.3 runtime-state-on-definition-entity — depend
- *     on the 0.11.6 `@derived` / `@snapshot` / `@volatile` property modifiers
- *     being represented in UPG_PROPERTY_SCHEMA in a machine-checkable form;
- *     scaffold once the modifier surface is queryable.
  *   - T1.4 scalar-mirrors-edge — the precise P14 enforcement (`spec-principles`
  *     keeps the broad form `it.skip` at ~85% false positives). Needs a curated
  *     FK-shaped-scalar baseline, not a regex; sequence after the P14 sweep
@@ -35,7 +39,12 @@ import { describe, it, expect } from 'vitest'
 import { UPG_EDGE_CATALOG } from '../catalog/edge-catalog.js'
 import { UPG_VALID_CHILDREN } from '../grammar/hierarchy.js'
 import { UPG_LIFECYCLES } from '../grammar/lifecycles.js'
-import { UPG_PROPERTY_SCHEMA } from '../properties/property-schema.js'
+import { UPG_PROPERTY_SCHEMA, type PropertyDefinition } from '../properties/property-schema.js'
+import {
+  isAggregateShapedProperty,
+  isRuntimeStateShapedProperty,
+  isRecordEntity,
+} from '../properties/property-modifiers.js'
 import { getDomainForType } from '../registry/domains.js'
 import { pickCanonicalEdge } from '../index.js'
 
@@ -136,5 +145,74 @@ describe('T1.7 spec guardrail — cross-domain edges do not newly connect same-d
       `NEW cross-domain edge whose endpoints are in the same domain — recompute its ` +
         `classification (within a domain it is not cross-domain). Offenders:\n${sameDomain.sort().join('\n')}`,
     ).toBeLessThanOrEqual(65)
+  })
+})
+
+// ─── T1.2 — stored-aggregate ──────────────────────────────────────────────────
+//
+// A numeric property holding a count/rollup derivable from edges or children
+// (a `*_count` / `headcount` shape) should be `@derived` — computed at read-time,
+// never stored — so a hand-authored value cannot drift from the graph. We freeze
+// the current inventory of untagged aggregates and forbid new ones. Tagging an
+// offender `modifier: 'derived'` removes it from the set, so the
+// baseline ratchets down as the debt is paid. Record entities legitimately store
+// their own measured counts (a recorded token/response count is not a graph
+// rollup) and are exempt. (property-fit audit Pattern B.)
+describe('T1.2 spec guardrail — derivable aggregates are marked @derived', () => {
+  const storedAggregates: string[] = []
+  for (const [type, props] of Object.entries(UPG_PROPERTY_SCHEMA)) {
+    if (isRecordEntity(type)) continue
+    for (const [name, def] of Object.entries(props as Record<string, PropertyDefinition>)) {
+      if (!isAggregateShapedProperty(name, def)) continue
+      if (def.modifier === 'derived') continue
+      storedAggregates.push(`${type}.${name}`)
+    }
+  }
+
+  it('the count of untagged stored-aggregate properties has not grown beyond the baseline', () => {
+    // Baseline 52 frozen 2026-06-17 ( T1.2, 0.13.0 Wave 0). A `*_count` /
+    // `headcount` numeric is a rollup of edges or children — mark it
+    // `modifier: 'derived'` (or drop it) and let tooling compute at read-time.
+    // Lower this as tags/removes the offenders; it must not grow.
+    expect(
+      storedAggregates.length,
+      `NEW derivable aggregate stored as a plain scalar. A count/rollup belongs to the ` +
+        `graph (edges/children) — mark it \`modifier: 'derived'\` so a stored value can no ` +
+        `longer contradict the graph. Offenders:\n${storedAggregates.sort().join('\n')}`,
+    ).toBeLessThanOrEqual(52)
+  })
+})
+
+// ─── T1.3 — runtime-state-on-definition-entity ────────────────────────────────
+//
+// A numeric live reading (a rate, percentage, current value, remaining budget,
+// latency percentile, monthly figure, or per-unit rate) on a DEFINITION entity
+// is live state masquerading as design knowledge. It should live on a `metric`
+// node (by edge) or carry `@snapshot` / `@volatile` with a paired `*_as_of`
+// timestamp. Record entities (`RECORD_ENTITY_TYPES`) legitimately hold live
+// figures and are exempt. Freeze the untagged set; forbid new ones; lower as
+// re-homes or marks them. (property-fit audit Pattern A.)
+describe('T1.3 spec guardrail — live readings on definition entities are marked @snapshot/@volatile', () => {
+  const runtimeState: string[] = []
+  for (const [type, props] of Object.entries(UPG_PROPERTY_SCHEMA)) {
+    if (isRecordEntity(type)) continue
+    for (const [name, def] of Object.entries(props as Record<string, PropertyDefinition>)) {
+      if (!isRuntimeStateShapedProperty(name, def)) continue
+      if (def.modifier === 'snapshot' || def.modifier === 'volatile') continue
+      runtimeState.push(`${type}.${name}`)
+    }
+  }
+
+  it('the count of untagged runtime-state properties on definition entities has not grown beyond the baseline', () => {
+    // Baseline 35 frozen 2026-06-17 ( T1.3, 0.13.0 Wave 0). A live reading
+    // on a definition entity belongs on a `metric` node (by edge) or must be marked
+    // `modifier: 'snapshot'` with a paired `*_as_of` stamp. Add a genuine
+    // execution/record entity to `RECORD_ENTITY_TYPES` rather than mistag it.
+    // Lower as re-homes the offenders; it must not grow.
+    expect(
+      runtimeState.length,
+      `NEW live reading on a definition entity. Route it to a \`metric\` node (by edge), or ` +
+        `mark it \`modifier: 'snapshot'\` / \`'volatile'\` with a \`*_as_of\` stamp. Offenders:\n${runtimeState.sort().join('\n')}`,
+    ).toBeLessThanOrEqual(35)
   })
 })
