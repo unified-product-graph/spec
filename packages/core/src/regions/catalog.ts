@@ -1768,11 +1768,6 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       },
       {
         direction: "import",
-        edge_id: "revenue_stream_measured_by_metric_cross_domain",
-        crosses_into: "business_gtm_growth",
-      },
-      {
-        direction: "import",
         edge_id: "service_level_objective_tracks_metric",
         crosses_into: "operations_quality",
       },

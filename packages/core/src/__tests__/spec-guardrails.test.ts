@@ -108,15 +108,17 @@ describe('T1.6 spec guardrail — valid_children pairs are backed by hierarchy-c
   }
 
   it('the count of non-hierarchy-backed containment pairs has not grown beyond the baseline', () => {
-    // Baseline 28 at 2026-06-16 (matches the audit's "28 known"). Lower
-    // as backing edges are reclassified to `hierarchy` (or the pair is dropped
-    // from valid_children); it must not silently grow.
+    // Baseline 28 at 2026-06-16 (matches the audit's "28 known"); lowered
+    // to 27 on 2026-06-17 ( T0.4, 0.13.0 Wave 1) when the cyclic
+    // metric ⊃ outcome containment was dropped. Lower as backing edges are
+    // reclassified to `hierarchy` (or the pair is dropped from valid_children);
+    // it must not silently grow.
     expect(
       mismatches.length,
       `NEW valid_children pair whose backing canonical edge is not hierarchy-classified. ` +
         `Either classify the backing edge \`hierarchy\`, or do not declare the containment. ` +
         `Offenders:\n${mismatches.sort().join('\n')}`,
-    ).toBeLessThanOrEqual(28)
+    ).toBeLessThanOrEqual(27)
   })
 })
 

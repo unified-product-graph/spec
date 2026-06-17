@@ -956,7 +956,9 @@ export const UPG_EDGE_CATALOG = {
   persona_belongs_to_market_segment: { forward_verb: 'belongs_to', reverse_verb: 'includes_persona', classification: 'cross-domain', source_type: 'persona', target_type: 'market_segment' },
   revenue_stream_priced_by_pricing_strategy: { forward_verb: 'priced_by', reverse_verb: 'prices', classification: 'cross-domain', source_type: 'revenue_stream', target_type: 'pricing_strategy' },
   revenue_stream_drives_outcome: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'revenue_stream', target_type: 'outcome' },
-  revenue_stream_measured_by_metric_cross_domain: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'cross-domain', source_type: 'revenue_stream', target_type: 'metric' },
+  // revenue_stream_measured_by_metric_cross_domain dropped in 0.13.0 Wave 1 ( T0.1):
+  // a cross-domain-classified shadow of revenue_stream_measured_by_metric (same measured_by
+  // verbs); pickCanonicalEdge never returned it. Dual-read to the canonical in UPG_EDGE_MIGRATIONS.
   pricing_tier_targets_behavioral_segment: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'cross-domain', source_type: 'pricing_tier', target_type: 'behavioral_segment' },
   key_resource_enables_value_proposition: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'cross-domain', source_type: 'key_resource', target_type: 'value_proposition' },
 

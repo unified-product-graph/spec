@@ -346,61 +346,6 @@ const SOLUTION_LIFECYCLE: UPGLifecycle = {
 }
 
 /**
- * hypothesis (Validation domain)
- *
- * @deprecated since v0.2.8. The original lifecycle (untested → testing →
- * resolved with validated/invalidated core states) bundled the stable
- * belief with the implicit assumption that evidence sits "inside" the
- * hypothesis. split 3 separated these: `hypothesis` carries
- * the lifecycle (drafted → active → validated | invalidated | archived);
- * `hypothesis_evidence` is lifecycle-free (each row a snapshot of a
- * moment when evidence was observed). Retained for one version while
- * consumers migrate; narrows in v0.2.9.
- */
-const HYPOTHESIS_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'hypothesis',
-  initial_phase: 'untested',
-  terminal_phases: ['resolved'],
-  phases: [
-    {
-      id: 'untested',
-      label: 'Untested',
-      description:
-        'The belief is stated. No experiment has been designed or run.',
-      transitions_to: ['testing'],
-    },
-    {
-      id: 'testing',
-      label: 'Testing',
-      description:
-        'An experiment is actively running to test this hypothesis. Evidence is being gathered.',
-      transitions_to: ['resolved'],
-    },
-    {
-      id: 'resolved',
-      label: 'Resolved',
-      description:
-        'The hypothesis has been tested and a conclusion reached. The resolved phase has two states: validated (belief held) or invalidated (belief did not hold).',
-      transitions_to: [],
-      core_states: [
-        {
-          id: 'validated',
-          label: 'Validated',
-          description:
-            'Evidence supports the hypothesis. The belief held. Learnings can inform solution design.',
-        },
-        {
-          id: 'invalidated',
-          label: 'Invalidated',
-          description:
-            'Evidence contradicts the hypothesis. The belief did not hold. Learnings prevent investment in the wrong direction.',
-        },
-      ],
-    },
-  ],
-}
-
-/**
  * hypothesis (Validation domain, v0.2.8 split 3)
  *
  * The stable templated belief (UCS pattern P5, templated-statement).
@@ -3509,8 +3454,7 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   NEED_LIFECYCLE,
   OPPORTUNITY_LIFECYCLE,
   SOLUTION_LIFECYCLE,
-  HYPOTHESIS_CLAIM_LIFECYCLE, // v0.4.0 canonical (re-promoted as 'hypothesis')
-  HYPOTHESIS_LIFECYCLE,       // pre-v0.2.8 legacy (retained for migration compat)
+  HYPOTHESIS_CLAIM_LIFECYCLE, // canonical 'hypothesis' lifecycle. The pre-v0.2.8 legacy binding (untested → testing → resolved) was removed in 0.13.0 Wave 1 ( T0.3): it was a dead second binding for the same entity_type, always shadowed by this one, and the legacy-status remap lives in UPG_*_MIGRATIONS, not a live lifecycle.
   EXPERIMENT_LIFECYCLE,
   EXPERIMENT_PLAN_LIFECYCLE,
   EXPERIMENT_RUN_LIFECYCLE,
@@ -3617,7 +3561,7 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
  *
  * @example
  * const lifecycle = getLifecycleForType('hypothesis')
- * // → HYPOTHESIS_LIFECYCLE
+ * // → HYPOTHESIS_CLAIM_LIFECYCLE
  *
  * const noLifecycle = getLifecycleForType('persona')
  * // → undefined

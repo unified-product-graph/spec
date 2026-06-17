@@ -358,6 +358,29 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
     // decomposition waterfall.
     natural_depth: 3,
   },
+  {
+    id: 'north_star',
+    label: 'North Star impact',
+    description: 'A north-star metric, the input/sub-metrics it decomposes into, and the outcomes it drives. The metric-rooted, leading-indicator view: outcomes hang off the metric by influence (the causal `drives` edge), distinct from the OKR view where the outcome sits on top and the metric measures it.',
+    framework_id: 'north-star-metric',
+    region: 'strategy_outcomes',
+    gap_policy: 'all-optional',
+    anchor_type: 'metric',
+    // A north-star tree roots at a metric by definition; no fallback (no metric =
+    // no north-star view, honestly empty rather than rooting elsewhere).
+    fallback_anchors: [],
+    child_map: {
+      // A metric decomposes into its input/sub-metrics (the `metric_decomposes_into_metric`
+      // hierarchy) AND drives the outcomes it predicts (the causal `metric_drives_outcome`).
+      // The outcome is a child by INFLUENCE, not containment — the leading-to-lagging chain.
+      // Following the causal edge by type-adjacency (cf. `strategy`'s initiative -> outcome)
+      // is how the metric-rooted view renders without re-creating the metric ⊃ outcome
+      // containment cycle removed in T0.4. The assembler's `seen` set terminates the
+      // metric -> metric recursion for free.
+      metric: [opt('metric'), opt('outcome')],
+    },
+    natural_depth: 3,
+  },
 ] as const
 
 /** O(1) lookup by pattern id. */

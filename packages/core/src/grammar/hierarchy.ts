@@ -297,7 +297,12 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
 
   // ── Data & Analytics hierarchy ───────────────────────────────────────────────
   data_source: ['metric', 'data_pipeline', 'data_lineage', 'event_schema'],
-  metric: ['metric', 'outcome', 'data_quality_rule', 'metric_quality_assessment'],
+  // T0.4 (0.13.0 Wave 1): `outcome` removed as a metric child. It closed a
+  // containment cycle (outcome ⊃ metric ⊃ outcome) and was backed only by the CAUSAL
+  // `metric_drives_outcome` edge, not a hierarchy edge — the "metric leads to outcome"
+  // meaning lives correctly on that causal edge. The real containment (outcome ⊃ metric)
+  // is kept. Sub-metric trees (metric ⊃ metric) stay.
+  metric: ['metric', 'data_quality_rule', 'metric_quality_assessment'],
   data_domain: ['data_product', 'data_source', 'glossary_term', 'data_model', 'dashboard'],
   dashboard: ['report', 'experiment_run'],
 
