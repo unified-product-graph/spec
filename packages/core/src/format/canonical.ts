@@ -15,7 +15,12 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import { createHash } from 'node:crypto'
+// Namespace import (not `import { createHash }`): a named import binds the
+// member at module-load, which throws in browser bundlers that externalise
+// `node:crypto` (e.g. Vite in Sanity Studio, which imports this package for
+// UPG_TYPES/getPropertySchema). A namespace defers the `.createHash` access to
+// call-time — only Node writers (CLI/MCP/SDK/cloud) ever call it, never browsers.
+import * as nodeCrypto from 'node:crypto'
 import type { UPGBaseNode } from '../shapes/base-node.js'
 import type { UPGEdge } from '../shapes/edges.js'
 import type {
@@ -360,7 +365,7 @@ export function computeBodyChecksum(doc: UPGDocument | UPGPortfolioDocument): st
   // JSON.stringify with no indent: the hash input only needs to be deterministic,
   // and key order is already canonical from the body builders.
   const content = JSON.stringify(body)
-  return createHash(INTEGRITY_HASH_PRIMITIVE).update(content).digest('hex').slice(0, INTEGRITY_DIGEST_HEX)
+  return nodeCrypto.createHash(INTEGRITY_HASH_PRIMITIVE).update(content).digest('hex').slice(0, INTEGRITY_DIGEST_HEX)
 }
 
 // ─── Public API ──────────────────────────────────────────────────────────────
