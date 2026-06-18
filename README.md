@@ -1,6 +1,6 @@
 # Unified Product Graph: Spec
 
-> 🧪 **Public beta.** The format, ontology, and APIs may still change. Issues and feedback are welcome.
+> 🧪 **Early alpha.** UPG v0.16.2. The format, ontology, and APIs are still evolving and breaking changes can land between versions. Pin a version if you need stability. Issues and feedback are welcome.
 
 The open standard for structured product knowledge: the `.upg` file format, the entity and edge ontology, lifecycles, scales, regions, and the framework catalog. This is what implementations build against.
 
