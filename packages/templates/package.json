@@ -1,7 +1,6 @@
 {
   "name": "@unified-product-graph/templates",
-  "version": "0.4.0",
-  "private": true,
+  "version": "0.16.2",
   "description": "Entity templates for the Unified Product Graph: start from proven patterns, not blank pages",
   "license": "MIT",
   "author": "The Product Creator <hello@theproductcreator.com>",
@@ -17,14 +16,15 @@
   },
   "files": [
     "dist",
-    "templates",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src/"
+    "test": "vitest run",
+    "lint": "eslint src/",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "upg",
@@ -51,6 +51,8 @@
     "access": "public"
   },
   "devDependencies": {
-    "typescript": "^5.8.0"
+    "@unified-product-graph/core": "*",
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.18"
   }
 }
