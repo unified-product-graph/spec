@@ -849,6 +849,7 @@ const TEAM_ORG_GUIDE: UPGDomainUsageGuide = {
     { description: 'Teams without OKRs: every team needs clear goals' },
     { description: 'Dependencies without both teams linked: a dependency must connect blocker and blocked' },
     { description: 'Retrospectives without action items: reflection without action is just venting' },
+    { description: 'Double-modelling the org as product_area and team_org: a product_area is the classification axis ON products (which area a product belongs to, the axis used to group products); a team_org department/team is the people structure (the org chart, who reports to whom). Use product_area to classify products and department/team for the org chart, and relate them through the team that owns an area rather than restating one as the other.' },
   ],
 }
 
@@ -965,6 +966,7 @@ const PORTFOLIO_GUIDE: UPGDomainUsageGuide = {
   anti_patterns: [
     { description: 'Products without a product area: every product should be classified' },
     { description: 'Portfolios without strategic alignment: portfolio decisions should reflect strategy' },
+    { description: 'Confusing product_area with the org chart: product_area is the classification axis on products (how products are grouped), not the people structure. Model who reports to whom with team_org department/team; relate the two through the team that owns an area.' },
   ],
 }
 

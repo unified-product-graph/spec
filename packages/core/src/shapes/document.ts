@@ -381,17 +381,28 @@ export interface UPGPortfolio {
   /** How products are structured within this portfolio */
   hierarchy_model?: 'flat' | 'nested' | 'matrix'
   /**
-   * Investment posture (UPG 0.9.27). `owned` = products we build and manage
-   * (the default: coverage, health, and product-spine anti-patterns apply).
-   * `watched` = an externally-monitored landscape such as competitor
-   * intelligence graphs, which must NOT be judged by product-management
-   * expectations or drag portfolio health. Absent is treated as `owned`
-   * (back-compat: all pre-0.9.27 portfolios are owned).
+   * Investment posture / grouping (UPG 0.9.27; extended 0.17.x). `owned` =
+   * products we build and manage (the default: coverage, health, and
+   * product-spine anti-patterns apply). `watched` = an externally-monitored
+   * landscape such as competitor intelligence graphs, which must NOT be judged
+   * by product-management expectations or drag portfolio health. `strategic`,
+   * `internal`, and `gtm` are owned-side groupings (e.g. a Go-to-Market
+   * portfolio of revenue operating_functions, an Internal portfolio of support
+   * functions); they classify the portfolio but, like `owned`, do not relax
+   * product grading. Only `watched` does. Absent is treated as `owned`.
    */
-  kind?: 'owned' | 'watched'
+  kind?: UPGPortfolioKind
   /** Product IDs that belong to this portfolio */
   products?: string[]
 }
+
+/**
+ * Closed set of portfolio kinds (0.17.x extends the 0.9.27 owned/watched pair,
+ * closing gap G2 / spec-issue #39). Only `watched` relaxes product grading;
+ * `strategic` / `internal` / `gtm` are owned-side classifications.
+ */
+export const UPG_PORTFOLIO_KINDS = ['owned', 'watched', 'strategic', 'internal', 'gtm'] as const
+export type UPGPortfolioKind = (typeof UPG_PORTFOLIO_KINDS)[number]
 
 /**
  * An organisation that owns portfolios and product areas. The top of the
