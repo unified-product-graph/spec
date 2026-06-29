@@ -89,11 +89,12 @@ export interface UPGHeader {
   kind?: 'portfolio'
   /**
    * Workspace member kind for single-product graphs (0.10.0, #45): `org_rollup`
-   * (company umbrella) or `watched` (monitored intelligence graph). Omitted for
-   * ordinary products (the default). Distinct from `kind`, which is the
-   * portfolio-vs-product document discriminator.
+   * (company umbrella), `watched` (monitored intelligence graph), or
+   * `operating_function` (a function a team operates, not a product it ships;
+   * 0.17.0). Omitted for ordinary products (the default). Distinct from `kind`,
+   * which is the portfolio-vs-product document discriminator.
    */
-  member_kind?: 'org_rollup' | 'watched'
+  member_kind?: 'org_rollup' | 'watched' | 'operating_function'
   /** Summary mirror of the root product (single-product docs) */
   product?: { id: string; title: string; stage?: string }
   /** Summary mirror of the organisation (portfolio docs) */
@@ -426,8 +427,13 @@ function serializeSingleWithHeader(doc: UPGDocument, opts: SerializeOptions): st
   if (summary) header.summary = summary
   header.counts = { nodes: doc.nodes?.length ?? 0, edges: doc.edges?.length ?? 0 }
   // Member kind (0.10.0, #45): stamp non-default kinds so the graph carries its
-  // own posture (org_rollup / watched); ordinary products stay clean (absent).
-  if (doc.member_kind === 'org_rollup' || doc.member_kind === 'watched') {
+  // own posture (org_rollup / watched / operating_function); ordinary products
+  // stay clean (absent).
+  if (
+    doc.member_kind === 'org_rollup' ||
+    doc.member_kind === 'watched' ||
+    doc.member_kind === 'operating_function'
+  ) {
     header.member_kind = doc.member_kind
   }
   header.provenance = buildProvenance(doc, opts)
@@ -453,18 +459,21 @@ function serializePortfolioWithHeader(doc: UPGPortfolioDocument, opts: Serialize
   const summary = deriveSummary(org.description)
   if (summary) header.summary = summary
   // counts.products counts only `product`-kind members (0.10.0, #45): a watched
-  // competitor-intelligence graph or the org_rollup umbrella graph is registered
-  // for reference but is not a product under management. Members carry
-  // `member_kind` (absent = product, back-compat); watched/rollup are surfaced
-  // separately so the breakdown stays legible.
+  // competitor-intelligence graph, the org_rollup umbrella graph, or an
+  // operating_function graph (0.17.0) is registered for reference but is not a
+  // product under management. Members carry `member_kind` (absent = product,
+  // back-compat); the non-product kinds are surfaced separately so the breakdown
+  // stays legible.
   const members = (doc.products ?? []) as Array<{ member_kind?: string }>
   const memberKindOf = (p: { member_kind?: string }) => p.member_kind ?? 'product'
   const watchedCount = members.filter((p) => memberKindOf(p) === 'watched').length
   const rollupCount = members.filter((p) => memberKindOf(p) === 'org_rollup').length
+  const operatingFunctionCount = members.filter((p) => memberKindOf(p) === 'operating_function').length
   header.counts = {
     products: members.filter((p) => memberKindOf(p) === 'product').length,
     ...(watchedCount > 0 ? { watched_products: watchedCount } : {}),
     ...(rollupCount > 0 ? { org_rollups: rollupCount } : {}),
+    ...(operatingFunctionCount > 0 ? { operating_functions: operatingFunctionCount } : {}),
     product_areas: doc.product_areas?.length ?? 0,
     portfolios: doc.portfolios?.length ?? 0,
     cross_edges: doc.cross_edges?.length ?? 0,
@@ -558,7 +567,9 @@ export function normalizeDocument(obj: unknown): UPGDocument | UPGPortfolioDocum
   // Lift $upg.member_kind back into the in-memory doc (0.10.0, #45). Legacy flat
   // files may carry a top-level member_kind; read either.
   const memberKind = (header?.member_kind ?? raw.member_kind) as UPGDocument['member_kind'] | undefined
-  if (memberKind === 'org_rollup' || memberKind === 'watched') out.member_kind = memberKind
+  if (memberKind === 'org_rollup' || memberKind === 'watched' || memberKind === 'operating_function') {
+    out.member_kind = memberKind
+  }
   if (_integrity) out._integrity = _integrity
   return out
 }

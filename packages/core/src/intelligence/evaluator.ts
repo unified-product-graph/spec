@@ -26,6 +26,8 @@ import type {
 import { UPG_ANTI_PATTERNS } from './anti-patterns.js'
 import { getBenchmark } from './benchmarks/index.js'
 import type { UPGProductStage } from './benchmarks/types.js'
+import { concernFor, concernEvaluatedFor } from './validation-profiles.js'
+import type { UPGAntiPatternConcern } from './validation-profiles.js'
 
 // ─── Inputs ──────────────────────────────────────────────────────────────────
 
@@ -49,6 +51,14 @@ export interface AntiPatternInputs {
    * Example: `{ hypothesis: { drafted: 5, active: 2 } }`.
    */
   countsByTypeAndStatus?: Record<string, Record<string, number>>
+
+  /**
+   * Per-type counts filtered by a property value (0.17.0). Only required for
+   * anti-patterns with a `filter: { property, value }` clause (e.g.
+   * `operating-function-without-north-star` counts `metric` where
+   * `designation === 'north_star'`). Shape: type → property key → value → count.
+   */
+  countsByTypeAndProperty?: Record<string, Record<string, Record<string, number>>>
 
   /**
    * Boolean presence per `(source_type, edge_type, target_type)` tuple.
@@ -78,6 +88,13 @@ export interface AntiPatternInputs {
    * (safer default: surface everything when stage is unknown).
    */
   productStage?: UPGProductStage
+
+  /**
+   * Workspace member kind (0.17.0). Selects the validation profile that decides
+   * which anti-pattern concern families are evaluated for this graph. Absent =
+   * `product` (evaluate the full product set; back-compat).
+   */
+  memberKind?: string
 }
 
 // ─── Output ──────────────────────────────────────────────────────────────────
@@ -93,6 +110,9 @@ export interface AntiPatternViolation {
   anti_pattern_id: string
   name: string
   severity: UPGAntiPatternSeverity
+  /** The concern family this pattern belongs to (0.17.0). Lets callers partition
+   *  fired violations into gating vs advisory per the member-kind profile. */
+  concern: UPGAntiPatternConcern
   /** Entity-type strings the catalog references. Phase 1: types, not ids. */
   target_entities: string[]
   description: string
@@ -160,9 +180,16 @@ export function evaluateAntiPatterns(
     ) {
       continue
     }
+    // Member-kind profile gating (0.17.0): only evaluate the concern families the
+    // member kind's profile includes. A product graph (default) evaluates
+    // product_spine + universal — the full existing set, so behaviour is
+    // unchanged — while an operating_function graph skips product-spine entirely
+    // and evaluates the operating spine instead.
+    const concern = concernFor(ap.id)
+    if (!concernEvaluatedFor(inputs.memberKind, concern)) continue
 
     if (evaluateCondition(ap.structured_condition, inputs)) {
-      fires.push(buildViolation(ap))
+      fires.push(buildViolation(ap, concern))
     }
   }
 
@@ -276,16 +303,17 @@ function evaluateEntityCount(
   check: EntityCheck,
   inputs: AntiPatternInputs,
 ): boolean {
-  // If a status filter is present, route through countsByTypeAndStatus.
-  const statusFilter =
-    check.filter && typeof check.filter.status === 'string'
-      ? (check.filter.status as string)
-      : undefined
+  const filter = check.filter as
+    | { status?: unknown; property?: unknown; value?: unknown }
+    | undefined
 
   let count = 0
-  if (statusFilter) {
-    const byStatus = inputs.countsByTypeAndStatus?.[check.entity_type]
-    count = byStatus?.[statusFilter] ?? 0
+  if (filter && typeof filter.property === 'string' && typeof filter.value === 'string') {
+    // Property-value filter (0.17.0): count entities of this type whose property
+    // equals the value, e.g. metric where designation == 'north_star'.
+    count = inputs.countsByTypeAndProperty?.[check.entity_type]?.[filter.property]?.[filter.value] ?? 0
+  } else if (filter && typeof filter.status === 'string') {
+    count = inputs.countsByTypeAndStatus?.[check.entity_type]?.[filter.status] ?? 0
   } else {
     count = inputs.countsByType[check.entity_type] ?? 0
   }
@@ -395,11 +423,12 @@ function evaluateOrphanCount(
 
 // ─── Violation construction ──────────────────────────────────────────────────
 
-function buildViolation(ap: UPGCuratedAntiPattern): AntiPatternViolation {
+function buildViolation(ap: UPGCuratedAntiPattern, concern: UPGAntiPatternConcern): AntiPatternViolation {
   return {
     anti_pattern_id: ap.id,
     name: ap.name,
     severity: ap.severity,
+    concern,
     target_entities: collectTargetEntities(ap.structured_condition),
     description: ap.description,
     why_it_matters: ap.why_it_matters,

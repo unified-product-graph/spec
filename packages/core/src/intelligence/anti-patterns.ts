@@ -620,6 +620,62 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     source: { kind: 'practitioner', attribution: 'Marty Cagan, Inspired (product discovery)' },
   },
 
+  // ── Operating-function layer (0.17.0): member_kind: operating_function ─────
+  // Carry concern 'operating' (UPG_ANTI_PATTERN_CONCERNS) and are evaluated ONLY
+  // for operating_function graphs — a function a team operates (revenue / success
+  // / finance / people / marketing), not a product it ships. The product-spine
+  // patterns above are not evaluated for that kind (category errors); these assert
+  // the function spine instead.
+  {
+    id: 'operating-function-without-north-star',
+    since: '0.17.0',
+    name: 'Operating function without a north-star metric',
+    description:
+      'An operating function graph has real content but no north-star metric to operate toward. A function (sales, finance, people, marketing) is run against one headline number it moves and that rolls up to the company tree. With no north-star metric the function has direction but nothing to steer by.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        { check: { type: 'total_entity_count', comparison: 'gt', threshold: 3 } },
+        { check: { type: 'entity_count', entity_type: 'metric', filter: { property: 'designation', value: 'north_star' }, comparison: 'zero' } },
+      ],
+    },
+    why_it_matters:
+      'A function with no north-star metric cannot be steered, prioritised, or rolled into the company metric tree. Operating work becomes activity without a measured target.',
+    remediation:
+      'Add the one `metric` the function operates toward and mark it `designation: north_star`, then wire it to the company metric tree via `metric_decomposes_into_metric`.',
+    stages: ['concept', 'validation', 'build', 'beta', 'launch', 'growth', 'mature', 'maintenance', 'sunset'],
+    severity: 'high',
+    source: { kind: 'fundamental' },
+  },
+
+  {
+    id: 'operating-function-without-operating-content',
+    since: '0.17.0',
+    name: 'Operating function without operating content',
+    description:
+      'An operating function graph has more than a few entities but none in any operating domain (sales, go-to-market, customer success, growth, marketing, business model, pricing). It carries direction and people but no operating substance: the work the function actually runs.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        { check: { type: 'total_entity_count', comparison: 'gt', threshold: 3 } },
+        { check: { type: 'domain_population', domain_id: 'sales', comparison: 'zero' } },
+        { check: { type: 'domain_population', domain_id: 'go_to_market', comparison: 'zero' } },
+        { check: { type: 'domain_population', domain_id: 'customer_success', comparison: 'zero' } },
+        { check: { type: 'domain_population', domain_id: 'growth', comparison: 'zero' } },
+        { check: { type: 'domain_population', domain_id: 'marketing', comparison: 'zero' } },
+        { check: { type: 'domain_population', domain_id: 'business_model', comparison: 'zero' } },
+        { check: { type: 'domain_population', domain_id: 'pricing', comparison: 'zero' } },
+      ],
+    },
+    why_it_matters:
+      'A function graph that is all strategy and org chart with no operating domain is a stub: it states intent but models none of the work the function runs, so it answers no operating questions.',
+    remediation:
+      'Populate at least one operating domain appropriate to the function (e.g. Field → `sales` / `go_to_market` / `customer_success`; Finance → `business_model` / `pricing`). Start from the matching template via `/upg-new-from-template`.',
+    stages: ['concept', 'validation', 'build', 'beta', 'launch', 'growth', 'mature', 'maintenance', 'sunset'],
+    severity: 'medium',
+    source: { kind: 'fundamental' },
+  },
+
   // ── Foundations layer (0.9.13): portfolio-scoped, registry-aware ──────────
   // These read the shared registry + cross-product edges, so they are evaluated
   // by portfolio_validate, not the single-graph evaluator. They carry no
@@ -670,6 +726,27 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'Consolidate onto one implementation that the others depend on (`depends_on_product` / `hosts`), or confirm the duplication is deliberate and record why. Capture the stewarding organization with `create_registry_edge` so the contract has an owner.',
     stages: ['build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'low',
+    source: { kind: 'fundamental' },
+  },
+
+  // ── Operating-function org link (0.17.0): portfolio-scoped ─────────────────
+  // Cross-product detector (in portfolio_validate): an operating_function graph
+  // should reference the org unit it operates under, which lives once in the
+  // rollup's team_org map. Carries no structured_condition — the org link is a
+  // cross-product edge in portfolio.upg, not a single-graph shape.
+  {
+    id: 'operating-function-without-org-link',
+    since: '0.17.0',
+    scope: 'portfolio',
+    name: 'Operating function without an org link',
+    description:
+      'An operating_function graph does not reference the org unit it operates under. The department/team hierarchy lives once in the rollup (org_rollup) as team_org entities; a function should point its spine at the department or team that owns it (node_owned_by_department / node_owned_by_team), so the operating layer hangs off the canonical org map rather than re-stating it.',
+    why_it_matters:
+      'A function with no org link floats free of the org chart: its work cannot be rolled up by department, and the single source of truth for who owns what is bypassed.',
+    remediation:
+      'Add a cross-product node_owned_by_department (or node_owned_by_team) edge from the function spine to its department/team in the rollup. Mint the org unit once in the org_rollup graph; functions reference it.',
+    stages: ['concept', 'validation', 'build', 'beta', 'launch', 'growth', 'mature', 'maintenance', 'sunset'],
+    severity: 'medium',
     source: { kind: 'fundamental' },
   },
 ] as const

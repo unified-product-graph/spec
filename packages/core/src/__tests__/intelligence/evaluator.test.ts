@@ -14,6 +14,7 @@ import {
   type AntiPatternInputs,
 } from '../../intelligence/evaluator.js'
 import { UPG_ANTI_PATTERNS } from '../../intelligence/anti-patterns.js'
+import { isThinCoverageAdvisory, THIN_GRAPH_THRESHOLD } from '../../intelligence/validation-profiles.js'
 
 // ─── Fixture builder ─────────────────────────────────────────────────────────
 
@@ -49,10 +50,11 @@ describe('Evaluator sanity', () => {
   it('every graph-scoped anti-pattern has a per-pattern test below', () => {
     // If the catalog grows past this count, this test fails. The author
     // should add matching fire/clear fixtures here. Stable count guard.
-    // 13 original + 2 F5 enforcement + 3 foundations (0.9.13, portfolio-scoped,
-    // evaluated by portfolio_validate not here) = 18.
-    expect(UPG_ANTI_PATTERNS.length).toBe(18)
-    expect(UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio').length).toBe(15)
+    // 13 original + 2 F5 enforcement + 2 operating-function (0.17.0) + 4
+    // portfolio-scoped (3 foundations 0.9.13 + the 0.17.0 org-link, evaluated by
+    // portfolio_validate not here) = 21.
+    expect(UPG_ANTI_PATTERNS.length).toBe(21)
+    expect(UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio').length).toBe(17)
   })
 
   it('empty graph produces no violations', () => {
@@ -77,6 +79,23 @@ describe('Evaluator sanity', () => {
         ).toBeGreaterThanOrEqual(0)
       }
     }
+  })
+})
+
+// ─── Thin-graph coverage softening (0.17.0, companion C) ─────────────────────
+
+describe('Thin-graph coverage softening', () => {
+  it('coverage patterns are advisory below the thin threshold', () => {
+    expect(isThinCoverageAdvisory('single-domain-graph', THIN_GRAPH_THRESHOLD - 1)).toBe(true)
+    expect(isThinCoverageAdvisory('competitors-missing-past-validation', 3)).toBe(true)
+  })
+  it('coverage patterns gate at or above the threshold', () => {
+    expect(isThinCoverageAdvisory('single-domain-graph', THIN_GRAPH_THRESHOLD)).toBe(false)
+    expect(isThinCoverageAdvisory('single-domain-graph', 20)).toBe(false)
+  })
+  it('non-coverage patterns are never softened by thinness', () => {
+    expect(isThinCoverageAdvisory('features-without-hypotheses', 1)).toBe(false)
+    expect(isThinCoverageAdvisory('orphan-loose-thoughts', 1)).toBe(false)
   })
 })
 
@@ -384,6 +403,65 @@ describe('Options + composite + stage gating', () => {
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'single-domain-graph')).toBe(true)
   })
 
+  // operating-function-without-north-star (operating concern; operating_function only)
+  it('operating-function-without-north-star fires for a function with content but no metric', () => {
+    const i = emptyInputs()
+    i.memberKind = 'operating_function'
+    i.totalEntityCount = 6
+    i.countsByType = { account: 4 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'operating-function-without-north-star')).toBe(true)
+  })
+  it('operating-function-without-north-star still fires when a metric exists but none is north-star', () => {
+    const i = emptyInputs()
+    i.memberKind = 'operating_function'
+    i.totalEntityCount = 6
+    i.countsByType = { account: 4, metric: 1 }
+    i.countsByTypeAndProperty = { metric: { designation: { vanity: 1 } } }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'operating-function-without-north-star')).toBe(true)
+  })
+  it('operating-function-without-north-star clears when a north-star metric exists', () => {
+    const i = emptyInputs()
+    i.memberKind = 'operating_function'
+    i.totalEntityCount = 6
+    i.countsByType = { account: 4, metric: 1 }
+    i.countsByTypeAndProperty = { metric: { designation: { north_star: 1 } } }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'operating-function-without-north-star')).toBe(false)
+  })
+
+  // operating-function-without-operating-content (operating concern)
+  it('operating-function-without-operating-content fires when only strategy/team_org are populated', () => {
+    const i = emptyInputs()
+    i.memberKind = 'operating_function'
+    i.totalEntityCount = 6
+    i.domainPopulation = { strategy: true, team_org: true }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'operating-function-without-operating-content')).toBe(true)
+  })
+  it('operating-function-without-operating-content clears when an operating domain is populated', () => {
+    const i = emptyInputs()
+    i.memberKind = 'operating_function'
+    i.totalEntityCount = 6
+    i.domainPopulation = { strategy: true, sales: true }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'operating-function-without-operating-content')).toBe(false)
+  })
+
+  // Profile evaluate-scope (0.17.0): a member kind only evaluates its profile's
+  // concern families, so product-spine noise never reaches a function graph and
+  // operating patterns never reach a product graph.
+  it('operating_function does NOT evaluate product-spine patterns', () => {
+    const i = emptyInputs()
+    i.memberKind = 'operating_function'
+    i.countsByType = { feature: 2 } // would fire features-without-hypotheses for a product
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'features-without-hypotheses')).toBe(false)
+  })
+  it('a product graph (default) evaluates product-spine and skips operating patterns', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 6
+    i.countsByType = { feature: 2 }
+    const ids = firedIds(evaluateAntiPatterns(i))
+    expect(fired(ids, 'features-without-hypotheses')).toBe(true)
+    expect(fired(ids, 'operating-function-without-north-star')).toBe(false)
+  })
+
   it('every graph-scoped UPG_ANTI_PATTERNS id has a fire fixture in this file', () => {
     // Self-checks the per-pattern coverage above. If a pattern is added to
     // UPG_ANTI_PATTERNS without a matching test, surface here. Portfolio-scoped
@@ -401,6 +479,8 @@ describe('Options + composite + stage gating', () => {
       'insights-without-evidence',
       'journey-phases-without-canonical-steps',
       'objective-without-key-results',
+      'operating-function-without-north-star',
+      'operating-function-without-operating-content',
       'opportunity-without-need',
       'orphan-loose-thoughts',
       'persona-count-below-stage-benchmark',

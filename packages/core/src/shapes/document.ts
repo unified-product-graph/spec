@@ -196,6 +196,13 @@ export type UPGCrossEdgeType =
   | 'feature_surfaces_product'
   | 'feature_uses_design_component'
   | 'product_implements_design_system'
+  // Org-link (0.17.0). An operating_function graph's spine references the org unit
+  // it operates under, which lives once in the rollup (org_rollup) team_org map.
+  // Dual-registered: the within-graph `node_owned_by_team` / `node_owned_by_department`
+  // catalog edges for the local case, here as cross-edges so a function in one graph
+  // points at a department or team in the rollup graph.
+  | 'node_owned_by_team'
+  | 'node_owned_by_department'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -239,6 +246,9 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'feature_surfaces_product',
   'feature_uses_design_component',
   'product_implements_design_system',
+  // Org-link (0.17.0): dual-registered ownership edges (see UPGCrossEdgeType above).
+  'node_owned_by_team',
+  'node_owned_by_department',
 ]
 
 /**
@@ -500,10 +510,13 @@ export interface UPGDocument {
    * Workspace member kind (0.10.0, #45). `product` (default / absent) = a product
    * under management; `org_rollup` = the company umbrella graph (org-level vision
    * and OKRs, not a shippable product); `watched` = an externally monitored
-   * intelligence graph (e.g. a competitor). Serialised to `$upg.member_kind`;
-   * cached in workspace.json + the portfolio registry for enumeration and counts.
+   * intelligence graph (e.g. a competitor); `operating_function` = a function a
+   * team operates (revenue / success / finance / people / marketing) rather than a
+   * product it ships — no product spine, graded on a function validation profile
+   * (0.17.0). Serialised to `$upg.member_kind`; cached in workspace.json + the
+   * portfolio registry for enumeration and counts.
    */
-  member_kind?: 'product' | 'org_rollup' | 'watched'
+  member_kind?: 'product' | 'org_rollup' | 'watched' | 'operating_function'
   /** Integrity checksum. Set by the MCP server on save, verified on load. */
   _integrity?: UPGIntegrity
 }
