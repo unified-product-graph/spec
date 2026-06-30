@@ -258,6 +258,7 @@ const STRATEGY_GUIDE: UPGDomainUsageGuide = {
     { description: 'Outcomes without metrics. Measurement is the signal an outcome happened.' },
     { description: 'Objectives without key results: an objective without measurement is a wish' },
     { description: 'Too many strategic themes: focus beats breadth, aim for 2-4 active themes' },
+    { description: 'Constraints without an origin: a qualitative guardrail lives on a constraint, so set constraint_origin to say where it comes from. internal marks a self-imposed principle or operating tenet the team commits to; external marks a limit, requirement, or ceiling imposed from outside (a regulation, a budget cap, a platform bound).' },
   ],
 }
 
@@ -840,6 +841,12 @@ const TEAM_ORG_GUIDE: UPGDomainUsageGuide = {
       entity_types: ['team', 'role', 'team_okr', 'retrospective', 'dependency'],
       edge_chain: ['team_staffed_with_role', 'team_targets_team_okr', 'team_reflects_in_retrospective', 'dependency_blocks_team'],
     },
+    {
+      name: 'Org Nesting',
+      description: 'A department contains its teams; a parent team contains its sub-teams or squads one level deeper. Keep a sub-team in the same department as its parent team. Cross-department reporting lines are modelled at the individual level with person_reports_to_person, not by nesting a team under a parent in another department.',
+      entity_types: ['department', 'team'],
+      edge_chain: ['department_contains_team', 'team_contains_team'],
+    },
   ],
   required_bridges: [
     { edge_type: 'node_owned_by_team', target_domain: 'product_spec', when: 'Features and epics should have team ownership' },
@@ -849,6 +856,7 @@ const TEAM_ORG_GUIDE: UPGDomainUsageGuide = {
     { description: 'Teams without OKRs: every team needs clear goals' },
     { description: 'Dependencies without both teams linked: a dependency must connect blocker and blocked' },
     { description: 'Retrospectives without action items: reflection without action is just venting' },
+    { description: 'Nesting a sub-team under a parent team in a different department: a team_contains_team nesting should stay within one department (both teams sharing a department_contains_team parent). A cross-department nesting is almost always a modelling error; model a cross-department reporting line at the individual level with person_reports_to_person instead.' },
     { description: 'Double-modelling the org as product_area and team_org: a product_area is the classification axis ON products (which area a product belongs to, the axis used to group products); a team_org department/team is the people structure (the org chart, who reports to whom). Use product_area to classify products and department/team for the org chart, and relate them through the team that owns an area rather than restating one as the other.' },
   ],
 }

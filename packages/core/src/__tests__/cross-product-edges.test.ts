@@ -12,7 +12,8 @@
 import { describe, it, expect } from 'vitest'
 import { validateUPGDocument } from '../grammar/validate.js'
 import { UPG_CROSS_EDGE_TYPES } from '../shapes/document.js'
-import { UPG_EDGE_CATALOG } from '../catalog/edge-catalog.js'
+import { UPG_EDGE_CATALOG, getEdgePropertySchema } from '../catalog/edge-catalog.js'
+import { validateEdgeProperties } from '../properties/edge-property-validation.js'
 
 const baseDoc = (edges: Array<Record<string, unknown>>) => ({
   upg_version: '0.2.4',
@@ -27,7 +28,7 @@ const baseDoc = (edges: Array<Record<string, unknown>>) => ({
 })
 
 describe('cross-product edge validation', () => {
-  it('exposes the thirty-seven canonical cross-product edge types', () => {
+  it('exposes the forty-one canonical cross-product edge types', () => {
     expect(UPG_CROSS_EDGE_TYPES).toEqual([
       'shares_persona',
       'shares_competitor',
@@ -66,6 +67,10 @@ describe('cross-product edge validation', () => {
       'product_implements_design_system',
       'node_owned_by_team',
       'node_owned_by_department',
+      'strategic_theme_contains_objective',
+      'objective_achieved_through_key_result',
+      'key_result_quantified_by_metric',
+      'objective_measured_by_metric',
     ])
   })
 
@@ -121,6 +126,60 @@ describe('cross-product edge validation', () => {
         result.errors.some((e) => e.message.includes('portfolio.cross_edges')),
         `${dualType} should be allowed in product edges[]`,
       ).toBe(false)
+    }
+  })
+
+  it('registers the four cross-graph strategy/measurement edges as dual-registered (catalog + cross), same direction and verb', () => {
+    // 0.17.2: the OKR/measurement spine can span files (a company strategy spine
+    // in the rollup laddering into product-graph objectives, key results, and
+    // metrics). Each cross-product variant reuses the EXISTING within-graph
+    // hierarchy edge unchanged — same source/target type, direction, and verb —
+    // so traversal is uniform regardless of where the endpoint lives.
+    const strategyCrossEdges = [
+      'strategic_theme_contains_objective',
+      'objective_achieved_through_key_result',
+      'key_result_quantified_by_metric',
+      'objective_measured_by_metric',
+    ] as const
+    for (const type of strategyCrossEdges) {
+      // Present in the cross-edge registry.
+      expect(UPG_CROSS_EDGE_TYPES).toContain(type)
+      // Dual-registered: the within-graph catalog entry still exists.
+      const def = UPG_EDGE_CATALOG[type]
+      expect(def, `${type} must remain a within-graph catalog edge`).toBeDefined()
+      // Hierarchy classification — these are containment / measurement edges.
+      expect(def.classification).toBe('hierarchy')
+    }
+    // Direction + verb are the canonical within-graph ones (no new verbs minted).
+    expect(UPG_EDGE_CATALOG.strategic_theme_contains_objective).toMatchObject({
+      forward_verb: 'contains', source_type: 'strategic_theme', target_type: 'objective',
+    })
+    expect(UPG_EDGE_CATALOG.objective_achieved_through_key_result).toMatchObject({
+      forward_verb: 'achieved_through', source_type: 'objective', target_type: 'key_result',
+    })
+    expect(UPG_EDGE_CATALOG.key_result_quantified_by_metric).toMatchObject({
+      forward_verb: 'quantified_by', source_type: 'key_result', target_type: 'metric',
+    })
+    expect(UPG_EDGE_CATALOG.objective_measured_by_metric).toMatchObject({
+      forward_verb: 'measured_by', source_type: 'objective', target_type: 'metric',
+    })
+  })
+
+  it('does not let the four strategy/measurement cross-edges carry properties', () => {
+    // They are structural hierarchy edges, not assessment-carrying edges, so they
+    // declare no property_schema and are not carries_properties. A property bag on
+    // one of them must be rejected by the cross-edge writer (validated upstream);
+    // here we assert the spec-level contract: no property schema is defined.
+    for (const type of [
+      'strategic_theme_contains_objective',
+      'objective_achieved_through_key_result',
+      'key_result_quantified_by_metric',
+      'objective_measured_by_metric',
+    ]) {
+      expect(validateEdgeProperties(type, { confidence: { value: 3, label: 'high' } }).length).toBe(0)
+      // No schema means the bag is simply unvalidated at the spec layer; the
+      // writer is what rejects properties on a non-carries-properties edge.
+      expect(getEdgePropertySchema(type)).toBeUndefined()
     }
   })
 

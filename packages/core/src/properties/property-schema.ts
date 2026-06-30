@@ -678,6 +678,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ConstraintProperties: Constraint: a named limitation or boundary on product creation.
   constraint: {
     constraint_kind: { type: 'string', enum: ['resource', 'technical', 'regulatory', 'temporal', 'compliance', 'other'], description: 'Limitation category' },
+    constraint_origin: { type: 'string', enum: ['internal', 'external'], description: 'Provenance: internal (a self-imposed principle or operating tenet) or external (a limit, requirement, or ceiling imposed from outside).' },
     constraint_status: { type: 'string', enum: ['binding', 'advisory', 'lifted'], description: 'Whether binding, advisory, or lifted' },
     rule_strength: { type: 'string', enum: ['must', 'must_not', 'exception', 'warning', 'guideline'], description: 'Enforcement strictness. Reuses the governance/guideline rule vocabulary.' },
     source: { type: 'string', description: 'Free-text origin: policy document, regulation, stakeholder, technical doc.' },

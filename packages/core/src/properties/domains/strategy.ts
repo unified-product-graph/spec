@@ -306,6 +306,19 @@ export type ConstraintKind = 'resource' | 'technical' | 'regulatory' | 'temporal
 export type ConstraintStatus = 'binding' | 'advisory' | 'lifted'
 
 /**
+ * Where a constraint comes from (0.17.2). The provenance axis, orthogonal to
+ * `constraint_kind` (category), `constraint_status` (in-effect state), and
+ * `rule_strength` (enforcement strictness).
+ *   `internal` = self-imposed: a principle or operating tenet the team commits to
+ *     (e.g. "ship weekly", "no feature without a metric"). The home for the
+ *     qualitative guardrails `constraint` models in place of a separate principle
+ *     type.
+ *   `external` = imposed on us: a limit, requirement, or ceiling coming from
+ *     outside (a regulation, a budget cap, a platform bound, a contractual rule).
+ */
+export type ConstraintOrigin = 'internal' | 'external'
+
+/**
  * Constraint: a named limitation or boundary on product creation.
  *
  * **Edge-defined**: semantic identity comes from what it constrains
@@ -327,6 +340,8 @@ export type ConstraintStatus = 'binding' | 'advisory' | 'lifted'
 export interface ConstraintProperties {
   /** Limitation category */
   constraint_kind?: ConstraintKind
+  /** Provenance: a self-imposed tenet (`internal`) or an imposed-on-us limit/requirement (`external`). */
+  constraint_origin?: ConstraintOrigin
   /** Whether binding, advisory, or lifted */
   constraint_status?: ConstraintStatus
   /** Enforcement strictness. Reuses the governance/guideline rule vocabulary. */

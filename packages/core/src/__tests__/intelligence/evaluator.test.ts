@@ -204,31 +204,47 @@ describe('Per-pattern fire / clear', () => {
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'roadmap-feature-without-outcome-link')).toBe(false)
   })
 
-  // 8. competitors-missing-past-validation (medium, benchmark — needs stage)
-  it('competitors-missing-past-validation fires when competitor count < benchmark min at validation', () => {
+  // 8. competitors-missing-past-validation (medium, benchmark — needs stage).
+  // Fires from build onward (0.17.2: dropped validation so the name "past
+  // validation" holds and young concept/validation graphs are exempt).
+  it('competitors-missing-past-validation fires when competitor count < benchmark min at build', () => {
     const i = emptyInputs()
-    i.productStage = 'validation' // benchmark.min = 3
+    i.productStage = 'build' // benchmark.min = 3
     i.countsByType = { competitor: 1 }
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'competitors-missing-past-validation')).toBe(true)
   })
-  it('competitors-missing-past-validation clears at or above benchmark min', () => {
+  it('competitors-missing-past-validation does not fire at validation (young-graph exempt)', () => {
     const i = emptyInputs()
     i.productStage = 'validation'
+    i.countsByType = { competitor: 1 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'competitors-missing-past-validation')).toBe(false)
+  })
+  it('competitors-missing-past-validation clears at or above benchmark min', () => {
+    const i = emptyInputs()
+    i.productStage = 'build'
     i.countsByType = { competitor: 3 }
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'competitors-missing-past-validation')).toBe(false)
   })
 
-  // 9. persona-count-below-stage-benchmark (medium, benchmark — needs stage)
-  it('persona-count-below-stage-benchmark fires when persona count < benchmark min', () => {
+  // 9. persona-count-below-stage-benchmark (medium, benchmark — needs stage).
+  // Fires from beta onward (0.17.2: dropped validation/build so a one-persona
+  // beachhead graph at build is not a false alarm).
+  it('persona-count-below-stage-benchmark fires when persona count < benchmark min at beta', () => {
     const i = emptyInputs()
-    i.productStage = 'validation' // benchmark.min = 2
+    i.productStage = 'beta' // benchmark.min = 3
     i.countsByType = { persona: 1 }
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'persona-count-below-stage-benchmark')).toBe(true)
   })
+  it('persona-count-below-stage-benchmark does not fire at build (beachhead-persona exempt)', () => {
+    const i = emptyInputs()
+    i.productStage = 'build'
+    i.countsByType = { persona: 1 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'persona-count-below-stage-benchmark')).toBe(false)
+  })
   it('persona-count-below-stage-benchmark clears at or above benchmark min', () => {
     const i = emptyInputs()
-    i.productStage = 'validation'
-    i.countsByType = { persona: 2 }
+    i.productStage = 'beta'
+    i.countsByType = { persona: 3 }
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'persona-count-below-stage-benchmark')).toBe(false)
   })
 
@@ -256,6 +272,18 @@ describe('Per-pattern fire / clear', () => {
     i.totalEntityCount = 6
     i.domainCount = 2
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'single-domain-graph')).toBe(false)
+  })
+  it('single-domain-graph does not fire at build but does at beta (0.17.2 young-graph exempt)', () => {
+    const atBuild = emptyInputs()
+    atBuild.productStage = 'build'
+    atBuild.totalEntityCount = 6
+    atBuild.domainCount = 1
+    expect(fired(firedIds(evaluateAntiPatterns(atBuild)), 'single-domain-graph')).toBe(false)
+    const atBeta = emptyInputs()
+    atBeta.productStage = 'beta'
+    atBeta.totalEntityCount = 6
+    atBeta.domainCount = 1
+    expect(fired(firedIds(evaluateAntiPatterns(atBeta)), 'single-domain-graph')).toBe(true)
   })
 
   // 12. orphan-loose-thoughts (medium)

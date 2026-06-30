@@ -1200,6 +1200,16 @@ export const UPG_EDGE_CATALOG = {
   // UPG_EDGE_MIGRATIONS['0.9.9'].
   product_organised_into_department: { forward_verb: 'organised_into', reverse_verb: 'organises', classification: 'hierarchy', source_type: 'product', target_type: 'department' },
   department_contains_team: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'department', target_type: 'team' },
+  // Second-level team nesting (0.17.2). department_contains_team covers the first
+  // level (department -> team); this covers a team nested inside another team in
+  // the same department (a sub-team or squad under a parent team). Modelled
+  // parent -> child like feature_area_contains_feature_area, so the org map builds
+  // correctly in get_tree (which reads source as the parent); the reverse verb
+  // belongs_to gives the upward "this team is part of that team" read. The
+  // same-department expectation is advisory (a write-time warning), never a hard
+  // block; cross-department reporting lines belong to person_reports_to_person at
+  // the individual level.
+  team_contains_team: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'team', target_type: 'team' },
   department_includes_stakeholder: { forward_verb: 'includes', reverse_verb: 'included_in', classification: 'hierarchy', source_type: 'department', target_type: 'stakeholder' },
   // NOTE: `person` is a containment-free entity type (see
   // UPG_CONTAINMENT_FREE_TYPES in grammar/hierarchy.ts). It is referenced

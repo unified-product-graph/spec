@@ -293,6 +293,10 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   team: [
     'role', 'team_okr', 'retrospective', 'dependency', 'skill', 'ceremony',
     'capacity_plan', 'decision',
+    // Self-nesting (0.17.2): a parent team contains its sub-teams / squads, one
+    // level below department_contains_team. Backs team_contains_team. Mirrors
+    // feature_area_contains_feature_area (same-type child listed last).
+    'team',
   ],
 
   // ── Data & Analytics hierarchy ───────────────────────────────────────────────

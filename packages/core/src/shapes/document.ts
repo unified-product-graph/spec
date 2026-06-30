@@ -203,6 +203,27 @@ export type UPGCrossEdgeType =
   // points at a department or team in the rollup graph.
   | 'node_owned_by_team'
   | 'node_owned_by_department'
+  // Cross-graph strategy & measurement (0.17.2). The OKR/measurement spine does
+  // not always live in one file: a company strategy spine sits in the rollup
+  // (org_rollup), while objectives, key results, and metrics scatter across the
+  // product graphs and operating-function graphs that ladder into it. These four
+  // hierarchy edges already exist within a graph (UPG_EDGE_CATALOG); they are
+  // dual-registered here so the same parent->child relationship can span files
+  // with the same direction and verb, and traversal stays uniform regardless of
+  // where the objective, key result, or metric lives.
+  //   - strategic_theme_contains_objective: a theme in the rollup contains an
+  //     objective that lives in a product graph (the keystone for a company
+  //     strategy spine that ladders into product OKRs).
+  //   - objective_achieved_through_key_result: a team owns the objective in one
+  //     graph and the key results in another.
+  //   - key_result_quantified_by_metric: a key result points at a metric that
+  //     lives in a sibling graph (so the metric is defined once, not duplicated).
+  //   - objective_measured_by_metric: a rollup objective points at a metric in a
+  //     product or internal graph.
+  | 'strategic_theme_contains_objective'
+  | 'objective_achieved_through_key_result'
+  | 'key_result_quantified_by_metric'
+  | 'objective_measured_by_metric'
 
 /**
  * Runtime-checkable list of valid cross-product edge types. Mirrors
@@ -249,6 +270,12 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   // Org-link (0.17.0): dual-registered ownership edges (see UPGCrossEdgeType above).
   'node_owned_by_team',
   'node_owned_by_department',
+  // Cross-graph strategy & measurement (0.17.2): dual-registered OKR/measurement
+  // hierarchy edges so the strategy spine can span files (see UPGCrossEdgeType above).
+  'strategic_theme_contains_objective',
+  'objective_achieved_through_key_result',
+  'key_result_quantified_by_metric',
+  'objective_measured_by_metric',
 ]
 
 /**

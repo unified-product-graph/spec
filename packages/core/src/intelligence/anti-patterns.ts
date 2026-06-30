@@ -384,7 +384,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     id: 'competitors-missing-past-validation',
     name: 'Competitor catalogue empty past validation',
     description:
-      'The graph has zero competitor entities at validation stage or later. Past concept, the absence of named competitors usually means alternatives haven\'t been thought through, not that none exist.',
+      'The graph has zero competitor entities at build stage or later. Past validation, the absence of named competitors usually means alternatives haven\'t been thought through, not that none exist. A graph still at concept or validation is exempt: cataloguing the field can wait until you commit to building.',
     structured_condition: {
       check: {
         type: 'benchmark',
@@ -396,7 +396,11 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'Without competitors in the graph, positioning, differentiation, and switching-cost analysis lack referents. The team is reasoning in a vacuum.',
     remediation:
       'Catalogue the 3–5 closest alternatives users would pick today. Use `/upg-compete` to author.',
-    stages: ['validation', 'build', 'beta', 'launch', 'growth', 'mature'],
+    // Fires from build onward, matching the name (past the validation stage). A
+    // concept or validation graph is still framing the problem; holding it to a
+    // competitor benchmark there is the false alarm this anti-pattern caused on
+    // legitimately-young graphs.
+    stages: ['build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'medium',
     source: { kind: 'industry_practice', category: 'product_strategy' },
   },
@@ -405,7 +409,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     id: 'persona-count-below-stage-benchmark',
     name: 'Persona count below stage benchmark',
     description:
-      'The graph has fewer personas than the stage-appropriate benchmark expects. Persona under-coverage signals the team has not segmented its audience.',
+      'The graph has fewer personas than the stage-appropriate benchmark expects, from beta onward. Persona under-coverage at that point signals the team has not segmented its audience. Concept through build are exempt: the sound move there is to start with one beachhead persona and expand as you find fit.',
     structured_condition: {
       check: {
         type: 'benchmark',
@@ -414,10 +418,14 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       },
     },
     why_it_matters:
-      'A graph with one persona past validation is usually carrying an unexamined "everyone is the same user" assumption.',
+      'A graph still on a single persona by beta is usually carrying an unexamined assumption that every user is the same.',
     remediation:
       'Add personas representing the next 1–2 most distinct user segments. Use `/upg-new-persona`.',
-    stages: ['validation', 'build', 'beta', 'launch', 'growth', 'mature'],
+    // Fires from beta onward. The persona benchmark expects 2+ from validation,
+    // but the canonical beachhead move is to start with one persona and expand as
+    // fit is found, so holding a build-stage graph to a multi-persona bar is a
+    // false alarm. By beta an unsegmented audience is a real signal.
+    stages: ['beta', 'launch', 'growth', 'mature'],
     severity: 'medium',
     source: { kind: 'practitioner', attribution: 'Alan Cooper, The Inmates Are Running the Asylum' },
   },
@@ -448,7 +456,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     id: 'single-domain-graph',
     name: 'Single-domain graph',
     description:
-      'The graph has more than five entities but they all live in a single UPG domain. A real product spans multiple domains; a single-domain graph is usually a deep notebook in one corner with the rest of the picture missing.',
+      'The graph has more than five entities but they all live in a single UPG domain, at beta stage or later. A real product spans multiple domains by then; a single-domain graph that far along is usually a deep notebook in one corner with the rest of the picture missing. Concept through build are exempt: a graph legitimately starts deep in one domain and broadens as it matures.',
     structured_condition: {
       operator: 'and',
       checks: [
@@ -460,7 +468,11 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
       'Single-domain coverage prevents cross-domain reasoning. The graph cannot answer questions like "which feature serves which persona?" or "which experiment validates which hypothesis?".',
     remediation:
       'Identify the next adjacent domain (usually `user`, `validation`, or `product_spec`) and add 2–3 anchor entities to bridge.',
-    stages: ['validation', 'build', 'beta', 'launch'],
+    // Fires from beta onward. Early on a graph is legitimately deep in one domain
+    // (a discovery notebook, a thin internal tool); only once it reaches beta is
+    // single-domain coverage a smell rather than a normal starting shape. Extends
+    // through growth and mature, where a single-domain graph is most telling.
+    stages: ['beta', 'launch', 'growth', 'mature'],
     severity: 'medium',
     source: { kind: 'fundamental' },
   },
