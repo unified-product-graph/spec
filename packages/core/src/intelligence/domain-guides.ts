@@ -248,6 +248,12 @@ const STRATEGY_GUIDE: UPGDomainUsageGuide = {
       entity_types: ['vision', 'mission', 'outcome', 'objective', 'key_result', 'metric'],
       edge_chain: ['product_guided_by_vision', 'product_fulfils_mission', 'vision_realised_through_mission', 'product_pursues_outcome', 'product_targets_objective', 'objective_achieved_through_key_result', 'outcome_measured_by_metric'],
     },
+    {
+      name: 'Rendering the company spine',
+      description: 'The company OKR / strategy / north-star spine already renders with get_tree, no new pattern needed: switch to the org_rollup member (the company rollup graph) and run the okr, strategy, or north_star tree pattern there. In a portfolio the spine can span files, a rollup theme laddering into product-graph objectives through the cross-product strategic_theme_contains_objective edge; get_tree walks the active member, so render the rollup for the whole-company view and a product for its slice.',
+      entity_types: ['strategic_theme', 'objective', 'key_result', 'metric'],
+      edge_chain: ['strategic_theme_contains_objective', 'objective_achieved_through_key_result', 'key_result_quantified_by_metric'],
+    },
   ],
   required_bridges: [
     { edge_type: 'outcome_reveals_opportunity', target_domain: 'discovery', when: 'Outcomes should connect to the opportunities that deliver them' },

@@ -5,6 +5,8 @@
 
 import type { UPGBaseNode, UPGMappingConfidence } from './base-node.js'
 import type { UPGEdge } from './edges.js'
+import type { CrossProductEligibleEdgeType } from '../catalog/edge-catalog.js'
+import { UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES } from '../catalog/edge-catalog.js'
 
 // ─── Document source ──────────────────────────────────────────────────────────
 
@@ -68,181 +70,42 @@ export type UPGProductStage =
 
 // ─── Cross-product edge types ────────────────────────────────────────────────
 
-/** The set of valid cross-product relationship types */
-export type UPGCrossEdgeType =
-  | 'shares_persona'
-  | 'shares_competitor'
-  | 'shares_metric'
-  | 'depends_on_product'
-  | 'cannibalises'
-  | 'succeeds'
-  // Composition / hosting (host runs the hosted product inside itself).
-  // Directed host -> hosted, matching the spec's container -> contained
-  // convention (portfolio_contains_product, product_contains_*). Distinct from
-  // depends_on_product, which is a runtime dependency, not containment.
-  | 'hosts'
-  // Strategic rollup / alignment. Directed subordinate -> superior: a product's
-  // strategy entity contributes to a higher-level one (product objective ->
-  // company objective, product key_result -> company key_result, product
-  // outcome -> company outcome). Unlike the symmetric shares_* peer edges, this
-  // is hierarchical — it expresses the OKR cascade ACROSS products, so a
-  // portfolio can answer "which company objective is this product serving?" and
-  // "which company KRs have no product driving them?".
-  | 'contributes_to'
-  // Canonical instance. Directed product entity -> canonical (registry) entity:
-  // "this product node is an instance of that shared, authoritative node." The
-  // target lives in the portfolio document's `registry` section (qualified as
-  // `registry/{node_id}`), not in a product. The endpoints must share a type
-  // (a persona instance_of a persona, a metric instance_of a metric); the
-  // same-type rule is enforced by the registry tooling, not by this list.
-  // Distinct from the symmetric `shares_*` peer edges: `instance_of` is
-  // canonical-to-instance and unlocks rollup ("every Developer instance and its
-  // per-surface jobs"), diff, and drift detection (an instance whose title or
-  // shape strays from its canonical). Coexists with `shares_*`; neither
-  // deprecates the other. See `REGISTRY_PRODUCT_ID` and `UPGRegistry`.
-  | 'instance_of'
-  // Org-axis to audience. Directed product_area -> canonical (registry) entity:
-  // "this area serves that persona" / "this area targets that market segment".
-  // The source is a portfolio `product_area` id; the target lives in the registry
-  // section (`registry/{node_id}`). Carries optional `relevance` (primary/secondary)
-  // and `audience_role` qualifiers — the primary-vs-secondary distinction is the
-  // core value of the area-to-audience matrix, and a persona can be a `buyer` for
-  // one area and a `user` for another. Created via the dedicated
-  // `link_area_to_audience` tool, not the generic `create_cross_product_edge`.
-  | 'area_serves_persona'
-  | 'area_targets_market_segment'
-  // Metric rollup. Directed product `metric` -> company/portfolio `metric`: a
-  // product KPI feeds a higher-level north-star. Mirrors `contributes_to` (the OKR
-  // cascade) for the measurement cascade (KPI -> north-star -> outcome). Same-type
-  // (metric -> metric), directional. Distinct from the symmetric `shares_metric`
-  // ("these track the same thing") — `rolls_up_to` says "this one feeds that one".
-  | 'rolls_up_to'
-  // Foundations (0.9.12). A product-graph entity links to a canonical
-  // specification or primitive in the registry. Directed product / feature /
-  // api_contract -> registry canonical (`registry/{node_id}` target), the same
-  // shape as `instance_of`. Registry-internal spec-to-spec and
-  // primitive-to-spec/primitive links are catalog edges, not cross-edges.
-  | 'product_implements_specification'
-  | 'product_exposes_specification'
-  | 'feature_conforms_to_specification'
-  | 'api_contract_speaks_specification'
-  | 'product_exposes_primitive'
-  | 'feature_manipulates_primitive'
-  | 'primitive_stored_as_data_type'
-  // Competitive parity (0.10.0, #38). Our `feature` rivals a `competitor_feature`
-  // that lives in a separate watched competitor-intelligence graph. Dual-registered:
-  // also a catalog edge (so resolve_edge_for_pair resolves it and within-graph is
-  // the degenerate case), here as a cross-edge for the cross-product case. Carries
-  // the parity assessment via `UPGCrossEdge.properties` (carries_properties).
-  | 'feature_rivals_competitor_feature'
-  // Competitor-signal surfacing (0.10.0, #41). A dated competitor move lives in a
-  // watched competitor-intelligence graph; these map it onto our product graph.
-  | 'competitor_signal_maps_to_feature'
-  | 'competitor_signal_surfaces_opportunity'
-  // Registry-canonical classification (0.10.2). A competitor (or other product
-  // node) classified directly against a `registry/{classification_value}`
-  // canonical, so a shared axis lives once in the registry and graphs carry no
-  // local taxonomy nodes. Dual-registered: a within-graph catalog edge for the
-  // local case, here as a cross-edge for the canonical case.
-  | 'competitor_classified_as_classification_value'
-  // Generic registry-canonical classification (0.10.3). The polymorphic sibling
-  // of competitor_classified_as_classification_value: ANY node (not just a
-  // competitor) classified against a `registry/{classification_value}` canonical.
-  // Same dual-registration: a polymorphic within-graph catalog edge for the
-  // local case, here as a cross-edge for the canonical case.
-  | 'node_classified_as_classification_value'
-  // Operating-lifecycle rollup (0.12.1). A product's `journey_phase` realises ONE
-  // canonical `operating_stage` that lives in the registry (`registry/{node_id}`).
-  // Dual-registered: the within-graph `journey_phase_realises_operating_stage`
-  // catalog edge for the local case, here as the cross-edge so 49 phases across 6
-  // product graphs roll up to one canonical lifecycle (~7 registry nodes + 49
-  // cross-edges) instead of minting per-product stage duplicates.
-  | 'journey_phase_realises_operating_stage'
-  // Cross-product reference family (0.12.7/698). A product-graph entity
-  // references a fact in another graph. Dual-registered (also in UPG_EDGE_CATALOG):
-  // the cross-edge is the common cross-graph case, the catalog entry the within-graph
-  // degenerate case. Distinct from `depends_on_product` (the built-on / dogfood
-  // relationship between two products).
-  //   - `screen_markets_product`: a marketing/landing screen markets a product
-  //     (e.g. the website's product pages; product node may live in another graph).
-  //   - `screen_renders_design_component`: a screen renders a component from the
-  //     shared design-system graph (the registry/foundation library, referenced once).
-  //   - `product_expresses_brand_identity`: a product expresses the shared brand
-  //     (a registry singleton; expressed, not instance_of-d).
-  | 'screen_markets_product'
-  | 'screen_renders_design_component'
-  | 'product_expresses_brand_identity'
-  // Connective cross-product layer (0.13.1, Data's connective-layer brief). Additive.
-  //   - shares_job / shares_need: the job/need siblings of shares_persona/competitor/metric.
-  //     Symmetric peer overlap ("these overlap") without a canonical instance_of identity;
-  //     used job -> job / need -> need across products.
-  //   - persona_delegates_to_persona: cross-product delegation (a human persona in one
-  //     product delegates to an agent persona in another, or a registry agent persona).
-  //     Dual-registered: the within-graph delegation is the existing catalog edge.
-  //   - screen_targets_competitor: a comparison / "vs" / positioning screen targets a
-  //     competitor (typically in a watched competitor-intel graph). Dual-registered.
-  //   - feature_surfaces_product: a feature surfaces / embeds another product (the
-  //     feature-granular sibling of depends_on_product; wires the portfolio into a mesh).
-  //     Dual-registered.
-  //   - feature_uses_design_component: a feature consumes a shared design_component from the
-  //     design-system graph (the feature sibling of screen_renders_design_component). Dual-registered.
-  //   - product_implements_design_system: a product adopts the shared design system (adoption
-  //     semantic, mirroring product_implements_specification; distinct from the hierarchy
-  //     product_systematised_in_design_system). Dual-registered.
-  | 'shares_job'
-  | 'shares_need'
-  | 'persona_delegates_to_persona'
-  | 'screen_targets_competitor'
-  | 'feature_surfaces_product'
-  | 'feature_uses_design_component'
-  | 'product_implements_design_system'
-  // Org-link (0.17.0). An operating_function graph's spine references the org unit
-  // it operates under, which lives once in the rollup (org_rollup) team_org map.
-  // Dual-registered: the within-graph `node_owned_by_team` / `node_owned_by_department`
-  // catalog edges for the local case, here as cross-edges so a function in one graph
-  // points at a department or team in the rollup graph.
-  | 'node_owned_by_team'
-  | 'node_owned_by_department'
-  // Cross-graph strategy & measurement (0.17.2). The OKR/measurement spine does
-  // not always live in one file: a company strategy spine sits in the rollup
-  // (org_rollup), while objectives, key results, and metrics scatter across the
-  // product graphs and operating-function graphs that ladder into it. These four
-  // hierarchy edges already exist within a graph (UPG_EDGE_CATALOG); they are
-  // dual-registered here so the same parent->child relationship can span files
-  // with the same direction and verb, and traversal stays uniform regardless of
-  // where the objective, key result, or metric lives.
-  //   - strategic_theme_contains_objective: a theme in the rollup contains an
-  //     objective that lives in a product graph (the keystone for a company
-  //     strategy spine that ladders into product OKRs).
-  //   - objective_achieved_through_key_result: a team owns the objective in one
-  //     graph and the key results in another.
-  //   - key_result_quantified_by_metric: a key result points at a metric that
-  //     lives in a sibling graph (so the metric is defined once, not duplicated).
-  //   - objective_measured_by_metric: a rollup objective points at a metric in a
-  //     product or internal graph.
-  | 'strategic_theme_contains_objective'
-  | 'objective_achieved_through_key_result'
-  | 'key_result_quantified_by_metric'
-  | 'objective_measured_by_metric'
-
 /**
- * Runtime-checkable list of valid cross-product edge types. Mirrors
- * `UPGCrossEdgeType` for use in validators and writers that need to test
- * `edge.type` against the cross-product whitelist at runtime.
+ * Portfolio-native cross-product edge types (0.17.3): relationships that exist ONLY
+ * across products within a portfolio and have NO within-graph catalog entry, so they
+ * cannot derive from a catalog flag the way the dual-registered set does. This is the
+ * stable half of the whitelist (these change rarely); the growing, dual-registered
+ * half is derived from the `cross_product_eligible` catalog flag — see
+ * `CrossProductEligibleEdgeType` and `UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES`.
  */
-export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
+export const UPG_CROSS_ONLY_EDGE_TYPES = [
+  // Peer overlap: "these two products share / overlap on this thing." Symmetric,
+  // no canonical instance_of identity. shares_job / shares_need are the job/need
+  // siblings of the persona/competitor/metric peers (connective layer, 0.13.1).
   'shares_persona',
   'shares_competitor',
   'shares_metric',
-  'depends_on_product',
+  'shares_job',
+  'shares_need',
+  // Product-to-product relationships.
+  'depends_on_product',   // runtime dependency (built-on / dogfood), not containment
   'cannibalises',
   'succeeds',
-  'hosts',
+  'hosts',                // host runs the hosted product inside itself (container -> contained)
+  // OKR / measurement rollup primitives: the cascade ACROSS products (subordinate
+  // -> superior). `contributes_to` rolls a product strategy entity up to a higher-
+  // level one; `rolls_up_to` feeds a product metric into a higher-level north-star.
   'contributes_to',
+  'rolls_up_to',
+  // Canonical instance + area-to-audience: the target lives in the portfolio
+  // `registry` section (`registry/{node_id}`). `instance_of` is same-type
+  // canonical-to-instance; the area edges are minted via `link_area_to_audience`.
   'instance_of',
   'area_serves_persona',
   'area_targets_market_segment',
-  'rolls_up_to',
+  // Foundations (0.9.12): a product-graph entity links to a canonical specification
+  // or primitive in the registry (`registry/{node_id}` target, same shape as
+  // instance_of). Registry-internal spec-to-spec links are catalog edges, not these.
   'product_implements_specification',
   'product_exposes_specification',
   'feature_conforms_to_specification',
@@ -250,32 +113,33 @@ export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
   'product_exposes_primitive',
   'feature_manipulates_primitive',
   'primitive_stored_as_data_type',
-  'feature_rivals_competitor_feature',
-  'competitor_signal_maps_to_feature',
-  'competitor_signal_surfaces_opportunity',
-  'competitor_classified_as_classification_value',
-  'node_classified_as_classification_value',
-  'journey_phase_realises_operating_stage',
-  'screen_markets_product',
-  'screen_renders_design_component',
-  'product_expresses_brand_identity',
-  // Connective cross-product layer (0.13.1) — see UPGCrossEdgeType above.
-  'shares_job',
-  'shares_need',
-  'persona_delegates_to_persona',
-  'screen_targets_competitor',
-  'feature_surfaces_product',
-  'feature_uses_design_component',
-  'product_implements_design_system',
-  // Org-link (0.17.0): dual-registered ownership edges (see UPGCrossEdgeType above).
-  'node_owned_by_team',
-  'node_owned_by_department',
-  // Cross-graph strategy & measurement (0.17.2): dual-registered OKR/measurement
-  // hierarchy edges so the strategy spine can span files (see UPGCrossEdgeType above).
-  'strategic_theme_contains_objective',
-  'objective_achieved_through_key_result',
-  'key_result_quantified_by_metric',
-  'objective_measured_by_metric',
+] as const
+
+/** One portfolio-native cross-product edge type (see `UPG_CROSS_ONLY_EDGE_TYPES`). */
+export type UPGCrossOnlyEdgeType = (typeof UPG_CROSS_ONLY_EDGE_TYPES)[number]
+
+/**
+ * The set of valid cross-product relationship types. The union of two tiers:
+ *  - `UPGCrossOnlyEdgeType` — portfolio-native edges with no within-graph form
+ *    (the stable half, listed above).
+ *  - `CrossProductEligibleEdgeType` — within-graph catalog edges dual-registered
+ *    across graphs via the `cross_product_eligible` flag (the derived, self-
+ *    maintaining half: flag a catalog entry and it joins this union with no edit
+ *    here). Includes the competitive-intel edges, the design-system / brand and
+ *    marketing references, org ownership (`node_owned_by_*`), and the strategy /
+ *    OKR / measurement laddering that spans the rollup and its product graphs.
+ */
+export type UPGCrossEdgeType = UPGCrossOnlyEdgeType | CrossProductEligibleEdgeType
+
+/**
+ * Runtime-checkable list of valid cross-product edge types, for validators and
+ * writers that test `edge.type` against the whitelist at runtime. Composed from the
+ * two tiers so a newly-flagged catalog edge flows in with no edit here. Order:
+ * portfolio-native first, then the catalog-derived set in catalog declaration order.
+ */
+export const UPG_CROSS_EDGE_TYPES: readonly UPGCrossEdgeType[] = [
+  ...UPG_CROSS_ONLY_EDGE_TYPES,
+  ...UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES,
 ]
 
 /**

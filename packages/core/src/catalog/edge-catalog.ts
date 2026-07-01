@@ -59,6 +59,21 @@ export interface UPGEdgeDefinition {
    * Discoverable via `get_edge_type`.
    */
   property_schema?: PropertySchema
+  /**
+   * Dual-registration marker (0.17.3). When `true`, this within-graph catalog edge
+   * is ALSO a valid cross-product edge: its endpoints can legitimately live in
+   * DIFFERENT graphs within a portfolio (a connective, rollup-laddering, reference,
+   * org-ownership, or competitive-intel relationship), so `batch_create_cross_product_edges`
+   * admits it across files. This is the single source of truth for the cross-product
+   * whitelist: `UPGCrossEdgeType` (the union) and `UPG_CROSS_EDGE_TYPES` (the runtime
+   * list) both derive the dual-registered half from this flag, so flagging one edge
+   * here is the only edit needed to admit it. NOT for product-spine or org-spine
+   * containment, whose endpoints must co-reside in one graph. Portfolio-native edges
+   * that only ever exist across products (shares_*, depends_on_product, instance_of,
+   * rolls_up_to, the area and foundation edges) have no within-graph catalog entry and
+   * live in `UPG_CROSS_ONLY_EDGE_TYPES` instead. Discoverable via `get_edge_type`.
+   */
+  cross_product_eligible?: true
 }
 
 /**
@@ -123,7 +138,7 @@ export const UPG_EDGE_CATALOG = {
   persona_aspires_to_desired_outcome: { forward_verb: 'aspires_to', reverse_verb: 'aspirational_for', classification: 'hierarchy', source_type: 'persona', target_type: 'desired_outcome' },
   // Delegation (0.11.6): a persona delegates work to another. The common case is human -> agent
   // (Content Ops Lead -> Content Agent), but it also expresses human -> human (editor -> reviewer).
-  persona_delegates_to_persona: { forward_verb: 'delegates_to', reverse_verb: 'delegated_by', classification: 'semantic', source_type: 'persona', target_type: 'persona' },
+  persona_delegates_to_persona: { forward_verb: 'delegates_to', reverse_verb: 'delegated_by', classification: 'semantic', source_type: 'persona', target_type: 'persona', cross_product_eligible: true },
   persona_incurs_switching_cost: { forward_verb: 'incurs', reverse_verb: 'incurred_by', classification: 'hierarchy', source_type: 'persona', target_type: 'switching_cost' },
   job_surfaces_need: { forward_verb: 'surfaces', reverse_verb: 'surfaces_from', classification: 'causal', source_type: 'job', target_type: 'need' },
   job_motivates_desired_outcome: { forward_verb: 'motivates', reverse_verb: 'motivated_by', classification: 'causal', source_type: 'job', target_type: 'desired_outcome' },
@@ -245,15 +260,15 @@ export const UPG_EDGE_CATALOG = {
   // Dual-registered as a cross-edge (UPG_CROSS_EDGE_TYPES) so it also spans our
   // product graph and a watched competitor-intelligence graph. Distinct from
   // `competitor_feature_inspires_feature` (ideation lineage, not parity).
-  feature_rivals_competitor_feature: { forward_verb: 'rivals', reverse_verb: 'is_rivalled_by', classification: 'cross-domain', source_type: 'feature', target_type: 'competitor_feature', carries_properties: true },
+  feature_rivals_competitor_feature: { forward_verb: 'rivals', reverse_verb: 'is_rivalled_by', classification: 'cross-domain', source_type: 'feature', target_type: 'competitor_feature', carries_properties: true, cross_product_eligible: true },
   // 0.10.0 (spec issue #41): competitor_signal is a dated competitor move (feature
   // launch / pricing change / acquisition / partnership / market entry) emitted by a
   // competitor and mapped onto our portfolio. `emits` is within the watched graph;
   // `maps_to_feature` / `surfaces_opportunity` cross from the watched signal into our
   // product graph (dual-registered as cross-edges in UPG_CROSS_EDGE_TYPES).
   competitor_emits_competitor_signal: { forward_verb: 'emits', reverse_verb: 'emitted_by', classification: 'hierarchy', source_type: 'competitor', target_type: 'competitor_signal' },
-  competitor_signal_maps_to_feature: { forward_verb: 'maps_to', reverse_verb: 'targeted_by_signal', classification: 'cross-domain', source_type: 'competitor_signal', target_type: 'feature' },
-  competitor_signal_surfaces_opportunity: { forward_verb: 'surfaces', reverse_verb: 'prompted_by_signal', classification: 'cross-domain', source_type: 'competitor_signal', target_type: 'opportunity' },
+  competitor_signal_maps_to_feature: { forward_verb: 'maps_to', reverse_verb: 'targeted_by_signal', classification: 'cross-domain', source_type: 'competitor_signal', target_type: 'feature', cross_product_eligible: true },
+  competitor_signal_surfaces_opportunity: { forward_verb: 'surfaces', reverse_verb: 'prompted_by_signal', classification: 'cross-domain', source_type: 'competitor_signal', target_type: 'opportunity', cross_product_eligible: true },
   competitive_analysis_analyses_competitor: { forward_verb: 'analyses', reverse_verb: 'analysed_in', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'competitor' },
   competitive_analysis_identifies_market_trend: { forward_verb: 'identifies', reverse_verb: 'identified_in', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'market_trend' },
   competitive_analysis_scopes_market_segment: { forward_verb: 'scopes', reverse_verb: 'scoped_in', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'market_segment' },
@@ -287,13 +302,13 @@ export const UPG_EDGE_CATALOG = {
   // competitor can be classified directly against a `registry/{classification_value}`
   // canonical, eliminating the per-graph taxonomy node. Within-graph (the catalogue
   // case) here; cross-product against the registry canonical via create_cross_product_edge.
-  competitor_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'competitor', target_type: 'classification_value', carries_properties: true, property_schema: CLASSIFICATION_EDGE_PROPERTY_SCHEMA },
+  competitor_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'competitor', target_type: 'classification_value', carries_properties: true, property_schema: CLASSIFICATION_EDGE_PROPERTY_SCHEMA, cross_product_eligible: true },
   // 0.10.3: the polymorphic, type-agnostic sibling. ANY node (a feature, a
   // product, a market_segment) classified against a classification_value, so
   // classification is not welded to the competitor type. Also dual-registered as
   // a cross-edge for the registry-canonical case. source_type:'node' (wildcard);
   // listed in UPG_POLYMORPHIC_EDGE_KEYS.
-  node_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'node', target_type: 'classification_value', carries_properties: true, property_schema: CLASSIFICATION_EDGE_PROPERTY_SCHEMA },
+  node_classified_as_classification_value: { forward_verb: 'classified_as', reverse_verb: 'classification_of', classification: 'semantic', source_type: 'node', target_type: 'classification_value', carries_properties: true, property_schema: CLASSIFICATION_EDGE_PROPERTY_SCHEMA, cross_product_eligible: true },
   persona_anti_fit_for_classification_value: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'classification_value' },
   persona_anti_fit_for_product: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'product' },
   persona_anti_fit_for_competitor: { forward_verb: 'is_anti_fit_for', reverse_verb: 'should_not_be_picked_by', classification: 'semantic', source_type: 'persona', target_type: 'competitor' },
@@ -351,28 +366,28 @@ export const UPG_EDGE_CATALOG = {
   // ── Part 2: Strategic & Execution Spine (Ring 2) ───────────────────────────
 
   // 2.1 Strategic Domain
-  product_pursues_outcome: { forward_verb: 'pursues', reverse_verb: 'pursued_by', classification: 'hierarchy', source_type: 'product', target_type: 'outcome' },
-  product_targets_objective: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'hierarchy', source_type: 'product', target_type: 'objective' },
-  product_guided_by_vision: { forward_verb: 'guided_by', reverse_verb: 'guides', classification: 'hierarchy', source_type: 'product', target_type: 'vision' },
+  product_pursues_outcome: { forward_verb: 'pursues', reverse_verb: 'pursued_by', classification: 'hierarchy', source_type: 'product', target_type: 'outcome', cross_product_eligible: true },
+  product_targets_objective: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'hierarchy', source_type: 'product', target_type: 'objective', cross_product_eligible: true },
+  product_guided_by_vision: { forward_verb: 'guided_by', reverse_verb: 'guides', classification: 'hierarchy', source_type: 'product', target_type: 'vision', cross_product_eligible: true },
   // product→{mission,strategic_theme,strategic_pillar,initiative,capability,value_stream,assumption}
   // are semantic "how the product relates to the strategic cascade", not containment.
   // The containment chain is product → vision → mission → strategic_pillar → … so these
   // targets are reachable via the vision/mission hierarchy already.
-  product_fulfils_mission: { forward_verb: 'fulfils', reverse_verb: 'fulfilled_by', classification: 'semantic', source_type: 'product', target_type: 'mission' },
-  product_organises_around_strategic_theme: { forward_verb: 'organises_around', reverse_verb: 'organises', classification: 'semantic', source_type: 'product', target_type: 'strategic_theme' },
-  product_stands_on_strategic_pillar: { forward_verb: 'stands_on', reverse_verb: 'supports', classification: 'semantic', source_type: 'product', target_type: 'strategic_pillar' },
-  product_invests_in_initiative: { forward_verb: 'invests_in', reverse_verb: 'investment_of', classification: 'semantic', source_type: 'product', target_type: 'initiative' },
+  product_fulfils_mission: { forward_verb: 'fulfils', reverse_verb: 'fulfilled_by', classification: 'semantic', source_type: 'product', target_type: 'mission', cross_product_eligible: true },
+  product_organises_around_strategic_theme: { forward_verb: 'organises_around', reverse_verb: 'organises', classification: 'semantic', source_type: 'product', target_type: 'strategic_theme', cross_product_eligible: true },
+  product_stands_on_strategic_pillar: { forward_verb: 'stands_on', reverse_verb: 'supports', classification: 'semantic', source_type: 'product', target_type: 'strategic_pillar', cross_product_eligible: true },
+  product_invests_in_initiative: { forward_verb: 'invests_in', reverse_verb: 'investment_of', classification: 'semantic', source_type: 'product', target_type: 'initiative', cross_product_eligible: true },
   product_develops_capability: { forward_verb: 'develops', reverse_verb: 'developed_by', classification: 'semantic', source_type: 'product', target_type: 'capability' },
   product_delivers_through_value_stream: { forward_verb: 'delivers_through', reverse_verb: 'delivers_for', classification: 'semantic', source_type: 'product', target_type: 'value_stream' },
   product_holds_assumption: { forward_verb: 'holds', reverse_verb: 'held_by', classification: 'semantic', source_type: 'product', target_type: 'assumption' },
-  product_measures_with_metric: { forward_verb: 'measures_with', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'product', target_type: 'metric' },
-  outcome_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'outcome', target_type: 'metric' },
+  product_measures_with_metric: { forward_verb: 'measures_with', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'product', target_type: 'metric', cross_product_eligible: true },
+  outcome_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'outcome', target_type: 'metric', cross_product_eligible: true },
   // outcome_tracked_by_metric retired — near-synonym of
   // outcome_measured_by_metric (the kept canonical key). Captain's lean =
   // collapse. See UPG_EDGE_MIGRATIONS['0.9.9'].
-  objective_achieved_through_key_result: { forward_verb: 'achieved_through', reverse_verb: 'achieves', classification: 'hierarchy', source_type: 'objective', target_type: 'key_result' },
-  objective_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'objective', target_type: 'metric' },
-  key_result_quantified_by_metric: { forward_verb: 'quantified_by', reverse_verb: 'quantifies', classification: 'hierarchy', source_type: 'key_result', target_type: 'metric' },
+  objective_achieved_through_key_result: { forward_verb: 'achieved_through', reverse_verb: 'achieves', classification: 'hierarchy', source_type: 'objective', target_type: 'key_result', cross_product_eligible: true },
+  objective_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'objective', target_type: 'metric', cross_product_eligible: true },
+  key_result_quantified_by_metric: { forward_verb: 'quantified_by', reverse_verb: 'quantifies', classification: 'hierarchy', source_type: 'key_result', target_type: 'metric', cross_product_eligible: true },
   // key_result_tracked_by_metric retired — near-synonym of
   // key_result_quantified_by_metric (the kept canonical key). Captain's lean =
   // collapse. See UPG_EDGE_MIGRATIONS['0.9.9'].
@@ -382,7 +397,7 @@ export const UPG_EDGE_CATALOG = {
   strategic_pillar_enables_capability: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'capability' },
   strategic_pillar_delivers_value_stream: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'value_stream' },
   strategic_pillar_decided_via_decision: { forward_verb: 'decided_via', reverse_verb: 'decided_for', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'decision' },
-  strategic_theme_pursues_initiative: { forward_verb: 'pursues', reverse_verb: 'pursued_under', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'initiative' },
+  strategic_theme_pursues_initiative: { forward_verb: 'pursues', reverse_verb: 'pursued_under', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'initiative', cross_product_eligible: true },
   // v0.9.0: the soft bridge from the annual strategy focus area to the
   // roadmap grouping that realises it. Semantic, NOT hierarchy: strategic_theme and
   // roadmap_theme sit on different spines (strategy cascade vs roadmap cascade), so
@@ -410,11 +425,11 @@ export const UPG_EDGE_CATALOG = {
   // surfaces the upward-rollup read. Mirrors `strategic_pillar_organises_
   // strategic_theme` (pillar → theme), completing the strategic cascade:
   // strategic_pillar → strategic_theme → objective → key_result.
-  strategic_theme_delivers_outcome: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'causal', source_type: 'strategic_theme', target_type: 'outcome' },
-  strategic_theme_measured_by_key_result: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'causal', source_type: 'strategic_theme', target_type: 'key_result' },
-  strategic_theme_contains_objective: { forward_verb: 'contains', reverse_verb: 'rolls_up_to', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'objective' },
+  strategic_theme_delivers_outcome: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'causal', source_type: 'strategic_theme', target_type: 'outcome', cross_product_eligible: true },
+  strategic_theme_measured_by_key_result: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'causal', source_type: 'strategic_theme', target_type: 'key_result', cross_product_eligible: true },
+  strategic_theme_contains_objective: { forward_verb: 'contains', reverse_verb: 'rolls_up_to', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'objective', cross_product_eligible: true },
   initiative_assumes_assumption: { forward_verb: 'assumes', reverse_verb: 'assumed_by', classification: 'hierarchy', source_type: 'initiative', target_type: 'assumption' },
-  initiative_drives_outcome: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'initiative', target_type: 'outcome' },
+  initiative_drives_outcome: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'initiative', target_type: 'outcome', cross_product_eligible: true },
   capability_enables_value_stream: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'cross-domain', source_type: 'capability', target_type: 'value_stream' },
   // v0.5.2: three capability-anchored edges that complete the
   // Wardley-style value chain: need → capability → capability → feature.
@@ -556,7 +571,7 @@ export const UPG_EDGE_CATALOG = {
   // brand_identity. Dual-registered: also a cross-edge for the common case where the
   // brand is a registry singleton in another graph (the ratified pattern: brand is a
   // singleton expressed, not instance_of-d); this catalog entry is the within-graph case.
-  product_expresses_brand_identity: { forward_verb: 'expresses', reverse_verb: 'expressed_by', classification: 'semantic', source_type: 'product', target_type: 'brand_identity' },
+  product_expresses_brand_identity: { forward_verb: 'expresses', reverse_verb: 'expressed_by', classification: 'semantic', source_type: 'product', target_type: 'brand_identity', cross_product_eligible: true },
   design_system_encompasses_user_journey: { forward_verb: 'encompasses', reverse_verb: 'encompassed_in', classification: 'hierarchy', source_type: 'design_system', target_type: 'user_journey' },
   design_system_encompasses_user_flow: { forward_verb: 'encompasses', reverse_verb: 'encompassed_in', classification: 'hierarchy', source_type: 'design_system', target_type: 'user_flow' },
   design_system_informed_by_insight: { forward_verb: 'informed_by', reverse_verb: 'informs', classification: 'hierarchy', source_type: 'design_system', target_type: 'insight' },
@@ -568,12 +583,12 @@ export const UPG_EDGE_CATALOG = {
   design_component_specified_by_interaction_spec: { forward_verb: 'specified_by', reverse_verb: 'specifies', classification: 'hierarchy', source_type: 'design_component', target_type: 'interaction_spec' },
   design_component_composes_design_component: { forward_verb: 'composes', reverse_verb: 'composed_in', classification: 'hierarchy', source_type: 'design_component', target_type: 'design_component' },
   prototype_annotated_with_annotation: { forward_verb: 'annotated_with', reverse_verb: 'annotates', classification: 'hierarchy', source_type: 'prototype', target_type: 'annotation' },
-  screen_renders_design_component: { forward_verb: 'renders', reverse_verb: 'rendered_on', classification: 'hierarchy', source_type: 'screen', target_type: 'design_component' },
+  screen_renders_design_component: { forward_verb: 'renders', reverse_verb: 'rendered_on', classification: 'hierarchy', source_type: 'screen', target_type: 'design_component', cross_product_eligible: true },
   // Marketing surface to product (0.12.7/698). A marketing/landing screen
   // markets a product. Dual-registered: also a cross-edge (UPG_CROSS_EDGE_TYPES) for
   // the common case where the product lives in another graph; this catalog entry is
   // the within-graph degenerate case (a product's own landing page).
-  screen_markets_product: { forward_verb: 'markets', reverse_verb: 'marketed_by', classification: 'semantic', source_type: 'screen', target_type: 'product' },
+  screen_markets_product: { forward_verb: 'markets', reverse_verb: 'marketed_by', classification: 'semantic', source_type: 'screen', target_type: 'product', cross_product_eligible: true },
   // Connective cross-product references (0.13.1, Data's connective-layer brief).
   // Dual-registered (also in UPG_CROSS_EDGE_TYPES) for the common cross-graph case;
   // these catalog entries are the within-graph degenerate case.
@@ -589,10 +604,10 @@ export const UPG_EDGE_CATALOG = {
   //     system (the adoption semantic, mirroring product_implements_specification). Distinct
   //     from the hierarchy `product_systematised_in_design_system` (structural containment):
   //     same pattern as brand (branded_as = hierarchy, expresses = semantic).
-  screen_targets_competitor: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'semantic', source_type: 'screen', target_type: 'competitor' },
-  feature_surfaces_product: { forward_verb: 'surfaces', reverse_verb: 'surfaced_by', classification: 'semantic', source_type: 'feature', target_type: 'product' },
-  feature_uses_design_component: { forward_verb: 'uses', reverse_verb: 'used_by', classification: 'semantic', source_type: 'feature', target_type: 'design_component' },
-  product_implements_design_system: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'semantic', source_type: 'product', target_type: 'design_system' },
+  screen_targets_competitor: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'semantic', source_type: 'screen', target_type: 'competitor', cross_product_eligible: true },
+  feature_surfaces_product: { forward_verb: 'surfaces', reverse_verb: 'surfaced_by', classification: 'semantic', source_type: 'feature', target_type: 'product', cross_product_eligible: true },
+  feature_uses_design_component: { forward_verb: 'uses', reverse_verb: 'used_by', classification: 'semantic', source_type: 'feature', target_type: 'design_component', cross_product_eligible: true },
+  product_implements_design_system: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'semantic', source_type: 'product', target_type: 'design_system', cross_product_eligible: true },
   screen_navigates_to_screen: { forward_verb: 'navigates_to', reverse_verb: 'navigated_from', classification: 'hierarchy', source_type: 'screen', target_type: 'screen' },
   screen_surfaces_feature: { forward_verb: 'surfaces', reverse_verb: 'surfaced_on', classification: 'cross-domain', source_type: 'screen', target_type: 'feature' },
   screen_wireframed_as_wireframe: { forward_verb: 'wireframed_as', reverse_verb: 'wireframes', classification: 'hierarchy', source_type: 'screen', target_type: 'wireframe' },
@@ -1485,10 +1500,10 @@ export const UPG_EDGE_CATALOG = {
   solution_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'solution', target_type: 'metric' },
 
   // ── Cross-domain: Ownership ──────────────────────────────────────────────────
-  node_owned_by_team: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'team' },
+  node_owned_by_team: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'team', cross_product_eligible: true },
   node_owned_by_role: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'role' },
   node_owned_by_stakeholder: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'stakeholder' },
-  node_owned_by_department: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'department' },
+  node_owned_by_department: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'department', cross_product_eligible: true },
   node_owned_by_person: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'person' },
 
   // ── Cross-domain: Architecture (DDD) ─────────────────────────────────────────
@@ -2208,7 +2223,7 @@ export const UPG_EDGE_CATALOG = {
   // not the outcome it exists to move; the strategic spine was severed at its
   // anchor (0 outbound to outcome). An objective ADVANCES an outcome. Intra-
   // domain (both in strategy) and directional → causal.
-  objective_advances_outcome: { forward_verb: 'advances', reverse_verb: 'advanced_by', classification: 'causal', source_type: 'objective', target_type: 'outcome' },
+  objective_advances_outcome: { forward_verb: 'advances', reverse_verb: 'advanced_by', classification: 'causal', source_type: 'objective', target_type: 'outcome', cross_product_eligible: true },
 
   // ── F6: Priority 2 — scored / synthesis / verdict dead-end leaves (P-A) ─────
   // desired_outcome (Ulwick-scored: importance × satisfaction) had 0 outbound —
@@ -2294,7 +2309,7 @@ export const UPG_EDGE_CATALOG = {
   specification_governed_by_organization: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'semantic', source_type: 'specification', target_type: 'organization' },
   // Operating-lifecycle cross-edges (0.11.6): a product's journey phase realises a canonical
   // operating stage (the cross-surface join key); a stage is measured by a rollup metric (loop close).
-  journey_phase_realises_operating_stage: { forward_verb: 'realises', reverse_verb: 'realised_by', classification: 'cross-domain', source_type: 'journey_phase', target_type: 'operating_stage' },
+  journey_phase_realises_operating_stage: { forward_verb: 'realises', reverse_verb: 'realised_by', classification: 'cross-domain', source_type: 'journey_phase', target_type: 'operating_stage', cross_product_eligible: true },
   operating_stage_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'cross-domain', source_type: 'operating_stage', target_type: 'metric' },
 
 } satisfies Record<string, UPGEdgeDefinition>
@@ -2305,6 +2320,46 @@ export const UPG_EDGE_CATALOG = {
  *  in `shapes/edges.ts`) so the polymorphic list below can reference it
  *  without creating a cyclic import. */
 type _UPGEdgeTypeLocal = keyof typeof UPG_EDGE_CATALOG
+
+// ─── Cross-product-eligible edges (derived) ─────────────────────────────────
+
+/**
+ * The dual-registered cross-product edges, as a value-filtered union derived from
+ * the `cross_product_eligible` flag (0.17.3). Because `UPG_EDGE_CATALOG` is declared
+ * with `satisfies`, the literal `true` is preserved, so this conditional-type filter
+ * stays exact as edges are flagged — flag one catalog entry and it appears here with
+ * no other edit. This is the dual-registered half of `UPGCrossEdgeType`; the
+ * portfolio-native half (edges with no within-graph catalog entry) is the explicit
+ * `UPG_CROSS_ONLY_EDGE_TYPES` in `shapes/document.ts`.
+ */
+export type CrossProductEligibleEdgeType = {
+  [K in keyof typeof UPG_EDGE_CATALOG]: typeof UPG_EDGE_CATALOG[K] extends { cross_product_eligible: true } ? K : never
+}[keyof typeof UPG_EDGE_CATALOG]
+
+/**
+ * Runtime list of catalog edges flagged `cross_product_eligible`, derived from the
+ * catalog in declaration order. The runtime mirror of `CrossProductEligibleEdgeType`,
+ * composed with `UPG_CROSS_ONLY_EDGE_TYPES` to build `UPG_CROSS_EDGE_TYPES`.
+ */
+export const UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES: readonly CrossProductEligibleEdgeType[] =
+  (Object.keys(UPG_EDGE_CATALOG) as _UPGEdgeTypeLocal[]).filter(
+    (k): k is CrossProductEligibleEdgeType =>
+      (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[k].cross_product_eligible === true,
+  )
+
+/**
+ * True if this catalog edge is dual-registered as cross-product-eligible: a
+ * within-graph edge whose endpoints may also live in different graphs within a
+ * portfolio (0.17.3). Accepts any string for ergonomic call sites.
+ *
+ * @example
+ * isCrossProductEligible('strategic_theme_contains_objective') // → true
+ * isCrossProductEligible('feature_area_contains_feature')      // → false
+ */
+export function isCrossProductEligible(type: string): boolean {
+  const def = (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[type]
+  return def?.cross_product_eligible === true
+}
 
 /**
  * Canonical allow-list of edges that use the `'node'` wildcard endpoint.

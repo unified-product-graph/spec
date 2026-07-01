@@ -1,9 +1,9 @@
 /**
  * UPG canonical tree patterns: the named, server-owned shapes the `get_tree`
  * tool assembles (OST, OKR, user, product, validation, strategy, feature areas,
- * delivery, architecture, journey, design system, commercial) — one per
- * tree-shaped region (or, for `architecture`/`commercial`, the tree-shaped
- * containment subset of a DAG/multi-hub region).
+ * delivery, architecture, journey, design system, commercial, north star, org) —
+ * one per tree-shaped region (or, for `architecture`/`commercial`/`org`, the
+ * tree-shaped containment subset of a DAG/multi-hub region).
  *
  * A tree pattern is anchor + a TYPE-DRIVEN child map, NOT a list of edge names.
  * `get_tree` roots at `anchor_type` (falling back through `fallback_anchors` when
@@ -379,6 +379,30 @@ export const UPG_TREE_PATTERNS: readonly UPGTreePattern[] = [
       // metric -> metric recursion for free.
       metric: [opt('metric'), opt('outcome')],
     },
+    natural_depth: 3,
+  },
+  {
+    id: 'org',
+    label: 'Org chart',
+    description: 'Departments and the teams they contain, plus the sub-teams nested within those teams. The people-structure org chart, walked by containment (department_contains_team, then team_contains_team). Distinct from product_area, which is the product classification axis, not the org.',
+    region: 'operations_quality',
+    gap_policy: 'all-optional',
+    anchor_type: 'department',
+    // A graph with no department roots at the team (team -> sub-team), reported
+    // anchor_resolved_from: department. A sub-team also renders as a bare team
+    // root when its parent department is not modelled.
+    fallback_anchors: ['team'],
+    child_map: {
+      // department -> team (department_contains_team) is the first level; team ->
+      // team (team_contains_team, 0.17.2) is the second, so a sub-team nested one
+      // level deeper than department_contains_team renders under its parent team.
+      // Self-nesting: the assembler's `seen` set terminates a team -> team cycle
+      // for free (a team met again becomes a shared reference).
+      department: [opt('team')],
+      team: [opt('team')],
+    },
+    // Default to 3 tiers (department -> team -> sub-team); `depth` extends into
+    // deeper team_contains_team nesting.
     natural_depth: 3,
   },
 ] as const

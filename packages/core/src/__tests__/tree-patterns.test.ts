@@ -20,14 +20,14 @@ import {
 const SLUG = /^[a-z][a-z0-9_]*$/
 
 describe('UPG_TREE_PATTERNS integrity', () => {
-  it('has the 13 canonical patterns with unique slug ids', () => {
-    expect(UPG_TREE_PATTERNS.length).toBe(13)
+  it('has the 14 canonical patterns with unique slug ids', () => {
+    expect(UPG_TREE_PATTERNS.length).toBe(14)
     const ids = UPG_TREE_PATTERNS.map((p) => p.id)
     expect(new Set(ids).size).toBe(ids.length)
     for (const id of ids) expect(id, `bad id ${id}`).toMatch(SLUG)
     for (const want of [
       'ost', 'okr', 'user', 'product', 'validation', 'strategy', 'feature_areas',
-      'delivery', 'architecture', 'journey', 'design_system', 'commercial', 'north_star',
+      'delivery', 'architecture', 'journey', 'design_system', 'commercial', 'north_star', 'org',
     ]) {
       expect(ids, `missing pattern ${want}`).toContain(want)
     }
@@ -82,7 +82,7 @@ describe('UPG_TREE_PATTERNS integrity', () => {
       // The framework patterns each declare at least one gap-worthy required child.
       // north_star: a metric may be a leaf/sub-metric with no driven outcome; the
       // metric-rooted view is a browse, not a required-children contract.
-      const ALL_OPTIONAL = new Set(['feature_areas', 'delivery', 'architecture', 'journey', 'design_system', 'commercial', 'north_star'])
+      const ALL_OPTIONAL = new Set(['feature_areas', 'delivery', 'architecture', 'journey', 'design_system', 'commercial', 'north_star', 'org'])
       if (!ALL_OPTIONAL.has(p.id)) {
         expect(requiredCount, `${p.id} has no required child slot`).toBeGreaterThan(0)
       }

@@ -11,8 +11,8 @@
 
 import { describe, it, expect } from 'vitest'
 import { validateUPGDocument } from '../grammar/validate.js'
-import { UPG_CROSS_EDGE_TYPES } from '../shapes/document.js'
-import { UPG_EDGE_CATALOG, getEdgePropertySchema } from '../catalog/edge-catalog.js'
+import { UPG_CROSS_EDGE_TYPES, UPG_CROSS_ONLY_EDGE_TYPES } from '../shapes/document.js'
+import { UPG_EDGE_CATALOG, getEdgePropertySchema, UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES, isCrossProductEligible } from '../catalog/edge-catalog.js'
 import { validateEdgeProperties } from '../properties/edge-property-validation.js'
 
 const baseDoc = (edges: Array<Record<string, unknown>>) => ({
@@ -27,51 +27,58 @@ const baseDoc = (edges: Array<Record<string, unknown>>) => ({
   edges,
 })
 
+// The 0.17.2 baseline: the 41 cross-product edge types that existed before the
+// whitelist became DERIVED (0.17.3). The derived set MUST stay a superset of this
+// frozen snapshot — the change is purely additive, so no blessed type may drop.
+const BASELINE_41 = [
+  'shares_persona', 'shares_competitor', 'shares_metric', 'depends_on_product',
+  'cannibalises', 'succeeds', 'hosts', 'contributes_to', 'instance_of',
+  'area_serves_persona', 'area_targets_market_segment', 'rolls_up_to',
+  'product_implements_specification', 'product_exposes_specification',
+  'feature_conforms_to_specification', 'api_contract_speaks_specification',
+  'product_exposes_primitive', 'feature_manipulates_primitive',
+  'primitive_stored_as_data_type', 'feature_rivals_competitor_feature',
+  'competitor_signal_maps_to_feature', 'competitor_signal_surfaces_opportunity',
+  'competitor_classified_as_classification_value', 'node_classified_as_classification_value',
+  'journey_phase_realises_operating_stage', 'screen_markets_product',
+  'screen_renders_design_component', 'product_expresses_brand_identity', 'shares_job',
+  'shares_need', 'persona_delegates_to_persona', 'screen_targets_competitor',
+  'feature_surfaces_product', 'feature_uses_design_component', 'product_implements_design_system',
+  'node_owned_by_team', 'node_owned_by_department', 'strategic_theme_contains_objective',
+  'objective_achieved_through_key_result', 'key_result_quantified_by_metric',
+  'objective_measured_by_metric',
+] as const
+
 describe('cross-product edge validation', () => {
-  it('exposes the forty-one canonical cross-product edge types', () => {
-    expect(UPG_CROSS_EDGE_TYPES).toEqual([
-      'shares_persona',
-      'shares_competitor',
-      'shares_metric',
-      'depends_on_product',
-      'cannibalises',
-      'succeeds',
-      'hosts',
-      'contributes_to',
-      'instance_of',
-      'area_serves_persona',
-      'area_targets_market_segment',
-      'rolls_up_to',
-      'product_implements_specification',
-      'product_exposes_specification',
-      'feature_conforms_to_specification',
-      'api_contract_speaks_specification',
-      'product_exposes_primitive',
-      'feature_manipulates_primitive',
-      'primitive_stored_as_data_type',
-      'feature_rivals_competitor_feature',
-      'competitor_signal_maps_to_feature',
-      'competitor_signal_surfaces_opportunity',
-      'competitor_classified_as_classification_value',
-      'node_classified_as_classification_value',
-      'journey_phase_realises_operating_stage',
-      'screen_markets_product',
-      'screen_renders_design_component',
-      'product_expresses_brand_identity',
-      'shares_job',
-      'shares_need',
-      'persona_delegates_to_persona',
-      'screen_targets_competitor',
-      'feature_surfaces_product',
-      'feature_uses_design_component',
-      'product_implements_design_system',
-      'node_owned_by_team',
-      'node_owned_by_department',
-      'strategic_theme_contains_objective',
-      'objective_achieved_through_key_result',
-      'key_result_quantified_by_metric',
-      'objective_measured_by_metric',
-    ])
+  it('the derived whitelist is a superset of the frozen 0.17.2 baseline of 41 types', () => {
+    expect(BASELINE_41).toHaveLength(41)
+    const set = new Set<string>(UPG_CROSS_EDGE_TYPES)
+    for (const t of BASELINE_41) {
+      expect(set.has(t), `baseline cross-edge type ${t} dropped from the derived whitelist`).toBe(true)
+    }
+    // Additive by design: never fewer than the baseline.
+    expect(UPG_CROSS_EDGE_TYPES.length).toBeGreaterThanOrEqual(BASELINE_41.length)
+  })
+
+  it('composes cross-only + catalog-derived with no duplicates and disjoint tiers', () => {
+    const dupes = UPG_CROSS_EDGE_TYPES.filter((t, i, a) => a.indexOf(t) !== i)
+    expect(dupes, `duplicate cross-edge types: ${dupes.join(', ')}`).toEqual([])
+    // Disjoint tiers: a portfolio-native type has NO catalog entry; a derived type has one.
+    const catalogTypes = new Set(Object.keys(UPG_EDGE_CATALOG))
+    for (const t of UPG_CROSS_ONLY_EDGE_TYPES) {
+      expect(catalogTypes.has(t), `${t} is cross-only but has a catalog entry`).toBe(false)
+    }
+    for (const t of UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES) {
+      expect(catalogTypes.has(t), `${t} is catalog-derived but missing its catalog entry`).toBe(true)
+    }
+    expect(UPG_CROSS_EDGE_TYPES.length).toBe(
+      UPG_CROSS_ONLY_EDGE_TYPES.length + UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES.length,
+    )
+  })
+
+  it('the catalog-derived half is exactly the entries flagged cross_product_eligible', () => {
+    const flagged = Object.keys(UPG_EDGE_CATALOG).filter((k) => isCrossProductEligible(k)).sort()
+    expect([...UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES].sort()).toEqual(flagged)
   })
 
   it('rejects a cross-product edge type in product edges[]', () => {
