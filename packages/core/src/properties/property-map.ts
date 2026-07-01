@@ -41,7 +41,7 @@ import type { SupportTicketProperties, CustomerFeedbackProperties, ChurnReasonPr
 import type { LocaleProperties, TranslationKeyProperties, TranslationBundleProperties, LocaleConfigProperties, CulturalAdaptationProperties, RegionalPricingProperties } from './domains/localisation.js'
 import type { EducationProgramProperties, TutorialProperties, WalkthroughProperties, WebinarProperties, CertificationProperties, HelpVideoProperties, LearningPathProperties } from './domains/education.js'
 import type { PartnerProgramProperties, PartnerTierProperties, ApiEcosystemProperties, MarketplaceListingProperties, DeveloperPortalProperties, IntegrationPartnerProperties, PartnerRevenueShareProperties } from './domains/ecosystem.js'
-import type { ProductProperties, VisionProperties, MissionProperties, StrategicThemeProperties, InitiativeProperties, CapabilityProperties, ValueStreamProperties, StrategicPillarProperties, AssumptionProperties, DecisionProperties, ConstraintProperties } from './domains/strategy.js'
+import type { ProductProperties, VisionProperties, MissionProperties, StrategicThemeProperties, InitiativeProperties, CapabilityProperties, ValueStreamProperties, StrategicPillarProperties, AssumptionProperties, StrategicQuestionProperties, DecisionProperties, ConstraintProperties } from './domains/strategy.js'
 import type { SpecificationProperties, PrimitiveProperties, OperatingLifecycleProperties, OperatingStageProperties } from './domains/foundations.js'
 
 // ─── Re-export everything so consumers can import from one place ──────────────
@@ -83,7 +83,7 @@ export type { SupportTicketProperties, CustomerFeedbackProperties, ChurnReasonPr
 export type { LocaleProperties, TranslationKeyProperties, TranslationBundleProperties, LocaleConfigProperties, CulturalAdaptationProperties, RegionalPricingProperties }
 export type { EducationProgramProperties, TutorialProperties, WalkthroughProperties, WebinarProperties, CertificationProperties, HelpVideoProperties, LearningPathProperties }
 export type { PartnerProgramProperties, PartnerTierProperties, ApiEcosystemProperties, MarketplaceListingProperties, DeveloperPortalProperties, IntegrationPartnerProperties, PartnerRevenueShareProperties }
-export type { ProductProperties, VisionProperties, MissionProperties, StrategicThemeProperties, InitiativeProperties, CapabilityProperties, ValueStreamProperties, StrategicPillarProperties, AssumptionProperties, DecisionProperties, ConstraintProperties }
+export type { ProductProperties, VisionProperties, MissionProperties, StrategicThemeProperties, InitiativeProperties, CapabilityProperties, ValueStreamProperties, StrategicPillarProperties, AssumptionProperties, StrategicQuestionProperties, DecisionProperties, ConstraintProperties }
 
 // ─── UPGNode typed wrapper ────────────────────────────────────────────────────
 
@@ -126,6 +126,8 @@ export interface UPGPropertyMap {
   /** A named limitation or boundary (resource, technical, regulatory,
    *  temporal, or compliance) that bounds product creation. Edge-defined. */
   constraint: ConstraintProperties
+  /** An open coordination or ownership question a plan is exposed to (strategy sibling of research_question / design_question) */
+  strategic_question: StrategicQuestionProperties
 
   // ─── Users & Needs ──────────────────────────────────────────────────────────
   /** A user persona representing a segment of people the product serves */

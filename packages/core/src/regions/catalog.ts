@@ -82,6 +82,10 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "strategic_question",
+        role: "leaf",
+      },
+      {
         type: "constraint",
         role: "leaf",
       },
@@ -106,6 +110,8 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "strategic_pillar_decided_via_decision",
       "strategic_theme_pursues_initiative",
       "initiative_assumes_assumption",
+      "objective_raises_strategic_question",
+      "initiative_raises_strategic_question",
       "initiative_drives_outcome",
       "objective_achieved_through_key_result",
       "objective_measured_by_metric",

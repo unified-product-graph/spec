@@ -2668,6 +2668,15 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     time_horizon: { type: 'string', description: 'Standing / multi-year horizon, often open-ended (a pillar is durable). @example "3 years", "2026-2028", "ongoing"' },
     success_indicator: { type: 'string', description: 'How the business knows this durable pillar is on track. Narrative, not a metric edge. A strategic_theme deliberately has no success_indicator: it is measured through its child objectives, not on its own.' },
   },
+  // StrategicQuestionProperties: StrategicQuestion entity. An open coordination or
+  // ownership question a plan is exposed to (strategy sibling of research_question /
+  // design_question). `status` is the node lifecycle (open -> resolved).
+  strategic_question: {
+    question: { type: 'string', description: 'The question itself. Primary content.' },
+    context: { type: 'string', description: 'Context that surfaced the question: the reorg, the boundary, the unowned area.' },
+    resolution: { type: 'string', description: 'The answer, captured when the question moves to `resolved`.' },
+    priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Importance to resolve relative to other open questions.' },
+  },
   // StrategicThemeProperties: StrategicTheme entity. A time-bound thrust WITHIN a
   // strategic_pillar (distinct cascade level T3.3) — measured through its
   // child objectives, so it carries no success_indicator of its own.

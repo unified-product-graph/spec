@@ -23,7 +23,7 @@ export type UPGEntityType =
   | 'metric_quality_assessment'
   | 'vision' | 'mission' | 'strategic_theme' | 'initiative' | 'capability'
   | 'value_stream' | 'strategic_pillar' | 'assumption' | 'decision'
-  | 'constraint'
+  | 'constraint' | 'strategic_question'
   // Users & Needs
   | 'persona' | 'job' | 'need' | 'desired_outcome'
   | 'job_step' | 'switching_cost'

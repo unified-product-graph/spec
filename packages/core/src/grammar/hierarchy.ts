@@ -139,7 +139,9 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   experiment_run: ['learning', 'evidence', 'metric', 'experiment_run'],
 
   // ── OKR hierarchy ──────────────────────────────────────────────────────────
-  objective: ['key_result', 'metric'],
+  // strategic_question (0.17.4): an open coordination question raised under an
+  // objective (objective_raises_strategic_question, hierarchy).
+  objective: ['key_result', 'metric', 'strategic_question'],
   key_result: ['metric'],
 
   // ── Strategic cascade: vision → mission → strategic_pillar → strategic_theme →
@@ -165,7 +167,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // catalog (hierarchy, strategic_theme → objective, reverse_verb: rolls_up_to;
   // renamed from objective_rolls_up_to_strategic_theme in).
   strategic_theme: ['initiative', 'objective'],
-  initiative: ['assumption'],
+  initiative: ['assumption', 'strategic_question'],
   // v0.5.2: capability decomposes into sub-capabilities (Wardley
   // value-chain spine) and is realised by user-facing features. Pairs with
   // `capability_depends_on_capability` and `capability_implemented_by_feature`

@@ -240,7 +240,7 @@ const STRATEGY_GUIDE: UPGDomainUsageGuide = {
   // entries are later additions appended in chronological-introduction
   // order. Placement reflects the order in which they would naturally be
   // authored after the canonical strategy spine.
-  creation_sequence: ['product', 'vision', 'mission', 'outcome', 'objective', 'key_result', 'metric', 'metric_quality_assessment', 'strategic_theme', 'strategic_pillar', 'initiative', 'capability', 'value_stream', 'assumption', 'decision', 'constraint'],
+  creation_sequence: ['product', 'vision', 'mission', 'outcome', 'objective', 'key_result', 'metric', 'metric_quality_assessment', 'strategic_theme', 'strategic_pillar', 'initiative', 'capability', 'value_stream', 'assumption', 'strategic_question', 'decision', 'constraint'],
   patterns: [
     {
       name: 'Strategic Cascade',
@@ -259,12 +259,15 @@ const STRATEGY_GUIDE: UPGDomainUsageGuide = {
     { edge_type: 'outcome_reveals_opportunity', target_domain: 'discovery', when: 'Outcomes should connect to the opportunities that deliver them' },
     { edge_type: 'outcome_delivered_by_feature', target_domain: 'product_spec', when: 'Strategic outcomes should decompose into shipped features' },
     { edge_type: 'assumption_becomes_hypothesis', target_domain: 'validation', when: 'Risky assumptions should become testable hypotheses' },
+    { edge_type: 'objective_depends_on_dependency', target_domain: 'team_org', when: 'An objective that hinges on cross-team work should name the dependency it is exposed to' },
+    { edge_type: 'objective_defers_feature', target_domain: 'product_spec', when: 'Work an objective explicitly puts out of scope for now should point at the deferred feature with a deferred_to period, not silently vanish from the quarter' },
   ],
   anti_patterns: [
     { description: 'Outcomes without metrics. Measurement is the signal an outcome happened.' },
     { description: 'Objectives without key results: an objective without measurement is a wish' },
     { description: 'Too many strategic themes: focus beats breadth, aim for 2-4 active themes' },
     { description: 'Constraints without an origin: a qualitative guardrail lives on a constraint, so set constraint_origin to say where it comes from. internal marks a self-imposed principle or operating tenet the team commits to; external marks a limit, requirement, or ceiling imposed from outside (a regulation, a budget cap, a platform bound).' },
+    { description: 'Overloading assumption for open questions: an assumption is a premise the plan is built on and resolves by being tested (assumption_becomes_hypothesis). An unresolved coordination or ownership question the plan is exposed to (who owns a capability across teams, where a boundary falls after a reorg) is a strategic_question, raised under the objective or initiative it hangs off. Do not force one into the other.' },
   ],
 }
 

@@ -292,6 +292,7 @@ export const ENTITY_EMOJI: Record<string, string> = {
   stakeholder: "🧑‍💼",
   status_report: "📄",
   strategic_pillar: "🏛️",
+  strategic_question: "❔",
   strategic_theme: "🧵",
   subscription: "🔂",
   success_milestone: "🎉",

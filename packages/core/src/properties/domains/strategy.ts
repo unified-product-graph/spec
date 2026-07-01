@@ -5,7 +5,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { HealthStatus, ISODate, ISODateTime, MaturityLevel, RuleStrength, UPGAssessment } from '../primitives.js'
+import type { HealthStatus, ISODate, ISODateTime, MaturityLevel, Priority, RuleStrength, UPGAssessment } from '../primitives.js'
 import type { UPGProductStage } from '../../shapes/document.js'
 
 // ---------------------------------------------------------------------------
@@ -240,6 +240,36 @@ export interface AssumptionProperties {
   risk_level?: UPGAssessment
   /** Observation that would prove this assumption false */
   falsifiability?: string
+}
+
+/** StrategicQuestion entity.
+ *
+ * An open coordination or ownership question a plan is exposed to: who owns a
+ * capability across teams, where a boundary falls after a reorg. The
+ * strategy-domain sibling of `research_question` and `design_question`.
+ *
+ * Distinct from `assumption`. An assumption is a premise the plan is built on
+ * and resolves by being tested (`assumption_becomes_hypothesis`). A
+ * strategic_question is not a testable premise; it is an unresolved question
+ * the plan is exposed to and carries until someone answers it. `status` is the
+ * node lifecycle (open → resolved); the answer lands in `resolution`.
+ *
+ * @example
+ * const properties: StrategicQuestionProperties = {
+ *   question: 'Who owns Variants delivery across MCP, Content Agent, and SDK?',
+ *   context: 'Studio does not own the full platform deployment path.',
+ *   priority: 'high',
+ * }
+ */
+export interface StrategicQuestionProperties {
+  /** The question itself. Primary content. */
+  question?: string
+  /** Context that surfaced the question: the reorg, the boundary, the unowned area. */
+  context?: string
+  /** The answer, captured when the question moves to `resolved`. */
+  resolution?: string
+  /** Importance to resolve relative to other open questions. */
+  priority?: Priority
 }
 
 /** Decision record. Strategic, product, engineering, or design.

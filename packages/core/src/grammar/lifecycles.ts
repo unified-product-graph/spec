@@ -1066,6 +1066,26 @@ const ASSUMPTION_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
+/**
+ * strategic_question (Strategy domain)
+ *
+ * Open -> resolved. A strategic_question is an unresolved coordination or
+ * ownership question a plan is exposed to (who owns a capability across teams,
+ * where a boundary falls after a reorg). It is settled once the plan gains an
+ * answer, captured in the `resolution` property. Mirrors research_question's
+ * open->answered loop but stays in strategy-domain vocabulary. `resolved` can
+ * reopen if the answer unravels.
+ */
+const STRATEGIC_QUESTION_LIFECYCLE: UPGLifecycle = {
+  entity_type: 'strategic_question',
+  initial_phase: 'open',
+  terminal_phases: ['resolved'],
+  phases: [
+    { id: 'open', label: 'Open', description: 'The question has been raised but not yet answered. The plan is exposed to it.', transitions_to: ['resolved'] },
+    { id: 'resolved', label: 'Resolved', description: 'The question has been answered; the resolution is captured. The plan is no longer exposed to it. May reopen if the answer unravels.', transitions_to: ['open'] },
+  ],
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Strategy / OKR
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3476,6 +3496,7 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   INITIATIVE_LIFECYCLE,
   STRATEGIC_PILLAR_LIFECYCLE,
   ASSUMPTION_LIFECYCLE,
+  STRATEGIC_QUESTION_LIFECYCLE,
   FEATURE_AREA_LIFECYCLE,
   FEATURE_LIFECYCLE,
   EPIC_LIFECYCLE,

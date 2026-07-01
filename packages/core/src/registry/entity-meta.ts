@@ -103,6 +103,10 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'assumption', type_id: 'ent_014', maturity: 'stable', since: '0.1.0' },
   { name: 'decision', type_id: 'ent_015', maturity: 'stable', since: '0.1.0' },
   { name: 'constraint', type_id: 'ent_348', maturity: 'stable', since: '0.4.3' },
+  // (0.17.4) Strategy-domain sibling of research_question / design_question,
+  // completing the domain-question triad. An open coordination/ownership question
+  // a plan is exposed to (distinct from `assumption`, which the plan is built on).
+  { name: 'strategic_question', type_id: 'ent_357', maturity: 'proposed', since: '0.17.4' },
 
   // ── User ──
   { name: 'persona', type_id: 'ent_016', maturity: 'stable', since: '0.1.0' },

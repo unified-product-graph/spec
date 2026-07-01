@@ -571,6 +571,7 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   value_stream: { alt_labels: ['value chain', 'stream'] },
   strategic_pillar: { alt_labels: ['pillar', 'foundation'] },
   assumption: { alt_labels: ['belief', 'working assumption', 'premise'] },
+  strategic_question: { alt_labels: ['open question', 'coordination question', 'ownership question'] },
 
   // User layer
   job_step: { alt_labels: ['job stage', 'job phase', 'job map step'] },

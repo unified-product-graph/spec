@@ -43,7 +43,7 @@ export const UPG_DOMAINS = [
       'metric_quality_assessment',
       'vision', 'mission', 'strategic_theme', 'initiative', 'capability',
       'value_stream', 'strategic_pillar', 'assumption', 'decision',
-      'constraint',
+      'constraint', 'strategic_question',
     ],
   },
   {

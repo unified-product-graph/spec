@@ -74,6 +74,22 @@ export interface UPGEdgeDefinition {
    * live in `UPG_CROSS_ONLY_EDGE_TYPES` instead. Discoverable via `get_edge_type`.
    */
   cross_product_eligible?: true
+  /**
+   * Deliberate-only marker (0.17.4). When `true`, this edge carries a meaning that
+   * is a deliberate authoring act, NOT a relationship that can be inferred from a
+   * source's hierarchy or a generic parent nesting. `objective_defers_feature` /
+   * `objective_defers_capability` mean an objective explicitly PARKS a
+   * feature/capability out of scope, the opposite of the "this child contributes to
+   * this parent" link a nesting implies. Generic-inference chokepoints
+   * (`inferEdgeTypeWithTier` in auto-nest mode, the adapter parentage resolvers)
+   * skip these, declining to auto-materialise them so the write path falls back to a
+   * `node_informs_node` link or a decline+warn. Explicit resolution
+   * (`resolve_edge_for_pair`, `create_edge`) is UNAFFECTED — the edge is authored on
+   * request. Single source of truth: `UPG_DELIBERATE_ONLY_EDGE_TYPES` (the runtime
+   * list) and `isDeliberateOnlyEdge` derive from this flag, so flagging one edge here
+   * is the only edit needed. Discoverable via `get_edge_type`.
+   */
+  deliberate_only?: true
 }
 
 /**
@@ -113,6 +129,23 @@ export const CLASSIFICATION_EDGE_PROPERTY_SCHEMA: PropertySchema = {
     type: 'string',
     description:
       'Optional. A source URL, or a competitor_signal / evidence node id backing the classification. Mirrors feature_rivals_competitor_feature.evidence (free text or a node id).',
+  },
+}
+
+/**
+ * Property schema carried by the two defer edges (`objective_defers_feature`
+ * and `objective_defers_capability`, 0.17.4). A single freeform `deferred_to`
+ * key names the period the parked work is deferred to. Freeform on purpose,
+ * mirroring `strategic_theme.time_horizon` ("Q1 2026", "FY26"): a deferral
+ * target is a planning label, not a typed date, and can name a quarter, a
+ * release, or a coarser horizon. Optional (a defer edge is meaningful without
+ * a stated period); the writers reject any other key.
+ */
+export const DEFER_EDGE_PROPERTY_SCHEMA: PropertySchema = {
+  deferred_to: {
+    type: 'string',
+    description:
+      'Target period the parked work is deferred to. Freeform, mirroring strategic_theme.time_horizon. @example "Q4 2026", "FY27", "next release".',
   },
 }
 
@@ -2312,6 +2345,48 @@ export const UPG_EDGE_CATALOG = {
   journey_phase_realises_operating_stage: { forward_verb: 'realises', reverse_verb: 'realised_by', classification: 'cross-domain', source_type: 'journey_phase', target_type: 'operating_stage', cross_product_eligible: true },
   operating_stage_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'cross-domain', source_type: 'operating_stage', target_type: 'metric' },
 
+  // ── OKR planning coverage (0.17.4) ──────────────────────────────────────────
+  // Reconciling the strategy graph against a live planning doc surfaced texture
+  // the objective — the node every OKR doc organises itself around — could not
+  // reach: cross-team dependencies and deferred (out-of-scope) work.
+
+  // objective ↔ dependency. Every OKR in the source doc carries a dependency
+  // table ("which other team's work this depends on"). `dependency` (team_org)
+  // already carries dependency_type / criticality / target_date; it was
+  // reachable only from `team`. An objective DEPENDS ON a dependency; the
+  // dependency BLOCKS the objective (explicit mirror, not left implicit).
+  // Cross-domain, not hierarchy: a dependency is parented under its owning team,
+  // so an objective references it laterally rather than containing it. Both are
+  // cross_product_eligible — a Studio objective can depend on a dependency owned
+  // by another team's graph within the portfolio (0.17.3 locked predicate).
+  objective_depends_on_dependency: { forward_verb: 'depends_on', reverse_verb: 'dependency_of', classification: 'cross-domain', source_type: 'objective', target_type: 'dependency', cross_product_eligible: true },
+  dependency_blocks_objective: { forward_verb: 'blocks', reverse_verb: 'blocked_by', classification: 'cross-domain', source_type: 'dependency', target_type: 'objective', cross_product_eligible: true },
+
+  // objective / initiative → strategic_question. A planning doc's "Risks & Open
+  // Questions" section names unresolved coordination questions the plan is
+  // exposed to (who owns a capability across teams after a reorg). The
+  // strategy-domain sibling of research_question / design_question. The question
+  // is raised under (contained by) the objective or initiative that surfaces it,
+  // so hierarchy — mirroring initiative_assumes_assumption. Within-graph: the
+  // question node is authored alongside its objective, so NOT
+  // cross_product_eligible (the cross-team nature lives in the question text, not
+  // in a cross-graph edge).
+  objective_raises_strategic_question: { forward_verb: 'raises', reverse_verb: 'raised_by', classification: 'hierarchy', source_type: 'objective', target_type: 'strategic_question' },
+  initiative_raises_strategic_question: { forward_verb: 'raises', reverse_verb: 'raised_by', classification: 'hierarchy', source_type: 'initiative', target_type: 'strategic_question' },
+
+  // objective → feature / capability (the defer / out-of-scope edge). Every OKR
+  // in the source doc carries an explicit "Out of scope" list, load-bearing for
+  // keeping a quarter from silently expanding (localization deferred to Q4,
+  // another team's feature work parked). Modelled as an edge to the real feature
+  // or capability parked for later, not a scalar exclusion string, so the parked
+  // work stays queryable and connected. The `deferred_to` edge property carries
+  // the temporal target. feature is product_spec (cross-domain); capability is
+  // intra-strategy (semantic). Both cross_product_eligible: deferring another
+  // product's feature or capability, authored in a different graph within the
+  // portfolio, fits the 0.17.3 locked predicate.
+  objective_defers_feature: { forward_verb: 'defers', reverse_verb: 'deferred_by', classification: 'cross-domain', source_type: 'objective', target_type: 'feature', carries_properties: true, property_schema: DEFER_EDGE_PROPERTY_SCHEMA, cross_product_eligible: true, deliberate_only: true },
+  objective_defers_capability: { forward_verb: 'defers', reverse_verb: 'deferred_by', classification: 'semantic', source_type: 'objective', target_type: 'capability', carries_properties: true, property_schema: DEFER_EDGE_PROPERTY_SCHEMA, cross_product_eligible: true, deliberate_only: true },
+
 } satisfies Record<string, UPGEdgeDefinition>
 
 // ─── Polymorphic edge registry ──────────────────────────────────────
@@ -2359,6 +2434,45 @@ export const UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES: readonly CrossProductEligibl
 export function isCrossProductEligible(type: string): boolean {
   const def = (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[type]
   return def?.cross_product_eligible === true
+}
+
+// ─── Deliberate-only edges (derived) ────────────────────────────────────────
+
+/**
+ * The deliberate-only edges, as a value-filtered union derived from the
+ * `deliberate_only` flag (0.17.4). Same `satisfies`-preserved pattern as
+ * `CrossProductEligibleEdgeType`: flag one catalog entry and it appears here with
+ * no other edit. These edges must never be inferred from a generic parent nesting;
+ * generic-inference chokepoints skip them.
+ */
+export type DeliberateOnlyEdgeType = {
+  [K in keyof typeof UPG_EDGE_CATALOG]: typeof UPG_EDGE_CATALOG[K] extends { deliberate_only: true } ? K : never
+}[keyof typeof UPG_EDGE_CATALOG]
+
+/**
+ * Runtime list of catalog edges flagged `deliberate_only`, derived from the catalog
+ * in declaration order. The single source of truth the SDK's auto-nest inference and
+ * the import adapters' parentage resolvers consume, so a deliberate-only edge
+ * self-excludes from every generic-inference path with one flag.
+ */
+export const UPG_DELIBERATE_ONLY_EDGE_TYPES: readonly DeliberateOnlyEdgeType[] =
+  (Object.keys(UPG_EDGE_CATALOG) as _UPGEdgeTypeLocal[]).filter(
+    (k): k is DeliberateOnlyEdgeType =>
+      (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[k].deliberate_only === true,
+  )
+
+/**
+ * True if this catalog edge is deliberate-only: it must be authored explicitly and
+ * is never inferred from a generic parent nesting (0.17.4). Accepts any string for
+ * ergonomic call sites.
+ *
+ * @example
+ * isDeliberateOnlyEdge('objective_defers_feature')   // → true
+ * isDeliberateOnlyEdge('feature_area_contains_feature') // → false
+ */
+export function isDeliberateOnlyEdge(type: string): boolean {
+  const def = (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[type]
+  return def?.deliberate_only === true
 }
 
 /**
