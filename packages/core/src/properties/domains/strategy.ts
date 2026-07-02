@@ -57,7 +57,7 @@ export interface VisionProperties {
    */
   timeframe?: string
   /**
-   * The north-star statement — a prose slogan of the future the product steers
+   * The north-star statement: a prose slogan of the future the product steers
    * toward. Legitimately free-text (graph-vs-prose). To link the *metric* a
    * vision optimises for, use the `vision_anchored_by_metric` edge (P14 0.12.0).
    */
@@ -97,11 +97,11 @@ export interface StrategicThemeProperties {
   /** Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
   /**
-   * Planning horizon.
+   * Bounded period this theme is active (a theme is time-bound, within a pillar).
    * @example "Q1 2026", "FY26"
    */
   time_horizon?: string
-  /** Short narrative of what the theme is about */
+  /** Short narrative of this time-bound thrust within its pillar */
   description?: string
   /** What the theme explicitly includes or excludes */
   scope?: string
@@ -209,16 +209,16 @@ export interface ValueStreamProperties {
 export interface StrategicPillarProperties {
   /** Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
   owner?: string
-  /** Narrative of the pillar's intent */
+  /** Narrative of the pillar's intent as a durable strategic area */
   description?: string
-  /** What this pillar covers */
+  /** The standing organisational area this pillar owns */
   scope?: string
   /**
-   * Planning horizon. Typically multi-year.
-   * @example "3 years", "2026-2028"
+   * Standing / multi-year horizon, often open-ended (a pillar is durable).
+   * @example "3 years", "2026-2028", "ongoing"
    */
   time_horizon?: string
-  /** How the business knows the pillar is on track. Narrative, not a metric edge. */
+  /** How the business knows this durable pillar is on track. Narrative, not a metric edge. A strategic_theme deliberately has no success_indicator: it is measured through its child objectives, not on its own. */
   success_indicator?: string
 }
 

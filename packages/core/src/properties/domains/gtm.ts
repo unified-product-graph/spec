@@ -215,6 +215,8 @@ export interface RebuttalProperties {
   statement?: string
   /** How convincing this rebuttal is (1-5) */
   strength?: UPGAssessment
+  /** References to supporting evidence (e.g. interview or observation ids). */
+  evidence_refs?: string[]
 }
 
 /** ProofPoint entity.

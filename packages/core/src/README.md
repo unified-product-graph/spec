@@ -23,7 +23,7 @@ Each layer imports only from layers above it.
 
 ## Entry points
 
-1. **`catalog/entity-catalog.ts`**: the active entity type union across 36 domains.
+1. **`catalog/entity-catalog.ts`**: the active entity type union across 37 domains.
 2. **`catalog/edge-catalog.ts`**: the canonical edge source (`as const satisfies`).
 3. **`shapes/base-node.ts`**: the interface every node shares.
 4. **`shapes/edges.ts`**: `UPGEdgeType` derived via `keyof typeof`.

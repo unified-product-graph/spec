@@ -1,6 +1,6 @@
 # `@unified-product-graph/core/regions`: Super-Domain Regions (topology only)
 
-Ten super-domain rollups over the 36 atomic domains in `../registry/domains.ts`. Each region captures **pure graph topology**:
+Eleven super-domain rollups over the 37 atomic domains in `../registry/domains.ts`. Each region captures **pure graph topology**:
 
 - Entity roster with structural role (anchor, root, hub, container, leaf)
 - Intra-domain edges (by `UPG_EDGE_CATALOG` key)

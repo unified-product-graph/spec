@@ -302,6 +302,7 @@ export const PROPERTY_SCALE_MAP: Record<string, string> = {
   severity:         'severity_5',    // users, engineering, ai, gtm, customer-success, security, accessibility
   severity_of_finding: 'severity_5', // validation/experiment_run
   bug_severity:     'severity_5',    // product-spec/bug ( Option C collapse)
+  magnitude:        'severity_5',    // user/switching_cost barrier size (0.17.7; restores the documented intent that a missing entry had silently overridden to scale_5)
   risk_level:       'severity_5',    // compliance/risk ( Option B)
   scarcity_risk:    'severity_5',    // market-intelligence ( Option B)
 
