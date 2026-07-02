@@ -270,7 +270,13 @@ export const UPG_EDGE_CATALOG = {
   research_study_collects_survey_response: { forward_verb: 'collects', reverse_verb: 'collected_in', classification: 'hierarchy', source_type: 'research_study', target_type: 'survey_response' },
   observation_evidenced_by_quote: { forward_verb: 'evidenced_by', reverse_verb: 'evidences', classification: 'hierarchy', source_type: 'observation', target_type: 'quote' },
   affinity_cluster_synthesises_insight: { forward_verb: 'synthesises', reverse_verb: 'synthesised_from', classification: 'hierarchy', source_type: 'affinity_cluster', target_type: 'insight' },
-  insight_informs_opportunity: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'insight', target_type: 'opportunity' },
+  // deliberate_only (0.17.6): "this insight informs that opportunity" is a
+  // PM-judgment link — which of many opportunities a finding actually feeds is
+  // authored, never inferred from a source's hierarchy. Auto-nest / adapter
+  // parentage resolvers decline to materialise it (fall through to a
+  // node_informs_node link or a decline+warn); explicit create_edge /
+  // resolve_edge_for_pair still return it. Fixes the latent auto-emission.
+  insight_informs_opportunity: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'insight', target_type: 'opportunity', deliberate_only: true },
 
   // 1.5 Market Intelligence Domain
   // product → competitive_analysis closes the parallel gap to

@@ -31,7 +31,7 @@ export * from './format/index.js'
  * it stamps the `upg_version` field of every `.upg` file written by the SDK.
  * The `check:version-lockstep` gate enforces this at release time.
  */
-export const UPG_VERSION = '0.17.5' as const
+export const UPG_VERSION = '0.17.6' as const
 
 /**
  * The `.upg` JSON document format version. Written to the `upg_version` field.
@@ -246,15 +246,15 @@ export function resolveContainmentEdge(
 //     `getTypes()` over `UPG_DOMAINS` (every type is assigned to exactly one
 //     domain; deprecated aliases are not). This is what `get_spec_version`,
 //     `list_type_labels`, and any "how many types can I create?" surface should
-//     report. Currently 312.
+//     report. Currently 319.
 //
 //   UPG_META_COUNT — EVERY entry in the meta registry, INCLUDING deprecated
 //     aliases (kpi, jtbd, pain_point, user_need, research_insight,
 //     hypothesis_claim, hypothesis_evidence, …). This is what `list_entity_types`
 //     reports because it must surface deprecated types so migrations can
-//     resolve them. Currently 349.
+//     resolve them. Currently 357.
 //
-// The numbers are correct as-is; the difference (349 − 312) is exactly the
+// The numbers are correct as-is; the difference (357 − 319) is exactly the
 // deprecated-alias set. Do NOT "reconcile" them to a single number — they
 // answer two different questions.
 

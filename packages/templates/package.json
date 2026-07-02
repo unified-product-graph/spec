@@ -1,6 +1,6 @@
 {
   "name": "@unified-product-graph/templates",
-  "version": "0.17.5",
+  "version": "0.17.6",
   "description": "Entity templates for the Unified Product Graph: start from proven patterns, not blank pages",
   "license": "MIT",
   "author": "The Product Creator <hello@theproductcreator.com>",

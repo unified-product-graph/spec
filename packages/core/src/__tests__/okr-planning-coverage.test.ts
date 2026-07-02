@@ -239,9 +239,17 @@ describe('deliberate_only flag + derived set', () => {
     expect(UPG_EDGE_CATALOG.objective_defers_capability.deliberate_only).toBe(true)
   })
 
+  // 0.17.6: insight → opportunity is a PM-judgment link — which opportunity a
+  // finding actually feeds is authored, never inferred from a source's hierarchy.
+  // Flagging it stops the latent auto-emission on the generic-inference path.
+  it('insight_informs_opportunity carries deliberate_only: true (0.17.6)', () => {
+    expect(UPG_EDGE_CATALOG.insight_informs_opportunity.deliberate_only).toBe(true)
+  })
+
   it('isDeliberateOnlyEdge reflects the flag', () => {
     expect(isDeliberateOnlyEdge('objective_defers_feature')).toBe(true)
     expect(isDeliberateOnlyEdge('objective_defers_capability')).toBe(true)
+    expect(isDeliberateOnlyEdge('insight_informs_opportunity')).toBe(true)
     // an ordinary edge is not deliberate-only
     expect(isDeliberateOnlyEdge('feature_area_contains_feature')).toBe(false)
     expect(isDeliberateOnlyEdge('__not_a_real_edge__')).toBe(false)
@@ -253,6 +261,10 @@ describe('deliberate_only flag + derived set', () => {
       .map(([k]) => k)
       .sort()
     expect([...UPG_DELIBERATE_ONLY_EDGE_TYPES].sort()).toEqual(flagged)
-    expect([...UPG_DELIBERATE_ONLY_EDGE_TYPES].sort()).toEqual(['objective_defers_capability', 'objective_defers_feature'])
+    expect([...UPG_DELIBERATE_ONLY_EDGE_TYPES].sort()).toEqual([
+      'insight_informs_opportunity',
+      'objective_defers_capability',
+      'objective_defers_feature',
+    ])
   })
 })
