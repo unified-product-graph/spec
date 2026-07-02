@@ -47,6 +47,12 @@ export interface ParticipantProperties {
   recruit_source?: string
   /** Current consent status for data usage */
   consent_status?: 'pending' | 'given' | 'withdrawn'
+  /**
+   * Stable deep-link to the exact moment this participant appears in the
+   * originating recording or transcript. A per-moment locator, not a
+   * study-level link. Rot-prone external pointer; treat as `volatile`.
+   */
+  source_url?: string
 }
 
 /** Discrete observation captured during research. Absorbed from the deprecated Highlight entity.
@@ -81,6 +87,13 @@ export interface ObservationProperties {
    * four values. More precise than `highlight_tag` for aggregation.
    */
   sentiment?: SignalSentiment
+  /**
+   * Stable deep-link to the exact moment this observation was captured in the
+   * originating recording or transcript. A per-moment locator, not a
+   * study-level link. Distinct from `session_ref`, which holds an opaque
+   * session ID for AI inference. Rot-prone external pointer; treat as `volatile`.
+   */
+  source_url?: string
 }
 
 /** Verbatim quote from a participant.
@@ -97,6 +110,12 @@ export interface QuoteProperties {
   text: string
   /** When said (ISO timestamp or session offset) */
   timestamp?: string
+  /**
+   * Stable deep-link to the exact moment this quote was spoken in the
+   * originating recording or transcript. A per-moment locator, not a
+   * study-level link. Rot-prone external pointer; treat as `volatile`.
+   */
+  source_url?: string
 }
 
 /** Unified insight, synthesised from evidence and observations.

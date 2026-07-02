@@ -2009,6 +2009,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     is_highlighted: { type: 'boolean', description: 'Flagged as a highlight. Absorbed from the deprecated Highlight entity.' },
     highlight_tag: { type: 'string', description: 'Free-form highlight type tag. @example "pain", "delight", "behaviour", "moment of clarity"' },
     sentiment: { type: 'string', enum: ['positive', 'neutral', 'negative', 'mixed'], description: 'Structured sentiment. Tools like Dovetail and EnjoyHQ converge on these four values. More precise than `highlight_tag` for aggregation.' },
+    source_url: { type: 'string', description: 'Stable deep-link to the exact moment this observation was captured in the originating recording or transcript. A per-moment locator, not a study-level link. Distinct from `session_ref`, which holds an opaque session ID.', modifier: 'volatile' },
   },
   // OnCallRotationProperties: On-call rotation.
   on_call_rotation: {
@@ -2051,6 +2052,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     alias: { type: 'string', description: 'Anonymous alias for privacy (e.g. "P01")' },
     recruit_source: { type: 'string', description: 'How the participant was recruited' },
     consent_status: { type: 'string', enum: ['pending', 'given', 'withdrawn'], description: 'Current consent status for data usage' },
+    source_url: { type: 'string', description: 'Stable deep-link to the exact moment this participant appears in the originating recording or transcript. A per-moment locator, not a study-level link.', modifier: 'volatile' },
   },
   // PartnerProgramProperties: Partner program.
   partner_program: {
@@ -2272,6 +2274,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   quote: {
     text: { type: 'string', description: 'Quoted text' },
     timestamp: { type: 'string', description: 'When said (ISO timestamp or session offset)' },
+    source_url: { type: 'string', description: 'Stable deep-link to the exact moment this quote was spoken in the originating recording or transcript. A per-moment locator, not a study-level link.', modifier: 'volatile' },
   },
   // QuoteDocumentProperties: Quote document.
   quote_document: {

@@ -1220,6 +1220,11 @@ export const UPG_EDGE_CATALOG = {
   document_describes_positioning: { forward_verb: 'describes', reverse_verb: 'described_by', classification: 'semantic', source_type: 'document', target_type: 'positioning' },
   document_describes_decision: { forward_verb: 'describes', reverse_verb: 'described_by', classification: 'semantic', source_type: 'document', target_type: 'decision' },
   document_contains_insight: { forward_verb: 'contains', reverse_verb: 'contained_in', classification: 'semantic', source_type: 'document', target_type: 'insight' },
+  // Research-provenance containment (0.17.5): a synthesis document is walkable
+  // to the evidence it sourced. Within-graph containment (the document and the
+  // evidence co-reside), so NOT cross_product_eligible.
+  document_contains_quote: { forward_verb: 'contains', reverse_verb: 'contained_in', classification: 'semantic', source_type: 'document', target_type: 'quote' },
+  document_contains_observation: { forward_verb: 'contains', reverse_verb: 'contained_in', classification: 'semantic', source_type: 'document', target_type: 'observation' },
 
   // 5.3 Customer Education & Training Domain
   product_educates_via_education_program: { forward_verb: 'educates_via', reverse_verb: 'educates', classification: 'hierarchy', source_type: 'product', target_type: 'education_program' },

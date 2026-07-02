@@ -119,6 +119,12 @@ const USER_RESEARCH_GUIDE: UPGDomainUsageGuide = {
     { description: 'Insights without evidence: every insight must trace back to observations and quotes' },
     { description: 'Orphan quotes: quotes should belong to observations, not float independently' },
     { description: 'Research studies without questions: always define what you want to learn before starting' },
+    {
+      name: 'Study conflation',
+      affected_entity: 'research_study',
+      description: 'Do not merge multiple research rounds with different stated goals into one `research_study` (or one participant pool) just because they were synthesized into the same downstream document. If two rounds have different research questions, they are different `research_study` nodes, even if an analyst wrote them up together.',
+      remediation: 'Verify against the *original* recording or session metadata, not the synthesis doc\'s grouping.',
+    },
   ],
 }
 
