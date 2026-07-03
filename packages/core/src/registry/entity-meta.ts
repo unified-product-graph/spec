@@ -72,34 +72,54 @@ export interface EntityTypeMeta {
    * not embedded columns.
    */
   default_frameworks?: string[]
+  /**
+   * Portfolio-shared tier (0.18.0). True for the ~26 canonical / above-product /
+   * registry-hostable entity types a *second* product graph can legitimately point
+   * at — the strategy spine + measurement (outcome, objective, key_result, metric,
+   * vision, mission, strategic_theme, strategic_pillar, initiative, capability,
+   * dependency), competitive-intel canon (competitor, competitor_feature,
+   * competitor_signal, classification_value, classification_axis, market_segment),
+   * design/brand foundation atoms (design_system, design_component, brand_identity),
+   * cross-team org (team, department), and the registry / foundations (specification,
+   * primitive, operating_lifecycle, operating_stage).
+   *
+   * This is a NEW axis, orthogonal to region/domain/classification — none of those
+   * encode "shareable across product graphs". It is the derived guardrail for
+   * cross-product edge eligibility: an edge is *cross-capable* iff ≥1 endpoint type
+   * is `portfolio_shared` (see `isCrossCapable` / `crossProductScope`). Product-local
+   * types (persona, job, need, assumption, decision, role, stakeholder, `product`
+   * itself as a graph root) are deliberately NOT shared, so their internal
+   * decomposition edges stay resident (hard-rejected cross-product).
+   */
+  portfolio_shared?: boolean
 }
 
 // ─── Entity type registry ──────────────────────────────────────────────────────
 
 export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   // Foundations (0.9.12): shared specifications + the primitives they define.
-  { name: 'specification', type_id: 'ent_352', maturity: 'proposed', since: '0.9.12' },
-  { name: 'primitive', type_id: 'ent_353', maturity: 'proposed', since: '0.9.12' },
-  { name: 'operating_lifecycle', type_id: 'ent_355', maturity: 'proposed', since: '0.11.6' },
-  { name: 'operating_stage', type_id: 'ent_356', maturity: 'proposed', since: '0.11.6' },
+  { name: 'specification', type_id: 'ent_352', maturity: 'proposed', since: '0.9.12', portfolio_shared: true },
+  { name: 'primitive', type_id: 'ent_353', maturity: 'proposed', since: '0.9.12', portfolio_shared: true },
+  { name: 'operating_lifecycle', type_id: 'ent_355', maturity: 'proposed', since: '0.11.6', portfolio_shared: true },
+  { name: 'operating_stage', type_id: 'ent_356', maturity: 'proposed', since: '0.11.6', portfolio_shared: true },
 
   // ── Strategic ──
   { name: 'product', type_id: 'ent_001', maturity: 'stable', since: '0.1.0' },
-  { name: 'outcome', type_id: 'ent_002', maturity: 'stable', since: '0.1.0' },
+  { name: 'outcome', type_id: 'ent_002', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'kpi', type_id: 'ent_003', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'metric' },
-  { name: 'objective', type_id: 'ent_004', maturity: 'stable', since: '0.1.0' },
-  { name: 'key_result', type_id: 'ent_005', maturity: 'stable', since: '0.1.0' },
-  { name: 'metric', type_id: 'ent_006', maturity: 'stable', since: '0.1.0' },
+  { name: 'objective', type_id: 'ent_004', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'key_result', type_id: 'ent_005', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'metric', type_id: 'ent_006', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   // F7: graduated proposed → stable at v0.9.x — proposed since 0.2.2,
   // the metric-quality assessment artefact is settled with no open restructure.
   { name: 'metric_quality_assessment', type_id: 'ent_339', maturity: 'stable', since: '0.2.2' },
-  { name: 'vision', type_id: 'ent_007', maturity: 'stable', since: '0.1.0' },
-  { name: 'mission', type_id: 'ent_008', maturity: 'stable', since: '0.1.0' },
-  { name: 'strategic_theme', type_id: 'ent_009', maturity: 'stable', since: '0.1.0' },
-  { name: 'initiative', type_id: 'ent_010', maturity: 'stable', since: '0.1.0' },
-  { name: 'capability', type_id: 'ent_011', maturity: 'stable', since: '0.1.0' },
+  { name: 'vision', type_id: 'ent_007', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'mission', type_id: 'ent_008', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'strategic_theme', type_id: 'ent_009', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'initiative', type_id: 'ent_010', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'capability', type_id: 'ent_011', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'value_stream', type_id: 'ent_012', maturity: 'stable', since: '0.1.0' },
-  { name: 'strategic_pillar', type_id: 'ent_013', maturity: 'stable', since: '0.1.0' },
+  { name: 'strategic_pillar', type_id: 'ent_013', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'assumption', type_id: 'ent_014', maturity: 'stable', since: '0.1.0' },
   { name: 'decision', type_id: 'ent_015', maturity: 'stable', since: '0.1.0' },
   { name: 'constraint', type_id: 'ent_348', maturity: 'stable', since: '0.4.3' },
@@ -159,18 +179,18 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'research_plan', type_id: 'ent_032', maturity: 'stable', since: '0.1.0' },
 
   // ── Market Intelligence ──
-  { name: 'competitor', type_id: 'ent_033', maturity: 'stable', since: '0.1.0' },
-  { name: 'competitor_feature', type_id: 'ent_034', maturity: 'stable', since: '0.1.0' },
-  { name: 'competitor_signal', type_id: 'ent_354', maturity: 'proposed', since: '0.10.0' },
+  { name: 'competitor', type_id: 'ent_033', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'competitor_feature', type_id: 'ent_034', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'competitor_signal', type_id: 'ent_354', maturity: 'proposed', since: '0.10.0', portfolio_shared: true },
   { name: 'market_trend', type_id: 'ent_035', maturity: 'stable', since: '0.1.0' },
-  { name: 'market_segment', type_id: 'ent_036', maturity: 'stable', since: '0.1.0' },
+  { name: 'market_segment', type_id: 'ent_036', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'competitive_analysis', type_id: 'ent_037', maturity: 'stable', since: '0.1.0' },
   // Classification taxonomy hosted by competitive_analysis.
   // F7: graduated proposed → stable at v0.9.x — two minor releases
   // stable since 0.4.0, the taxonomy-axis/value pair backs the competitive-
   // analysis classification spine with no open rename/restructure ticket.
-  { name: 'classification_axis', type_id: 'ent_346', maturity: 'stable', since: '0.4.0' },
-  { name: 'classification_value', type_id: 'ent_347', maturity: 'stable', since: '0.4.0' },
+  { name: 'classification_axis', type_id: 'ent_346', maturity: 'stable', since: '0.4.0', portfolio_shared: true },
+  { name: 'classification_value', type_id: 'ent_347', maturity: 'stable', since: '0.4.0', portfolio_shared: true },
 
   // ── UX Research ──
   { name: 'research_study', type_id: 'ent_038', maturity: 'stable', since: '0.1.0' },
@@ -194,9 +214,9 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'how_might_we', type_id: 'ent_333', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.2.0', replacement: 'design_question' },
   { name: 'design_concept', type_id: 'ent_054', maturity: 'stable', since: '0.1.0' },
   { name: 'prototype', type_id: 'ent_055', maturity: 'stable', since: '0.1.0' },
-  { name: 'design_component', type_id: 'ent_056', maturity: 'stable', since: '0.1.0' },
+  { name: 'design_component', type_id: 'ent_056', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'design_token', type_id: 'ent_057', maturity: 'stable', since: '0.1.0' },
-  { name: 'brand_identity', type_id: 'ent_058', maturity: 'stable', since: '0.1.0' },
+  { name: 'brand_identity', type_id: 'ent_058', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'brand_colour', type_id: 'ent_059', maturity: 'stable', since: '0.1.0' },
   { name: 'brand_typography', type_id: 'ent_060', maturity: 'stable', since: '0.1.0' },
   { name: 'brand_voice', type_id: 'ent_061', maturity: 'stable', since: '0.1.0' },
@@ -205,7 +225,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'design_guideline', type_id: 'ent_064', maturity: 'stable', since: '0.1.0' },
   { name: 'annotation', type_id: 'ent_065', maturity: 'stable', since: '0.1.0' },
   { name: 'interaction_spec', type_id: 'ent_066', maturity: 'stable', since: '0.1.0' },
-  { name: 'design_system', type_id: 'ent_067', maturity: 'stable', since: '0.1.0' },
+  { name: 'design_system', type_id: 'ent_067', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'user_flow', type_id: 'ent_068', maturity: 'stable', since: '0.1.0' },
   { name: 'screen', type_id: 'ent_069', maturity: 'stable', since: '0.1.0' },
   { name: 'screen_state', type_id: 'ent_070', maturity: 'stable', since: '0.1.0' },
@@ -330,15 +350,15 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'proof_point', type_id: 'ent_141', maturity: 'stable', since: '0.1.0' },
 
   // ── Team & Organisation ──
-  { name: 'team', type_id: 'ent_142', maturity: 'stable', since: '0.1.0' },
+  { name: 'team', type_id: 'ent_142', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'role', type_id: 'ent_143', maturity: 'stable', since: '0.1.0' },
   { name: 'stakeholder', type_id: 'ent_144', maturity: 'stable', since: '0.1.0' },
   { name: 'person', type_id: 'ent_349', maturity: 'stable', since: '0.5.0' },
   { name: 'product_decision', type_id: 'ent_145', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.2.0', replacement: 'decision' },
   { name: 'team_okr', type_id: 'ent_146', maturity: 'stable', since: '0.1.0' },
   { name: 'retrospective', type_id: 'ent_147', maturity: 'stable', since: '0.1.0' },
-  { name: 'dependency', type_id: 'ent_148', maturity: 'stable', since: '0.1.0' },
-  { name: 'department', type_id: 'ent_149', maturity: 'stable', since: '0.1.0' },
+  { name: 'dependency', type_id: 'ent_148', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
+  { name: 'department', type_id: 'ent_149', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'skill', type_id: 'ent_150', maturity: 'stable', since: '0.1.0' },
   { name: 'ceremony', type_id: 'ent_151', maturity: 'stable', since: '0.1.0' },
   { name: 'capacity_plan', type_id: 'ent_152', maturity: 'stable', since: '0.1.0' },
@@ -595,6 +615,31 @@ export const UPG_ACTIVE_TYPES: readonly string[] = UPG_ENTITY_META
 export const UPG_DEPRECATED_TYPES: readonly string[] = UPG_ENTITY_META
   .filter((m) => m.maturity === 'deprecated')
   .map((m) => m.name)
+
+/**
+ * The portfolio-shared entity types (0.18.0), derived from the `portfolio_shared`
+ * flag on the records above — single source of truth, same derive-from-records
+ * pattern as `UPG_ACTIVE_TYPES`. The 26 canonical / above-product types a second
+ * product graph can reference. Snapshot-guarded (`cross-product-edges.test.ts`) so
+ * adding or removing a shared tag is a deliberate, reviewed change.
+ */
+export const UPG_PORTFOLIO_SHARED_TYPES: readonly string[] = UPG_ENTITY_META
+  .filter((m) => m.portfolio_shared === true)
+  .map((m) => m.name)
+
+/**
+ * Check if an entity type is portfolio-shared (0.18.0): a canonical / above-product
+ * type a second product graph can point at. The necessary condition for a
+ * cross-product edge — see `isCrossCapable` / `crossProductScope`.
+ *
+ * @example
+ * isPortfolioSharedType('metric')   // → true
+ * isPortfolioSharedType('persona')  // → false (echoable via shares_persona, not resident)
+ * isPortfolioSharedType('product')  // → false (a graph root, not a shared reference target)
+ */
+export function isPortfolioSharedType(name: string): boolean {
+  return UPG_ENTITY_META_BY_NAME.get(name)?.portfolio_shared === true
+}
 
 /**
  * Check if a type name is deprecated.

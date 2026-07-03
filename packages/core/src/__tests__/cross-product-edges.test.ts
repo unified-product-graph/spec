@@ -12,8 +12,10 @@
 import { describe, it, expect } from 'vitest'
 import { validateUPGDocument } from '../grammar/validate.js'
 import { UPG_CROSS_EDGE_TYPES, UPG_CROSS_ONLY_EDGE_TYPES } from '../shapes/document.js'
-import { UPG_EDGE_CATALOG, getEdgePropertySchema, UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES, isCrossProductEligible } from '../catalog/edge-catalog.js'
+import { UPG_EDGE_CATALOG, getEdgePropertySchema, UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES, isCrossProductEligible, type UPGEdgeDefinition } from '../catalog/edge-catalog.js'
 import { validateEdgeProperties } from '../properties/edge-property-validation.js'
+import { crossProductScope, isCrossCapable, isCuratedCrossEligible } from '../grammar/cross-scope.js'
+import { UPG_PORTFOLIO_SHARED_TYPES, isPortfolioSharedType } from '../registry/entity-meta.js'
 
 const baseDoc = (edges: Array<Record<string, unknown>>) => ({
   upg_version: '0.2.4',
@@ -212,5 +214,86 @@ describe('cross-product edge validation', () => {
     const result = validateUPGDocument(doc)
     // persona_pursues_job may not be in catalog — that produces a warning, not an error
     expect(result.errors).toHaveLength(0)
+  })
+})
+
+// ── 3-state cross-product derivation (0.18.0) ─────────────────────────────────
+// The write surface is now curated (allow) / provisional (allow + warn) /
+// resident (reject), derived from `EntityTypeMeta.portfolio_shared`. The canonical
+// `UPG_CROSS_EDGE_TYPES` (59) is UNCHANGED — the derivation is a separate predicate.
+
+// The ratified portfolio-shared set (0.18.0): capability +
+// market_segment + classification_axis IN, design_token OUT. Snapshot-guarded so
+// adding or removing a shared tag is a deliberate, reviewed change.
+const EXPECTED_PORTFOLIO_SHARED_TYPES = [
+  'brand_identity', 'capability', 'classification_axis', 'classification_value',
+  'competitor', 'competitor_feature', 'competitor_signal', 'department', 'dependency',
+  'design_component', 'design_system', 'initiative', 'key_result', 'market_segment',
+  'metric', 'mission', 'objective', 'operating_lifecycle', 'operating_stage', 'outcome',
+  'primitive', 'specification', 'strategic_pillar', 'strategic_theme', 'team', 'vision',
+].sort()
+
+// The 3 curated edges whose endpoints are NOT portfolio-shared, so they ride on the
+// explicit curated flag, not the gate. (screen/feature → product where a product is
+// referenced cross-graph, and persona → persona peer delegation.)
+const CURATED_GATE_EXCEPTIONS = [
+  'feature_surfaces_product', 'persona_delegates_to_persona', 'screen_markets_product',
+].sort()
+
+describe('cross-product 3-state derivation (0.18.0)', () => {
+  it('the portfolio_shared entity-type set matches the ratified 26-name snapshot', () => {
+    expect(UPG_PORTFOLIO_SHARED_TYPES).toHaveLength(26)
+    expect([...UPG_PORTFOLIO_SHARED_TYPES].sort()).toEqual(EXPECTED_PORTFOLIO_SHARED_TYPES)
+  })
+
+  it('every curated cross type classifies as scope "curated" (canonical 59 unchanged)', () => {
+    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(59)
+    for (const t of UPG_CROSS_EDGE_TYPES) {
+      expect(crossProductScope(t), `${t} should classify as curated`).toBe('curated')
+      expect(isCuratedCrossEligible(t), `${t} should be curated-eligible`).toBe(true)
+    }
+  })
+
+  it('the gate covers every curated catalog edge EXCEPT exactly the 3 gate-exceptions', () => {
+    const exceptions = Object.keys(UPG_EDGE_CATALOG)
+      .filter((k) => isCuratedCrossEligible(k))
+      .filter((k) => {
+        const def = (UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>)[k]
+        return !isCrossCapable(def.source_type, def.target_type)
+      })
+      .sort()
+    expect(exceptions).toEqual(CURATED_GATE_EXCEPTIONS)
+  })
+
+  it('resident internal edges stay resident — the containment guardrail (both endpoints non-shared)', () => {
+    const residentInternal = [
+      'persona_pursues_job',
+      'persona_experiences_need',
+      'persona_aspires_to_desired_outcome',
+      'product_holds_assumption',
+    ]
+    for (const t of residentInternal) {
+      // Must be a real catalog edge, so a typo cannot masquerade as "resident".
+      expect(UPG_EDGE_CATALOG[t as keyof typeof UPG_EDGE_CATALOG], `${t} must exist in the catalog`).toBeDefined()
+      expect(crossProductScope(t), `${t} must be resident (hard-rejected cross-product)`).toBe('resident')
+    }
+    // Echoable-not-resident: persona is shareable via `shares_persona` (portfolio-native)
+    // yet is NOT portfolio_shared, so its internal edges stay in-graph.
+    expect(isPortfolioSharedType('persona')).toBe(false)
+    expect(isPortfolioSharedType('job')).toBe(false)
+    expect(isPortfolioSharedType('need')).toBe(false)
+    expect(isPortfolioSharedType('product')).toBe(false)
+  })
+
+  it('an unflagged catalog edge touching a shared type is provisional (not resident, not curated)', () => {
+    // metric is portfolio_shared → experiment_run_measures_metric passes the gate but
+    // is not curated, so it is allowed with a warning at the write surface.
+    expect(UPG_EDGE_CATALOG.experiment_run_measures_metric).toBeDefined()
+    expect(crossProductScope('experiment_run_measures_metric')).toBe('provisional')
+    expect(isCuratedCrossEligible('experiment_run_measures_metric')).toBe(false)
+  })
+
+  it('an unknown / non-catalog edge type is resident (default-deny)', () => {
+    expect(crossProductScope('not_a_real_edge_type')).toBe('resident')
   })
 })
