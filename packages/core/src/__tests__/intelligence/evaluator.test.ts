@@ -52,9 +52,9 @@ describe('Evaluator sanity', () => {
     // should add matching fire/clear fixtures here. Stable count guard.
     // 13 original + 2 F5 enforcement + 2 operating-function (0.17.0) + 4
     // portfolio-scoped (3 foundations 0.9.13 + the 0.17.0 org-link, evaluated by
-    // portfolio_validate not here) = 21.
-    expect(UPG_ANTI_PATTERNS.length).toBe(21)
-    expect(UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio').length).toBe(17)
+    // portfolio_validate not here) + 1 planning-cadence (0.20.0) = 22.
+    expect(UPG_ANTI_PATTERNS.length).toBe(22)
+    expect(UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio').length).toBe(18)
   })
 
   it('empty graph produces no violations', () => {
@@ -202,6 +202,21 @@ describe('Per-pattern fire / clear', () => {
       [relKey('feature', 'feature_drives_key_result', 'key_result')]: true,
     }
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'roadmap-feature-without-outcome-link')).toBe(false)
+  })
+
+  // 7b. planning-cycle-without-scheduled-work (low, 0.20.0)
+  it('planning-cycle-without-scheduled-work fires with a cycle that schedules nothing and nests nothing', () => {
+    const i = emptyInputs()
+    i.countsByType = { planning_cycle: 1 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'planning-cycle-without-scheduled-work')).toBe(true)
+  })
+  it('planning-cycle-without-scheduled-work clears when the cycle schedules a user_story', () => {
+    const i = emptyInputs()
+    i.countsByType = { planning_cycle: 1 }
+    i.edgePresence = {
+      [relKey('planning_cycle', 'planning_cycle_schedules_user_story', 'user_story')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'planning-cycle-without-scheduled-work')).toBe(false)
   })
 
   // 8. competitors-missing-past-validation (medium, benchmark — needs stage).
@@ -513,6 +528,7 @@ describe('Options + composite + stage gating', () => {
       'orphan-loose-thoughts',
       'persona-count-below-stage-benchmark',
       'personas-without-jobs',
+      'planning-cycle-without-scheduled-work',
       'roadmap-feature-without-outcome-link',
       'single-domain-graph',
       'untested-hypothesis-pile-up',

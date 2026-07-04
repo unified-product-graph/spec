@@ -379,6 +379,44 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     source: { kind: 'practitioner', attribution: 'John Cutler, Outcomes over Output' },
   },
 
+  {
+    id: 'planning-cycle-without-scheduled-work',
+    name: 'Planning cycle with no scheduled work',
+    description:
+      'A planning_cycle exists but neither schedules any user_story nor contains a finer sub-cycle. An empty cadence box is a date range with nothing flowing through it: a sprint or iteration nobody planned work into, or a coarse period that was never broken down.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        { check: { type: 'entity_count', entity_type: 'planning_cycle', comparison: 'nonzero' } },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'planning_cycle',
+            edge_type: 'planning_cycle_schedules_user_story',
+            target_type: 'user_story',
+            comparison: 'not_exists',
+          },
+        },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'planning_cycle',
+            edge_type: 'planning_cycle_contains_planning_cycle',
+            target_type: 'planning_cycle',
+            comparison: 'not_exists',
+          },
+        },
+      ],
+    },
+    why_it_matters:
+      'A cadence layer only earns its keep when work is planned through it. An interval with no scheduled stories and no nested cycles adds ceremony without telling anyone what the period is for.',
+    remediation:
+      'Schedule the stories the cycle will carry via `planning_cycle_schedules_user_story`, or break a coarse period into finer cycles via `planning_cycle_contains_planning_cycle`. If neither applies, the interval is not yet a real cadence box.',
+    stages: ['build', 'beta', 'launch', 'growth', 'mature'],
+    severity: 'low',
+    since: '0.20.0',
+  },
+
   // ── Market intelligence layer ───────────────────────────────────────────
   {
     id: 'competitors-missing-past-validation',

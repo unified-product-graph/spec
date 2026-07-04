@@ -143,6 +143,16 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         crosses_into: "product_delivery",
       },
       {
+        direction: "export",
+        edge_id: "objective_scoped_to_planning_cycle",
+        crosses_into: "product_delivery",
+      },
+      {
+        direction: "export",
+        edge_id: "strategic_theme_scoped_to_planning_cycle",
+        crosses_into: "product_delivery",
+      },
+      {
         direction: "import",
         edge_id: "feature_drives_key_result",
         crosses_into: "product_delivery",
@@ -954,6 +964,11 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         type: "status_report",
         role: "leaf",
       },
+      {
+        type: "planning_cycle",
+        role: "container",
+        notes: "self-nesting cadence axis",
+      },
     ],
     anchor: {
       type: "feature",
@@ -977,11 +992,23 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "milestone_gates_release",
       "roadmap_item_references_feature",
       "feature_request_voted_on_by_feedback_vote",
+      "planning_cycle_contains_planning_cycle",
+      "planning_cycle_schedules_user_story",
     ],
     boundary_edges: [
       {
         direction: "import",
         edge_id: "outcome_delivered_by_feature",
+        crosses_into: "strategy_outcomes",
+      },
+      {
+        direction: "import",
+        edge_id: "objective_scoped_to_planning_cycle",
+        crosses_into: "strategy_outcomes",
+      },
+      {
+        direction: "import",
+        edge_id: "strategic_theme_scoped_to_planning_cycle",
         crosses_into: "strategy_outcomes",
       },
       {

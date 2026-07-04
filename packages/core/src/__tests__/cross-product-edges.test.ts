@@ -223,13 +223,15 @@ describe('cross-product edge validation', () => {
 // `UPG_CROSS_EDGE_TYPES` (59) is UNCHANGED — the derivation is a separate predicate.
 
 // The ratified portfolio-shared set (0.18.0): capability +
-// market_segment + classification_axis IN, design_token OUT. Snapshot-guarded so
-// adding or removing a shared tag is a deliberate, reviewed change.
+// market_segment + classification_axis IN, design_token OUT. 0.20.0 added
+// planning_cycle (a coarse cadence interval is an org-shared node). Snapshot-guarded
+// so adding or removing a shared tag is a deliberate, reviewed change.
 const EXPECTED_PORTFOLIO_SHARED_TYPES = [
   'brand_identity', 'capability', 'classification_axis', 'classification_value',
   'competitor', 'competitor_feature', 'competitor_signal', 'department', 'dependency',
   'design_component', 'design_system', 'initiative', 'key_result', 'market_segment',
   'metric', 'mission', 'objective', 'operating_lifecycle', 'operating_stage', 'outcome',
+  'planning_cycle',
   'primitive', 'specification', 'strategic_pillar', 'strategic_theme', 'team', 'vision',
 ].sort()
 
@@ -241,8 +243,8 @@ const CURATED_GATE_EXCEPTIONS = [
 ].sort()
 
 describe('cross-product 3-state derivation (0.18.0)', () => {
-  it('the portfolio_shared entity-type set matches the ratified 26-name snapshot', () => {
-    expect(UPG_PORTFOLIO_SHARED_TYPES).toHaveLength(26)
+  it('the portfolio_shared entity-type set matches the ratified 27-name snapshot', () => {
+    expect(UPG_PORTFOLIO_SHARED_TYPES).toHaveLength(27)
     expect([...UPG_PORTFOLIO_SHARED_TYPES].sort()).toEqual(EXPECTED_PORTFOLIO_SHARED_TYPES)
   })
 

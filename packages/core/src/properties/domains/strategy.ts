@@ -98,6 +98,7 @@ export interface StrategicThemeProperties {
   owner?: string
   /**
    * Bounded period this theme is active (a theme is time-bound, within a pillar).
+   * @deprecated since 0.20.0. Promote the period to a `planning_cycle` node and link it with the `strategic_theme_scoped_to_planning_cycle` edge, which points at a shared, dated, nestable interval instead of a drifting per-theme string. Kept (not removed) for back-compat; removal is a later major. `strategic_pillar.time_horizon` stays as-is (a durable pillar horizon is genuinely open-ended, not a dated cycle).
    * @example "Q1 2026", "FY26"
    */
   time_horizon?: string

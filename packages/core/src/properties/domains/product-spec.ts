@@ -153,6 +153,10 @@ export interface FeatureProperties {
   target_date?: ISODate
   /** Delivery health */
   health?: HealthStatus
+  /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
+  workflow_state?: string
+  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
+  workflow_state_category?: string
 }
 
 /** A collection of related user stories that delivers a feature or capability.
@@ -175,6 +179,10 @@ export interface EpicProperties {
   start_date?: ISODate
   /** ISO date work completes */
   target_date?: ISODate
+  /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
+  workflow_state?: string
+  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
+  workflow_state_category?: string
 }
 
 
@@ -205,6 +213,18 @@ export interface UserStoryProperties {
   so_that?: string
   /** Free-form story text. Used as a single-line rendered view. */
   text?: string
+  /** Assigned person. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
+  assignee?: string
+  /** Effort estimate (e.g. "2h", "1d", "3 points"). Use a consistent unit within your team. */
+  effort?: string
+  /** Relative importance against other stories. Lifted onto user_story (0.20.0) so the story is a first-class plannable unit alongside task, matching Jira/Linear where the story/issue is the estimated-and-assigned atom. */
+  priority?: Priority
+  /** ISO date due. Typically bounded by the release or planning_cycle the story is scheduled into. */
+  due_date?: ISODate
+  /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
+  workflow_state?: string
+  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
+  workflow_state_category?: string
 }
 
 /**
@@ -276,6 +296,10 @@ export interface TaskProperties {
   /** Free-form classification tags. Applied uniformly across work item types. */
   labels?: string[]
   // `estimate` (story_task collapse relic, duplicated `effort`) removed in 0.14.0.
+  /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
+  workflow_state?: string
+  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
+  workflow_state_category?: string
 }
 
 /** Bug report.
@@ -307,6 +331,10 @@ export interface BugProperties {
   due_date?: ISODate
   /** Free-form classification tags. Applied uniformly across work item types. */
   labels?: string[]
+  /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
+  workflow_state?: string
+  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
+  workflow_state_category?: string
 }
 
 /** Product roadmap.
@@ -379,4 +407,43 @@ export interface ChangelogProperties {
   date?: string
   /** Change type */
   change_type?: 'feature' | 'improvement' | 'bugfix' | 'breaking' | 'deprecation'
+}
+
+/** Planning cycle: a named, dated interval work flows through, which nests.
+ *
+ * The cadence axis of the delivery region. One self-nesting type spans every
+ * delivery methodology (Scrum sprint, Kanban cadence, Shape Up cycle + cooldown,
+ * SAFe program increment, quarterly OKR cycle) because they are all variants of
+ * one primitive: a named, dated interval that work is assigned to and which can
+ * contain finer intervals. `cadence_kind` discriminates the granularity instead
+ * of minting a type per methodology; `planning_cycle_contains_planning_cycle`
+ * handles the granularity ladder (a PI contains iterations; a cycle contains its
+ * cooldown). Concretely dated (`starts_on` / `ends_on`), which is the deliberate
+ * contrast with the freeform `strategic_theme.time_horizon` label a theme carries.
+ *
+ * @example
+ * const properties: PlanningCycleProperties = {
+ *   cadence_kind: 'iteration',
+ *   cadence_label: 'sprint',
+ *   starts_on: '2026-07-06',
+ *   ends_on: '2026-07-17',
+ *   sequence: 47,
+ *   goal: 'Ship the AI autofill beta to the design-partner cohort.',
+ * }
+ */
+export interface PlanningCycleProperties {
+  /** Methodology-neutral granularity of this interval. `period` is a coarse container (quarter / PI / OKR-cycle scale); `iteration` is a fine execution box (sprint / cycle); `buffer` is between-box slack (cooldown). Required: it is the discriminator that lets one type stand in for every methodology. */
+  cadence_kind: 'period' | 'iteration' | 'buffer'
+  /** The source methodology term verbatim ("sprint", "cycle", "PI", "quarter", "cooldown"). The dual-band label: `cadence_kind` is the canonical granularity reasoned over; `cadence_label` preserves what the team actually calls it. */
+  cadence_label?: string
+  /** ISO date the interval opens. A cycle is concretely dated, unlike a coarse `time_horizon` label. */
+  starts_on?: ISODate
+  /** ISO date the interval closes. */
+  ends_on?: ISODate
+  /** The cycle / iteration number (e.g. Sprint 47, PI 3). */
+  sequence?: number
+  /** The interval's goal or focus: what this cadence box is for. */
+  goal?: string
+  /** Shape Up appetite: the fixed time budget a cycle is willing to spend on a bet (e.g. "6 weeks", "2 weeks"). */
+  appetite?: string
 }

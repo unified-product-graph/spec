@@ -36,7 +36,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     // Brand Identity
     'brand_identity',
     // Product Specification
-    'feature', 'feature_area', 'release', 'roadmap', 'roadmap_theme',
+    'feature', 'feature_area', 'release', 'roadmap', 'roadmap_theme', 'planning_cycle',
     // Engineering
     'bounded_context', 'code_repository', 'integration_pattern', 'external_api', 'data_flow',
     // Growth
@@ -243,6 +243,13 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   epic: ['user_story'],
   user_story: ['acceptance_criterion'],
   task: ['task'],
+  // planning_cycle (0.20.0): the cadence axis self-nests (a program-increment
+  // contains iterations; a cycle contains its cooldown) via
+  // planning_cycle_contains_planning_cycle. It does NOT contain user_story as a
+  // child: scheduling work into a cycle is the semantic, deliberate-only
+  // planning_cycle_schedules_user_story edge, so a story keeps its feature/epic
+  // containment parent and is merely referenced by the cycle.
+  planning_cycle: ['planning_cycle'],
 
   // ── Engineering hierarchy ───────────────────────────────────────────────────
   bounded_context: [

@@ -273,6 +273,14 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'theme', type_id: 'ent_080', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.9.0', replacement: 'roadmap_theme' },
   { name: 'roadmap_theme', type_id: 'ent_351', maturity: 'stable', since: '0.1.0' },
   { name: 'changelog', type_id: 'ent_081', maturity: 'stable', since: '0.1.0' },
+  // (0.20.0) The cadence axis: a named, dated interval that work flows through
+  // and which nests (a program-increment contains iterations; a cycle contains
+  // its cooldown). One self-nesting type with a `cadence_kind` discriminator
+  // spans sprint / iteration / quarter / PI / cooldown rather than minting a
+  // type per methodology. `portfolio_shared` because a coarse cycle is an
+  // org-shared interval an objective in a rollup graph and a story in a product
+  // graph both schedule into.
+  { name: 'planning_cycle', type_id: 'ent_358', maturity: 'proposed', since: '0.20.0', portfolio_shared: true },
 
   // ── Engineering ──
   { name: 'bounded_context', type_id: 'ent_082', maturity: 'stable', since: '0.1.0' },

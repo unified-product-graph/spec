@@ -3462,6 +3462,26 @@ const SPECIFICATION_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
+/**
+ * planning_cycle (Product Specification domain)
+ *
+ * planned -> active -> closed. A cadence interval is drafted while it is being
+ * shaped (dates set, goal written, work scheduled in), runs while the team is
+ * inside it, and closes when it ends. `status` is the node lifecycle; there is
+ * deliberately no shadow `*_status`. A closed cycle can reopen if the team
+ * extends or reruns it.
+ */
+const PLANNING_CYCLE_LIFECYCLE: UPGLifecycle = {
+  entity_type: 'planning_cycle',
+  initial_phase: 'planned',
+  terminal_phases: ['closed'],
+  phases: [
+    { id: 'planned', label: 'Planned', description: 'The cycle is being shaped: dates set, goal written, work scheduled into it. It has not started yet.', transitions_to: ['active'] },
+    { id: 'active', label: 'Active', description: 'The team is inside the interval; work is flowing through it.', transitions_to: ['closed'] },
+    { id: 'closed', label: 'Closed', description: 'The interval has ended. Scheduled work has shipped, carried over, or been dropped. May reopen if the team extends or reruns it.', transitions_to: ['active'] },
+  ],
+}
+
 export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   // Product (root)
   PRODUCT_LIFECYCLE,
@@ -3507,6 +3527,7 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   TASK_LIFECYCLE,
   BUG_LIFECYCLE,
   ROADMAP_ITEM_LIFECYCLE,
+  PLANNING_CYCLE_LIFECYCLE,
   IP_ASSET_LIFECYCLE,
   CONTRACT_LIFECYCLE,
   DESIGN_CONCEPT_LIFECYCLE,

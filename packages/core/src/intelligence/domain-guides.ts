@@ -285,13 +285,19 @@ const PRODUCT_SPEC_GUIDE: UPGDomainUsageGuide = {
   // registered to product_spec but missing from the navigation order).
   // `changelog` lives here because it is a structural product-shipping
   // artefact; content domain references it only via cross-domain bridges.
-  creation_sequence: ['feature_area', 'feature', 'epic', 'user_story', 'acceptance_criterion', 'task', 'bug', 'release', 'roadmap', 'roadmap_item', 'roadmap_theme', 'changelog'],
+  creation_sequence: ['feature_area', 'feature', 'epic', 'user_story', 'acceptance_criterion', 'task', 'bug', 'release', 'roadmap', 'roadmap_item', 'roadmap_theme', 'changelog', 'planning_cycle'],
   patterns: [
     {
       name: 'Feature Decomposition',
       description: 'Features group into areas, decompose into epics, epics specify user stories (the templated promise), and tasks implement them as the engineering work',
       entity_types: ['feature_area', 'feature', 'epic', 'user_story', 'task'],
       edge_chain: ['feature_area_contains_feature', 'feature_decomposed_into_epic', 'epic_specified_by_user_story', 'task_implements_user_story'],
+    },
+    {
+      name: 'Planning Cadence',
+      description: 'The cadence axis. Create a planning_cycle (a sprint, iteration, quarter, or PI), nest finer cycles inside a coarse one, schedule the stories that flow through it, and scope the objectives the cycle serves. Scheduling and scoping are deliberate links, not containment: a story keeps its feature/epic parent.',
+      entity_types: ['planning_cycle', 'user_story', 'objective'],
+      edge_chain: ['planning_cycle_contains_planning_cycle', 'planning_cycle_schedules_user_story', 'objective_scoped_to_planning_cycle'],
     },
   ],
   required_bridges: [

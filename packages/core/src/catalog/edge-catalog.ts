@@ -504,6 +504,8 @@ export const UPG_EDGE_CATALOG = {
   product_builds_feature: { forward_verb: 'builds', reverse_verb: 'built_by', classification: 'hierarchy', source_type: 'product', target_type: 'feature' },
   product_ships_via_release: { forward_verb: 'ships_via', reverse_verb: 'ships', classification: 'hierarchy', source_type: 'product', target_type: 'release' },
   product_plans_via_roadmap: { forward_verb: 'plans_via', reverse_verb: 'plans_for', classification: 'hierarchy', source_type: 'product', target_type: 'roadmap' },
+  // (0.20.0) top-level attach for the cadence axis, mirroring product_plans_via_roadmap.
+  product_runs_planning_cycle: { forward_verb: 'runs', reverse_verb: 'run_by', classification: 'hierarchy', source_type: 'product', target_type: 'planning_cycle' },
   product_categorises_by_roadmap_theme: { forward_verb: 'categorises_by', reverse_verb: 'categorises', classification: 'hierarchy', source_type: 'product', target_type: 'roadmap_theme' },
   feature_area_contains_feature: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'feature_area', target_type: 'feature' },
   feature_area_contains_feature_area: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'feature_area', target_type: 'feature_area' },
@@ -542,6 +544,34 @@ export const UPG_EDGE_CATALOG = {
   roadmap_item_references_feature: { forward_verb: 'references', reverse_verb: 'referenced_by', classification: 'cross-domain', source_type: 'roadmap_item', target_type: 'feature' },
   feature_decomposes_into_task:           { forward_verb: 'decomposes_into',   reverse_verb: 'implements',       classification: 'hierarchy',  source_type: 'feature',           target_type: 'task' },
   task_has_subtask:                       { forward_verb: 'has_subtask',       reverse_verb: 'is_subtask_of',    classification: 'hierarchy',  source_type: 'task',              target_type: 'task' },
+
+  // ── Planning cadence (0.20.0) ────────────────────────────────────────────────
+  // The cadence axis. E1 self-nests the interval (a program-increment contains
+  // iterations; a cycle contains its cooldown), mirroring team_contains_team.
+  planning_cycle_contains_planning_cycle: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'planning_cycle', target_type: 'planning_cycle' },
+  // E3: scheduling work into a cycle is a deliberate authoring act, not a
+  // containment nesting — user_story keeps its feature/epic parent and is merely
+  // referenced by the cycle. deliberate_only so the generic-inference chokepoints
+  // never auto-materialise it.
+  planning_cycle_schedules_user_story: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'semantic', source_type: 'planning_cycle', target_type: 'user_story', deliberate_only: true },
+  // E2: the OKR cycle-scoping anchor. objective -> planning_cycle. planning_cycle
+  // is portfolio_shared, so this passes the cross-scope gate and ships as
+  // PROVISIONAL (allowed cross-product with a write-time warning, self-maintaining,
+  // never added to the curated set) rather than carrying a cross_product_eligible
+  // flag, which would make it curated. Eligibility is permission, not obligation.
+  objective_scoped_to_planning_cycle: { forward_verb: 'scoped_to', reverse_verb: 'scopes', classification: 'semantic', source_type: 'objective', target_type: 'planning_cycle' },
+  // F: the promoted `strategic_theme.time_horizon`. Same shape as E2 — a theme's
+  // bounded period becomes a scoping edge onto a shared, dated, nestable interval.
+  // Provisional (planning_cycle portfolio_shared). The property stays @deprecated.
+  strategic_theme_scoped_to_planning_cycle: { forward_verb: 'scoped_to', reverse_verb: 'scopes', classification: 'semantic', source_type: 'strategic_theme', target_type: 'planning_cycle' },
+  // Gap 2 — polymorphic issue links over the work-item set {feature, epic,
+  // user_story, task, bug}. Endpoint-polymorphic (node -> node, registered in
+  // UPG_POLYMORPHIC_EDGE_KEYS) so one edge covers every level teams link at; the
+  // `work_item_` key names the intended semantic domain. All deliberate_only: an
+  // issue link is authored, never inferred from hierarchy.
+  work_item_blocks_work_item: { forward_verb: 'blocks', reverse_verb: 'blocked_by', classification: 'causal', source_type: 'node', target_type: 'node', deliberate_only: true },
+  work_item_relates_to_work_item: { forward_verb: 'relates_to', reverse_verb: 'relates_to', classification: 'semantic', source_type: 'node', target_type: 'node', deliberate_only: true },
+  work_item_duplicates_work_item: { forward_verb: 'duplicates', reverse_verb: 'duplicated_by', classification: 'semantic', source_type: 'node', target_type: 'node', deliberate_only: true },
 
   // 2.3 Legal Domain
   product_owned_by_legal_entity: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'hierarchy', source_type: 'product', target_type: 'legal_entity' },
@@ -2530,6 +2560,12 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   'framework_exercise_includes_node',
   // Universal classification (any node classified against a classification_value)
   'node_classified_as_classification_value',
+  // Work-item issue links (0.20.0): endpoint-polymorphic over the work-item set
+  // {feature, epic, user_story, task, bug}. The `work_item_` key names the
+  // intended semantic domain; the endpoints are the `node` wildcard.
+  'work_item_blocks_work_item',
+  'work_item_relates_to_work_item',
+  'work_item_duplicates_work_item',
 ] as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)

@@ -261,10 +261,16 @@ describe('deliberate_only flag + derived set', () => {
       .map(([k]) => k)
       .sort()
     expect([...UPG_DELIBERATE_ONLY_EDGE_TYPES].sort()).toEqual(flagged)
+    // 0.20.0 added the planning-cadence deliberate-only set: scheduling work into
+    // a cycle and the three polymorphic work-item issue links are authored acts.
     expect([...UPG_DELIBERATE_ONLY_EDGE_TYPES].sort()).toEqual([
       'insight_informs_opportunity',
       'objective_defers_capability',
       'objective_defers_feature',
+      'planning_cycle_schedules_user_story',
+      'work_item_blocks_work_item',
+      'work_item_duplicates_work_item',
+      'work_item_relates_to_work_item',
     ])
   })
 })

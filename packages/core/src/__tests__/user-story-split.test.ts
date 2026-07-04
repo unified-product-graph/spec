@@ -120,18 +120,20 @@ describe('Property interfaces', () => {
  expect(Object.keys(schema!)).toContain('effort')
  })
 
- it('statement and task schemas do not overlap on shape-determining fields', () => {
+ it('the templated-promise fields stay unique to user_story; planning fields are shared with task (0.20.0)', () => {
  const statementFields = new Set(Object.keys(UPG_PROPERTY_SCHEMA['user_story'] ?? {}))
  const taskFields = new Set(Object.keys(UPG_PROPERTY_SCHEMA['task'] ?? {}))
+ // The P5 templated-promise fields are the design artefact; they never bleed into task.
  const statementOnly = ['as_a', 'i_want_to', 'so_that', 'text']
- const taskOnly = ['effort', 'priority']
  for (const f of statementOnly) {
  expect(statementFields.has(f), `statement should carry ${f}`).toBe(true)
  expect(taskFields.has(f), `task must NOT carry ${f}`).toBe(false)
  }
- for (const f of taskOnly) {
+ // 0.20.0 Gap 4: user_story is a first-class plannable unit, so the task-level
+ // planning fields are lifted onto it and now DELIBERATELY overlap with task.
+ for (const f of ['priority', 'effort', 'assignee', 'due_date']) {
+ expect(statementFields.has(f), `user_story should now carry ${f}`).toBe(true)
  expect(taskFields.has(f), `task should carry ${f}`).toBe(true)
- expect(statementFields.has(f), `statement must NOT carry ${f}`).toBe(false)
  }
  })
 })

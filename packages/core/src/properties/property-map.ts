@@ -13,7 +13,7 @@ import type { ResearchStudyProperties, ParticipantProperties, ObservationPropert
 import type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, AnnotationProperties, InteractionSpecProperties } from './domains/ux-design.js'
 import type { DesignComponentProperties, DesignTokenProperties, DesignSystemProperties, DesignPatternProperties, DesignGuidelineProperties } from './domains/design-system.js'
 import type { BrandIdentityProperties, BrandColourProperties, BrandTypographyProperties, BrandVoiceProperties, BrandLogoProperties, BrandImageryProperties } from './domains/brand.js'
-import type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, UserStoryProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, RoadmapThemeProperties, ChangelogProperties } from './domains/product-spec.js'
+import type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, UserStoryProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, RoadmapThemeProperties, ChangelogProperties, PlanningCycleProperties } from './domains/product-spec.js'
 import type { MetricProperties, MetricQualityAssessmentProperties } from './domains/metrics.js'
 import type { BoundedContextProperties, ServiceProperties, DomainEventProperties, ApiContractProperties, TechnicalDebtItemProperties, FeatureFlagProperties, DeploymentProperties, AggregateProperties, DomainEntityProperties, ValueObjectProperties, CommandProperties, ReadModelProperties, ApiEndpointProperties, DatabaseSchemaProperties, QueueTopicProperties, BuildArtifactProperties, CodeRepositoryProperties, LibraryDependencyProperties, IntegrationPatternProperties, ExternalApiProperties, DataFlowProperties, InvestigationProperties, RootCauseProperties, SymptomProperties, FixProperties } from './domains/engineering.js'
 import type { FunnelProperties, FunnelStepProperties, AcquisitionChannelProperties, GrowthCampaignProperties, CohortProperties, BehavioralSegmentProperties, GrowthLoopProperties, VariantProperties, AttributionModelProperties } from './domains/growth.js'
@@ -295,6 +295,8 @@ export interface UPGPropertyMap {
   roadmap_theme: RoadmapThemeProperties
   /** A changelog entry recording what shipped in a release */
   changelog: ChangelogProperties
+  /** A named, dated, self-nesting planning interval (sprint / iteration / quarter / PI / cooldown) work is scheduled through: the cadence axis */
+  planning_cycle: PlanningCycleProperties
 
   // ─── Foundations ─────────────────────────────────────────────────────────────
   /** A governed specification (query language, protocol, format) products implement, expose, or conform to */

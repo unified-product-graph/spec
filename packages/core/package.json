@@ -1,6 +1,6 @@
 {
   "name": "@unified-product-graph/core",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "Unified Product Graph — open specification and TypeScript types for product knowledge",
   "type": "module",
   "license": "MIT",
@@ -18,7 +18,8 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",

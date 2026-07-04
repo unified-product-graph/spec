@@ -7,6 +7,25 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.20.0] - 2026-07-04
+
+**A cadence layer for the product-delivery region: one self-nesting `planning_cycle` entity models sprints, iterations, quarters, program increments, and cooldowns, so a Jira or Linear export round-trips its time-boxes losslessly.** The delivery region could describe what ships (feature → epic → story → task) and what governs it (release, roadmap, theme), but had no home for the interval work flows *through*. This release mints `planning_cycle` — a named, dated, self-nesting interval discriminated by `cadence_kind` (period / iteration / buffer) rather than a type per methodology — plus the edges that schedule work into it and scope objectives and themes to it. It also closes the smaller structural gaps a Jira ∪ Linear import hits: polymorphic issue links, a dual-band `workflow_state` that preserves an imported tool's raw states without displacing the canonical `status`, and the task-level planning fields lifted onto `user_story`. Additive; no breaking change.
+
+### Added
+- **`planning_cycle` entity** (`proposed`) — the cadence axis. A self-nesting container in the `product_spec` domain / `product_delivery` region, `portfolio_shared`, lifecycle `planned → active → closed`. Properties: `cadence_kind` (period / iteration / buffer), `cadence_label`, `starts_on`, `ends_on`, `sequence`, `goal`, `appetite`. One type with a `cadence_kind` discriminator spans sprint / iteration / quarter / program-increment / cooldown; self-nesting handles the granularity ladder (a PI contains iterations; a cycle contains its cooldown).
+- **Core cadence edges** — `planning_cycle_contains_planning_cycle` (self-nesting containment), `objective_scoped_to_planning_cycle` and `strategic_theme_scoped_to_planning_cycle` (OKR / theme cycle-scoping, provisional cross-scope), `planning_cycle_schedules_user_story` (deliberate-only work scheduling — a story keeps its feature/epic containment parent), and `product_runs_planning_cycle` (top-level attach).
+- **Polymorphic work-item issue links** — `work_item_blocks_work_item`, `work_item_relates_to_work_item`, `work_item_duplicates_work_item` over the work-item set {feature, epic, user_story, task, bug}, all deliberate-only.
+- **Dual-band `workflow_state`** — a freeform `workflow_state` plus an optional `workflow_state_category` on the work-item entities, so an imported custom workflow round-trips losslessly without displacing canonical `status` as the reasoning axis.
+- **`planning-cycle-without-scheduled-work`** anti-pattern (low severity) — a cadence box that neither schedules work nor nests a sub-cycle.
+
+### Changed
+- **`user_story` gains `priority`, `effort`, `assignee`, `due_date`** — the story is now a first-class plannable unit alongside `task`, matching the tools where the story / issue is the estimated-and-assigned atom.
+
+### Deprecated
+- **`strategic_theme.time_horizon`** — promote the bounded period to a `planning_cycle` node linked with `strategic_theme_scoped_to_planning_cycle`. The property is kept and readable; removal is a later major. `strategic_pillar.time_horizon` (a durable, open-ended pillar horizon, not a dated cycle) stays as-is.
+
+---
+
 ## [0.19.0] - 2026-07-04
 
 **The MCP surface consolidates from 139 tools to 93 (+ 5 prompts): the static-spec introspection cluster folds into four faceted reads, and five procedural routers become skills.** The spec catalogue had accreted 45 near-identical `list_*` / `get_*` reads plus five routers — a surface an agent had to scan linearly before it could choose. This release collapses the reads into four facets and retires the routers, leaving the 89 write and live-graph-read verbs untouched. A parity gate (`retired-tools.json` + a byte-equality test wired as a prepublish stage) proves every retired tool's data is still reachable and identical through the facets, on both the local and cloud servers — which licenses a clean break with no deprecation window. Both servers' instructions gain a methodology preamble (the SEE → THINK → ACT → LEARN working loop) so the surface conveys *how to work*, not only *what exists*. Breaking. Local 139 → 93; cloud 100 → 54.

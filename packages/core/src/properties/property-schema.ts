@@ -12,7 +12,7 @@
  * wall-clock timestamp: generation is deterministic). This file is a GATED
  * artifact — check:generated re-runs the generator and fails on any drift, so
  * edit the sources above, never this file.
- * Entity types with properties: 322
+ * Entity types with properties: 323
  */
 
 export interface PropertyDefinition {
@@ -462,6 +462,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     assignee: { type: 'string', description: 'Assigned person. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     due_date: { type: 'string', description: 'ISO date due. Often tied to a release gate or SLA.' },
     labels: { type: 'string[]', description: 'Free-form classification tags. Applied uniformly across work item types.' },
+    workflow_state: { type: 'string', description: 'The source tool\'s raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis.' },
+    workflow_state_category: { type: 'string', description: 'Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`.' },
   },
   // BuildArtifactProperties: Build artifact.
   build_artifact: {
@@ -1100,6 +1102,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     owner: { type: 'string', description: 'Responsible person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     start_date: { type: 'string', description: 'ISO date work begins' },
     target_date: { type: 'string', description: 'ISO date work completes' },
+    workflow_state: { type: 'string', description: 'The source tool\'s raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis.' },
+    workflow_state_category: { type: 'string', description: 'Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`.' },
   },
   // ErrorBudgetProperties: Error budget.
   error_budget: {
@@ -1266,6 +1270,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     start_date: { type: 'string', description: 'ISO date work begins' },
     target_date: { type: 'string', description: 'ISO date work completes' },
     health: { type: 'string', enum: ['on_track', 'at_risk', 'off_track'], description: 'Delivery health' },
+    workflow_state: { type: 'string', description: 'The source tool\'s raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis.' },
+    workflow_state_category: { type: 'string', description: 'Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`.' },
   },
   // FeatureAreaProperties: A structural grouping of related features within a product.
   feature_area: {
@@ -2135,6 +2141,16 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     conversion_rate: { type: 'number', description: 'Percentage of deals that advance from this stage', modifier: 'snapshot' },
     avg_days_in_stage: { type: 'number', description: 'Average number of days deals spend in this stage' },
   },
+  // PlanningCycleProperties: Planning cycle: a named, dated interval work flows through, which nests.
+  planning_cycle: {
+    cadence_kind: { type: 'string', enum: ['period', 'iteration', 'buffer'], description: 'Methodology-neutral granularity of this interval. `period` is a coarse container (quarter / PI / OKR-cycle scale); `iteration` is a fine execution box (sprint / cycle); `buffer` is between-box slack (cooldown). Required: it is the discriminator that lets one type stand in for every methodology.' },
+    cadence_label: { type: 'string', description: 'The source methodology term verbatim ("sprint", "cycle", "PI", "quarter", "cooldown"). The dual-band label: `cadence_kind` is the canonical granularity reasoned over; `cadence_label` preserves what the team actually calls it.' },
+    starts_on: { type: 'string', description: 'ISO date the interval opens. A cycle is concretely dated, unlike a coarse `time_horizon` label.' },
+    ends_on: { type: 'string', description: 'ISO date the interval closes.' },
+    sequence: { type: 'number', description: 'The cycle / iteration number (e.g. Sprint 47, PI 3).' },
+    goal: { type: 'string', description: 'The interval\'s goal or focus: what this cadence box is for.' },
+    appetite: { type: 'string', description: 'Shape Up appetite: the fixed time budget a cycle is willing to spend on a bet (e.g. "6 weeks", "2 weeks").' },
+  },
   // PlaybookProperties: Customer success playbook.
   playbook: {
     playbook_type: { type: 'string', enum: ['onboarding', 'expansion', 'renewal', 'rescue', 'other'], description: 'Scenario this playbook addresses' },
@@ -2668,7 +2684,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // StrategicThemeProperties: StrategicTheme entity.
   strategic_theme: {
     owner: { type: 'string', description: 'Owning person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
-    time_horizon: { type: 'string', description: 'Bounded period this theme is active (a theme is time-bound, within a pillar). @example "Q1 2026", "FY26"' },
+    time_horizon: { type: 'string', description: 'Bounded period this theme is active (a theme is time-bound, within a pillar). @deprecated since 0.20.0. Promote the period to a `planning_cycle` node and link it with the `strategic_theme_scoped_to_planning_cycle` edge, which points at a shared, dated, nestable interval instead of a drifting per-theme string. Kept (not removed) for back-compat; removal is a later major. `strategic_pillar.time_horizon` stays as-is (a durable pillar horizon is genuinely open-ended, not a dated cycle). @example "Q1 2026", "FY26"' },
     description: { type: 'string', description: 'Short narrative of this time-bound thrust within its pillar' },
     scope: { type: 'string', description: 'What the theme explicitly includes or excludes' },
   },
@@ -2759,6 +2775,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Relative importance against other tasks' },
     due_date: { type: 'string', description: 'ISO date due. Typically bounded by the containing story\'s due date.' },
     labels: { type: 'string[]', description: 'Free-form classification tags. Applied uniformly across work item types.' },
+    workflow_state: { type: 'string', description: 'The source tool\'s raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis.' },
+    workflow_state_category: { type: 'string', description: 'Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`.' },
   },
   // TeamProperties: Team entity.
   team: {
@@ -2966,6 +2984,12 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     i_want_to: { type: 'string', description: 'Capability or action the persona wants.' },
     so_that: { type: 'string', description: 'Benefit or outcome the persona expects.' },
     text: { type: 'string', description: 'Free-form story text. Used as a single-line rendered view.' },
+    assignee: { type: 'string', description: 'Assigned person. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
+    effort: { type: 'string', description: 'Effort estimate (e.g. "2h", "1d", "3 points"). Use a consistent unit within your team.' },
+    priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Relative importance against other stories. Lifted onto user_story (0.20.0) so the story is a first-class plannable unit alongside task, matching Jira/Linear where the story/issue is the estimated-and-assigned atom.' },
+    due_date: { type: 'string', description: 'ISO date due. Typically bounded by the release or planning_cycle the story is scheduled into.' },
+    workflow_state: { type: 'string', description: 'The source tool\'s raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis.' },
+    workflow_state_category: { type: 'string', description: 'Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`.' },
   },
   // ValueObjectProperties: DDD value object.
   value_object: {

@@ -227,6 +227,7 @@ export const ENTITY_EMOJI: Record<string, string> = {
   persona: "🎭",
   pipeline_sales: "🪈",
   pipeline_stage: "🧽",
+  planning_cycle: "🗓️",
   playbook: "📒",
   portfolio: "🧸",
   positioning: "🎪",

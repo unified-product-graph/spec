@@ -646,6 +646,7 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   roadmap: { alt_labels: ['product roadmap', 'release plan', 'timeline'] },
   roadmap_item: { alt_labels: ['roadmap entry', 'planned item'] },
   roadmap_theme: { alt_labels: ['product theme', 'roadmap theme'] }, //: renamed from bare 'theme' (N6 lineage)
+  planning_cycle: { alt_labels: ['sprint', 'iteration', 'cycle', 'program increment', 'pi', 'cadence', 'time-box', 'cooldown', 'quarter'] },
 
   // Engineering layer
   bounded_context: { alt_labels: ['context', 'domain boundary', 'module boundary'] },
