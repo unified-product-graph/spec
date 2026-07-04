@@ -436,6 +436,10 @@ export const UPG_EDGE_CATALOG = {
   strategic_pillar_enables_capability: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'capability' },
   strategic_pillar_delivers_value_stream: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'value_stream' },
   strategic_pillar_decided_via_decision: { forward_verb: 'decided_via', reverse_verb: 'decided_for', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'decision' },
+  // 0.20.1: the durable pillar's own north-star, mirroring objective_measured_by_metric
+  // one level up the cascade. A strategic_pillar is multi-year and org-wide, so its
+  // measuring metric is portfolio-shared just like the pillar itself.
+  strategic_pillar_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'hierarchy', source_type: 'strategic_pillar', target_type: 'metric', cross_product_eligible: true },
   strategic_theme_pursues_initiative: { forward_verb: 'pursues', reverse_verb: 'pursued_under', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'initiative', cross_product_eligible: true },
   // v0.9.0: the soft bridge from the annual strategy focus area to the
   // roadmap grouping that realises it. Semantic, NOT hierarchy: strategic_theme and
@@ -468,6 +472,17 @@ export const UPG_EDGE_CATALOG = {
   strategic_theme_measured_by_key_result: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'causal', source_type: 'strategic_theme', target_type: 'key_result', cross_product_eligible: true },
   strategic_theme_contains_objective: { forward_verb: 'contains', reverse_verb: 'rolls_up_to', classification: 'hierarchy', source_type: 'strategic_theme', target_type: 'objective', cross_product_eligible: true },
   initiative_assumes_assumption: { forward_verb: 'assumes', reverse_verb: 'assumed_by', classification: 'hierarchy', source_type: 'initiative', target_type: 'assumption' },
+  // 0.20.1: the G6 alignment-sheet bridge edges — an initiative reaches directly
+  // into the OKR ladder and the roadmap, rather than only via its parent
+  // strategic_theme. `advances_key_result` is intra-strategy execution (both
+  // ends sit in the strategy domain), so causal not cross-domain; the KR is
+  // portfolio-shared like the initiative, so the pair is cross-product-eligible.
+  initiative_advances_key_result: { forward_verb: 'advances', reverse_verb: 'advanced_by', classification: 'causal', source_type: 'initiative', target_type: 'key_result', cross_product_eligible: true },
+  // `delivered_via_roadmap_theme` mirrors strategic_theme_realised_by_roadmap_theme:
+  // a semantic cross-reference between the strategy spine and the roadmap spine,
+  // not containment. roadmap_theme is not portfolio-shared, so this stays
+  // within-graph (no cross_product_eligible flag).
+  initiative_delivered_via_roadmap_theme: { forward_verb: 'delivered_via', reverse_verb: 'delivers', classification: 'semantic', source_type: 'initiative', target_type: 'roadmap_theme' },
   initiative_drives_outcome: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'initiative', target_type: 'outcome', cross_product_eligible: true },
   capability_enables_value_stream: { forward_verb: 'enables', reverse_verb: 'enabled_by', classification: 'cross-domain', source_type: 'capability', target_type: 'value_stream' },
   // v0.5.2: three capability-anchored edges that complete the

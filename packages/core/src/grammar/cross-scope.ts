@@ -9,8 +9,8 @@
  * eligible" rule over-admits ~5×, because portfolio-shared types also anchor rich
  * within-graph decomposition). So eligibility is a two-layer model:
  *
- *  - **curated**     — the blessed canonical set (`UPG_CROSS_EDGE_TYPES`, 59 types:
- *                      21 portfolio-native + 38 catalog-flagged `cross_product_eligible`).
+ *  - **curated**     — the blessed canonical set (`UPG_CROSS_EDGE_TYPES`, 61 types:
+ *                      21 portfolio-native + 40 catalog-flagged `cross_product_eligible`).
  *                      Hard-allow at the write surface, no warning.
  *  - **provisional** — an unflagged catalog edge that PASSES the shared-tier gate
  *                      (≥1 endpoint `portfolio_shared`). Allowed at the write surface
@@ -26,8 +26,10 @@
  *
  * The gate (`isCrossCapable`) is DERIVED from `EntityTypeMeta.portfolio_shared`, so
  * the guardrail is self-maintaining: a new persona/job/need internal edge is
- * auto-rejected with no list to touch. The canonical `UPG_CROSS_EDGE_TYPES` snapshot
- * is UNCHANGED (adapters / portfolio_query / list_cross_edge_types keep reading 59);
+ * auto-rejected with no list to touch. The gate LOGIC itself never changes the
+ * canonical `UPG_CROSS_EDGE_TYPES` snapshot (adapters / portfolio_query /
+ * list_cross_edge_types keep reading whatever it currently is, 61 as of 0.20.1);
+ * only a new `cross_product_eligible` flag or portfolio-native type grows it.
  * `crossProductScope` is a separate predicate the write + read surfaces consult.
  */
 
@@ -61,7 +63,7 @@ export function isCrossCapable(sourceType: string, targetType: string): boolean 
 
 /**
  * True if this cross-edge type is in the curated canonical set (`UPG_CROSS_EDGE_TYPES`,
- * the 59). Distinct from the catalog's `isCrossProductEligible` (the 38 dual-registered
+ * the 61). Distinct from the catalog's `isCrossProductEligible` (the 40 dual-registered
  * flags only): this also covers the 21 portfolio-native cross-only types.
  *
  * @example

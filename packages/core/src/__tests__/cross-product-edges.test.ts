@@ -219,8 +219,11 @@ describe('cross-product edge validation', () => {
 
 // ── 3-state cross-product derivation (0.18.0) ─────────────────────────────────
 // The write surface is now curated (allow) / provisional (allow + warn) /
-// resident (reject), derived from `EntityTypeMeta.portfolio_shared`. The canonical
-// `UPG_CROSS_EDGE_TYPES` (59) is UNCHANGED — the derivation is a separate predicate.
+// resident (reject), derived from `EntityTypeMeta.portfolio_shared`. The DERIVATION
+// itself is a separate predicate from the canonical `UPG_CROSS_EDGE_TYPES` set — it
+// only grows when a `cross_product_eligible` flag or a portfolio-native type is
+// added (61 as of 0.20.1's two new G6 seam-edge flags), never as a side effect of
+// this 3-state logic.
 
 // The ratified portfolio-shared set (0.18.0): capability +
 // market_segment + classification_axis IN, design_token OUT. 0.20.0 added
@@ -248,8 +251,8 @@ describe('cross-product 3-state derivation (0.18.0)', () => {
     expect([...UPG_PORTFOLIO_SHARED_TYPES].sort()).toEqual(EXPECTED_PORTFOLIO_SHARED_TYPES)
   })
 
-  it('every curated cross type classifies as scope "curated" (canonical 59 unchanged)', () => {
-    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(59)
+  it('every curated cross type classifies as scope "curated" (canonical 61 as of 0.20.1)', () => {
+    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(61)
     for (const t of UPG_CROSS_EDGE_TYPES) {
       expect(crossProductScope(t), `${t} should classify as curated`).toBe('curated')
       expect(isCuratedCrossEligible(t), `${t} should be curated-eligible`).toBe(true)

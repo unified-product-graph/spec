@@ -160,7 +160,11 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   //     That success-measurement asymmetry is the load-bearing distinction.
   vision: ['mission'],
   mission: ['strategic_pillar'],
-  strategic_pillar: ['strategic_theme', 'capability', 'value_stream', 'decision'],
+  // 0.20.1: metric added as a strategic_pillar child, backing
+  // strategic_pillar_measured_by_metric (hierarchy) — the pillar's own
+  // north-star, mirrored from objective: ['key_result', 'metric', ...] one
+  // level down the cascade.
+  strategic_pillar: ['strategic_theme', 'capability', 'value_stream', 'decision', 'metric'],
   // v0.5.4: objectives are the specific quarterly bets *within* a
   // strategic theme. The theme is the multi-quarter focus area; objectives are
   // subordinate. Pairs with `strategic_theme_contains_objective` in the edge

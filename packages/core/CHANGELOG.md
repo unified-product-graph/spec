@@ -7,6 +7,17 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.20.1] - 2026-07-04
+
+**Three edges close the alignment-sheet seam: an initiative can now reach directly into the OKR ladder and the roadmap, and a strategic pillar gets its own north-star metric.** Composed flat region surfaces spanning org/team/product altitudes surfaced two gaps in the strategic cascade: an initiative's only path to a key result or a roadmap theme ran through its parent `strategic_theme`, and `strategic_pillar` — durable, multi-year, org-wide — had no measuring metric of its own, unlike every other rung of the cascade (`objective_measured_by_metric`, `key_result_quantified_by_metric`). Additive; no breaking change.
+
+### Added
+- **`initiative_advances_key_result`** — `initiative` → `key_result`, causal (intra-strategy execution, not cross-domain), cross-product-eligible. Extends the curated OKR laddering DAG that `objective_measured_by_metric` / `key_result_quantified_by_metric` are already part of.
+- **`initiative_delivered_via_roadmap_theme`** — `initiative` → `roadmap_theme`, semantic, within-graph. Mirrors `strategic_theme_realised_by_roadmap_theme`: a cross-reference between the strategy spine and the roadmap spine, not containment, so initiatives can reach the roadmap without routing through their parent theme.
+- **`strategic_pillar_measured_by_metric`** — `strategic_pillar` → `metric`, hierarchy, cross-product-eligible. Mirrors `objective_measured_by_metric` one level up the cascade; `metric` joins `strategic_pillar`'s valid children.
+
+---
+
 ## [0.20.0] - 2026-07-04
 
 **A cadence layer for the product-delivery region: one self-nesting `planning_cycle` entity models sprints, iterations, quarters, program increments, and cooldowns, so a Jira or Linear export round-trips its time-boxes losslessly.** The delivery region could describe what ships (feature → epic → story → task) and what governs it (release, roadmap, theme), but had no home for the interval work flows *through*. This release mints `planning_cycle` — a named, dated, self-nesting interval discriminated by `cadence_kind` (period / iteration / buffer) rather than a type per methodology — plus the edges that schedule work into it and scope objectives and themes to it. It also closes the smaller structural gaps a Jira ∪ Linear import hits: polymorphic issue links, a dual-band `workflow_state` that preserves an imported tool's raw states without displacing the canonical `status`, and the task-level planning fields lifted onto `user_story`. Additive; no breaking change.
