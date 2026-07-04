@@ -7,6 +7,322 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.19.0] - 2026-07-04
+
+**The MCP surface consolidates from 139 tools to 93 (+ 5 prompts): the static-spec introspection cluster folds into four faceted reads, and five procedural routers become skills.** The spec catalogue had accreted 45 near-identical `list_*` / `get_*` reads plus five routers — a surface an agent had to scan linearly before it could choose. This release collapses the reads into four facets and retires the routers, leaving the 89 write and live-graph-read verbs untouched. A parity gate (`retired-tools.json` + a byte-equality test wired as a prepublish stage) proves every retired tool's data is still reachable and identical through the facets, on both the local and cloud servers — which licenses a clean break with no deprecation window. Both servers' instructions gain a methodology preamble (the SEE → THINK → ACT → LEARN working loop) so the surface conveys *how to work*, not only *what exists*. Breaking. Local 139 → 93; cloud 100 → 54.
+
+### Added
+- **`list_catalog({ kind })`** and **`get_catalog_entry({ kind, id })`** — the two faceted reads that subsume 40 per-catalogue `list_*` / `get_*` tools (entity types, edge types, regions, lenses, domains, anti-patterns, playbooks, frameworks, …).
+- **`get_spec_version` gains `changelog` and `since`** — folds the proposed `get_changelog` / `whats_new` surface in; `changelog: true` returns this file parsed into entries, `since` filters to versions strictly newer. Default output is byte-identical to before.
+- **Enriched `get_entity_schema`** — now also returns valid children, the entity's region, and the resolved edge for a source→target pair (absorbing `get_valid_children`, `get_region_for_entity_type`, `resolve_edge_for_pair`).
+- **Shared `mcp-catalog` module** imported by both servers, so parity is structural rather than hand-maintained.
+- **Methodology preamble** in both servers' instructions.
+
+### Removed
+- **48 spec-introspection tools** (25 `list_*` → `list_catalog`, 15 `get_*` → `get_catalog_entry`, 3 folds into `get_entity_schema`, 5 routers → skills). Every one is reachable — byte-equal — through the faceted surface (parity-gated).
+
+---
+
+## [0.18.0] - 2026-07-03
+
+**Cross-product edge eligibility becomes a three-state gate derived from entity tiers, replacing the hand-maintained allowlist.** 0.17.3 derived which edge *types* may cross graphs; this governs which *instances* may, per endpoint. A `portfolio_shared` flag on 26 entity-type-meta records sorts every candidate cross-product edge into three tiers: **curated** (38 — explicitly modelled, allowed), **provisional** (194 — plausible cross-graph pairs, allowed with a warning and no PR requirement), and **resident** (794 — spine containment that must co-reside, hard-rejected). Pure tier-derivation over-admits by 4–5×, so eligibility is treated as *permission, not obligation*. Canonical cross-edges are unchanged at 59.
+
+### Added
+- **`portfolio_shared`** on `EntityTypeMeta` (26 types) — the tier signal the gate reads.
+- **Tri-state `cross_product_scope`** on the read path.
+
+### Changed
+- **Cross-product write validation → a three-state gate** — a relaxation: provisional pairs now warn-and-allow rather than block.
+
+---
+
+## [0.17.8] - 2026-07-03
+
+**The write-merge path stops silently clobbering concurrent edits: field-level three-way merge, and delete/modify collisions surface as conflicts.** A latent defect (roughly three months old — not a regression) could drop one of two concurrent edits to the same node. The merge is rewritten to reconcile at the field level and to raise delete/modify collisions as explicit `CONFLICT`s instead of resolving them silently. The dogfood graph was verified clean. SDK-only.
+
+### Fixed
+- Field-level three-way merge; delete/modify collisions surfaced as `CONFLICT` (zero silent resolution).
+
+---
+
+## [0.17.7] - 2026-07-02
+
+**Property schemas rejoin the generated-artifact gate, entity descriptions are filled in, and a count-drift guard prevents doc/spec divergence.** The property-schema files re-enter `check:generated` so they cannot drift from source, missing entity descriptions are authored, and a new `check:count-drift` gate fails the build whenever a hardcoded count anywhere disagrees with the derived spec counts.
+
+### Added
+- **`check:count-drift`** release gate.
+
+### Changed
+- `switching_cost.magnitude` resolves onto the `severity_5` assessment scale (finalised).
+- Property-schema files back under `check:generated`.
+
+---
+
+## [0.17.6] - 2026-07-02
+
+**A shelf-clearing sweep: `reload_product` for conflict recovery, `insight_informs_opportunity` made deliberate-only, and a property-modifier doc generator.** `reload_product({ discard_local })` recovers from a write `CONFLICT` when the active `.upg` was edited out of band, without a restart. `insight_informs_opportunity` is flagged `deliberate_only`, so an insight-contains-opportunity nesting no longer auto-materialises a judgment edge. A generator keeps the property-modifier docs in sync, alongside copy and count-accuracy fixes.
+
+### Added
+- **`reload_product`** conflict-recovery tool.
+
+### Changed
+- `insight_informs_opportunity` → `deliberate_only`.
+
+---
+
+## [0.17.5] - 2026-07-02
+
+**`user_research` gains provenance: a `source_url` and document containment, so an insight can point back to where it came from.** Research entities could hold findings but not cite them. This adds `source_url` to `user_research` and a document-containment path so a research artifact and the insights extracted from it carry a verifiable source.
+
+### Added
+- `source_url` on `user_research`; document-containment provenance for research.
+
+---
+
+## [0.17.4] - 2026-07-01
+
+**OKR-planning coverage — objective↔dependency, a `strategic_question` entity, defer edges — plus the `deliberate_only` keystone that stops auto-nest from materialising judgment edges.** From the first graph-versus-planning-doc fidelity check: `objective_depends_on_dependency` and its mirror `dependency_blocks_objective`; a new `strategic_question` entity that completes the research / design / strategy question triad; and defer edges (`objective_defers_feature` / `objective_defers_capability`) that carry a freeform `deferred_to` planning label. The keystone is a `deliberate_only` catalogue flag, derived once into `UPG_DELIBERATE_ONLY_EDGE_TYPES`, that every auto-nest write path and adapter resolver reads — so an edge that must be authored deliberately is never inferred from a containment nesting.
+
+### Added
+- **`strategic_question`** entity (the strategy-domain sibling of `research_question` / `design_question`).
+- `objective_depends_on_dependency` / `dependency_blocks_objective`.
+- `objective_defers_feature` / `objective_defers_capability`, carrying a `deferred_to` edge property.
+- **`deliberate_only`** catalogue flag + `isDeliberateOnlyEdge` derivation.
+
+---
+
+## [0.17.3] - 2026-07-01
+
+**A single `cross_product_eligible` catalogue flag now derives the entire cross-edge registry — one source of truth for which edge types may cross graphs.** The cross-edge type set had been maintained by hand. This makes it a derivation: a `cross_product_eligible` flag on each edge-catalogue entry flows automatically into `UPGCrossEdgeType` and `UPG_CROSS_EDGE_TYPES`, while portfolio-native edges stay in the explicit `UPG_CROSS_ONLY_EDGE_TYPES`. It front-loads the whole strategy / OKR / measurement laddering plus the eight product→strategy alignment edges (the set moves 41 → 55). Ships with an atomic `batch_delete_cross_product_edges`, an `org` tree pattern (department → team → sub-team), and portfolio-structure reads.
+
+### Added
+- `cross_product_eligible` flag + the derived cross-edge registry.
+- `batch_delete_cross_product_edges` (atomic).
+- `org` tree pattern.
+
+### Changed
+- Cross-edge set 41 → 55.
+
+---
+
+## [0.17.2] - 2026-06-30
+
+**Org-wide modeling: second-level team nesting, cross-product OKR/measurement edges, a `constraint_origin` sub-role, and young-graph anti-pattern tuning.** `team_contains_team` adds parent→child org nesting. Four OKR/measurement edges (`strategic_theme_contains_objective`, `objective_achieved_through_key_result`, `key_result_quantified_by_metric`, `objective_measured_by_metric`) gain cross-product registry variants (cross-edges 37 → 41). `deduplicate_nodes` gains a read-only `match: "similar"` near-duplicate suggestion, `update_product` a slug / file-rename path, and `constraint` a `constraint_origin` (internal / external) sub-role.
+
+### Added
+- `team_contains_team`; four cross-product OKR/measurement edge variants.
+- `constraint_origin` on `constraint`.
+- `deduplicate_nodes match: "similar"`; `update_product` rename path.
+
+### Changed
+- Three coverage anti-patterns stage-tuned so young graphs aren't flagged prematurely.
+
+---
+
+## [0.17.1] - 2026-06-30
+
+**First-class `create_portfolio` with portfolio kinds, and a domain-guide note separating `product_area` from `team_org`.** `create_portfolio` becomes a first-class tool (warning on a dangling `parent_portfolio_id`), and a domain-guide note distinguishes `product_area` (a product's own decomposition) from `team_org` (who owns it). Includes post-QA repairs to workspace re-kinding and `member_kind` docs.
+
+### Added
+- `create_portfolio` tool + portfolio kinds.
+
+---
+
+## [0.17.0] - 2026-06-29
+
+**`operating_function` gains a `member_kind` discriminator and a required north-star metric, with cross-product org-ownership edges and three anti-patterns.** The operating-function layer (how an org runs itself) matures: a `member_kind` discriminator with table-driven validation profiles, a required north-star metric (with softened coverage warnings on thin graphs), and cross-product ownership edges linking an operating function to the org that runs it. Also completes Pattern G C1 — `owner: string` becomes `node_owned_by_*` edges.
+
+### Added
+- `member_kind` on `operating_function` + validation profiles.
+- Operating-function org-ownership cross-edges.
+- Three anti-patterns: operating-function without north-star / operating-content / org-link.
+
+### Changed
+- `operating_function` requires a north-star metric.
+- Pattern G C1: `owner: string` → `node_owned_by_*` edges.
+
+---
+
+## [0.16.2] - 2026-06-18
+
+**A first-class template system: `list_templates` / `get_template` (local + cloud parity), an SDK access layer, and the `/templates` gallery driven from the package.** Starter templates become queryable spec data rather than site content — two MCP tools with parity across both servers, an SDK template-access layer and `upg template` CLI command, CLI starter seeds sourced from the package, and the site gallery reading the same single source. Ships with a conformance drift gate.
+
+### Added
+- `list_templates` / `get_template` (local + cloud); SDK template layer; `upg template` command.
+
+---
+
+## [0.16.1] - 2026-06-18
+
+**Adoption-path hardening: revived CLI verify gates, SDK-reference re-verification, and a templates conformance pass.** A QA sweep of the adoption surface (SDK / CLI / MCP): the dead `--no-orphans` / `--no-broken-chains` verify gates are revived, the SDK barrel reference is re-verified against core, templates gain a conformance pass and drift gate, and skills' stale status / stage vocabulary is scrubbed to canonical. Tooling and docs only; no spec-model change.
+
+### Fixed
+- Dead `verify --no-orphans` / `--no-broken-chains` gates; SDK barrel-reference drift; stale status / stage vocabulary in skills.
+
+---
+
+## [0.16.0] - 2026-06-17
+
+**Pattern G — the open-standard data boundary: 12 PII / registry / vendor properties dropped, 20 infrastructure pointers tagged `@volatile`.** The boundary ADR draws the line between what the open standard models (product structure) and what it must not carry (personal data, tenancy, session, vendor pointers). Twelve such properties are removed and twenty infrastructure pointers marked `@volatile`. Breaking. The `owner: string` → edge split (C1) defers to 0.17.0.
+
+### Removed
+- 12 PII / registry / session / vendor properties.
+
+### Changed
+- 20 infrastructure pointers → `@volatile`.
+
+---
+
+## [0.15.0] - 2026-06-17
+
+**Pattern D — 14 `*_status` shadow properties collapse into the entity lifecycle.** Fourteen properties that duplicated an entity's phase as a parallel `*_status` scalar are removed; the single base `status` / lifecycle becomes the one axis, and the T1.1 guardrail goes 14 → 0. `*_status` properties that are genuinely distinct axes (not subsets of a phase set) are kept. Breaking.
+
+### Removed
+- 14 `*_status` shadow properties (lifted to base `status`).
+
+---
+
+## [0.14.1] - 2026-06-17
+
+**Release rider: a browser-safe `crypto` import in the canonical serialiser (unblocks Sanity Studio).** The canonical serialiser imported `crypto` in a form that broke browser bundlers; it is namespaced to `node:crypto`. Fix only.
+
+### Fixed
+- Browser-safe `crypto` import in `format/canonical.ts`.
+
+---
+
+## [0.14.0] - 2026-06-17
+
+**Pattern E — 14 deprecated / ghost properties removed, with a hard-removal guard.** Fourteen long-deprecated or never-implemented ("ghost") properties are removed, gated by a new T1.8 guard that fails the build if a hard-removed property reappears, and recorded in `UPG_PROPERTY_MIGRATIONS['0.14.0']`. Breaking.
+
+### Removed
+- 14 deprecated / ghost properties.
+
+### Added
+- T1.8 hard-removal guard.
+
+---
+
+## [0.13.2] - 2026-06-17
+
+**Runtime-state properties are tagged `@snapshot` and aggregates `@derived`, taking the T1.2 / T1.3 baselines to zero.** The additive half of Wave 2: roughly 55 runtime / live-state properties on definition entities are marked `@snapshot` and about 30 derived / computed scalars `@derived` — mark, don't delete — so the guardrail baselines reach 0 without data loss.
+
+### Changed
+- ~85 properties tagged `@snapshot` / `@derived`.
+
+---
+
+## [0.13.1] - 2026-06-17
+
+**A connective cross-edge layer: shared jobs and needs, feature→product surfacing, screen→competitor targeting, persona delegation, and design-system connectors.** New cross-domain edges that connect entities without containing them — `shares_job` / `shares_need`, `feature_surfaces_product`, `screen_targets_competitor`, `persona_delegates_to_persona` (agent delegation, promoted to a cross-edge), and design-system connectors. The relational tissue between domains.
+
+### Added
+- Connective cross-edges: `shares_job` / `shares_need`, `feature_surfaces_product`, `screen_targets_competitor`, `persona_delegates_to_persona`, design-system connectors.
+
+---
+
+## [0.13.0] - 2026-06-17
+
+**Edge hygiene: a dead revenue cross-domain edge dropped, the hypothesis lifecycle de-duplicated, and the metric↔outcome cycle broken.** Wave 1 of the structural cleanup removes a dead cross-domain revenue edge, collapses duplicate hypothesis-lifecycle edges, and breaks a metric↔outcome reference cycle that made traversal ambiguous. Adds CLI `tree --pattern` help for `north_star`.
+
+### Changed
+- Dead revenue cross-domain edge removed; hypothesis lifecycle de-duplicated; metric↔outcome cycle broken.
+
+---
+
+## [0.12.8] - 2026-06-17
+
+**A queryable property-modifier surface (`@derived` / `@snapshot` / `@volatile`) with the T1.2 / T1.3 guardrails.** Introduces the property-modifier vocabulary as first-class, queryable spec metadata — a property can be tagged derived (computed), snapshot (cached live-state), or volatile (infrastructure) — and the guardrails that hold the counts. This is the substrate the 0.13.2 tagging pass and the 0.16.0 boundary sweep build on.
+
+### Added
+- Property-modifier surface + T1.2 / T1.3 guardrails.
+
+---
+
+## [0.12.7] - 2026-06-17
+
+**A cross-product reference family for brand, design system, and marketing.** Edges that let one graph reference shared brand, design-system, and marketing entities living in another graph within a portfolio.
+
+### Added
+- Cross-product reference edges (brand, design system, marketing).
+
+---
+
+## [0.12.6] - 2026-06-17
+
+**`user_story` and `experiment_run` graduate to `stable`.** Two proposed entity types meet the promotion rubric and graduate.
+
+### Changed
+- `user_story`, `experiment_run` → `stable`.
+
+---
+
+## [0.12.5] - 2026-06-17
+
+**A `screen_markets_product` cross-edge, the `portfolio_census` read, and a single-sourced active entity-type count.** Adds the `screen_markets_product` cross-edge, a `portfolio_census` cross-product read tool, a hardened proposed-promotion rubric checker, and single-sources the active entity-type count.
+
+### Added
+- `screen_markets_product` cross-edge; `portfolio_census` tool.
+
+---
+
+## [0.12.4] - 2026-06-16
+
+**P14 Bucket B — actor scalars become promotable to polymorphic `node_owned_by_*` edges (additive).** The actor-ownership string fields become promotable to polymorphic `node_owned_by_*` edges via `promote_scalar_to_edge`, per the enumeration-versus-polymorphism ADR. Additive — promotion is opt-in.
+
+### Added
+- P14 Bucket B: actor scalars → `node_owned_by_*` (promotable).
+
+---
+
+## [0.12.3] - 2026-06-16
+
+**`switching_cost.magnitude` steered onto the `severity_5` assessment scale; the SDK resolves products in `workspace.json` subfolders.** Property-scale alignment plus a resolver fix so products nested in workspace subfolders are found.
+
+### Changed
+- `switching_cost.magnitude` → `severity_5` assessment scale.
+
+### Fixed
+- `findProductFileById` resolves products in `workspace.json` subfolders.
+
+---
+
+## [0.12.2] - 2026-06-16
+
+**Canonical registry: `register_instance` resolves nodes in any workspace product.** The registry / instance-of layer's `register_instance` now resolves its target across any product in the workspace, not only the active one.
+
+### Changed
+- `register_instance` — cross-product node resolution.
+
+---
+
+## [0.12.1] - 2026-06-16
+
+**`operating_lifecycle` / `operating_stage` refined (properties and edges).** Property and edge refinements to the operating-lifecycle primitive introduced in the 0.11 line.
+
+### Changed
+- `operating_lifecycle` / `operating_stage` property + edge refinements.
+
+---
+
+## [0.12.0] - 2026-06-16
+
+**P14 — the string-reference sweep: `promote_scalar_to_edge` turns entity-reference scalars into real edges, starting with 22 orphans and the flagship `north_star_metric`.** The keystone of the P14 conformance track. A `promote_scalar_to_edge` engine converts properties that named another entity by string into first-class edges: Bucket A1 promotes 22 orphan entity-reference scalars, A2 resolves shadow references, Bucket C collapses one aggregate, and the flagship `north_star_metric` becomes an edge. This is the foundation the polymorphic-ownership work (Bucket B, 0.12.4) and the modifier waves build on.
+
+### Added
+- `promote_scalar_to_edge` engine; `north_star_metric` edge; `list_scalar_to_edge_migrations` (cloud parity).
+
+### Changed
+- 22 orphan scalars, shadow references, and one aggregate → edges (P14 A1 / A2 / C).
+
+---
+
+## [0.11.6] - 2026-06-16
+
+**Version bump — regenerated site artifacts and paper-count sync.** Version-stamp and artifact regeneration; no spec-model change.
+
+---
+
 ## [0.11.5] - 2026-06-15
 
 **`get_tree` gains a `commercial` pattern: the business-model spine as a one-call tree.** The monetisation axis was the one populated, tree-shaped region with no pattern — *"show me the money model: streams, costs, tiers, and the metrics that measure them"* meant a hand-authored `query`. `commercial` roots at `business_model` and walks its revenue streams, cost structure, and unit economics; a stream into its pricing tiers, the metrics that measure it, and the pricing strategy that prices it; and metrics decompose into their components (the MRR waterfall). A pricing tier reached from both its stream and its pricing strategy renders once, then as a shared reference — the same multi-parent (G5) path `delivery` relies on. It is a curated spanning tree over the containment subset of the multi-hub `business_gtm_growth` region (the GTM/value flow stays excluded — a tree would misrepresent it); company-grain financials (CAC, LTV, runway) hang off the product, not a single stream, and remain an okr/strategy concern. Declarative child-map record, no engine work, all-optional (a stream without a metric is not a structural hole). 12 patterns now; no new tools (131). A new pattern on a young tool = a patch.
