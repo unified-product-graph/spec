@@ -199,7 +199,7 @@ export const ossTemplates: TemplateSet[] = [
         default_properties: {
           offering_type: 'service',
           validation_state: 'hypothesis',
-          status: 'drafted',
+          status: 'untested',
         },
         default_tags: ['enterprise', 'paid-tier'],
       },

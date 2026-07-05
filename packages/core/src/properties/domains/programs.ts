@@ -21,8 +21,6 @@ import type { HealthStatus, ISODate, Priority } from '../primitives.js'
  * }
  */
 export interface ProgramProperties {
-  /** Current status of the program */
-  program_status?: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled'
   /** Program start date (ISO format) */
   start_date?: ISODate
   /** Program end date (ISO format) */
@@ -41,8 +39,6 @@ export interface ProgramProperties {
  * }
  */
 export interface ProjectProperties {
-  /** Current status of the project */
-  project_status?: 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled'
   /** Project start date (ISO format) */
   start_date?: ISODate
   /** Project end date (ISO format) */
@@ -118,8 +114,6 @@ export interface DeliverableProperties {
   deliverable_type?: 'document' | 'prototype' | 'release' | 'design' | 'report' | 'other'
   /** Due date for the deliverable (ISO format) */
   due_date?: ISODate
-  /** Current progress status */
-  deliverable_status?: 'not_started' | 'in_progress' | 'in_review' | 'accepted' | 'rejected'
   /** Criteria that must be met for the deliverable to be accepted */
   acceptance_criteria?: string
 }

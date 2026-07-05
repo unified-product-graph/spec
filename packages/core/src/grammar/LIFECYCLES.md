@@ -2,7 +2,7 @@
 
 # UPG Lifecycles Reference
 
-Every entity type's status journey, in one table. **190 types carry a lifecycle today** (85 hand-authored + 105 template-derived). **122 types are deliberately lifecycle-free**, and **0 are triaged for a future lifecycle**.
+Every entity type's status journey, in one table. **191 types carry a lifecycle today** (68 hand-authored + 123 template-derived). **129 types are deliberately lifecycle-free**, and **0 are triaged for a future lifecycle**.
 
 ## Model
 
@@ -11,32 +11,25 @@ UPG lifecycles are **two-level**:
 - **Phases** are the universal vocabulary every consumer can rely on (e.g. `draft`, `review`, `published`). Phases are fixed by the spec for each lifecycle and surface on the entity's `status` property.
 - **States** (optional, finer-grained) are sub-positions within a phase, defined inline on `LifecyclePhase.core_states`. Tools may extend states locally via `lifecycle_extensions` on the document.
 
-`UPGLifecycle.terminal_phases` lists the phases that represent **completion**. Terminal phases may still declare `transitions_to`; these are **late-state moves** (reopen, revive, deprecate after approval) and are NOT forward progression. Consumers treating "terminal = done" should respect this distinction.
+`UPGLifecycle.terminal_phases` lists the phases that represent **completion**. Terminal phases may still declare `transitions_to` — these are **late-state moves** (reopen, revive, deprecate after approval) and are NOT forward progression. Consumers treating "terminal = done" should respect this distinction.
 
 **Templates** are reusable phase chains shared across many entity types. Six templates today: `PUBLISHING`, `OPERATIONAL`, `APPROVAL`, `WORK_ITEM`, `DISCOVERY`, `MATURITY`. A type generated from a template carries the template's id on `UPGLifecycle.template_id` so render and audit tooling can group, label, and link templates without re-detecting them structurally.
 
-`getLifecycleRenderShape(entityType)` returns a flattened, render-ready shape for any type (phase-level only), with transitions classified as `forward | backward | terminal | reopen`.
+`getLifecycleRenderShape(entityType)` returns a flattened, render-ready shape for any type — phase-level only, with transitions classified as `forward | backward | terminal | reopen`.
 
 ---
 
 
-## Hand-authored lifecycles (85)
+## Hand-authored lifecycles (68)
 
 Lifecycles defined directly in `lifecycles.ts` because the entity carries a state machine that doesn't fit one of the reusable templates.
 
 | Type | Domain | Initial | Phases | Terminals | Reopen? |
 | --- | --- | --- | --- | --- | --- |
-| `experiment` | _(unmapped)_ | `planned` | planned → running → analysing → done | `done` | no |
-| `hypothesis_claim` | _(unmapped)_ | `drafted` | drafted → active → validated → invalidated → archived | `validated`, `invalidated`, `archived` | yes |
-| `user_story` | _(unmapped)_ | `draft` | draft → ready → in_progress → done | `done` | no |
-| `a11y_issue` | accessibility | `open` | open → triaged → in_progress → fixed → verified → accepted | `verified`, `accepted` | no |
 | `ai_dataset` | ai | `collecting` | collecting → curated → versioned → archived | `versioned`, `archived` | yes |
-| `ai_experiment` | ai | `planned` | planned → running → analysed → completed → abandoned | `completed`, `abandoned` | no |
 | `ai_guardrail` | ai | `proposed` | proposed → active → relaxed → removed | `active`, `relaxed`, `removed` | yes |
 | `ai_model` | ai | `evaluating` | evaluating → staging → production → deprecated → retired | `retired` | no |
 | `eval_benchmark` | ai | `drafted` | drafted → running → published → deprecated | `published`, `deprecated` | yes |
-| `eval_run` | ai | `planned` | planned → running → complete → failed | `complete`, `failed` | no |
-| `hallucination_report` | ai | `reported` | reported → investigating → resolved → accepted | `resolved`, `accepted` | yes |
 | `model_comparison` | ai | `planned` | planned → running → published → archived | `published`, `archived` | yes |
 | `prompt_version` | ai | `drafted` | drafted → testing → active → deprecated | `active`, `deprecated` | yes |
 | `agent_definition` | automation | `testing` | testing → active → paused → disabled → retired | `retired` | no |
@@ -46,15 +39,10 @@ Lifecycles defined directly in `lifecycles.ts` because the entity carries a stat
 | `brand_identity` | brand | `exploratory` | exploratory → defined → mature | `mature` | no |
 | `business_model` | business_model | `drafted` | drafted → testing → validated → invalidated → pivoted | `validated`, `invalidated`, `pivoted` | yes |
 | `revenue_stream` | business_model | `proposed` | proposed → piloting → live → sunset | `live`, `sunset` | yes |
-| `value_proposition` | business_model | `drafted` | drafted → testing → validated → invalidated | `validated`, `invalidated` | yes |
-| `customer_feedback` | customer_success | `received` | received → triaged → actioned → acknowledged | `actioned`, `acknowledged` | no |
 | `customer_health_score` | customer_success | `monitoring` | monitoring → at_risk → critical → recovered → churned | `recovered`, `churned` | yes |
 | `playbook` | customer_success | `drafted` | drafted → tested → live → retired | `live`, `retired` | yes |
-| `support_ticket` | customer_success | `opened` | opened → triaged → in_progress → resolved → closed | `resolved`, `closed` | yes |
 | `data_pipeline` | data_analytics | `building` | building → active → paused → failed → deprecated | `deprecated` | no |
 | `incident` | devops | `detected` | detected → triaged → contained → resolved → mitigated | `resolved`, `mitigated` | no |
-| `design_sprint` | discovery | `planning` | planning → in_progress → completed | `completed` | no |
-| `feasibility_study` | discovery | `scoped` | scoped → analysing → concluded → abandoned | `concluded`, `abandoned` | no |
 | `opportunity` | discovery | `identified` | identified → validated → deferred | _(none)_ | no |
 | `solution` | discovery | `proposed` | proposed → in_progress → shipped → deferred | `shipped` | yes |
 | `database_schema` | engineering | `current` | current → pending → failed | _(none)_ | no |
@@ -63,25 +51,21 @@ Lifecycles defined directly in `lifecycles.ts` because the entity carries a stat
 | `feature_flag` | engineering | `off` | off → rollout → on | `on` | no |
 | `investigation` | engineering | `open` | open → active → paused → resolved → abandoned | `resolved`, `abandoned` | no |
 | `service` | engineering | `development` | development → staging → production → deprecated | `deprecated` | no |
-| `technical_debt_item` | engineering | `identified` | identified → acknowledged → in_progress → resolved → accepted | `resolved`, `accepted` | no |
 | `beta_program` | feedback | `recruiting` | recruiting → active → graduated → closed | `graduated`, `closed` | no |
 | `feature_request` | feedback | `new` | new → under_review → planned → in_progress → shipped → wont_do | `shipped`, `wont_do` | no |
 | `feedback_program` | feedback | `planning` | planning → active → paused → retired | `retired` | no |
 | `user_advisory_board` | feedback | `recruiting` | recruiting → active → paused → retired | `retired` | no |
+| `specification` | foundations | `draft` | draft → active → deprecated → superseded | `superseded` | no |
 | `growth_campaign` | growth | `drafted` | drafted → planning → live → completed → paused | `completed`, `paused` | yes |
 | `variant` | growth | `proposed` | proposed → live → winning → losing → retired | `winning`, `losing`, `retired` | yes |
 | `contract` | legal | `draft` | draft → in_review → signed → active → expired → terminated | `expired`, `terminated` | no |
 | `ip_asset` | legal | `filed` | filed → pending → granted → expired → abandoned | `expired`, `abandoned` | no |
-| `bug` | product_spec | `open` | open → in_progress → fixed → verified → wont_fix | `verified`, `wont_fix` | no |
-| `epic` | product_spec | `todo` | todo → in_progress → done | `done` | no |
 | `feature` | product_spec | `proposed` | proposed → in_progress → shipped → archived | `archived` | no |
 | `feature_area` | product_spec | `planned` | planned → active → deprecated | `deprecated` | no |
+| `planning_cycle` | product_spec | `planned` | planned → active → closed | `closed` | yes |
 | `release` | product_spec | `planned` | planned → in_progress → shipped | `shipped` | no |
 | `roadmap_item` | product_spec | `planned` | planned → in_progress → shipped → deferred | `shipped` | no |
-| `task` | product_spec | `todo` | todo → in_progress → in_review → done | `done` | no |
 | `security_control` | security | `planned` | planned → in_progress → implemented → verified | `verified` | no |
-| `vulnerability` | security | `open` | open → triaged → in_progress → mitigated → resolved → accepted | `resolved`, `accepted` | no |
-| `assumption` | strategy | `untested` | untested → testing → validated → invalidated | `validated`, `invalidated` | no |
 | `capability` | strategy | `planned` | planned → building → operational → retired | `operational`, `retired` | yes |
 | `initiative` | strategy | `proposed` | proposed → in_progress → completed → abandoned | `completed`, `abandoned` | no |
 | `key_result` | strategy | `on_track` | on_track → at_risk → behind → achieved | `achieved` | no |
@@ -90,6 +74,7 @@ Lifecycles defined directly in `lifecycles.ts` because the entity carries a stat
 | `outcome` | strategy | `identified` | identified → measuring → achieved → abandoned | `achieved`, `abandoned` | yes |
 | `product` | strategy | `concept` | concept → validation → build → beta → launch → growth → mature → maintenance → sunset | `sunset` | no |
 | `strategic_pillar` | strategy | `proposed` | proposed → active → sunset | `sunset` | no |
+| `strategic_question` | strategy | `open` | open → resolved | `resolved` | yes |
 | `strategic_theme` | strategy | `active` | active → paused → completed | `completed` | no |
 | `vision` | strategy | `drafting` | drafting → ratified → revised → archived | `ratified`, `revised`, `archived` | yes |
 | `capacity_plan` | team_org | `drafted` | drafted → committed → in_flight → completed → revised | `completed`, `revised` | yes |
@@ -98,23 +83,21 @@ Lifecycles defined directly in `lifecycles.ts` because the entity carries a stat
 | `role` | team_org | `proposed` | proposed → open → filled → vacant | `filled`, `vacant` | yes |
 | `team_okr` | team_org | `drafted` | drafted → committed → in_progress → completed → missed | `completed`, `missed` | yes |
 | `test_case` | testing | `draft` | draft → active → deprecated | `deprecated` | no |
+| `test_plan` | testing | `drafted` | drafted → executing → completed → cancelled | `completed`, `cancelled` | yes |
 | `test_suite` | testing | `draft` | draft → active → deprecated | `deprecated` | no |
 | `need` | user | `raw` | raw → validated → prioritized | `prioritized` | no |
 | `insight` | user_research | `proposed` | proposed → validated → applied → retired | `applied`, `retired` | yes |
 | `interview_guide` | user_research | `drafting` | drafting → ready → in_use → archived | `archived` | yes |
 | `research_question` | user_research | `open` | open → researching → answered → parked | `answered`, `parked` | yes |
-| `research_study` | user_research | `planned` | planned → in_progress → analysing → complete | `complete` | no |
 | `design_concept` | ux_design | `sketched` | sketched → refined → selected → rejected | `selected`, `rejected` | no |
-| `prototype` | ux_design | `untested` | untested → testing → passed → failed | `passed`, `failed` | no |
+| `screen` | ux_design | `draft` | draft → in_design → built → shipped → deprecated | `deprecated` | no |
 | `experiment_plan` | validation | `drafted` | drafted → scheduled → approved → cancelled | `approved`, `cancelled` | no |
-| `experiment_run` | validation | `in_progress` | in_progress → complete → aborted | `complete`, `aborted` | no |
-| `hypothesis` | validation | `untested` | untested → testing → resolved | `resolved` | no |
 | `research_plan` | validation | `draft` | draft → active → completed → abandoned | `completed`, `abandoned` | no |
-| `test_plan` | validation | `drafted` | drafted → executing → completed → cancelled | `completed`, `cancelled` | yes |
+| `framework_exercise` | workspace | `draft` | draft → active → archived | `archived` | yes |
 
 ---
 
-## Template-derived lifecycles (105)
+## Template-derived lifecycles (123)
 
 Lifecycles generated by `fromTemplate()` from one of the reusable templates. Adding a new entity type to an existing template is a one-line change in `TEMPLATE_LIFECYCLES`.
 
@@ -131,6 +114,13 @@ Lifecycles generated by `fromTemplate()` from one of the reusable templates. Add
 | `security_policy` | security | `APPROVAL` | `proposed` | `approved`, `rejected`, `deprecated` |
 | `threat_model` | security | `APPROVAL` | `proposed` | `approved`, `rejected`, `deprecated` |
 | `design_question` | ux_design | `DISCOVERY` | `open` | `resolved`, `parked` |
+| `a11y_issue` | accessibility | `INCIDENT` | `open` | `resolved`, `closed`, `wont_fix` |
+| `bug` | product_spec | `INCIDENT` | `open` | `resolved`, `closed`, `wont_fix` |
+| `customer_feedback` | customer_success | `INCIDENT` | `open` | `resolved`, `closed`, `wont_fix` |
+| `hallucination_report` | ai | `INCIDENT` | `open` | `resolved`, `closed`, `wont_fix` |
+| `support_ticket` | customer_success | `INCIDENT` | `open` | `resolved`, `closed`, `wont_fix` |
+| `technical_debt_item` | engineering | `INCIDENT` | `open` | `resolved`, `closed`, `wont_fix` |
+| `vulnerability` | security | `INCIDENT` | `open` | `resolved`, `closed`, `wont_fix` |
 | `api_ecosystem` | ecosystem | `MATURITY` | `alpha` | `deprecated` |
 | `brand_logo` | brand | `MATURITY` | `alpha` | `deprecated` |
 | `certification` | education | `MATURITY` | `alpha` | `deprecated` |
@@ -142,7 +132,6 @@ Lifecycles generated by `fromTemplate()` from one of the reusable templates. Add
 | `infrastructure_component` | devops | `MATURITY` | `alpha` | `deprecated` |
 | `integration_partner` | ecosystem | `MATURITY` | `alpha` | `deprecated` |
 | `locale` | localisation | `MATURITY` | `alpha` | `deprecated` |
-| `screen` | ux_design | `MATURITY` | `alpha` | `deprecated` |
 | `a11y_audit` | accessibility | `OPERATIONAL` | `planning` | `completed`, `sunset` |
 | `alert_rule` | devops | `OPERATIONAL` | `planning` | `completed`, `sunset` |
 | `community_initiative` | marketing | `OPERATIONAL` | `planning` | `completed`, `sunset` |
@@ -216,19 +205,31 @@ Lifecycles generated by `fromTemplate()` from one of the reusable templates. Add
 | `risk` | compliance | `RISK_ITEM` | `identified` | `mitigated`, `accepted`, `closed` |
 | `threat` | security | `RISK_ITEM` | `identified` | `mitigated`, `accepted`, `closed` |
 | `deal` | sales | `SALES_DEAL` | `qualified` | `closed_won`, `closed_lost` |
+| `ai_experiment` | ai | `STUDY` | `planned` | `complete`, `abandoned` |
+| `design_sprint` | discovery | `STUDY` | `planned` | `complete`, `abandoned` |
+| `eval_run` | ai | `STUDY` | `planned` | `complete`, `abandoned` |
+| `experiment` | validation | `STUDY` | `planned` | `complete`, `abandoned` |
+| `experiment_run` | validation | `STUDY` | `planned` | `complete`, `abandoned` |
+| `feasibility_study` | discovery | `STUDY` | `planned` | `complete`, `abandoned` |
+| `research_study` | user_research | `STUDY` | `planned` | `complete`, `abandoned` |
+| `assumption` | strategy | `VALIDATION` | `untested` | `validated`, `invalidated`, `archived` |
+| `hypothesis` | validation | `VALIDATION` | `untested` | `validated`, `invalidated`, `archived` |
+| `prototype` | ux_design | `VALIDATION` | `untested` | `validated`, `invalidated`, `archived` |
+| `value_proposition` | business_model | `VALIDATION` | `untested` | `validated`, `invalidated`, `archived` |
 | `agent_hook` | automation | `WORK_ITEM` | `todo` | `done` |
 | `agent_skill` | automation | `WORK_ITEM` | `todo` | `done` |
 | `agent_task` | automation | `WORK_ITEM` | `todo` | `done` |
 | `deliverable` | program_mgmt | `WORK_ITEM` | `todo` | `done` |
+| `epic` | product_spec | `WORK_ITEM` | `todo` | `done` |
 | `invoice` | sales | `WORK_ITEM` | `todo` | `done` |
 | `lead` | sales | `WORK_ITEM` | `todo` | `done` |
 | `milestone` | program_mgmt | `WORK_ITEM` | `todo` | `done` |
-| `story_task` | product_spec | `WORK_ITEM` | `todo` | `done` |
 | `success_milestone` | customer_success | `WORK_ITEM` | `todo` | `done` |
+| `task` | product_spec | `WORK_ITEM` | `todo` | `done` |
 
 ---
 
-## Templates (8)
+## Templates (11)
 
 Reusable lifecycle patterns. Each entity type registered against a template inherits the template's phases verbatim. Add a type to a template via `TEMPLATE_LIFECYCLES` in `lifecycles.ts`.
 
@@ -238,11 +239,11 @@ Reusable lifecycle patterns. Each entity type registered against a template inhe
 
 Phases:
 
-- `proposed`: Proposed. → `reviewing`
-- `reviewing`: Reviewing. → `approved`, `rejected`, `proposed`
-- `approved` [terminal]: Approved. → `deprecated`
-- `rejected` [terminal]: Rejected. → `proposed`
-- `deprecated` [terminal]: Deprecated. → _(end)_
+- `proposed` — Proposed. → `reviewing`
+- `reviewing` — Reviewing. → `approved`, `rejected`, `proposed`
+- `approved` [terminal] — Approved. → `deprecated`
+- `rejected` [terminal] — Rejected. → `proposed`
+- `deprecated` [terminal] — Deprecated. → _(end)_
 
 Applied to:
 
@@ -254,29 +255,46 @@ Applied to:
 
 Phases:
 
-- `open`: Open. → `exploring`
-- `exploring`: Exploring. → `resolved`, `parked`, `open`
-- `resolved` [terminal]: Resolved. → _(end)_
-- `parked` [terminal]: Parked. → `open`
+- `open` — Open. → `exploring`
+- `exploring` — Exploring. → `resolved`, `parked`, `open`
+- `resolved` [terminal] — Resolved. → _(end)_
+- `parked` [terminal] — Parked. → `open`
 
 Applied to:
 
 `design_question`
 
-### `MATURITY` (12 consumers)
+### `INCIDENT` (7 consumers)
+
+**Initial:** `open` · **Terminals:** `resolved`, `closed`, `wont_fix` · **Reopen:** yes
+
+Phases:
+
+- `open` — Open. → `triaged`
+- `triaged` — Triaged. → `in_progress`, `resolved`, `wont_fix`
+- `in_progress` — In Progress. → `resolved`, `wont_fix`
+- `resolved` [terminal] — Resolved. → `closed`, `triaged`
+- `closed` [terminal] — Closed. → _(end)_
+- `wont_fix` [terminal] — Won't Fix. → _(end)_
+
+Applied to:
+
+`support_ticket`, `bug`, `a11y_issue`, `vulnerability`, `hallucination_report`, `technical_debt_item`, `customer_feedback`
+
+### `MATURITY` (11 consumers)
 
 **Initial:** `alpha` · **Terminals:** `deprecated` · **Reopen:** no
 
 Phases:
 
-- `alpha`: Alpha. → `beta`
-- `beta`: Beta. → `ga`, `alpha`
-- `ga`: Generally Available. → `deprecated`
-- `deprecated` [terminal]: Deprecated. → _(end)_
+- `alpha` — Alpha. → `beta`
+- `beta` — Beta. → `ga`, `alpha`
+- `ga` — Generally Available. → `deprecated`
+- `deprecated` [terminal] — Deprecated. → _(end)_
 
 Applied to:
 
-`api_ecosystem`, `integration_partner`, `locale`, `design_system`, `design_component`, `design_pattern`, `screen`, `brand_logo`, `certification`, `data_source`, `data_product`, `infrastructure_component`
+`api_ecosystem`, `integration_partner`, `locale`, `design_system`, `design_component`, `design_pattern`, `brand_logo`, `certification`, `data_source`, `data_product`, `infrastructure_component`
 
 ### `OPERATIONAL` (32 consumers)
 
@@ -284,11 +302,11 @@ Applied to:
 
 Phases:
 
-- `planning`: Planning. → `active`
-- `active`: Active. → `paused`, `completed`, `sunset`
-- `paused`: Paused. → `active`, `sunset`
-- `completed` [terminal]: Completed. → _(end)_
-- `sunset` [terminal]: Sunset. → _(end)_
+- `planning` — Planning. → `active`
+- `active` — Active. → `paused`, `completed`, `sunset`
+- `paused` — Paused. → `active`, `sunset`
+- `completed` [terminal] — Completed. → _(end)_
+- `sunset` [terminal] — Sunset. → _(end)_
 
 Applied to:
 
@@ -300,10 +318,10 @@ Applied to:
 
 Phases:
 
-- `draft`: Draft. → `review`
-- `review`: In Review. → `draft`, `published`
-- `published`: Published. → `archived`, `draft`
-- `archived` [terminal]: Archived. → `draft`
+- `draft` — Draft. → `review`
+- `review` — In Review. → `draft`, `published`
+- `published` — Published. → `archived`, `draft`
+- `archived` [terminal] — Archived. → `draft`
 
 Applied to:
 
@@ -315,11 +333,11 @@ Applied to:
 
 Phases:
 
-- `identified`: Identified. → `assessed`
-- `assessed`: Assessed. → `mitigated`, `accepted`, `closed`
-- `mitigated` [terminal]: Mitigated. → _(end)_
-- `accepted` [terminal]: Accepted. → _(end)_
-- `closed` [terminal]: Closed. → `assessed`
+- `identified` — Identified. → `assessed`
+- `assessed` — Assessed. → `mitigated`, `accepted`, `closed`
+- `mitigated` [terminal] — Mitigated. → _(end)_
+- `accepted` [terminal] — Accepted. → _(end)_
+- `closed` [terminal] — Closed. → `assessed`
 
 Applied to:
 
@@ -331,40 +349,68 @@ Applied to:
 
 Phases:
 
-- `qualified`: Qualified. → `proposal`
-- `proposal`: Proposal. → `negotiation`, `closed_lost`
-- `negotiation`: Negotiation. → `closed_won`, `closed_lost`
-- `closed_won` [terminal]: Closed Won. → _(end)_
-- `closed_lost` [terminal]: Closed Lost. → _(end)_
+- `qualified` — Qualified. → `proposal`
+- `proposal` — Proposal. → `negotiation`, `closed_lost`
+- `negotiation` — Negotiation. → `closed_won`, `closed_lost`
+- `closed_won` [terminal] — Closed Won. → _(end)_
+- `closed_lost` [terminal] — Closed Lost. → _(end)_
 
 Applied to:
 
 `deal`
 
-### `WORK_ITEM` (9 consumers)
+### `STUDY` (7 consumers)
+
+**Initial:** `planned` · **Terminals:** `complete`, `abandoned` · **Reopen:** no
+
+Phases:
+
+- `planned` — Planned. → `running`
+- `running` — Running. → `analysing`, `abandoned`
+- `analysing` — Analysing. → `complete`, `abandoned`
+- `complete` [terminal] — Complete. → _(end)_
+- `abandoned` [terminal] — Abandoned. → _(end)_
+
+Applied to:
+
+`experiment`, `experiment_run`, `research_study`, `design_sprint`, `feasibility_study`, `ai_experiment`, `eval_run`
+
+### `VALIDATION` (4 consumers)
+
+**Initial:** `untested` · **Terminals:** `validated`, `invalidated`, `archived` · **Reopen:** yes
+
+Phases:
+
+- `untested` — Untested. → `testing`
+- `testing` — Testing. → `validated`, `invalidated`
+- `validated` [terminal] — Validated. → `archived`
+- `invalidated` [terminal] — Invalidated. → `archived`, `testing`
+- `archived` [terminal] — Archived. → _(end)_
+
+Applied to:
+
+`assumption`, `prototype`, `value_proposition`, `hypothesis`
+
+### `WORK_ITEM` (10 consumers)
 
 **Initial:** `todo` · **Terminals:** `done` · **Reopen:** no
 
 Phases:
 
-- `todo`: To Do. → `in_progress`
-- `in_progress`: In Progress. → `in_review`, `todo`
-- `in_review`: In Review. → `done`, `in_progress`
-- `done` [terminal]: Done. → _(end)_
+- `todo` — To Do. → `in_progress`
+- `in_progress` — In Progress. → `in_review`, `todo`
+- `in_review` — In Review. → `done`, `in_progress`
+- `done` [terminal] — Done. → _(end)_
 
 Applied to:
 
-`story_task`, `deliverable`, `milestone`, `success_milestone`, `invoice`, `lead`, `agent_task`, `agent_skill`, `agent_hook`
+`deliverable`, `milestone`, `success_milestone`, `invoice`, `lead`, `agent_task`, `agent_skill`, `agent_hook`, `task`, `epic`
 
 ---
 
-## Lifecycle-free types (122)
+## Lifecycle-free types (129)
 
 Types that deliberately do not carry a status lifecycle. Reference data (vocabularies, lookups), structural primitives (atoms of a composite), immutable data points, configuration, append-only ledger entries, computed values, and DDD modelling primitives. Source of truth: `UPG_LIFECYCLE_FREE_TYPES` in `lifecycles.ts`.
-
-### _(unmapped)_ (1)
-
-`hypothesis_evidence`
 
 ### accessibility (2)
 
@@ -418,6 +464,10 @@ Types that deliberately do not carry a status lifecycle. Reference data (vocabul
 
 `feedback_theme`, `feedback_vote`
 
+### foundations (3)
+
+`operating_lifecycle`, `operating_stage`, `primitive`
+
 ### go_to_market (7)
 
 `ideal_customer_profile`, `objection`, `positioning`, `proof_point`, `rebuttal`, `sales_motion`, `territory`
@@ -434,9 +484,9 @@ Types that deliberately do not carry a status lifecycle. Reference data (vocabul
 
 `cultural_adaptation`, `locale_config`, `regional_pricing`, `translation_key`
 
-### market_intelligence (4)
+### market_intelligence (7)
 
-`competitor`, `competitor_feature`, `market_segment`, `market_trend`
+`classification_axis`, `classification_value`, `competitor`, `competitor_feature`, `competitor_signal`, `market_segment`, `market_trend`
 
 ### marketing (1)
 
@@ -452,7 +502,7 @@ Types that deliberately do not carry a status lifecycle. Reference data (vocabul
 
 ### product_spec (4)
 
-`acceptance_criterion`, `changelog`, `story_statement`, `theme`
+`acceptance_criterion`, `changelog`, `roadmap_theme`, `user_story`
 
 ### program_mgmt (2)
 
@@ -466,13 +516,13 @@ Types that deliberately do not carry a status lifecycle. Reference data (vocabul
 
 `data_classification`
 
-### strategy (3)
+### strategy (4)
 
-`metric`, `metric_quality_assessment`, `value_stream`
+`constraint`, `metric`, `metric_quality_assessment`, `value_stream`
 
-### team_org (5)
+### team_org (6)
 
-`ceremony`, `department`, `skill`, `stakeholder`, `team`
+`ceremony`, `department`, `person`, `skill`, `stakeholder`, `team`
 
 ### testing (3)
 
@@ -498,6 +548,6 @@ Types that deliberately do not carry a status lifecycle. Reference data (vocabul
 
 ## Planned types (0)
 
-Types triaged for a future lifecycle but not yet implemented. As phases land, types migrate from this set into `UPG_LIFECYCLES`. Source of truth: `UPG_LIFECYCLE_PLANNED_TYPES` in `lifecycles.ts`.
+Types triaged for a future lifecycle but not yet implemented. As lifecycles land, types migrate from this set into `UPG_LIFECYCLES`. Source of truth: `UPG_LIFECYCLE_PLANNED_TYPES` in `lifecycles.ts`.
 
 

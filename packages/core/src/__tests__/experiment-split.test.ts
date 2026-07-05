@@ -139,13 +139,19 @@ describe('Lifecycles', () => {
  expect(phaseIds).toEqual(new Set(['drafted', 'scheduled', 'approved', 'cancelled']))
  })
 
- it('experiment_run has a run-shape lifecycle (in_progress → complete | aborted)', () => {
+ it('experiment_run has a run-shape lifecycle (STUDY: planned → running → analysing → complete | abandoned)', () => {
+ // (0.21.0): experiment_run folded off its bespoke
+ // [in_progress, complete, aborted] singleton onto the shared STUDY template.
+ // The legacy values remap via UPG_STATUS_MIGRATIONS (in_progress→running,
+ // aborted→abandoned). The run-shape identity is preserved (still a time-boxed
+ // run distinct from experiment_plan's approval shape — see the dual-shape test).
  const lifecycle = getLifecycleForType('experiment_run')!
  expect(lifecycle).toBeDefined()
- expect(lifecycle.initial_phase).toBe('in_progress')
- expect(lifecycle.terminal_phases).toEqual(expect.arrayContaining(['complete', 'aborted']))
+ expect(lifecycle.template_id).toBe('STUDY')
+ expect(lifecycle.initial_phase).toBe('planned')
+ expect(lifecycle.terminal_phases).toEqual(expect.arrayContaining(['complete', 'abandoned']))
  const phaseIds = new Set(lifecycle.phases.map((p) => p.id))
- expect(phaseIds).toEqual(new Set(['in_progress', 'complete', 'aborted']))
+ expect(phaseIds).toEqual(new Set(['planned', 'running', 'analysing', 'complete', 'abandoned']))
  })
 
  it('plan and run lifecycles do not share any phase ids (the dual-shape test)', () => {

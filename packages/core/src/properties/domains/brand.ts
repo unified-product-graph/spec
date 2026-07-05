@@ -24,8 +24,6 @@ export interface BrandIdentityProperties {
   tagline?: string
   /** Mission statement: what the brand exists to do. */
   mission_statement?: string
-  /** Current lifecycle stage of the brand */
-  brand_stage?: 'exploratory' | 'defined' | 'mature'
   /**
    * Core brand values. The principles the brand stands for.
    * @example ["innovation", "transparency", "sustainability"]

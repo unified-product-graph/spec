@@ -172,8 +172,6 @@ export interface PressReleaseProperties {
   publish_date?: ISODate
   /** Media outlets targeted for distribution */
   outlets?: string[]
-  /** Current status of the press release */
-  pr_status?: 'draft' | 'in_review' | 'distributed' | 'published'
 }
 
 /** Event.

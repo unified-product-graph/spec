@@ -623,6 +623,34 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.21.0: D.1 — collapse residual *_status shadows into status ────
+  //
+  // Six `*_status` enum properties that re-encode their entity's own lifecycle
+  // phases (the residual Pattern-D shadows not caught by the 0.15.0 sweep, now
+  // that the entities sit on shared templates). Each is removed; the authored
+  // value LIFTS to UPGBaseNode.status, remapping where the property vocabulary
+  // diverged from the (template) lifecycle. `security_policy.policy_status` was
+  // deliberately EXCLUDED (Captain 2026-07-04): its active/under_review/retired
+  // values are an operational-status axis distinct from its APPROVAL lifecycle
+  // (active != approved) — a distinct-axis keeper, not a shadow.
+  '0.21.0': [
+    { kind: 'lift_property_to_top_level', type: 'brand_identity', from_property: 'brand_stage', to: 'status',
+      reason: ' D.1: brand_stage (exploratory/defined/mature) is an exact shadow of the brand_identity lifecycle. Removed in 0.21.0; lifts to status verbatim.' },
+    { kind: 'lift_property_to_top_level', type: 'deliverable', from_property: 'deliverable_status', to: 'status',
+      value_map: { not_started: 'todo', accepted: 'done', rejected: 'done' },
+      reason: ' D.1: deliverable_status re-encoded the deliverable WORK_ITEM lifecycle. Removed in 0.21.0; lifts to status with not_started -> todo, accepted/rejected -> done.' },
+    { kind: 'lift_property_to_top_level', type: 'press_release', from_property: 'pr_status', to: 'status',
+      value_map: { in_review: 'review', distributed: 'published' },
+      reason: ' D.1: pr_status re-encoded the press_release PUBLISHING lifecycle. Removed in 0.21.0; lifts to status with in_review -> review, distributed -> published.' },
+    { kind: 'lift_property_to_top_level', type: 'program', from_property: 'program_status', to: 'status',
+      value_map: { on_hold: 'paused', cancelled: 'sunset' },
+      reason: ' D.1: program_status re-encoded the program OPERATIONAL lifecycle. Removed in 0.21.0; lifts to status with on_hold -> paused, cancelled -> sunset.' },
+    { kind: 'lift_property_to_top_level', type: 'project', from_property: 'project_status', to: 'status',
+      value_map: { on_hold: 'paused', cancelled: 'sunset' },
+      reason: ' D.1: project_status re-encoded the project OPERATIONAL lifecycle. Removed in 0.21.0; lifts to status with on_hold -> paused, cancelled -> sunset.' },
+    { kind: 'lift_property_to_top_level', type: 'screen', from_property: 'screen_status', to: 'status',
+      reason: ' D.3/Q3: screen flips from MATURITY to a hand-authored build-pipeline lifecycle (draft/in_design/built/shipped/deprecated); screen_status already carried those exact values. Removed in 0.21.0; lifts to status verbatim.' },
+  ],
   // ── v0.16.0: Pattern G — open-standard data boundary ───────────────
   //
   // The portable graph holds modeling knowledge, not PII, registry filings,

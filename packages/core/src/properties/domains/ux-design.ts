@@ -337,8 +337,6 @@ export interface ScreenProperties {
   viewport?: 'mobile' | 'tablet' | 'desktop' | 'tv' | 'watch' | 'responsive'
   /** Reach */
   access_level?: 'public' | 'authenticated' | 'admin' | 'internal'
-  /** Build pipeline stage */
-  screen_status?: 'draft' | 'in_design' | 'built' | 'shipped' | 'deprecated'
   /** One-line purpose */
   purpose?: string
 }

@@ -81,19 +81,7 @@ export const UPG_STATUS_MIGRATIONS: Partial<Record<UPGEntityType, Record<string,
   },
 
   // ── Discovery & Validation ───────────────────────────────────────────────
-  hypothesis: {
-    // Lifecycle: [drafted, active, validated, invalidated, archived]
-    // Legacy pre-v0.2.8 vocabulary mapped via UPG_PROPERTY_MIGRATIONS for
-    // property→top-level lifts, but raw top-level legacy values surface
-    // when authors set `status: untested` directly without going through
-    // the property bag.
-    untested: 'drafted',
-    testing: 'active',
-    proposed: 'drafted',
-    deferred: 'archived',
-    resolved: 'active', // ambiguous: prefer active until evidence settles
-  },
-
+  // (hypothesis moved to the VALIDATION template fold section below, 0.21.0)
   opportunity: {
     // Lifecycle: [identified, validated, deferred]  (no terminal phases)
     // Common authoring leftovers from pre-canonical Lean Canvas
@@ -150,7 +138,116 @@ export const UPG_STATUS_MIGRATIONS: Partial<Record<UPGEntityType, Record<string,
     retired: 'sunset',
   },
 
-  // ── DevOps: incident ─────────────────────────────────────────────────────
+  // ── VALIDATION template fold (0.21.0) ───────────────────────────
+  // Bespoke claim vocabularies remapped onto VALIDATION
+  // [untested, testing, validated, invalidated, archived].
+  // `assumption` already matches (untested, testing, validated, invalidated) —
+  // no migration entry needed.
+  prototype: {
+    // was [untested, testing, passed, failed]
+    passed: 'validated',
+    failed: 'invalidated',
+  },
+  value_proposition: {
+    // was [drafted, testing, validated, invalidated]
+    drafted: 'untested',
+  },
+  hypothesis: {
+    // was [drafted, active, validated, invalidated, archived] (HYPOTHESIS_CLAIM
+    // const, re-homed to entity_type 'hypothesis' at v0.4.0). The legacy
+    // pre-v0.2.8 [untested, testing, resolved] mapping already lived here; it is
+    // now consistent with the VALIDATION spine.
+    drafted: 'untested',
+    active: 'testing',
+    // pre-v0.2.8 legacy values (kept from the prior hypothesis migration):
+    proposed: 'untested',
+    deferred: 'archived',
+    resolved: 'validated', // ambiguous historically; prefer validated on resolve
+  },
+
+  // ── STUDY template fold (0.21.0) ────────────────────────────────
+  // Bespoke run/study vocabularies remapped onto STUDY
+  // [planned, running, analysing, complete, abandoned].
+  experiment: {
+    // was [planned, running, analysing, done]
+    done: 'complete',
+  },
+  experiment_run: {
+    // was [in_progress, complete, aborted]
+    in_progress: 'running',
+    aborted: 'abandoned',
+  },
+  research_study: {
+    // was [planned, in_progress, analysing, complete]
+    in_progress: 'running',
+  },
+  design_sprint: {
+    // was [planning, in_progress, completed]
+    planning: 'planned',
+    in_progress: 'running',
+    completed: 'complete',
+  },
+  feasibility_study: {
+    // was [scoped, analysing, concluded, abandoned]
+    scoped: 'planned',
+    concluded: 'complete',
+  },
+  ai_experiment: {
+    // was [planned, running, analysed, completed, abandoned]
+    analysed: 'analysing',
+    completed: 'complete',
+  },
+  eval_run: {
+    // was [planned, running, complete, failed]. `failed` = the run did not
+    // finish cleanly (errored / killed) → abandoned. A completed run whose
+    // result was negative stays `complete` (the verdict lives elsewhere).
+    failed: 'abandoned',
+  },
+
+  // ── INCIDENT template fold (0.21.0) ─────────────────────────────
+  // Bespoke triage vocabularies remapped onto INCIDENT
+  // [open, triaged, in_progress, resolved, closed, wont_fix]. `incident` itself
+  // is NOT folded (stays bespoke; see the DevOps entry below).
+  support_ticket: {
+    // was [opened, triaged, in_progress, resolved, closed]
+    opened: 'open',
+  },
+  bug: {
+    // was [open, in_progress, fixed, verified, wont_fix]
+    fixed: 'in_progress', // fixed-but-not-verified is still work in progress
+    verified: 'resolved',
+  },
+  a11y_issue: {
+    // was [open, triaged, in_progress, fixed, verified, accepted]
+    fixed: 'in_progress',
+    verified: 'resolved',
+    accepted: 'resolved', // verified-and-accepted == resolved
+  },
+  vulnerability: {
+    // was [open, triaged, in_progress, mitigated, resolved, accepted]
+    mitigated: 'in_progress', // mitigation applied, not yet fully resolved
+    accepted: 'resolved',
+  },
+  hallucination_report: {
+    // was [reported, investigating, resolved, accepted]
+    reported: 'open',
+    investigating: 'in_progress',
+    accepted: 'resolved',
+  },
+  technical_debt_item: {
+    // was [identified, acknowledged, in_progress, resolved, accepted]
+    identified: 'open',
+    acknowledged: 'triaged',
+    accepted: 'resolved',
+  },
+  customer_feedback: {
+    // was [received, triaged, actioned, acknowledged]
+    received: 'open',
+    actioned: 'resolved',
+    acknowledged: 'closed', // noted with no action == administratively closed
+  },
+
+  // ── DevOps: incident (stays bespoke — richer SRE flow, not folded) ────────
   incident: {
     // Lifecycle: [detected, triaged, contained, resolved, mitigated]
     open: 'detected',
@@ -159,6 +256,17 @@ export const UPG_STATUS_MIGRATIONS: Partial<Record<UPGEntityType, Record<string,
     in_progress: 'triaged',
     closed: 'resolved',
     fixed: 'resolved',
+  },
+
+  // ── UX/Design: screen ( Q3/D.3, 0.21.0) — MATURITY → build-pipeline
+  // flip. Old lifecycle [alpha, beta, ga, deprecated]; new SCREEN_LIFECYCLE
+  // [draft, in_design, built, shipped, deprecated]. `deprecated` IS canonical
+  // in both (no rewrite needed); omitted per the no-identity-entries doctrine
+  // (see status-migrations.test.ts).
+  screen: {
+    alpha: 'built',
+    beta: 'shipped',
+    ga: 'shipped',
   },
 }
 

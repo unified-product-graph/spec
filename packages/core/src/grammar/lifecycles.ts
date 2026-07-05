@@ -186,48 +186,6 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
 // Discovery & Validation
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * research_study (UX Research domain)
- *
- * A study progresses from planning through execution, analysis, and conclusion.
- * The `complete` phase is terminal; findings are captured in `research_study`
- * children (insight, quote) after the study concludes.
- */
-const RESEARCH_STUDY_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'research_study',
-  initial_phase: 'planned',
-  terminal_phases: ['complete'],
-  phases: [
-    {
-      id: 'planned',
-      label: 'Planned',
-      description:
-        'The study has been scoped and scheduled. Research questions are defined, method is chosen, participants have not yet been recruited or sessions started.',
-      transitions_to: ['in_progress'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'Research sessions are actively running. Participants are being interviewed, observed, or surveyed. Data is being collected.',
-      transitions_to: ['analysing'],
-    },
-    {
-      id: 'analysing',
-      label: 'Analysing',
-      description:
-        'Data collection is complete. The team is reviewing recordings, notes, and responses to identify patterns and insights.',
-      transitions_to: ['complete'],
-    },
-    {
-      id: 'complete',
-      label: 'Complete',
-      description:
-        'Analysis is done. Insights have been captured and shared. The study is a historical record.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * need (Users & Needs domain)
@@ -345,114 +303,7 @@ const SOLUTION_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * hypothesis (Validation domain, v0.2.8 split 3)
- *
- * The stable templated belief (UCS pattern P5, templated-statement).
- * Unlike the legacy hypothesis, the claim is **lifecycle-bearing** because
- * the belief itself progresses through clear states: it's `drafted` (still
- * being written), `active` (committed and being tested by experiments and
- * evidence), `validated` (evidence sufficiently supports it), `invalidated`
- * (evidence sufficiently refutes it), or `archived` (set aside without
- * resolution: superseded by a new claim, deprioritised, etc.).
- *
- * The paired `hypothesis_evidence` is lifecycle-free; each evidence row
- * is a snapshot of a moment, not a state machine.
- *
- * Reopen path: `validated` and `invalidated` can transition back to
- * `active` if new evidence materially changes the picture (e.g. follow-up
- * experiment with different conditions). `archived` can return to `active`
- * if the team decides to revisit.
- */
-const HYPOTHESIS_CLAIM_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'hypothesis',
-  initial_phase: 'drafted',
-  terminal_phases: ['validated', 'invalidated', 'archived'],
-  phases: [
-    {
-      id: 'drafted',
-      label: 'Drafted',
-      description:
-        'The claim is being written. We_believe / will_result_in / we_know_when may not yet be complete. Not yet committed for testing.',
-      transitions_to: ['active', 'archived'],
-    },
-    {
-      id: 'active',
-      label: 'Active',
-      description:
-        'The claim is committed and being tested. Experiments may be running; evidence may be accruing via supports/refutes edges. current_confidence updates as evidence weight shifts.',
-      transitions_to: ['validated', 'invalidated', 'archived'],
-    },
-    {
-      id: 'validated',
-      label: 'Validated',
-      description:
-        'Evidence sufficiently supports the claim. The belief held. Reopens to `active` if new evidence materially changes the picture.',
-      transitions_to: ['active'],
-    },
-    {
-      id: 'invalidated',
-      label: 'Invalidated',
-      description:
-        'Evidence sufficiently refutes the claim. The belief did not hold. Reopens to `active` if new evidence materially changes the picture.',
-      transitions_to: ['active'],
-    },
-    {
-      id: 'archived',
-      label: 'Archived',
-      description:
-        'Set aside without resolution: superseded by a new claim, deprioritised, or no longer relevant. Reopens to `active` if revisited.',
-      transitions_to: ['active'],
-    },
-  ],
-}
 
-/**
- * experiment (Validation domain)
- *
- * @deprecated since v0.2.6. The original lifecycle straddled plan-shape phases
- * (`planned`) and run-shape phases (`running`, `analysing`, `done`) on the
- * same entity, a textbook dual-shape entity per the UPG dual-shape audit.
- * See `EXPERIMENT_PLAN_LIFECYCLE` (plan-shape phases) and
- * `EXPERIMENT_RUN_LIFECYCLE` (run-shape phases) below for the post-split
- * lifecycles. Retained for one version while consumers migrate; narrows to
- * `never` in v0.2.7.
- */
-const EXPERIMENT_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'experiment',
-  initial_phase: 'planned',
-  terminal_phases: ['done'],
-  phases: [
-    {
-      id: 'planned',
-      label: 'Planned',
-      description:
-        'The experiment has been designed. Method, sample size, success criteria, and timeline are defined. It has not started yet.',
-      transitions_to: ['running'],
-    },
-    {
-      id: 'running',
-      label: 'Running',
-      description:
-        'The experiment is live and collecting data. Traffic is being split, interviews are being conducted, or surveys are being distributed.',
-      transitions_to: ['analysing'],
-    },
-    {
-      id: 'analysing',
-      label: 'Analysing',
-      description:
-        'Data collection is complete. The team is reviewing results, running statistical analysis, and deriving conclusions.',
-      transitions_to: ['done'],
-    },
-    {
-      id: 'done',
-      label: 'Done',
-      description:
-        'The experiment is concluded. Learnings have been captured. The experiment is a historical record.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * experiment_plan (Validation domain, v0.2.6 split 1)
@@ -506,49 +357,6 @@ const EXPERIMENT_PLAN_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * experiment_run (Validation domain, v0.2.6 split 1)
- *
- * Run-shape lifecycle. An `experiment_run` is the execution event linked
- * back to its parent `experiment_plan` via `experiment_plan_ran_as_experiment_run`.
- * A single plan may have N runs (re-execution); each run is its own event
- * with its own actual dates, observed reach, outcome, and disposition.
- *
- * Runs are where evidence accrues; the `validates`, `produced_insight`,
- * and `informed_decision` edges all originate here.
- *
- * Initial: `in_progress`. Terminals: `complete` (the run finished and a
- * disposition was recorded) and `aborted` (the run terminated early
- * without a valid finding).
- */
-const EXPERIMENT_RUN_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'experiment_run',
-  initial_phase: 'in_progress',
-  terminal_phases: ['complete', 'aborted'],
-  phases: [
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'The run is actively collecting data. Traffic is being split, interviews are happening, or surveys are out. Outcome and disposition are not yet recorded.',
-      transitions_to: ['complete', 'aborted'],
-    },
-    {
-      id: 'complete',
-      label: 'Complete',
-      description:
-        'Data collection finished and a disposition was recorded (confirmed, disconfirmed, or inconclusive). Learnings captured; outcome edges (validates, produced_insight, informed_decision) wired to downstream entities.',
-      transitions_to: [],
-    },
-    {
-      id: 'aborted',
-      label: 'Aborted',
-      description:
-        'Terminated early without a valid finding: infrastructure failure, exposure threshold not met, or the underlying plan was withdrawn. No disposition recorded.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * research_plan (Validation domain)
@@ -778,40 +586,6 @@ const USER_ADVISORY_BOARD_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * design_sprint (Discovery domain)
- *
- * A design sprint is a time-boxed exploration of an opportunity. `completed`
- * is terminal.
- */
-const DESIGN_SPRINT_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'design_sprint',
-  initial_phase: 'planning',
-  terminal_phases: ['completed'],
-  phases: [
-    {
-      id: 'planning',
-      label: 'Planning',
-      description:
-        'The sprint challenge has been defined. Participants are identified. Space and materials are being arranged.',
-      transitions_to: ['in_progress'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'The sprint is running. The team is moving through understand, sketch, decide, prototype, and test phases.',
-      transitions_to: ['completed'],
-    },
-    {
-      id: 'completed',
-      label: 'Completed',
-      description:
-        'The sprint has concluded. Decisions and prototypes have been captured. Learnings inform next steps.',
-      transitions_to: [],
-    },
-  ],
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Strategy & Product Specification
@@ -1023,48 +797,6 @@ const STRATEGIC_PILLAR_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * assumption (Strategy domain)
- *
- * A strategic assumption is a belief that underlies a decision. Unlike a
- * hypothesis, it may never be formally tested. `validated` and `invalidated`
- * are both terminal; once tested, an assumption becomes knowledge.
- */
-const ASSUMPTION_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'assumption',
-  initial_phase: 'untested',
-  terminal_phases: ['validated', 'invalidated'],
-  phases: [
-    {
-      id: 'untested',
-      label: 'Untested',
-      description:
-        'Stated and acknowledged, awaiting systematic test. Some strategic assumptions stay untested by design.',
-      transitions_to: ['testing'],
-    },
-    {
-      id: 'testing',
-      label: 'Testing',
-      description:
-        'An experiment or research activity is underway to test this assumption. Evidence is being gathered.',
-      transitions_to: ['validated', 'invalidated'],
-    },
-    {
-      id: 'validated',
-      label: 'Validated',
-      description:
-        'Evidence supports the assumption. The belief has been confirmed. Decisions resting on it are on firmer ground.',
-      transitions_to: [],
-    },
-    {
-      id: 'invalidated',
-      label: 'Invalidated',
-      description:
-        'Evidence contradicts the assumption. Decisions or plans that rested on it should be revisited.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * strategic_question (Strategy domain)
@@ -1244,40 +976,6 @@ const FEATURE_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * epic (Product Specification domain)
- *
- * An epic is a large body of work spanning multiple sprints. It uses the
- * canonical Agile lifecycle.
- */
-const EPIC_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'epic',
-  initial_phase: 'todo',
-  terminal_phases: ['done'],
-  phases: [
-    {
-      id: 'todo',
-      label: 'To Do',
-      description:
-        'The epic has been defined and scoped but work has not started. It is in the backlog.',
-      transitions_to: ['in_progress'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'Work on the epic is underway. Stories are being pulled into sprints.',
-      transitions_to: ['done'],
-    },
-    {
-      id: 'done',
-      label: 'Done',
-      description:
-        'All stories in the epic have been completed and the epic goal has been achieved.',
-      transitions_to: [],
-    },
-  ],
-}
 
 // `user_story` (re-canonicalised from `story_statement` at v0.7.0/) is
 // the templated "As X, I want Y so Z" promise, a stable design artefact, NOT a
@@ -1326,96 +1024,7 @@ const RELEASE_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * task (Product Specification domain)
- *
- * A task is the smallest unit of tracked work. `in_review` captures the
- * code review stage before completion.
- */
-const TASK_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'task',
-  initial_phase: 'todo',
-  terminal_phases: ['done'],
-  phases: [
-    {
-      id: 'todo',
-      label: 'To Do',
-      description:
-        'The task is defined and ready to be picked up.',
-      transitions_to: ['in_progress'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'A team member is actively working on this task.',
-      transitions_to: ['in_review', 'done'],
-    },
-    {
-      id: 'in_review',
-      label: 'In Review',
-      description:
-        'Work is complete and awaiting review, approval, or verification.',
-      transitions_to: ['in_progress', 'done'],
-    },
-    {
-      id: 'done',
-      label: 'Done',
-      description:
-        'The task is complete and verified.',
-      transitions_to: [],
-    },
-  ],
-}
 
-/**
- * bug (Product Specification domain)
- *
- * A bug tracks a defect through discovery, investigation, fix, and verification.
- * `wont_fix` is a deliberate terminal state when the team decides not to address it.
- */
-const BUG_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'bug',
-  initial_phase: 'open',
-  terminal_phases: ['verified', 'wont_fix'],
-  phases: [
-    {
-      id: 'open',
-      label: 'Open',
-      description:
-        'The bug has been reported but not yet triaged or assigned.',
-      transitions_to: ['in_progress', 'wont_fix'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'A developer is investigating and/or fixing the bug.',
-      transitions_to: ['fixed', 'wont_fix'],
-    },
-    {
-      id: 'fixed',
-      label: 'Fixed',
-      description:
-        'A fix has been implemented and merged. Awaiting verification in the target environment.',
-      transitions_to: ['verified', 'open'],
-    },
-    {
-      id: 'verified',
-      label: 'Verified',
-      description:
-        'The fix has been confirmed to resolve the bug in the target environment.',
-      transitions_to: [],
-    },
-    {
-      id: 'wont_fix',
-      label: "Won't Fix",
-      description:
-        'Declined: by design, too costly relative to impact, or superseded by other work.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * roadmap_item (Product Specification domain)
@@ -1608,48 +1217,6 @@ const DESIGN_CONCEPT_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * prototype (Experience Design domain)
- *
- * A prototype is built to be tested. `passed` and `failed` are both terminal.
- * A failed prototype informs the next iteration; a new prototype is created
- * rather than the failed one being reopened.
- */
-const PROTOTYPE_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'prototype',
-  initial_phase: 'untested',
-  terminal_phases: ['passed', 'failed'],
-  phases: [
-    {
-      id: 'untested',
-      label: 'Untested',
-      description:
-        'The prototype has been built but has not yet been put in front of users.',
-      transitions_to: ['testing'],
-    },
-    {
-      id: 'testing',
-      label: 'Testing',
-      description:
-        'The prototype is being tested with users. Sessions are underway.',
-      transitions_to: ['passed', 'failed'],
-    },
-    {
-      id: 'passed',
-      label: 'Passed',
-      description:
-        'Testing confirmed the design concept works for users. It is ready to inform detailed design or development.',
-      transitions_to: [],
-    },
-    {
-      id: 'failed',
-      label: 'Failed',
-      description:
-        'Testing revealed significant usability or concept problems. Learnings will inform a new design direction.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * brand_identity (Experience Design domain)
@@ -1681,6 +1248,62 @@ const BRAND_IDENTITY_LIFECYCLE: UPGLifecycle = {
       label: 'Mature',
       description:
         'The brand identity is fully articulated and consistently applied. Guidelines are documented and followed across all touchpoints.',
+      transitions_to: [],
+    },
+  ],
+}
+
+/**
+ * screen (Experience Design domain)
+ *
+ * Q3 (0.21.0): screen was `fromTemplate('screen', MATURITY_TEMPLATE)`
+ * (alpha/beta/ga/deprecated) with a shadow `screen_status` property carrying
+ * the entity's actual build-pipeline state (draft/in_design/built/shipped/
+ * deprecated). MATURITY answers "how proven is this design surface as a
+ * concept"; that's not the axis teams track for a screen. What teams actually
+ * track is where the screen sits in the build pipeline: has it been designed,
+ * built, and shipped. This lifecycle promotes that pipeline to the primary
+ * phase chain and collapses `screen_status` onto base `status`
+ * (UPG_PROPERTY_MIGRATIONS['0.21.0']). `deprecated` is terminal.
+ */
+const SCREEN_LIFECYCLE: UPGLifecycle = {
+  entity_type: 'screen',
+  initial_phase: 'draft',
+  terminal_phases: ['deprecated'],
+  phases: [
+    {
+      id: 'draft',
+      label: 'Draft',
+      description:
+        'The screen is a rough idea: named and scoped, but not yet worked in a design tool.',
+      transitions_to: ['in_design'],
+    },
+    {
+      id: 'in_design',
+      label: 'In Design',
+      description:
+        'The screen is being designed: wireframes, mockups, or prototypes are in progress. May fall back to `draft` if the approach is rethought from scratch.',
+      transitions_to: ['built', 'draft'],
+    },
+    {
+      id: 'built',
+      label: 'Built',
+      description:
+        'The screen has been implemented in code. It exists in a build but is not yet live for users. May return to `in_design` if implementation surfaces a design gap.',
+      transitions_to: ['shipped', 'in_design'],
+    },
+    {
+      id: 'shipped',
+      label: 'Shipped',
+      description:
+        'The screen is live in production and reachable by users.',
+      transitions_to: ['deprecated'],
+    },
+    {
+      id: 'deprecated',
+      label: 'Deprecated',
+      description:
+        'The screen has been retired. It is no longer reachable, or is being phased out in favour of a replacement.',
       transitions_to: [],
     },
   ],
@@ -1803,55 +1426,6 @@ const FEATURE_FLAG_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * technical_debt_item (Engineering domain)
- *
- * A technical debt item tracks a known quality compromise. `accepted` is a
- * deliberate terminal state; the team acknowledges the debt and chooses to
- * live with it. `resolved` is the positive terminal.
- */
-const TECHNICAL_DEBT_ITEM_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'technical_debt_item',
-  initial_phase: 'identified',
-  terminal_phases: ['resolved', 'accepted'],
-  phases: [
-    {
-      id: 'identified',
-      label: 'Identified',
-      description:
-        'The debt has been recognised and documented. It has not yet been triaged for action.',
-      transitions_to: ['acknowledged', 'accepted'],
-    },
-    {
-      id: 'acknowledged',
-      label: 'Acknowledged',
-      description:
-        'The team agrees the debt exists and has assessed its severity. A decision on when to address it is pending.',
-      transitions_to: ['in_progress', 'accepted'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'Work is underway to address and remediate the debt.',
-      transitions_to: ['resolved'],
-    },
-    {
-      id: 'resolved',
-      label: 'Resolved',
-      description:
-        'The debt has been addressed. The code or system has been improved.',
-      transitions_to: [],
-    },
-    {
-      id: 'accepted',
-      label: 'Accepted',
-      description:
-        'A conscious decision to live with the debt. Remediation cost outweighs current value.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * investigation (Engineering domain)
@@ -2030,62 +1604,6 @@ const INCIDENT_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * vulnerability (Security domain)
- *
- * A vulnerability follows a remediation lifecycle. `resolved` is the ideal
- * terminal. `accepted` is a deliberate terminal when the risk is acknowledged
- * and no remediation is planned.
- */
-const VULNERABILITY_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'vulnerability',
-  initial_phase: 'open',
-  terminal_phases: ['resolved', 'accepted'],
-  phases: [
-    {
-      id: 'open',
-      label: 'Open',
-      description:
-        'The vulnerability has been identified. It has not yet been assessed for severity or assigned for remediation.',
-      transitions_to: ['triaged'],
-    },
-    {
-      id: 'triaged',
-      label: 'Triaged',
-      description:
-        'The vulnerability has been assessed. CVSS score assigned. Priority and ownership determined.',
-      transitions_to: ['in_progress', 'accepted'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'Remediation work is actively underway. A fix is being developed or a compensating control is being implemented.',
-      transitions_to: ['mitigated', 'resolved'],
-    },
-    {
-      id: 'mitigated',
-      label: 'Mitigated',
-      description:
-        'A compensating control is in place. Immediate risk is reduced but the root vulnerability has not been patched.',
-      transitions_to: ['resolved', 'accepted'],
-    },
-    {
-      id: 'resolved',
-      label: 'Resolved',
-      description:
-        'The vulnerability has been fully remediated. The underlying issue is patched or eliminated.',
-      transitions_to: [],
-    },
-    {
-      id: 'accepted',
-      label: 'Accepted',
-      description:
-        'Formally acknowledged by the security team. Remediation is parked: low severity, compensating controls, or cost/benefit analysis.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * security_control (Security domain)
@@ -2129,62 +1647,6 @@ const SECURITY_CONTROL_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * a11y_issue (Accessibility domain)
- *
- * An accessibility issue parallels the vulnerability lifecycle, moving from
- * discovery through triage and remediation to resolution. `accepted` is a
- * deliberate terminal for known issues the team has chosen not to fix.
- */
-const A11Y_ISSUE_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'a11y_issue',
-  initial_phase: 'open',
-  terminal_phases: ['verified', 'accepted'],
-  phases: [
-    {
-      id: 'open',
-      label: 'Open',
-      description:
-        'The accessibility issue has been identified. It has not yet been triaged for severity or assigned for remediation.',
-      transitions_to: ['triaged'],
-    },
-    {
-      id: 'triaged',
-      label: 'Triaged',
-      description:
-        'The issue has been assessed for severity and mapped to the affected WCAG criterion. Priority has been assigned.',
-      transitions_to: ['in_progress', 'accepted'],
-    },
-    {
-      id: 'in_progress',
-      label: 'In Progress',
-      description:
-        'A developer or designer is actively working to fix the accessibility issue.',
-      transitions_to: ['fixed'],
-    },
-    {
-      id: 'fixed',
-      label: 'Fixed',
-      description:
-        'The fix has been implemented. Awaiting verification with assistive technology.',
-      transitions_to: ['verified', 'in_progress'],
-    },
-    {
-      id: 'verified',
-      label: 'Verified',
-      description:
-        'The fix has been confirmed to resolve the accessibility barrier using appropriate assistive technology.',
-      transitions_to: [],
-    },
-    {
-      id: 'accepted',
-      label: 'Accepted',
-      description:
-        'The team has formally acknowledged this issue and made a documented decision not to fix it at this time.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * data_pipeline (Data & Analytics domain)
@@ -2285,47 +1747,6 @@ const AI_MODEL_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * eval_run (AI & Machine Learning domain)
- *
- * An eval run progresses through execution phases. `complete` is the positive
- * terminal. `failed` is the negative terminal; a new run is created for retries.
- */
-const EVAL_RUN_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'eval_run',
-  initial_phase: 'planned',
-  terminal_phases: ['complete', 'failed'],
-  phases: [
-    {
-      id: 'planned',
-      label: 'Planned',
-      description:
-        'The run has been queued. It has not yet started executing.',
-      transitions_to: ['running'],
-    },
-    {
-      id: 'running',
-      label: 'Running',
-      description:
-        'Actively executing. Prompts are being sent and responses scored.',
-      transitions_to: ['complete', 'failed'],
-    },
-    {
-      id: 'complete',
-      label: 'Complete',
-      description:
-        'The run finished successfully. Scores and results are available.',
-      transitions_to: [],
-    },
-    {
-      id: 'failed',
-      label: 'Failed',
-      description:
-        'Failed to complete: API error, timeout, or infrastructure failure. Create a new run to retry.',
-      transitions_to: [],
-    },
-  ],
-}
 
 /**
  * workflow_run (Agentic Workflows domain)
@@ -2671,46 +2092,9 @@ const TEST_PLAN_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * feasibility_study (Discovery domain)
- *
- * Smaller cousin of research_study. Scoped → analysing → concluded or
- * abandoned. Concluded is the achievement terminal; abandoned covers
- * "we ran out of runway" cases.
- */
-const FEASIBILITY_STUDY_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'feasibility_study',
-  initial_phase: 'scoped',
-  terminal_phases: ['concluded', 'abandoned'],
-  phases: [
-    { id: 'scoped', label: 'Scoped', description: 'Study has been framed: questions, methods, and budget are agreed.', transitions_to: ['analysing', 'abandoned'] },
-    { id: 'analysing', label: 'Analysing', description: 'Active analysis. Data is being gathered and synthesised.', transitions_to: ['concluded', 'abandoned'] },
-    { id: 'concluded', label: 'Concluded', description: 'Study reached a conclusion. Findings inform a go/no-go decision.', transitions_to: [] },
-    { id: 'abandoned', label: 'Abandoned', description: 'Study was stopped before reaching a conclusion. Captured for the record.', transitions_to: [] },
-  ],
-}
 
 // ── AI workflow ──────────────────────────────────────────────────────────────
 
-/**
- * ai_experiment (AI domain)
- *
- * Mirrors EXPERIMENT_LIFECYCLE but kept distinct because AI experiments
- * have specific tooling and provenance requirements (datasets, prompt
- * versions, eval benchmarks).
- */
-const AI_EXPERIMENT_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'ai_experiment',
-  initial_phase: 'planned',
-  terminal_phases: ['completed', 'abandoned'],
-  phases: [
-    { id: 'planned', label: 'Planned', description: 'Experiment has been designed but is not yet running.', transitions_to: ['running', 'abandoned'] },
-    { id: 'running', label: 'Running', description: 'Experiment is actively executing: model is being trained, evaluated, or compared.', transitions_to: ['analysed', 'abandoned'] },
-    { id: 'analysed', label: 'Analysed', description: 'Run is finished and results are being reviewed.', transitions_to: ['completed', 'abandoned'] },
-    { id: 'completed', label: 'Completed', description: 'Findings captured. Linked learnings drive downstream decisions.', transitions_to: [] },
-    { id: 'abandoned', label: 'Abandoned', description: 'Experiment was stopped before producing usable findings.', transitions_to: [] },
-  ],
-}
 
 /**
  * ai_dataset (AI domain)
@@ -2751,24 +2135,6 @@ const AI_GUARDRAIL_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * hallucination_report (AI domain)
- *
- * Mirrors INCIDENT_LIFECYCLE shape. Reported → investigating →
- * resolved or accepted. Accepted means "known limitation, not fixing"
- * (a legitimate steady state for some hallucination classes).
- */
-const HALLUCINATION_REPORT_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'hallucination_report',
-  initial_phase: 'reported',
-  terminal_phases: ['resolved', 'accepted'],
-  phases: [
-    { id: 'reported', label: 'Reported', description: 'A hallucination has been observed and logged. Not yet investigated.', transitions_to: ['investigating'] },
-    { id: 'investigating', label: 'Investigating', description: 'Active investigation: root cause analysis, reproduction, scope.', transitions_to: ['resolved', 'accepted'] },
-    { id: 'resolved', label: 'Resolved', description: 'A fix has shipped. Future occurrences should not happen.', transitions_to: ['investigating'] },
-    { id: 'accepted', label: 'Accepted', description: 'Known limitation that will not be fixed in this iteration. Documented for users.', transitions_to: ['investigating'] },
-  ],
-}
 
 /**
  * model_comparison (AI domain)
@@ -2849,24 +2215,6 @@ const BUSINESS_MODEL_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
-/**
- * value_proposition (Business Model domain)
- *
- * Simpler than business_model: drafted → testing → validated or
- * invalidated. No pivot terminal; a failed value proposition just goes
- * back to drafting.
- */
-const VALUE_PROPOSITION_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'value_proposition',
-  initial_phase: 'drafted',
-  terminal_phases: ['validated', 'invalidated'],
-  phases: [
-    { id: 'drafted', label: 'Drafted', description: 'Statement of value has been articulated. Not yet tested.', transitions_to: ['testing', 'invalidated'] },
-    { id: 'testing', label: 'Testing', description: 'Statement is being tested against the target audience.', transitions_to: ['validated', 'invalidated'] },
-    { id: 'validated', label: 'Validated', description: 'Audience response confirms the value resonates. Forms the messaging foundation.', transitions_to: ['testing'] },
-    { id: 'invalidated', label: 'Invalidated', description: 'Statement did not resonate. May reopen to drafted for a rewrite.', transitions_to: ['drafted'] },
-  ],
-}
 
 /**
  * revenue_stream (Business Model domain)
@@ -2889,45 +2237,7 @@ const REVENUE_STREAM_LIFECYCLE: UPGLifecycle = {
 
 // ── Customer Success ─────────────────────────────────────────────────────────
 
-/**
- * support_ticket (Customer Success domain)
- *
- * Two-step terminal (resolved → closed) is industry-standard for support:
- * a ticket can be resolved by support but stay open until the customer
- * confirms. Reopen from closed isn't typical (customers file a new
- * ticket); reopen from in_progress covers regressions found post-resolve.
- */
-const SUPPORT_TICKET_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'support_ticket',
-  initial_phase: 'opened',
-  terminal_phases: ['resolved', 'closed'],
-  phases: [
-    { id: 'opened', label: 'Opened', description: 'Ticket has been filed. Not yet looked at.', transitions_to: ['triaged'] },
-    { id: 'triaged', label: 'Triaged', description: 'Ticket has been categorised, prioritised, and assigned. Ready for work.', transitions_to: ['in_progress'] },
-    { id: 'in_progress', label: 'In Progress', description: 'Support is actively working on the ticket.', transitions_to: ['resolved', 'triaged'] },
-    { id: 'resolved', label: 'Resolved', description: 'Support believes the issue is fixed. Awaiting customer confirmation.', transitions_to: ['in_progress', 'closed'] },
-    { id: 'closed', label: 'Closed', description: 'Customer has confirmed. Ticket is fully done.', transitions_to: [] },
-  ],
-}
 
-/**
- * customer_feedback (Customer Success domain)
- *
- * Two terminals: actioned means it drove a change in product or
- * process; acknowledged means we read it but won't act. Both are
- * legitimate, distinguishable outcomes worth tracking.
- */
-const CUSTOMER_FEEDBACK_LIFECYCLE: UPGLifecycle = {
-  entity_type: 'customer_feedback',
-  initial_phase: 'received',
-  terminal_phases: ['actioned', 'acknowledged'],
-  phases: [
-    { id: 'received', label: 'Received', description: 'Feedback has been captured. Not yet processed.', transitions_to: ['triaged'] },
-    { id: 'triaged', label: 'Triaged', description: 'Feedback has been categorised and routed. Decision on action is pending.', transitions_to: ['actioned', 'acknowledged'] },
-    { id: 'actioned', label: 'Actioned', description: 'Feedback drove a change (a feature, a process, a doc update). Captured for the record.', transitions_to: [] },
-    { id: 'acknowledged', label: 'Acknowledged', description: 'Feedback was read and considered but will not drive a change. Customer has been thanked.', transitions_to: [] },
-  ],
-}
 
 /**
  * customer_health_score (Customer Success domain)
@@ -3250,6 +2560,84 @@ const SALES_DEAL_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   ],
 }
 
+/**
+ * Validation: untested → testing → validated / invalidated → archived
+ *
+ * The shared spine of "a claim we test to a verdict." Members author a
+ * hypothesis / assumption / prototype and drive it to a validated or
+ * invalidated verdict; `archived` is a late-state terminal for a settled
+ * claim retained for provenance. `invalidated → testing` is a late-state
+ * reopen (re-test after new evidence).
+ *
+ * Deliberately does NOT cover a strategic *pivot* outcome (a `business_model`
+ * that is invalidated-then-repositioned): `pivoted` is a distinct strategic
+ * terminal, not a verdict, so `business_model` keeps its bespoke lifecycle.
+ */
+const VALIDATION_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
+  template_id: 'VALIDATION',
+  initial_phase: 'untested',
+  terminal_phases: ['validated', 'invalidated', 'archived'],
+  phases: [
+    { id: 'untested', label: 'Untested', description: 'Articulated but not yet examined against evidence.', transitions_to: ['testing'] },
+    { id: 'testing', label: 'Testing', description: 'Actively gathering evidence for or against the claim.', transitions_to: ['validated', 'invalidated'] },
+    { id: 'validated', label: 'Validated', description: 'Evidence supports the claim. Treated as true until contradicted.', transitions_to: ['archived'] },
+    { id: 'invalidated', label: 'Invalidated', description: 'Evidence contradicts the claim. May re-test if new evidence appears.', transitions_to: ['archived', 'testing'] },
+    { id: 'archived', label: 'Archived', description: 'Settled and retained for provenance. No longer active.', transitions_to: [] },
+  ],
+}
+
+/**
+ * Incident / triage: open → triaged → in_progress → resolved
+ *
+ * The shared spine of "something surfaced that gets triaged and worked to
+ * resolution" — tickets, bugs, defects, reports. Distinct from `RISK_ITEM`
+ * on purpose: a risk's assess-then-treat flow is a *decision* axis; this is a
+ * *work* axis (triage-then-fix). Late-state terminals cover the two common
+ * non-resolution exits: `closed` (administratively closed, e.g. a duplicate or
+ * a dropped ticket) and `wont_fix` (triaged as not-to-be-actioned).
+ * `resolved → triaged` is a late-state reopen (regression / reoccurrence).
+ *
+ * Note: the `incident` entity itself keeps a richer bespoke lifecycle — its
+ * `contained` and `mitigated` states carry SRE-specific meaning that this lean
+ * triage spine would flatten. The template serves the broader defect/ticket
+ * family.
+ */
+const INCIDENT_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
+  template_id: 'INCIDENT',
+  initial_phase: 'open',
+  terminal_phases: ['resolved', 'closed', 'wont_fix'],
+  phases: [
+    { id: 'open', label: 'Open', description: 'Surfaced and logged. Not yet triaged.', transitions_to: ['triaged'] },
+    { id: 'triaged', label: 'Triaged', description: 'Assessed for severity and ownership. Routed for work or dispositioned.', transitions_to: ['in_progress', 'resolved', 'wont_fix'] },
+    { id: 'in_progress', label: 'In Progress', description: 'Actively being worked toward a fix.', transitions_to: ['resolved', 'wont_fix'] },
+    { id: 'resolved', label: 'Resolved', description: 'Addressed and verified. May reopen to `triaged` on regression.', transitions_to: ['closed', 'triaged'] },
+    { id: 'closed', label: 'Closed', description: 'Administratively closed (duplicate, withdrawn, or no longer relevant).', transitions_to: [] },
+    { id: 'wont_fix', label: "Won't Fix", description: 'Triaged as not to be actioned. Reason should be documented.', transitions_to: [] },
+  ],
+}
+
+/**
+ * Study / run: planned → running → analysing → complete
+ *
+ * The shared spine of a time-boxed investigation — an experiment, eval run,
+ * research study, or design sprint. `abandoned` is a late-state terminal for
+ * a run stopped before completion (killed, timed out, superseded). No reopen:
+ * a re-run is a new node, keeping run-level analytics clean (same discipline
+ * as `SALES_DEAL`).
+ */
+const STUDY_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
+  template_id: 'STUDY',
+  initial_phase: 'planned',
+  terminal_phases: ['complete', 'abandoned'],
+  phases: [
+    { id: 'planned', label: 'Planned', description: 'Scoped and scheduled. Not yet started.', transitions_to: ['running'] },
+    { id: 'running', label: 'Running', description: 'Actively executing: collecting data or running the protocol.', transitions_to: ['analysing', 'abandoned'] },
+    { id: 'analysing', label: 'Analysing', description: 'Execution done; results are being analysed and written up.', transitions_to: ['complete', 'abandoned'] },
+    { id: 'complete', label: 'Complete', description: 'Analysed and concluded. Findings captured.', transitions_to: [] },
+    { id: 'abandoned', label: 'Abandoned', description: 'Stopped before completion (killed, timed out, or superseded).', transitions_to: [] },
+  ],
+}
+
 /** All entity types generated from lifecycle templates */
 const TEMPLATE_LIFECYCLES: UPGLifecycle[] = [
   // Publishing lifecycle
@@ -3359,10 +2747,11 @@ const TEMPLATE_LIFECYCLES: UPGLifecycle[] = [
   fromTemplate('privacy_policy', APPROVAL_TEMPLATE),
 
   // ── Phase C: MATURITY (alpha / beta / ga / deprecated) ──────────────────────
+  // screen removed ( Q3, 0.21.0): hand-authored SCREEN_LIFECYCLE below —
+  // the build-pipeline IS the real lifecycle, MATURITY was the mis-fit.
   fromTemplate('design_system', MATURITY_TEMPLATE),
   fromTemplate('design_component', MATURITY_TEMPLATE),
   fromTemplate('design_pattern', MATURITY_TEMPLATE),
-  fromTemplate('screen', MATURITY_TEMPLATE),
   fromTemplate('brand_logo', MATURITY_TEMPLATE),
   fromTemplate('certification', MATURITY_TEMPLATE),
   fromTemplate('data_source', MATURITY_TEMPLATE),
@@ -3373,6 +2762,10 @@ const TEMPLATE_LIFECYCLES: UPGLifecycle[] = [
   fromTemplate('agent_task', WORK_ITEM_TEMPLATE),
   fromTemplate('agent_skill', WORK_ITEM_TEMPLATE),
   fromTemplate('agent_hook', WORK_ITEM_TEMPLATE),
+  // (0.21.0): task (exact match) + epic (todo→in_progress→done ⊆ WORK_ITEM,
+  // in_review becomes available — non-breaking widening) folded off hand-authored.
+  fromTemplate('task', WORK_ITEM_TEMPLATE),
+  fromTemplate('epic', WORK_ITEM_TEMPLATE),
 
   // ── Phase B: RISK_ITEM (identified → assessed → mitigated/accepted/closed) ──
   fromTemplate('threat', RISK_ITEM_TEMPLATE),
@@ -3381,6 +2774,37 @@ const TEMPLATE_LIFECYCLES: UPGLifecycle[] = [
 
   // ── Phase B: SALES_DEAL (qualified → proposal → negotiation → won/lost) ─────
   fromTemplate('deal', SALES_DEAL_TEMPLATE),
+
+  // ── STUDY (planned → running → analysing → complete / abandoned) ───────────
+  // (0.21.0): time-boxed investigations folded off bespoke singletons.
+  // `model_comparison` stays bespoke — its publish/archive tail is a weak fit.
+  fromTemplate('experiment', STUDY_TEMPLATE),
+  fromTemplate('experiment_run', STUDY_TEMPLATE),
+  fromTemplate('research_study', STUDY_TEMPLATE),
+  fromTemplate('design_sprint', STUDY_TEMPLATE),
+  fromTemplate('feasibility_study', STUDY_TEMPLATE),
+  fromTemplate('ai_experiment', STUDY_TEMPLATE),
+  fromTemplate('eval_run', STUDY_TEMPLATE),
+
+  // ── VALIDATION (untested → testing → validated / invalidated → archived) ───
+  // (0.21.0): claims-tested-to-a-verdict folded off bespoke singletons.
+  // `business_model` stays bespoke — its `pivoted` terminal is a strategic
+  // outcome, not a verdict.
+  fromTemplate('assumption', VALIDATION_TEMPLATE),
+  fromTemplate('prototype', VALIDATION_TEMPLATE),
+  fromTemplate('value_proposition', VALIDATION_TEMPLATE),
+  fromTemplate('hypothesis', VALIDATION_TEMPLATE),
+
+  // ── INCIDENT (open → triaged → in_progress → resolved / closed / wont_fix) ─
+  // (0.21.0): triage-to-resolution defect/ticket family folded off
+  // bespoke singletons. `incident` stays bespoke (richer SRE flow).
+  fromTemplate('support_ticket', INCIDENT_TEMPLATE),
+  fromTemplate('bug', INCIDENT_TEMPLATE),
+  fromTemplate('a11y_issue', INCIDENT_TEMPLATE),
+  fromTemplate('vulnerability', INCIDENT_TEMPLATE),
+  fromTemplate('hallucination_report', INCIDENT_TEMPLATE),
+  fromTemplate('technical_debt_item', INCIDENT_TEMPLATE),
+  fromTemplate('customer_feedback', INCIDENT_TEMPLATE),
 ]
 
 /**
@@ -3490,20 +2914,15 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   SPECIFICATION_LIFECYCLE,
 
   // Discovery & Validation
-  RESEARCH_STUDY_LIFECYCLE,
   NEED_LIFECYCLE,
   OPPORTUNITY_LIFECYCLE,
   SOLUTION_LIFECYCLE,
-  HYPOTHESIS_CLAIM_LIFECYCLE, // canonical 'hypothesis' lifecycle. The pre-v0.2.8 legacy binding (untested → testing → resolved) was removed in 0.13.0 Wave 1 ( T0.3): it was a dead second binding for the same entity_type, always shadowed by this one, and the legacy-status remap lives in UPG_*_MIGRATIONS, not a live lifecycle.
-  EXPERIMENT_LIFECYCLE,
   EXPERIMENT_PLAN_LIFECYCLE,
-  EXPERIMENT_RUN_LIFECYCLE,
   RESEARCH_PLAN_LIFECYCLE,
   FEEDBACK_PROGRAM_LIFECYCLE,
   FEATURE_REQUEST_LIFECYCLE,
   BETA_PROGRAM_LIFECYCLE,
   USER_ADVISORY_BOARD_LIFECYCLE,
-  DESIGN_SPRINT_LIFECYCLE,
 
   // Strategy & Product Specification
   OUTCOME_LIFECYCLE,
@@ -3515,40 +2934,32 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   STRATEGIC_THEME_LIFECYCLE,
   INITIATIVE_LIFECYCLE,
   STRATEGIC_PILLAR_LIFECYCLE,
-  ASSUMPTION_LIFECYCLE,
   STRATEGIC_QUESTION_LIFECYCLE,
   FEATURE_AREA_LIFECYCLE,
   FEATURE_LIFECYCLE,
-  EPIC_LIFECYCLE,
   // user_story is lifecycle-free (declared in UPG_LIFECYCLE_FREE_TYPES below).
-  // story_task lifecycle removed v0.4.0; collapsed into task (TASK_LIFECYCLE,
-  // WORK_ITEM_TEMPLATE).
+  // story_task lifecycle removed v0.4.0; collapsed into task. task + epic are
+  // now WORK_ITEM-template-derived (0.21.0) — see TEMPLATE_LIFECYCLES.
   RELEASE_LIFECYCLE,
-  TASK_LIFECYCLE,
-  BUG_LIFECYCLE,
   ROADMAP_ITEM_LIFECYCLE,
   PLANNING_CYCLE_LIFECYCLE,
   IP_ASSET_LIFECYCLE,
   CONTRACT_LIFECYCLE,
   DESIGN_CONCEPT_LIFECYCLE,
-  PROTOTYPE_LIFECYCLE,
   BRAND_IDENTITY_LIFECYCLE,
+  SCREEN_LIFECYCLE,
 
   // Engineering & Operations
   SERVICE_LIFECYCLE,
   DEPLOYMENT_LIFECYCLE,
   FEATURE_FLAG_LIFECYCLE,
-  TECHNICAL_DEBT_ITEM_LIFECYCLE,
   INVESTIGATION_LIFECYCLE,
   EXTERNAL_API_LIFECYCLE,
   DATABASE_SCHEMA_LIFECYCLE,
   INCIDENT_LIFECYCLE,
-  VULNERABILITY_LIFECYCLE,
   SECURITY_CONTROL_LIFECYCLE,
-  A11Y_ISSUE_LIFECYCLE,
   DATA_PIPELINE_LIFECYCLE,
   AI_MODEL_LIFECYCLE,
-  EVAL_RUN_LIFECYCLE,
   WORKFLOW_RUN_LIFECYCLE,
   AGENT_DEFINITION_LIFECYCLE,
   AGENT_SESSION_LIFECYCLE,
@@ -3562,22 +2973,16 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   RESEARCH_QUESTION_LIFECYCLE,
   INTERVIEW_GUIDE_LIFECYCLE,
   TEST_PLAN_LIFECYCLE,
-  FEASIBILITY_STUDY_LIFECYCLE,
   // AI workflow
-  AI_EXPERIMENT_LIFECYCLE,
   AI_DATASET_LIFECYCLE,
   AI_GUARDRAIL_LIFECYCLE,
-  HALLUCINATION_REPORT_LIFECYCLE,
   MODEL_COMPARISON_LIFECYCLE,
   PROMPT_VERSION_LIFECYCLE,
   EVAL_BENCHMARK_LIFECYCLE,
   // Business Model
   BUSINESS_MODEL_LIFECYCLE,
-  VALUE_PROPOSITION_LIFECYCLE,
   REVENUE_STREAM_LIFECYCLE,
   // Customer Success
-  SUPPORT_TICKET_LIFECYCLE,
-  CUSTOMER_FEEDBACK_LIFECYCLE,
   CUSTOMER_HEALTH_SCORE_LIFECYCLE,
   PLAYBOOK_LIFECYCLE,
   // Team & Organisation
@@ -3603,7 +3008,7 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
  *
  * @example
  * const lifecycle = getLifecycleForType('hypothesis')
- * // → HYPOTHESIS_CLAIM_LIFECYCLE
+ * // → VALIDATION template (untested → testing → validated | invalidated)
  *
  * const noLifecycle = getLifecycleForType('persona')
  * // → undefined

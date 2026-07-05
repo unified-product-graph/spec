@@ -118,14 +118,18 @@ describe('Lifecycles (v0.4.0 state)', () => {
  expect(getLifecycleForType('evidence')).toBeUndefined()
  })
 
- it('hypothesis has the 5-phase lifecycle (drafted → active → validated|invalidated|archived)', () => {
- // v0.4.0: HYPOTHESIS_CLAIM_LIFECYCLE re-homed to entity_type: 'hypothesis'.
+ it('hypothesis carries the VALIDATION lifecycle (untested → testing → validated|invalidated → archived)', () => {
+ // v0.4.0: the bespoke HYPOTHESIS_CLAIM lifecycle re-homed to entity_type 'hypothesis'.
+ // (0.21.0): folded onto the shared VALIDATION template — the bespoke
+ // [drafted, active, ...] vocabulary remaps via UPG_STATUS_MIGRATIONS
+ // (drafted→untested, active→testing); verdict + archive terminals unchanged.
  const lifecycle = getLifecycleForType('hypothesis')!
  expect(lifecycle).toBeDefined()
- expect(lifecycle.initial_phase).toBe('drafted')
+ expect(lifecycle.template_id).toBe('VALIDATION')
+ expect(lifecycle.initial_phase).toBe('untested')
  expect(lifecycle.terminal_phases).toEqual(expect.arrayContaining(['validated', 'invalidated', 'archived']))
  const phaseIds = new Set(lifecycle.phases.map((p) => p.id))
- expect(phaseIds).toEqual(new Set(['drafted', 'active', 'validated', 'invalidated', 'archived']))
+ expect(phaseIds).toEqual(new Set(['untested', 'testing', 'validated', 'invalidated', 'archived']))
  })
 
  it('hypothesis_evidence is no longer in lifecycle-free types (deprecated at v0.4.0)', () => {

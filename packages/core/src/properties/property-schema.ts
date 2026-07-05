@@ -398,7 +398,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     personality_traits: { type: 'string[]', description: 'Core personality traits of the brand (e.g. "bold", "approachable", "innovative")' },
     tagline: { type: 'string', description: 'Brand tagline or slogan (e.g. "Just Do It", "Think Different")' },
     mission_statement: { type: 'string', description: 'Mission statement: what the brand exists to do.' },
-    brand_stage: { type: 'string', enum: ['exploratory', 'defined', 'mature'], description: 'Current lifecycle stage of the brand' },
     brand_values: { type: 'string[]', description: 'Core brand values. The principles the brand stands for. @example ["innovation", "transparency", "sustainability"]' },
     brand_story: { type: 'string', description: 'Brand origin story or narrative. Free-form text, may be multiple paragraphs.' },
     target_audience_description: { type: 'string', description: 'Target audience description. Who the brand speaks to. @example "Solo founders and small product teams building their first product."' },
@@ -907,7 +906,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   deliverable: {
     deliverable_type: { type: 'string', enum: ['document', 'prototype', 'release', 'design', 'report', 'other'], description: 'Kind of deliverable ( Option B).' },
     due_date: { type: 'string', description: 'Due date for the deliverable (ISO format)' },
-    deliverable_status: { type: 'string', enum: ['not_started', 'in_progress', 'in_review', 'accepted', 'rejected'], description: 'Current progress status' },
     acceptance_criteria: { type: 'string', description: 'Criteria that must be met for the deliverable to be accepted' },
   },
   // DemandGenProgramProperties: DemandGenProgram entity.
@@ -2179,7 +2177,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     pr_type: { type: 'string', enum: ['product_launch', 'partnership', 'funding', 'milestone', 'other'], description: 'Category of the press release' },
     publish_date: { type: 'string', description: 'Date the release was or will be published (ISO format)' },
     outlets: { type: 'string[]', description: 'Media outlets targeted for distribution' },
-    pr_status: { type: 'string', enum: ['draft', 'in_review', 'distributed', 'published'], description: 'Current status of the press release' },
   },
   // PricingStrategyProperties: Pricing strategy.
   pricing_strategy: {
@@ -2224,14 +2221,12 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // ProgramProperties: Program.
   program: {
-    program_status: { type: 'string', enum: ['planning', 'active', 'on_hold', 'completed', 'cancelled'], description: 'Current status of the program' },
     start_date: { type: 'string', description: 'Program start date (ISO format)' },
     end_date: { type: 'string', description: 'Program end date (ISO format)' },
     budget: { type: 'number', description: 'Total budget allocated to the program' },
   },
   // ProjectProperties: Project.
   project: {
-    project_status: { type: 'string', enum: ['planning', 'active', 'on_hold', 'completed', 'cancelled'], description: 'Current status of the project' },
     start_date: { type: 'string', description: 'Project start date (ISO format)' },
     end_date: { type: 'string', description: 'Project end date (ISO format)' },
     methodology: { type: 'string', enum: ['agile', 'waterfall', 'kanban', 'hybrid'], description: 'Development methodology used' },
@@ -2491,7 +2486,6 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     route: { type: 'string', description: 'Application route. @example "/dashboard", "/settings/billing"' },
     viewport: { type: 'string', enum: ['mobile', 'tablet', 'desktop', 'tv', 'watch', 'responsive'], description: 'Primary target viewport' },
     access_level: { type: 'string', enum: ['public', 'authenticated', 'admin', 'internal'], description: 'Reach' },
-    screen_status: { type: 'string', enum: ['draft', 'in_design', 'built', 'shipped', 'deprecated'], description: 'Build pipeline stage' },
     purpose: { type: 'string', description: 'One-line purpose' },
   },
   // ScreenStateProperties: Specific state of a screen.
