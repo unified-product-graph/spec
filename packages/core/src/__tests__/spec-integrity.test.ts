@@ -530,14 +530,14 @@ describe('Polymorphic edge allow-list', () => {
  expect(divergent, `Edges where derived polymorphism disagrees with allow-list:\n${divergent.join('\n')}`).toEqual([])
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (17 entries, 7 families)', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (18 entries, 8 families)', () => {
  // Bumping this? You added a polymorphic edge — follow the ripple checklist in
  // CONTRIBUTING.md ("How to propose a new edge type") so the fixture, cross-edge
  // registration, and paper move with it.
  expect(
  UPG_POLYMORPHIC_EDGE_KEYS.length,
  'UPG_POLYMORPHIC_EDGE_KEYS count changed — update this assertion AND see CONTRIBUTING.md edge-add checklist',
- ).toBe(17)
+ ).toBe(18)
  })
 })
 

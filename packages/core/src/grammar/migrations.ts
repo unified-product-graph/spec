@@ -2119,6 +2119,25 @@ export type UPGEdgeMigration =
  * Key is the version that INTRODUCES the migration (target version).
  */
 export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
+  // (target version TBD at release ceremony — pencilled at 0.22.0, the next
+  // breaking slot after 0.21.0 per the docket; adjust the key if Wave 4
+  // claims it first.) WS3 commit-provenance collapse (2026-07-05, ratified):
+  // `workspace_produced_decision` widens to the `node` wildcard endpoint —
+  // a workspace's commit loop can legitimately produce any entity type
+  // arranged in it (decision, feature, persona, ...), not just decisions.
+  // No flip (source stays workspace); the target node's concrete type is
+  // unchanged (still a decision), only the edge key + catalog target_type
+  // widen. See the enum-vs-polymorphism ADR and the WS3 proposal doc for
+  // the full reasoning (mirrors decision_produces_node).
+  '0.22.0': [
+    // No requires_target_type: the destination's target_type is the `node`
+    // wildcard, and the endpoint guard is checked against the catalog's
+    // declared type (per the spec-integrity "endpoint guards match the
+    // catalog entry" test), not the concrete instance type — a concrete
+    // `decision` instance would never satisfy a literal 'node' guard at
+    // runtime. Gate only on the unwidened source endpoint.
+    { kind: 'rename', from: 'workspace_produced_decision', to: 'workspace_produced_node', requires_source_type: 'workspace', reason: 'WS3 commit-provenance collapse (2026-07-05, Captain-ratified). workspace_produced_decision widens to the polymorphic workspace_produced_node: a workspace commit can legitimately produce any entity type, not just a decision. No flip; only the target_type widens from decision to the node wildcard.' },
+  ],
   '0.9.9': [
     // (since v0.9.9/) Validation experiment-model + test_plan
     // re-home. The validation chain is reshaped to the single-parent line

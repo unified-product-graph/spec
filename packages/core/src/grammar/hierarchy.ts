@@ -487,13 +487,19 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // ── Portfolio layer hierarchy ────────────────────────────────────────────────
   // organization → product_area is the org-axis anchor (who owns what);
   // organization → portfolio is the strategic-axis anchor (where you invest).
-  organization: ['portfolio', 'product_area'],
+  // organization → workspace (WS3, 2026-07-05): org-altitude workspace anchor
+  // (organization_thinks_in_workspace) — a workspace scoped to org altitude
+  // lives in the same portfolio-level graph as its organization node.
+  organization: ['portfolio', 'product_area', 'workspace'],
   // portfolios can nest (multi-level investment structures).
   portfolio: ['product', 'portfolio'],
   // product_area is the organisational container for products and can
   // nest (parent → sub-area). product_area also groups features; the
-  // "Studio area owns 6 features" mental model.
-  product_area: ['product', 'product_area', 'feature'],
+  // "Studio area owns 6 features" mental model. product_area → workspace
+  // (WS3, 2026-07-05): plane-altitude workspace anchor
+  // (product_area_thinks_in_workspace) — "plane" is Entopo's app-level name
+  // for product_area, not a distinct spec entity.
+  product_area: ['product', 'product_area', 'feature', 'workspace'],
 } as const
 
 /**

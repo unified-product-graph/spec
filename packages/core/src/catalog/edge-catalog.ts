@@ -1469,8 +1469,31 @@ export const UPG_EDGE_CATALOG = {
   product_succeeds_product: { forward_verb: 'succeeds', reverse_verb: 'succeeded_by', classification: 'causal', source_type: 'product', target_type: 'product' },
 
   // 8.3 Workspace Edges
+  // Altitude anchors (WS3, 2026-07-05): a workspace scopes to exactly one of
+  // three legal altitudes — organization / product_area ("plane") / product —
+  // each a typed hierarchy edge, not a polymorphic `_node` wildcard. Per the
+  // enum-vs-polymorphism ADR (2026-06-16), this family fails universality
+  // (the anchor set is a closed altitude ladder, not "any entity") and is
+  // structural (it must resolve through `resolveContainmentEdge`/`get_tree`),
+  // so it stays enumerated — the same shape `feature`'s five typed parent
+  // edges already use. Same verb pair across all three altitudes. Neither new
+  // edge is cross_product_eligible: an org/plane-altitude workspace lives in
+  // the same portfolio-level `.upg` as its anchor, same as sibling containment
+  // edges (organization_organised_into_product_area, portfolio_contains_product).
+  organization_thinks_in_workspace: { forward_verb: 'thinks_in', reverse_verb: 'thinks_for', classification: 'hierarchy', source_type: 'organization', target_type: 'workspace' },
+  product_area_thinks_in_workspace: { forward_verb: 'thinks_in', reverse_verb: 'thinks_for', classification: 'hierarchy', source_type: 'product_area', target_type: 'workspace' },
   product_thinks_in_workspace: { forward_verb: 'thinks_in', reverse_verb: 'thinks_for', classification: 'hierarchy', source_type: 'product', target_type: 'workspace' },
-  workspace_produced_decision: { forward_verb: 'produced', reverse_verb: 'produced_in', classification: 'causal', source_type: 'workspace', target_type: 'decision' },
+  // Commit provenance (WS3, 2026-07-05): widened from the single-target
+  // `workspace_produced_decision` to the `node` wildcard — a workspace's
+  // commit loop can legitimately produce any entity type arranged in it
+  // (decision, feature, persona, ...), so per the same ADR test this family
+  // is universal + non-structural (provenance metadata, not the produced
+  // node's real containment edge) and collapses polymorphic, mirroring
+  // `decision_produces_node`. See UPG_EDGE_MIGRATIONS for the rename rule.
+  // Edge-provenance (which workspace produced a committed *edge*, not just a
+  // node) has no schema mechanism yet — deliberately deferred, see the WS3
+  // proposal doc, ripple map "surprises" #3.
+  workspace_produced_node: { forward_verb: 'produced', reverse_verb: 'produced_in', classification: 'causal', source_type: 'workspace', target_type: 'node' },
 
   // ── P14 edges (replacing foreign-key properties) ─────────────────────────
   feature_addresses_job: { forward_verb: 'addresses', reverse_verb: 'addressed_by', classification: 'cross-domain', source_type: 'feature', target_type: 'job' },
@@ -2534,7 +2557,7 @@ export function isDeliberateOnlyEdge(type: string): boolean {
 /**
  * Canonical allow-list of edges that use the `'node'` wildcard endpoint.
  *
- * Five semantic families are sanctioned:
+ * Eight semantic families are sanctioned:
  *
  * 1. **Universal semantic verbs**: any node can inform / constrain / inspire
  *    any other node. The meaning is deliberately abstract; consumers render
@@ -2549,6 +2572,15 @@ export function isDeliberateOnlyEdge(type: string): boolean {
  * 5. **Framework exercises**: a framework_exercise can include any entity type
  *    it scores. The technique is type-agnostic, so binding the target would
  *    re-weld frameworks to one entity type — the limitation this edge removes.
+ * 6. **Universal classification**: any node can be classified against a
+ *    classification_value. Classification schemes are type-agnostic.
+ * 7. **Work-item issue links**: blocks/relates/duplicates spans the work-item
+ *    set {feature, epic, user_story, task, bug} — endpoint-polymorphic over a
+ *    bounded family, not the full type universe.
+ * 8. **Workspace provenance** (WS3, 2026-07-05): a workspace's commit loop can
+ *    produce any entity type arranged in it (decision, feature, persona, ...).
+ *    Widened from the single-target `workspace_produced_decision`; see
+ *    `UPG_EDGE_MIGRATIONS` for the rename rule.
  *
  * Adding a new polymorphic edge requires extending this array AND the
  * spec-integrity regression test, which forces a conscious decision and
@@ -2581,6 +2613,9 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   'work_item_blocks_work_item',
   'work_item_relates_to_work_item',
   'work_item_duplicates_work_item',
+  // Workspace provenance (WS3, 2026-07-05): a workspace can produce any
+  // entity type arranged in it. Widened from workspace_produced_decision.
+  'workspace_produced_node',
 ] as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)
