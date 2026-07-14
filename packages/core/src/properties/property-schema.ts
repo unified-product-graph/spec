@@ -549,9 +549,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ClassificationValueProperties: ClassificationValue: a value on a classification axis.
   classification_value: {
     rationale: { type: 'string', description: 'Short paragraph: why this value earns its own row/column. Longer narrative belongs in `summary_md` or attached `content_piece` nodes.' },
-    exemplars: { type: 'string[]', description: 'Free-text examples of products occupying this value. For queryable occupancy, prefer `competitor` nodes with `classified_as` edges. @example [\'Sanity\', \'Contentful\', \'Hygraph\']' },
+    exemplars: { type: 'string[]', description: 'Free-text examples of products occupying this value. For queryable occupancy, prefer `competitor` nodes with `classified_as` edges. @example [\'Nimbus\', \'Larch\', \'Prism\']' },
     commitments: { type: 'object[]', description: 'The N (typically 2–4) load-bearing commitments that define this category. Each commitment is a structural axis; removing it changes the category. Pairs with `capabilities`: commitments are the *load-bearing definition*; capabilities are the *surface offering*. @example [ { name: \'Typed content graph\', description: \'Schemas in code; references as edges; content is structured data.\' }, { name: \'Real-time backend\', description: \'Live queries, CRDT collaboration, sub-second propagation.\' }, { name: \'Embeddable studio\', description: \'Editor is a library hosted inside the team app, not an external portal.\' }, ]' },
-    capabilities: { type: 'object[]', description: 'Structured capability bullets across the six canonical surfaces. Each surface appears at most once per `classification_value`. Pairs with `commitments`: capabilities describe what the category *offers*; commitments describe what *defines* it. @example [ { surface: \'delivery\', bullets: [\'GROQ\', \'GraphQL\', \'REST\', \'Live Content API\', \'Asset CDN\'] }, { surface: \'extensibility\', bullets: [\'Custom input components\', \'Studio plugins\'] }, ]' },
+    capabilities: { type: 'object[]', description: 'Structured capability bullets across the six canonical surfaces. Each surface appears at most once per `classification_value`. Pairs with `commitments`: capabilities describe what the category *offers*; commitments describe what *defines* it. @example [ { surface: \'delivery\', bullets: [\'NQL\', \'GraphQL\', \'REST\', \'Live Sync API\', \'Asset CDN\'] }, { surface: \'extensibility\', bullets: [\'Custom input components\', \'editor plugins\'] }, ]' },
   },
   // CodeRepositoryProperties: Code repository.
   code_repository: {
@@ -586,9 +586,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     analysis_type: { type: 'string', enum: ['feature_comparison', 'positioning', 'swot', 'pricing'], description: 'Type of analysis. `feature_comparison` = side-by-side matrix. `positioning` = competitor positioning relative to each other. `swot` = strengths, weaknesses, opportunities, threats. `pricing` = pricing structure comparison.' },
     analysis_date: { type: 'string', description: 'ISO date conducted. Competitive intelligence decays quickly; track snapshot age. @example "2026-03-15"' },
     framework_id: { type: 'string', description: 'Framework ID (references `UPGFramework.id`). @example "porter-five-forces", "swot-analysis", "competitive-matrix"' },
-    empty_cells: { type: 'object[]', description: 'Empty cells in a 2-axis classification matrix that earn explicit commentary. Only the strategically interesting cells. Opportunity-kind cells are the most valuable; they identify unoccupied strategic space. Each entry references two `classification_value` nodes by id (one from each `classification_axis` child of this `competitive_analysis`). `validate_graph` enforces that the refs resolve to `classification_value` nodes whose parents are distinct `classification_axis` instances. See `ClassificationValueProperties.commitments` for the inverse "occupied cell" structural-definition shape. @example [ { axis_a_value_ref: \'val-git-based\', axis_b_value_ref: \'val-portable-text\', rationale_kind: \'opportunity\', rationale_md: \'No technical reason; only adoption inertia. Watching brief.\' }, { axis_a_value_ref: \'val-composable\', axis_b_value_ref: \'val-wysiwyg\', rationale_kind: \'structural\', rationale_md: \'Composable rejects HTML blobs; WYSIWYG requires them.\' }, ]' },
+    empty_cells: { type: 'object[]', description: 'Empty cells in a 2-axis classification matrix that earn explicit commentary. Only the strategically interesting cells. Opportunity-kind cells are the most valuable; they identify unoccupied strategic space. Each entry references two `classification_value` nodes by id (one from each `classification_axis` child of this `competitive_analysis`). `validate_graph` enforces that the refs resolve to `classification_value` nodes whose parents are distinct `classification_axis` instances. See `ClassificationValueProperties.commitments` for the inverse "occupied cell" structural-definition shape. @example [ { axis_a_value_ref: \'val-git-based\', axis_b_value_ref: \'val-structured-text\', rationale_kind: \'opportunity\', rationale_md: \'No technical reason; only adoption inertia. Watching brief.\' }, { axis_a_value_ref: \'val-composable\', axis_b_value_ref: \'val-wysiwyg\', rationale_kind: \'structural\', rationale_md: \'Composable rejects HTML blobs; WYSIWYG requires them.\' }, ]' },
     last_updated: { type: 'string', description: 'Provenance: ISO date-time this record was last observed or refreshed. Distinct from `analysis_date` (when the analysis was conducted). @example "2026-06-13"' },
-    source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://www.contentful.com/changelog/"' },
+    source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://docs.larch.example/changelog/"' },
     confidence: {
       type: 'assessment', scale_id: 'confidence_5', description: 'Provenance: how sure we are, on the canonical confidence_5 scale. Carries both a numeric value and a high / medium / low label.',
       properties: {
@@ -614,7 +614,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     strengths: { type: 'string[]', description: 'Bulleted factual strengths. Each item is a short statement, not prose. @example [\'Real-time multiplayer canvas\', \'Generous free tier\']' },
     weaknesses: { type: 'string[]', description: 'Bulleted factual weaknesses: gaps, friction, or capabilities materially below market. @example [\'Weak API query capabilities\', \'No mobile companion\']' },
     last_updated: { type: 'string', description: 'Provenance: ISO date-time this record was last observed or refreshed. Lets a stale record be told apart from a fresh one. @example "2026-06-13"' },
-    source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://www.contentful.com/pricing/"' },
+    source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://docs.larch.example/pricing/"' },
     confidence: {
       type: 'assessment', scale_id: 'confidence_5', description: 'Provenance: how sure we are, on the canonical confidence_5 scale. Carries both a numeric value and a high / medium / low label.',
       properties: {
@@ -634,7 +634,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     quality: { type: 'string', enum: ['better', 'same', 'worse', 'missing'], description: 'Quality comparison. `better` = ours is meaningfully superior. `same` = roughly equivalent. `worse` = theirs is meaningfully superior. `missing` = we have no equivalent.' },
     parity_status: { type: 'string', enum: ['ahead', 'behind', 'parity', 'unique_to_us', 'unique_to_them'], description: 'Parity. More granular than `quality`; captures whether the gap is offensive or defensive. `ahead` = we lead. `behind` = they lead. `parity` = equivalent. `unique_to_us` / `unique_to_them` = only one side offers it.' },
     last_updated: { type: 'string', description: 'ISO date this assessment was last updated. Competitor feature landscapes change quickly. @example "2026-02-15"' },
-    source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://www.contentful.com/changelog/"' },
+    source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://docs.larch.example/changelog/"' },
     confidence: {
       type: 'assessment', scale_id: 'confidence_5', description: 'Provenance: how sure we are, on the canonical confidence_5 scale. Carries both a numeric value and a high / medium / low label.',
       properties: {
@@ -658,7 +658,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     from_value: { type: 'string', description: 'Reclassification only. The prior `classification_value` id the competitor was classified as before this move (the superseded cell). Absent for a first-time classification (nothing was superseded).' },
     to_value: { type: 'string', description: 'Reclassification only. The new `classification_value` id the competitor is classified as after this move (the cell the new classify edge points at).' },
     last_updated: { type: 'string', description: 'Provenance: ISO date-time this record was last observed or refreshed. @example "2026-06-13"' },
-    source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://www.contentful.com/changelog/"' },
+    source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://docs.larch.example/changelog/"' },
     confidence: {
       type: 'assessment', scale_id: 'confidence_5', description: 'Provenance: how sure we are, on the canonical confidence_5 scale. Carries both a numeric value and a high / medium / low label.',
       properties: {
@@ -2019,7 +2019,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // OperatingLifecycleProperties: An operating_lifecycle: a canonical, ordered (often cyclic) operating process
   operating_lifecycle: {
     cyclic: { type: 'boolean', description: 'True if the process loops (e.g. Analyze → Extend → Plan). The sequence is fully expressed by the stages\' `stage_order`; `cyclic` adds the wrap from the last stage back to the first.' },
-    source: { type: 'string', description: 'Origin of the canonical model (e.g. "Sanity official content-ops lifecycle"). Optional provenance; promote to an edge if it names a real `specification`/`document`.' },
+    source: { type: 'string', description: 'Origin of the canonical model (e.g. "a published content-ops lifecycle"). Optional provenance; promote to an edge if it names a real `specification`/`document`.' },
   },
   // OperatingStageProperties: An operating_stage: one ordered stage of an `operating_lifecycle`. A product's
   operating_stage: {

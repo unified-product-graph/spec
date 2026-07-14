@@ -30,15 +30,15 @@
           },
           {
             "axis_a_value_ref": "val-git-based",
-            "axis_b_value_ref": "val-portable-text",
+            "axis_b_value_ref": "val-structured-text",
             "rationale_kind": "opportunity",
-            "rationale_md": "No technical reason, only adoption inertia. Watching brief: anyone shipping a starter that drops .md into Portable Text JSON could change the row."
+            "rationale_md": "No technical reason, only adoption inertia. Watching brief: anyone shipping a starter that drops .md into Structured Text JSON could change the row."
           },
           {
             "axis_a_value_ref": "val-monolithic",
-            "axis_b_value_ref": "val-portable-text",
+            "axis_b_value_ref": "val-structured-text",
             "rationale_kind": "ideological",
-            "rationale_md": "Monolithic CMSs treat content as page-bound HTML. Portable Text's structured-block model contradicts the page-as-unit assumption that monolithic vendors compete on."
+            "rationale_md": "Monolithic CMSs treat content as page-bound HTML. Structured Text's structured-block model contradicts the page-as-unit assumption that monolithic vendors compete on."
           }
         ]
       }
@@ -73,7 +73,7 @@
       "parent_id": "axis-architecture",
       "properties": {
         "rationale": "Composable extends headless with three load-bearing commitments. Remove any one and you have headless, not composable.",
-        "exemplars": ["Sanity", "Contentful", "Hygraph"],
+        "exemplars": ["Nimbus", "Larch", "Prism"],
         "commitments": [
           {
             "name": "Typed content graph",
@@ -89,8 +89,8 @@
           }
         ],
         "capabilities": [
-          { "surface": "delivery", "bullets": ["GROQ projection-first queries", "Generated GraphQL", "REST patch-based mutations", "Live Content API push subscriptions", "Asset CDN with URL transforms", "Edge-cached reads"] },
-          { "surface": "extensibility", "bullets": ["Custom input components", "Studio plugins", "Action hooks", "Reference filters"] },
+          { "surface": "delivery", "bullets": ["NQL projection-first queries", "Generated GraphQL", "REST patch-based mutations", "Live Sync API push subscriptions", "Asset CDN with URL transforms", "Edge-cached reads"] },
+          { "surface": "extensibility", "bullets": ["Custom input components", "editor plugins", "Action hooks", "Reference filters"] },
           { "surface": "collaboration", "bullets": ["CRDT multiplayer", "Presence", "Inline comments", "Workflow states"] },
           { "surface": "preview", "bullets": ["Visual editing overlays", "Click-to-edit deep links", "Branch-aware preview"] },
           { "surface": "localization", "bullets": ["Document-level translations", "Field-level translations", "Releases (scheduled atomic publishes)"] },
@@ -106,7 +106,7 @@
       "parent_id": "axis-architecture",
       "properties": {
         "rationale": "Headless without the composable extensions: APIs over content but no typed graph guarantee, often without real-time, often with hosted-only editor.",
-        "exemplars": ["Contentstack", "Storyblok", "Strapi"],
+        "exemplars": ["Contentstack", "Storyblok", "Forge"],
         "commitments": [
           { "name": "API-only delivery", "description": "No coupled rendering layer; consumers pull content via REST/GraphQL." },
           { "name": "Hosted editor", "description": "Studio is the vendor's SaaS surface, not an embeddable library." }
@@ -181,25 +181,25 @@
       "parent_id": "axis-editing",
       "properties": {
         "rationale": "Trades preview fidelity for structure guarantees. The form is the source of truth; preview is downstream.",
-        "exemplars": ["Strapi", "Contentful classic"]
+        "exemplars": ["Forge", "Larch classic"]
       }
     },
     {
-      "id": "val-portable-text",
+      "id": "val-structured-text",
       "type": "classification_value",
-      "title": "Structured Content + Portable Text",
+      "title": "Structured Content + Structured Text",
       "description": "Long-form content as a typed array of typed blocks; rich text without HTML.",
       "parent_id": "axis-editing",
       "properties": {
-        "rationale": "Sanity's signature shape: long-form authoring without surrendering type guarantees. Each paragraph/heading/quote is a typed block; embedded references are first-class.",
-        "exemplars": ["Sanity Studio"],
+        "rationale": "Nimbus's signature shape: long-form authoring without surrendering type guarantees. Each paragraph/heading/quote is a typed block; embedded references are first-class.",
+        "exemplars": ["Nimbus Studio"],
         "commitments": [
           { "name": "Typed blocks", "description": "Every paragraph, heading, list, quote is a typed JSON block with stable schema." },
           { "name": "References as blocks", "description": "Embedded entities (images, products, callouts) are typed references, not HTML." }
         ],
         "capabilities": [
           { "surface": "extensibility", "bullets": ["Custom block types", "Custom marks", "Custom annotations"] },
-          { "surface": "preview", "bullets": ["Schema-aware Portable Text renderer per platform"] }
+          { "surface": "preview", "bullets": ["Schema-aware Structured Text renderer per platform"] }
         ]
       }
     },
@@ -216,22 +216,22 @@
     },
 
     {
-      "id": "competitor-sanity",
+      "id": "competitor-nimbus",
       "type": "competitor",
-      "title": "Sanity",
-      "description": "The reference implementation of composable + Portable Text editing.",
+      "title": "Nimbus",
+      "description": "The reference implementation of composable + Structured Text editing.",
       "properties": {
         "positioning": "Composable content platform with embeddable studio and real-time backend.",
         "pricing_model": "Usage-based + per-seat",
-        "website": "https://sanity.io",
+        "website": "https://nimbus.example",
         "strengths": [
-          "Typed content graph with GROQ query language",
+          "Typed content graph with NQL query language",
           "Real-time CRDT collaboration out of the box",
           "Embeddable studio, owned inside the team's repo"
         ],
         "weaknesses": [
           "Steeper learning curve than form-based headless CMSs",
-          "Portable Text renderers must be authored per output platform"
+          "Structured Text renderers must be authored per output platform"
         ]
       }
     },
@@ -276,15 +276,15 @@
     { "id": "e-v-wysiwyg",  "type": "classification_axis_includes_classification_value", "source": "axis-editing", "target": "val-wysiwyg" },
     { "id": "e-v-block",    "type": "classification_axis_includes_classification_value", "source": "axis-editing", "target": "val-block" },
     { "id": "e-v-form",     "type": "classification_axis_includes_classification_value", "source": "axis-editing", "target": "val-form" },
-    { "id": "e-v-pt",       "type": "classification_axis_includes_classification_value", "source": "axis-editing", "target": "val-portable-text" },
+    { "id": "e-v-pt",       "type": "classification_axis_includes_classification_value", "source": "axis-editing", "target": "val-structured-text" },
     { "id": "e-v-builder",  "type": "classification_axis_includes_classification_value", "source": "axis-editing", "target": "val-visual-builder" },
 
-    { "id": "e-sanity-composable", "type": "competitor_classified_as_classification_value", "source": "competitor-sanity", "target": "val-composable" },
-    { "id": "e-sanity-pt",         "type": "competitor_classified_as_classification_value", "source": "competitor-sanity", "target": "val-portable-text" },
+    { "id": "e-nimbus-composable", "type": "competitor_classified_as_classification_value", "source": "competitor-nimbus", "target": "val-composable" },
+    { "id": "e-nimbus-pt",         "type": "competitor_classified_as_classification_value", "source": "competitor-nimbus", "target": "val-structured-text" },
     { "id": "e-wp-monolithic",     "type": "competitor_classified_as_classification_value", "source": "competitor-wordpress", "target": "val-monolithic" },
     { "id": "e-wp-wysiwyg",        "type": "competitor_classified_as_classification_value", "source": "competitor-wordpress", "target": "val-wysiwyg" },
 
     { "id": "e-anti-fit-composable", "type": "persona_anti_fit_for_classification_value", "source": "persona-small-marketing-team", "target": "val-composable" },
-    { "id": "e-anti-fit-pt",         "type": "persona_anti_fit_for_classification_value", "source": "persona-small-marketing-team", "target": "val-portable-text" }
+    { "id": "e-anti-fit-pt",         "type": "persona_anti_fit_for_classification_value", "source": "persona-small-marketing-team", "target": "val-structured-text" }
   ]
 }

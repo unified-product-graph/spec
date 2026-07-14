@@ -20,9 +20,9 @@
  *   kind: 'language',
  *   language_flavor: 'query',
  *   governance: 'open_spec_stewarded',
- *   steward: 'Sanity',
+ *   steward: 'Nimbus',
  *   openness: 'open',
- *   spec_url: 'https://sanity.io/docs/groq',
+ *   spec_url: 'https://nimbus.example/docs/nql',
  *   current_version: '1.0',
  *   since: '2019',
  * }
@@ -53,13 +53,13 @@ export interface SpecificationProperties {
 }
 
 /** A foundational compositional unit a specification defines: the noun products
- * pass around and compose with (a Portable Text block, a Sanity reference, a
+ * pass around and compose with (a Structured Text block, a typed reference, a
  * Git commit, a Stripe PaymentIntent). Lifecycle-free, like `metric`.
  *
  * @example
  * const properties: PrimitiveProperties = {
  *   primitive_kind: 'block',
- *   defined_by: 'specification/portable_text',
+ *   defined_by: 'specification/structured_text',
  *   since: '2018',
  * }
  */
@@ -73,7 +73,7 @@ export interface PrimitiveProperties {
 }
 
 /** An operating_lifecycle: a canonical, ordered (often cyclic) operating process
- * that many products' journey phases map onto — e.g. Sanity's content-operations
+ * that many products' journey phases map onto — e.g. Nimbus's content-operations
  * lifecycle. Registry-hostable like a `specification`; the cross-product join key
  * that turns per-surface journeys into one operation. Distinct from the per-entity
  * status `lifecycle` grammar concept (this is an entity, not a state machine).
@@ -81,13 +81,13 @@ export interface PrimitiveProperties {
  * @example
  * const properties: OperatingLifecycleProperties = {
  *   cyclic: true,
- *   source: 'Sanity official 5-stage content-ops lifecycle',
+ *   source: 'a canonical 5-stage content-ops lifecycle',
  * }
  */
 export interface OperatingLifecycleProperties {
   /** True if the process loops (e.g. Analyze → Extend → Plan). The sequence is fully expressed by the stages' `stage_order`; `cyclic` adds the wrap from the last stage back to the first. */
   cyclic?: boolean
-  /** Origin of the canonical model (e.g. "Sanity official content-ops lifecycle"). Optional provenance; promote to an edge if it names a real `specification`/`document`. */
+  /** Origin of the canonical model (e.g. "a published content-ops lifecycle"). Optional provenance; promote to an edge if it names a real `specification`/`document`. */
   source?: string
 }
 

@@ -348,7 +348,7 @@ export const UPG_DOMAINS = [
   {
     id: 'foundations',
     label: 'Foundations',
-    description: 'The shared specifications and foundational primitives a product organisation stewards or implements everywhere. Specifications are governed specs (query languages, protocols, data formats, encodings) like GROQ or Portable Text; primitives are the compositional units those specs define (a block, a reference, a query value). Both are registry-hostable canonicals that products implement, expose, or conform to. Distinct from a product feature: a specification has no single owner, no P&L, and no buyer; it is the rulebook many products point at.',
+    description: 'The shared specifications and foundational primitives a product organisation stewards or implements everywhere. Specifications are governed specs (query languages, protocols, data formats, encodings) like NQL or Structured Text; primitives are the compositional units those specs define (a block, a reference, a query value). Both are registry-hostable canonicals that products implement, expose, or conform to. Distinct from a product feature: a specification has no single owner, no P&L, and no buyer; it is the rulebook many products point at.',
     types: ['specification', 'primitive', 'operating_lifecycle', 'operating_stage'],
   },
 ] as const satisfies readonly UPGDomain[]

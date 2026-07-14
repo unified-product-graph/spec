@@ -2451,6 +2451,15 @@ export const UPG_EDGE_CATALOG = {
   // by another team's graph within the portfolio (0.17.3 locked predicate).
   objective_depends_on_dependency: { forward_verb: 'depends_on', reverse_verb: 'dependency_of', classification: 'cross-domain', source_type: 'objective', target_type: 'dependency', cross_product_eligible: true },
   dependency_blocks_objective: { forward_verb: 'blocks', reverse_verb: 'blocked_by', classification: 'cross-domain', source_type: 'dependency', target_type: 'objective', cross_product_eligible: true },
+  // The RESOLVING side, distinct from the two blocking edges above.
+  // `dependency_blocks_objective` names an objective the dependency holds up (the
+  // waiting side); this names the objective whose completion CLEARS the
+  // dependency (the providing side). In a portfolio, a dependency in one
+  // product's graph points at the objective in another product's graph that
+  // delivers the awaited work, instead of recording it only in the free-text
+  // `resolution` property. cross_product_eligible — the resolving objective
+  // lives in another product's graph.
+  dependency_resolved_by_objective: { forward_verb: 'resolved_by', reverse_verb: 'resolves', classification: 'cross-domain', source_type: 'dependency', target_type: 'objective', cross_product_eligible: true },
 
   // objective / initiative → strategic_question. A planning doc's "Risks & Open
   // Questions" section names unresolved coordination questions the plan is

@@ -50,7 +50,7 @@ describe('member_kind serialization (#45)', () => {
       products: [
         { id: 'p1', title: 'A' }, // default = product
         { id: 'p2', title: 'B', member_kind: 'product' },
-        { id: 'c1', title: 'Contentful', member_kind: 'watched' },
+        { id: 'c1', title: 'Larch', member_kind: 'watched' },
         { id: 'roll', title: 'Umbrella', member_kind: 'org_rollup' },
       ],
       cross_edges: [],

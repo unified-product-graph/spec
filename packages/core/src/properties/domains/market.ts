@@ -47,7 +47,7 @@ export interface CompetitorProperties {
   /**
    * Provenance: where this was observed. A changelog, pricing, or docs URL,
    * an analyst report, or a research note.
-   * @example "https://www.contentful.com/pricing/"
+   * @example "https://docs.larch.example/pricing/"
    */
   source?: string
   /**
@@ -104,7 +104,7 @@ export interface CompetitorFeatureProperties {
   /**
    * Provenance: where this was observed. A changelog, pricing, or docs URL,
    * an analyst report, or a research note.
-   * @example "https://www.contentful.com/changelog/"
+   * @example "https://docs.larch.example/changelog/"
    */
   source?: string
   /**
@@ -229,7 +229,7 @@ export interface CompetitiveAnalysisProperties {
    *
    * @example
    *   [
-   *     { axis_a_value_ref: 'val-git-based', axis_b_value_ref: 'val-portable-text',
+   *     { axis_a_value_ref: 'val-git-based', axis_b_value_ref: 'val-structured-text',
    *       rationale_kind: 'opportunity',
    *       rationale_md: 'No technical reason; only adoption inertia. Watching brief.' },
    *     { axis_a_value_ref: 'val-composable', axis_b_value_ref: 'val-wysiwyg',
@@ -247,7 +247,7 @@ export interface CompetitiveAnalysisProperties {
   /**
    * Provenance: where this was observed. A changelog, pricing, or docs URL,
    * an analyst report, or a research note.
-   * @example "https://www.contentful.com/changelog/"
+   * @example "https://docs.larch.example/changelog/"
    */
   source?: string
   /**
@@ -327,7 +327,7 @@ export interface CompetitorSignalProperties {
   /**
    * Provenance: where this was observed. A changelog, pricing, or docs URL,
    * an analyst report, or a research note.
-   * @example "https://www.contentful.com/changelog/"
+   * @example "https://docs.larch.example/changelog/"
    */
   source?: string
   /**
@@ -472,14 +472,14 @@ export interface ClassificationAxisProperties {
  * @example
  * const properties: ClassificationValueProperties = {
  *   rationale: 'Composable extends headless with three load-bearing commitments.',
- *   exemplars: ['Sanity', 'Contentful', 'Hygraph'],
+ *   exemplars: ['Nimbus', 'Larch', 'Prism'],
  *   commitments: [
  *     { name: 'Typed content graph', description: 'Schemas in code; references as edges.' },
  *     { name: 'Real-time backend', description: 'Live queries, CRDT collaboration.' },
  *     { name: 'Embeddable studio', description: 'Editor is a library hosted inside the team app.' },
  *   ],
  *   capabilities: [
- *     { surface: 'delivery', bullets: ['GROQ', 'GraphQL', 'REST', 'Live Content API'] },
+ *     { surface: 'delivery', bullets: ['NQL', 'GraphQL', 'REST', 'Live Sync API'] },
  *   ],
  * }
  */
@@ -492,7 +492,7 @@ export interface ClassificationValueProperties {
   /**
    * Free-text examples of products occupying this value.
    * For queryable occupancy, prefer `competitor` nodes with `classified_as` edges.
-   * @example ['Sanity', 'Contentful', 'Hygraph']
+   * @example ['Nimbus', 'Larch', 'Prism']
    */
   exemplars?: string[]
   /**
@@ -519,8 +519,8 @@ export interface ClassificationValueProperties {
    *
    * @example
    *   [
-   *     { surface: 'delivery', bullets: ['GROQ', 'GraphQL', 'REST', 'Live Content API', 'Asset CDN'] },
-   *     { surface: 'extensibility', bullets: ['Custom input components', 'Studio plugins'] },
+   *     { surface: 'delivery', bullets: ['NQL', 'GraphQL', 'REST', 'Live Sync API', 'Asset CDN'] },
+   *     { surface: 'extensibility', bullets: ['Custom input components', 'editor plugins'] },
    *   ]
    */
   capabilities?: Array<ClassificationCapability>

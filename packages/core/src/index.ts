@@ -31,7 +31,7 @@ export * from './format/index.js'
  * it stamps the `upg_version` field of every `.upg` file written by the SDK.
  * The `check:version-lockstep` gate enforces this at release time.
  */
-export const UPG_VERSION = '0.23.0' as const
+export const UPG_VERSION = '0.23.1' as const
 
 /**
  * The `.upg` JSON document format version. Written to the `upg_version` field.

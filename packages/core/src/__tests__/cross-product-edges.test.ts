@@ -251,8 +251,8 @@ describe('cross-product 3-state derivation (0.18.0)', () => {
     expect([...UPG_PORTFOLIO_SHARED_TYPES].sort()).toEqual(EXPECTED_PORTFOLIO_SHARED_TYPES)
   })
 
-  it('every curated cross type classifies as scope "curated" (canonical 61 as of 0.20.1)', () => {
-    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(61)
+  it('every curated cross type classifies as scope "curated" (canonical 62 as of 0.23.1)', () => {
+    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(62)
     for (const t of UPG_CROSS_EDGE_TYPES) {
       expect(crossProductScope(t), `${t} should classify as curated`).toBe('curated')
       expect(isCuratedCrossEligible(t), `${t} should be curated-eligible`).toBe(true)

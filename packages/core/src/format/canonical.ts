@@ -17,9 +17,10 @@
 
 // Namespace import (not `import { createHash }`): a named import binds the
 // member at module-load, which throws in browser bundlers that externalise
-// `node:crypto` (e.g. Vite in Sanity Studio, which imports this package for
-// UPG_TYPES/getPropertySchema). A namespace defers the `.createHash` access to
-// call-time — only Node writers (CLI/MCP/SDK/cloud) ever call it, never browsers.
+// `node:crypto` (e.g. Vite-based apps that import this package for its type
+// registry and property schema on the client). A namespace defers the
+// `.createHash` access to call-time — only Node writers (CLI/MCP/SDK/cloud)
+// ever call it, never browsers.
 import * as nodeCrypto from 'node:crypto'
 import type { UPGBaseNode } from '../shapes/base-node.js'
 import type { UPGEdge } from '../shapes/edges.js'

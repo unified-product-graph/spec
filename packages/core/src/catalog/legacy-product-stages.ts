@@ -1,7 +1,7 @@
 /**
  * Legacy product-stage aliases.
  *
- * Existing graphs (`entopo.upg`, `sanity.upg`, `maximum-minimum.upg`,
+ * Existing graphs (`entopo.upg`, `nimbus.upg`, `maximum-minimum.upg`,
  * `notion-saturated.upg`, etc.) carry `product.stage` values that pre-date
  * the canonical `UPGProductStage` enum
  * (`concept | validation | build | beta | launch | growth | mature |

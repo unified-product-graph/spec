@@ -365,7 +365,10 @@ describe('Edge pair uniqueness', () => {
  // 0.13.1 (Data's connective brief, B1) added product→design_system {systematised_in
  // (hierarchy, design structured within the system), implements (semantic, the product
  // adopts the shared design system)} — same brand pattern, distinct classification. → 34.
- expect(multiPairs.length).toMatchInlineSnapshot(`34`)
+ // 0.23.1 (feedback 27f64221) added dependency→objective {blocks (existing, the
+ // dependency holds up an objective), resolved_by (new, an objective resolves the
+ // dependency)} — same source/target pair, distinct relationship + verb. → 35.
+ expect(multiPairs.length).toMatchInlineSnapshot(`35`)
  })
 })
 
