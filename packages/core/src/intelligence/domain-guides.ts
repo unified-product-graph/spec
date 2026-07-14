@@ -294,6 +294,12 @@ const PRODUCT_SPEC_GUIDE: UPGDomainUsageGuide = {
       edge_chain: ['feature_area_contains_feature', 'feature_decomposed_into_epic', 'epic_specified_by_user_story', 'task_implements_user_story'],
     },
     {
+      name: 'Epic Work Items',
+      description: 'A bug or a pure engineering/infra task that belongs to one specific epic (not the feature as a whole) attaches directly to that epic, mirroring how task and bug attach at the feature level. Use this when importing a real tracker (Linear/Jira) whose tickets are heterogeneous: keep genuine stories as user_story, but let bugs, spikes, and engineering tasks nest under their epic with their true type instead of being mislabelled to preserve the grouping.',
+      entity_types: ['epic', 'task', 'bug'],
+      edge_chain: ['epic_decomposes_into_task', 'epic_affected_by_bug'],
+    },
+    {
       name: 'Planning Cadence',
       description: 'The cadence axis. Create a planning_cycle (a sprint, iteration, quarter, or PI), nest finer cycles inside a coarse one, schedule the stories that flow through it, and scope the objectives the cycle serves. Scheduling and scoping are deliberate links, not containment: a story keeps its feature/epic parent.',
       entity_types: ['planning_cycle', 'user_story', 'objective'],

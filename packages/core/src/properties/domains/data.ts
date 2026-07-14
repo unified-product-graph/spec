@@ -58,7 +58,7 @@ export interface EventSchemaProperties {
  */
 export interface DashboardProperties {
   /** Analytics tool hosting this dashboard */
-  tool?: 'looker' | 'amplitude' | 'mixpanel' | 'posthog' | 'custom'
+  tool?: 'looker' | 'amplitude' | 'mixpanel' | 'posthog' | 'omni' | 'custom'
   /** URL to the live dashboard */
   url?: string
   /** Intended audience for this dashboard */

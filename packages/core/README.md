@@ -7,7 +7,7 @@
 
 The TypeScript core for the **Unified Product Graph (UPG)**, an open specification that gives product tools a shared vocabulary for entities, edges, and frameworks.
 
-320 entity types across 37 domains. 1039 typed edges. 46 canonical framework definitions, with more added as each is reviewed.
+320 entity types across 37 domains. 1041 typed edges. 46 canonical framework definitions, with more added as each is reviewed.
 
 ## Install
 

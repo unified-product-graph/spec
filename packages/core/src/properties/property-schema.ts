@@ -794,7 +794,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // DashboardProperties: Dashboard entity.
   dashboard: {
-    tool: { type: 'string', enum: ['looker', 'amplitude', 'mixpanel', 'posthog', 'custom'], description: 'Analytics tool hosting this dashboard' },
+    tool: { type: 'string', enum: ['looker', 'amplitude', 'mixpanel', 'posthog', 'omni', 'custom'], description: 'Analytics tool hosting this dashboard' },
     url: { type: 'string', description: 'URL to the live dashboard', modifier: 'volatile' },
     audience: { type: 'string', description: 'Intended audience for this dashboard' },
     element_count: { type: 'number', description: 'Number of widgets or panels on the dashboard', modifier: 'derived' },

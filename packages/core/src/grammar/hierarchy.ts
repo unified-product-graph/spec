@@ -244,7 +244,10 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // task_implements_user_story edge.
   feature: ['epic', 'bug', 'task'],
   feature_area: ['feature', 'feature_area'],
-  epic: ['user_story'],
+  // epic owns user_story (the templated promise) and, mirroring feature, may
+  // also directly contain bug/task — heterogeneous imported tickets that belong
+  // to one epic rather than the feature as a whole (feedback df99026a).
+  epic: ['user_story', 'bug', 'task'],
   user_story: ['acceptance_criterion'],
   task: ['task'],
   // planning_cycle (0.20.0): the cadence axis self-nests (a program-increment
