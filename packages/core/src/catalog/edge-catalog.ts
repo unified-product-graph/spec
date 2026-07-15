@@ -567,8 +567,14 @@ export const UPG_EDGE_CATALOG = {
   // feature-level edges (same verbs/classification), so `pickCanonicalEdge` /
   // `resolveContainmentEdge('epic', 'task'|'bug')` and the adapter import path
   // resolve them with no further wiring.
-  epic_decomposes_into_task:              { forward_verb: 'decomposes_into',   reverse_verb: 'implements',       classification: 'hierarchy',  source_type: 'epic',              target_type: 'task' },
-  epic_affected_by_bug:                   { forward_verb: 'affected_by',       reverse_verb: 'affects',          classification: 'hierarchy',  source_type: 'epic',              target_type: 'bug' },
+  // cross_product_eligible (feedback 9a10be30): an epic is a cross-team planning
+  // unit — its implementing task or affecting bug may live in a different
+  // product's engineering substrate (e.g. a consumer product's epic whose
+  // backend work is tracked in a separate platform/infra graph). Dual-registered
+  // like the objective↔dependency edges: valid within a product AND across
+  // products (endpoints referenced by qualified id).
+  epic_decomposes_into_task:              { forward_verb: 'decomposes_into',   reverse_verb: 'implements',       classification: 'hierarchy',  source_type: 'epic',              target_type: 'task', cross_product_eligible: true },
+  epic_affected_by_bug:                   { forward_verb: 'affected_by',       reverse_verb: 'affects',          classification: 'hierarchy',  source_type: 'epic',              target_type: 'bug', cross_product_eligible: true },
   task_has_subtask:                       { forward_verb: 'has_subtask',       reverse_verb: 'is_subtask_of',    classification: 'hierarchy',  source_type: 'task',              target_type: 'task' },
 
   // ── Planning cadence (0.20.0) ────────────────────────────────────────────────

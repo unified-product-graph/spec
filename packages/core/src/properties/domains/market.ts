@@ -441,6 +441,18 @@ export interface EmptyCell {
  * const properties: ClassificationAxisProperties = {
  *   axis_kind: 'categorical',
  * }
+ *
+ * @example
+ * // Canonical governance axis `change_blast_radius` (ordinal): grade a change /
+ * // feature / decision by how much risk it carries, so review ceremony and
+ * // agent-autonomy gating scale with reach. Four ordered values —
+ * // Trivial(0) < Standard(1) < Significant(2) < Critical(3) — classified via the
+ * // polymorphic `node_classified_as_classification_value` edge. Report metrics
+ * // WITHIN tier (pooling across tiers is Simpson's-paradox bait). See
+ * // decisions/2026-07-15-change-blast-radius-axis.md.
+ * const properties: ClassificationAxisProperties = {
+ *   axis_kind: 'ordinal',
+ * }
  */
 export interface ClassificationAxisProperties {
   /**

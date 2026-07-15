@@ -243,6 +243,11 @@ const EXPECTED_PORTFOLIO_SHARED_TYPES = [
 // referenced cross-graph, and persona → persona peer delegation.)
 const CURATED_GATE_EXCEPTIONS = [
   'feature_surfaces_product', 'persona_delegates_to_persona', 'screen_markets_product',
+  // 0.23.2 (feedback 9a10be30): epic→task/bug blessed cross-eligible so an epic
+  // can nest its implementing task / affecting bug in another product's graph.
+  // epic/task/bug are product-local work items (not portfolio_shared), so the
+  // curated flag overrides the type-gate — same class as feature_surfaces_product.
+  'epic_decomposes_into_task', 'epic_affected_by_bug',
 ].sort()
 
 describe('cross-product 3-state derivation (0.18.0)', () => {
@@ -251,8 +256,8 @@ describe('cross-product 3-state derivation (0.18.0)', () => {
     expect([...UPG_PORTFOLIO_SHARED_TYPES].sort()).toEqual(EXPECTED_PORTFOLIO_SHARED_TYPES)
   })
 
-  it('every curated cross type classifies as scope "curated" (canonical 62 as of 0.23.1)', () => {
-    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(62)
+  it('every curated cross type classifies as scope "curated" (canonical 64 as of 0.23.2)', () => {
+    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(64)
     for (const t of UPG_CROSS_EDGE_TYPES) {
       expect(crossProductScope(t), `${t} should classify as curated`).toBe('curated')
       expect(isCuratedCrossEligible(t), `${t} should be curated-eligible`).toBe(true)

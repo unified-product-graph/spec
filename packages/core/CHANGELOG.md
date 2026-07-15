@@ -214,7 +214,7 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.14.1] - 2026-06-17
 
-**Release rider: a browser-safe `crypto` import in the canonical serialiser (unblocks Sanity Studio).** The canonical serialiser imported `crypto` in a form that broke browser bundlers; it is namespaced to `node:crypto`. Fix only.
+**Release rider: a browser-safe `crypto` import in the canonical serialiser (unblocks browser bundlers).** The canonical serialiser imported `crypto` in a form that broke browser bundlers; it is namespaced to `node:crypto`. Fix only.
 
 ### Fixed
 - Browser-safe `crypto` import in `format/canonical.ts`.
