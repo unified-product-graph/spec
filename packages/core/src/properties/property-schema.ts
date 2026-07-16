@@ -122,6 +122,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     account_type: { type: 'string', enum: ['prospect', 'customer', 'partner', 'churned'], description: 'Relationship status of this account' },
     industry: { type: 'string', description: 'Industry vertical the account operates in' },
     employee_count: { type: 'number', description: 'Number of employees at the account', modifier: 'snapshot' },
+    segment: { type: 'string', enum: ['smb', 'mid_market', 'enterprise', 'strategic'], description: 'Go-to-market tier this account is served at. A segmentation *decision* (how the field org treats the account), distinct from `employee_count` (a raw fact) and aligned with but not identical to the ideal customer profile\'s `company_size` buckets. `strategic` is the tier that escalates to a dedicated account-plan graph (Tier 3 client model).' },
+    annual_contract_value: { type: 'number', description: 'Annual contract value in the account\'s billing currency. The single most common enterprise account-tiering input; a snapshot that changes on expansion or renewal.', modifier: 'snapshot' },
+    region: { type: 'string', description: 'Geographic region the account is managed in (e.g. "EMEA", "NA-West"). Free-form: territory taxonomies vary by org and are modelled structurally via the `territory` entity when they need to be queryable.' },
   },
   // AcquisitionChannelProperties: AcquisitionChannel entity.
   acquisition_channel: {
@@ -695,6 +698,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   contact: {
     contact_role: { type: 'string', description: 'Job title or role within the account' },
     is_decision_maker: { type: 'boolean', description: 'Whether this person has purchasing authority' },
+    buying_role: { type: 'string', enum: ['champion', 'economic_buyer', 'technical_evaluator', 'end_user', 'detractor', 'influencer', 'procurement', 'legal', 'security'], description: 'Role this contact plays in the buying committee (the decision-making unit). The substrate of enterprise multi-threading and of qualification frameworks (MEDDICC/SPICED): a deal with no `champion` and no `economic_buyer` mapped is single-threaded and at risk. `is_decision_maker` becomes largely derivable (`buying_role = economic_buyer`) but is kept for back-compat. @example \'economic_buyer\'' },
   },
   // ContentCalendarProperties: Content calendar.
   content_calendar: {
@@ -889,6 +893,21 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     deal_value: { type: 'number', description: 'Monetary value of the deal' },
     close_date: { type: 'string', description: 'Expected close date (ISO format)' },
     probability: { type: 'number', description: 'Likelihood of closing (0-100%)' },
+    deal_outcome: { type: 'string', enum: ['won', 'lost', 'no_decision'], description: 'Terminal result of the deal. An Event-axis outcome (the verdict on a one-time event), NOT a lifecycle phase, so it is `deal_outcome` and not `deal_status` per the status-convention Rule 3. Lifecycle (open/won/lost as phases) belongs on the base `status` slot; this records the win/loss verdict a closed deal carries and gives `deal_lost_to_competitor` / win-loss study derivations their anchor. @example \'won\'' },
+    deal_type: { type: 'string', enum: ['new_business', 'expansion', 'renewal'], description: 'Motion this deal belongs to. Mirrors `PipelineSales.pipeline_type` at the deal grain; `renewal` is the value `subscription_renews_via_deal` points at. @example \'expansion\'' },
+    next_step: { type: 'string', description: 'The single most-used CRM field: the next concrete action to move the deal. Free text on purpose (a coordination note, not a structured task). @example \'Send security questionnaire to procurement\'' },
+    next_step_date: { type: 'string', description: 'When the `next_step` is due (ISO format).' },
+    qualification_framework: { type: 'string', enum: ['meddicc', 'bant', 'spiced', 'custom'], description: 'Qualification framework this deal is scored against. Names the rubric so the `qualification_score` is interpretable; per-pillar booleans (MEDDICC\'s Metrics / Economic buyer / Decision criteria / …) are deferred until `custom` recurrence proves the demand. @example \'meddicc\'' },
+    qualification_score: {
+      type: 'assessment', scale_id: 'confidence_5', description: 'How well-qualified the deal is, on the canonical `confidence_5` scale (UPGAssessment: numeric value plus a high/medium/low label). Coarse by design; the granular per-pillar breakdown is deferred (see `qualification_framework`).',
+      properties: {
+        value: { type: 'number', description: 'The numeric value, used for computation.' },
+        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
+        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
+        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
+      },
+      required: ['value', 'label'],
+    },
   },
   // DecisionProperties: Decision record. Strategic, product, engineering, or design.
   decision: {
@@ -1863,7 +1882,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // MessagingProperties: Messaging entity. Each instance is a channel/stage variant.
   messaging: {
-    channel: { type: 'string', enum: ['landing_page', 'email', 'social', 'ad', 'pitch', 'press', 'in_product', 'other'], description: 'Channel this messaging variant is crafted for' },
+    channel: { type: 'string', enum: ['landing_page', 'email', 'social', 'ad', 'pitch', 'press', 'in_product', 'enablement', 'other'], description: 'Channel this messaging variant is crafted for. `enablement` is the internal field-ops channel (SE/PMM/SA enablement one-pagers, battlecards\' narrative), distinct from `pitch` (external, customer-facing).' },
     funnel_stage: { type: 'string', enum: ['awareness', 'consideration', 'conversion', 'retention'], description: 'Marketing funnel stage this variant targets' },
     headline: { type: 'string', description: 'Primary headline or hook' },
     body: { type: 'string', description: 'Full message body copy' },

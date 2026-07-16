@@ -31,12 +31,12 @@ export type PropertyModifierValue = 'derived' | 'snapshot' | 'volatile'
 
 /**
  * Curated modifier annotations, keyed entityType -> propertyName -> modifier.
- * 116 annotations across 83 entity types (29 derived, 64 snapshot, 23 volatile).
+ * 117 annotations across 83 entity types (29 derived, 65 snapshot, 23 volatile).
  */
 export const PROPERTY_MODIFIER_OVERLAY: Record<string, Record<string, PropertyModifierValue>> = {
   a11y_audit: { violations_count: 'derived', passes_count: 'derived', incomplete_count: 'derived' },
   a11y_issue: { css_selector: 'volatile', html_snippet: 'volatile' },
-  account: { employee_count: 'snapshot' },
+  account: { employee_count: 'snapshot', annual_contract_value: 'snapshot' },
   acquisition_channel: { monthly_volume: 'snapshot' },
   affinity_cluster: { child_observation_count: 'derived' },
   agent_hook: { execution_count: 'snapshot' },

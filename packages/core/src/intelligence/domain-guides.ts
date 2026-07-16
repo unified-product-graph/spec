@@ -691,6 +691,12 @@ const GTM_GUIDE: UPGDomainUsageGuide = {
       entity_types: ['positioning', 'messaging', 'objection', 'rebuttal', 'proof_point'],
       edge_chain: ['gtm_strategy_positions_via_positioning', 'positioning_communicated_via_messaging', 'positioning_challenged_by_objection', 'objection_countered_by_rebuttal', 'rebuttal_evidenced_by_proof_point'],
     },
+    {
+      name: 'Audience Projection Lattice',
+      description: 'One feature approaching launch needs many faces: what the internal field org (SE/PMM/SA) needs to know differs from what an enterprise champion needs at beta versus GA. Model the atoms, not the rendered pages. A feature is communicated_via messaging variants; each variant targets a persona (an internal field-ops persona or a customer persona) and is used_in a staged launch (beta, then GA); the launch is coordinated_via a project (the readiness checklist: demo env, SE training, by when). The projection itself is a query over these atoms, rendered by the product, never a stored copy that drifts.',
+      entity_types: ['feature', 'messaging', 'persona', 'launch', 'project'],
+      edge_chain: ['feature_communicated_via_messaging', 'messaging_targets_persona', 'launch_ships_feature', 'launch_coordinated_via_project'],
+    },
   ],
   required_bridges: [
     { edge_type: 'positioning_differentiates_via_value_proposition', target_domain: 'business_model', when: 'Positioning should reference your value propositions' },
@@ -738,16 +744,32 @@ const SALES_GUIDE: UPGDomainUsageGuide = {
       entity_types: ['pipeline_sales', 'lead', 'account', 'deal', 'pipeline_stage', 'subscription'],
       edge_chain: ['pipeline_sales_qualifies_lead', 'lead_becomes_account', 'account_negotiates_deal', 'deal_at_pipeline_stage', 'pipeline_sales_converts_to_subscription'],
     },
+    {
+      name: 'Enterprise Buying Committee',
+      description: 'An enterprise deal is a months-long coordination effort, not a forecast row. Attach the decision-making unit directly to the deal (each contact carries a buying_role: champion, economic buyer, technical evaluator, procurement, detractor), then wire the gauntlet the deal must clear: objections it faces, the security review that gates it, and the contract it closes via. A deal with no champion and no economic buyer mapped is single-threaded and at risk.',
+      entity_types: ['deal', 'contact', 'objection', 'security_review', 'contract'],
+      edge_chain: ['account_negotiates_deal', 'deal_involves_contact', 'deal_challenged_by_objection', 'deal_gated_by_security_review', 'deal_closed_via_contract'],
+    },
+    {
+      name: 'Win/Loss Learning Loop',
+      description: 'Close the pre-sale learning loop the way the post-sale one already closes (support_ticket reveals need). A deal is armed with a competitive battlecard; when it is lost to a competitor, a win/loss research_study analyses it. This gives competitive_battle_card.win_rate a derivation path (nothing could compute it before) and turns lost deals into structured competitive intelligence rather than a note in a closed record.',
+      entity_types: ['deal', 'competitive_battle_card', 'competitor', 'research_study'],
+      edge_chain: ['deal_armed_with_competitive_battle_card', 'deal_lost_to_competitor', 'research_study_analyzes_deal'],
+    },
   ],
   required_bridges: [
     { edge_type: 'lead_sourced_from_acquisition_channel', target_domain: 'growth', when: 'Track where leads come from for attribution' },
     { edge_type: 'subscription_subscribes_to_pricing_tier', target_domain: 'pricing', when: 'Subscriptions should link to the tier purchased' },
     { edge_type: 'account_partners_via_partnership', target_domain: 'business_model', when: 'Partner accounts should link to the partnership entity' },
+    { edge_type: 'deal_blocked_by_feature', target_domain: 'product_spec', when: 'When a roadmap gap holds up pipeline, link the deal to the blocking feature so "which features unblock how much revenue" is queryable' },
+    { edge_type: 'account_implements_via_project', target_domain: 'program_mgmt', when: 'Post-sale onboarding/implementation reuses the program-management machinery (project/milestone/deliverable), scoped to the account' },
   ],
   anti_patterns: [
     { description: 'Deals without pipeline stages: every deal needs a current position in the pipeline' },
     { description: 'Leads without source attribution. Attribution drives channel optimisation.' },
     { description: 'Forecasts without probability: weight deals by likelihood to close' },
+    { name: 'Single-threaded enterprise deal', description: 'An enterprise deal with no contacts attached (deal_involves_contact) or no champion/economic_buyer among their buying_role values is single-threaded: the whole relationship rests on one unmapped person. Attach the buying committee and map at least the champion and economic buyer.', affected_entity: 'deal', remediation: 'Create deal_involves_contact edges to the committee and set each contact\'s buying_role.' },
+    { name: 'Won/lost recorded only as a phase', description: 'The deal outcome (won/lost/no_decision) is an Event-axis fact and belongs on deal_outcome, not conflated with the lifecycle status. A lost deal with no deal_lost_to_competitor edge also strands the competitive signal that competitive_battle_card.win_rate depends on.', affected_entity: 'deal', remediation: 'Set deal_outcome, and on a loss create deal_lost_to_competitor plus a win/loss research_study via research_study_analyzes_deal.' },
   ],
 }
 

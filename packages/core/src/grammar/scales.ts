@@ -323,6 +323,7 @@ export const PROPERTY_SCALE_MAP: Record<string, string> = {
   current_confidence: 'confidence_5', // validation/hypothesis ( Option B)
   likelihood:       'confidence_5',  // market/risk ( Option B)
   probability:      'confidence_5',  // sales/forecast ( Option B)
+  qualification_score: 'confidence_5', // sales/deal — how confident the qualification is (0.24.0)
 
   // ── Effort ───────────────────────────────────────────────────────────────
   effort:           'effort_5',      // discovery

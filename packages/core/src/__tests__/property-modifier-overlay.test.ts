@@ -49,12 +49,13 @@ describe('property-modifier overlay ↔ schema sync', () => {
     expect(dangling).toEqual([])
   })
 
-  it('carries the audited count: 116 annotations (29 derived, 64 snapshot, 23 volatile)', () => {
+  it('carries the audited count: 117 annotations (29 derived, 65 snapshot, 23 volatile)', () => {
+    // 0.24.0: account.annual_contract_value added as a snapshot (64 -> 65 snapshot).
     const rows = overlayRows()
-    expect(rows).toHaveLength(116)
+    expect(rows).toHaveLength(117)
     const by = (m: string) => rows.filter((r) => r.modifier === m).length
     expect(by('derived')).toBe(29)
-    expect(by('snapshot')).toBe(64)
+    expect(by('snapshot')).toBe(65)
     expect(by('volatile')).toBe(23)
   })
 })

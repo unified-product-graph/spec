@@ -2492,6 +2492,106 @@ export const UPG_EDGE_CATALOG = {
   objective_defers_feature: { forward_verb: 'defers', reverse_verb: 'deferred_by', classification: 'cross-domain', source_type: 'objective', target_type: 'feature', carries_properties: true, property_schema: DEFER_EDGE_PROPERTY_SCHEMA, cross_product_eligible: true, deliberate_only: true },
   objective_defers_capability: { forward_verb: 'defers', reverse_verb: 'deferred_by', classification: 'semantic', source_type: 'objective', target_type: 'capability', carries_properties: true, property_schema: DEFER_EDGE_PROPERTY_SCHEMA, cross_product_eligible: true, deliberate_only: true },
 
+  // ── Enterprise GTM coordination batch (0.24.0, Track 1 Wave A) ───────────────
+  // The catalog modelled each go-to-market department's nouns but almost none of
+  // the handoffs between them, and the enterprise motion IS the handoffs (audit
+  // `2026-07-16-enterprise-gtm-coverage-audit.md`, §3). Sixteen additive edges
+  // wire the buying committee onto the deal, give the enablement lattice a demand
+  // side, close the pre-sale win/loss LEARN loop, make post-sale account-scoped,
+  // and complete the audience-projection lattice. None are hierarchy — every one
+  // is a lateral coordination link — so UPG_VALID_CHILDREN is untouched. Verbs
+  // are precedent-matched (cited per row); classification per the standard
+  // taxonomy. Two edges are portfolio-crossing by construction (a deal in a
+  // field-ops graph blocked by a feature in a product graph; a win/loss study in
+  // a research graph analysing a deal in another) → cross_product_eligible at
+  // mint, one line rather than a later migration (audit §7-addendum decision 6).
+
+  // Buying committee (F2). A contact was reachable only via account_contains_contact;
+  // it could not attach to the deal it influences. This is the substrate of every
+  // qualification framework (MEDDICC/SPICED) and of multi-threading. Semantic, not
+  // hierarchy: the contact is parented under its account (account_contains_contact),
+  // so a deal references it laterally, not by containment; and semantic, not
+  // cross-domain, because deal and contact are both in the sales domain (T1.7
+  // guardrail: a within-domain edge is not cross-domain). @example deal "Northwind
+  // platform expansion" involves contact "VP Engineering" (buying_role: 'economic_buyer').
+  deal_involves_contact: { forward_verb: 'involves', reverse_verb: 'involved_in', classification: 'semantic', source_type: 'deal', target_type: 'contact' },
+  // Enablement demand side (F3). GTM's objection→rebuttal→proof_point chain had
+  // supply but nothing consuming it in a deal context. Mirrors the positioning
+  // precedent (positioning_challenged_by_objection). @example deal "Northwind
+  // platform expansion" challenged_by objection "no SOC 2 report yet".
+  deal_challenged_by_objection: { forward_verb: 'challenged_by', reverse_verb: 'challenges', classification: 'cross-domain', source_type: 'deal', target_type: 'objection' },
+  // Enablement deployed in context (F3). Which battlecard was armed on which deal.
+  // Mirrors gtm_strategy_arms_with_competitive_battle_card. @example deal armed_with
+  // competitive_battle_card "vs. Meridian Cloud".
+  deal_armed_with_competitive_battle_card: { forward_verb: 'armed_with', reverse_verb: 'arms', classification: 'cross-domain', source_type: 'deal', target_type: 'competitive_battle_card' },
+  // Loss cause (F3). Gives competitive_battle_card.win_rate its derivation path —
+  // nothing in the graph could previously compute it. Causal (a directional
+  // outcome), mirroring lead_becomes_account. @example deal "Sterling Data Systems
+  // renewal" lost_to competitor "Meridian Cloud".
+  deal_lost_to_competitor: { forward_verb: 'lost_to', reverse_verb: 'won', classification: 'causal', source_type: 'deal', target_type: 'competitor' },
+  // Close mechanism (F4). MSA/SOW/order form reachable from the deal; contract
+  // previously bound only legal_entity and partnership. Mirrors
+  // deal_quoted_via_quote_document. @example deal closed_via contract "Northwind MSA".
+  deal_closed_via_contract: { forward_verb: 'closed_via', reverse_verb: 'closes', classification: 'cross-domain', source_type: 'deal', target_type: 'contract' },
+  // Pipeline blocker (F5). "Which roadmap items unblock how much pipeline"; plugs
+  // into change_blast_radius. Mirrors epic_affected_by_bug. cross_product_eligible:
+  // the deal lives in the field-ops graph, the blocking feature in the product
+  // graph. @example deal blocked_by feature "SAML SSO".
+  deal_blocked_by_feature: { forward_verb: 'blocked_by', reverse_verb: 'blocks', classification: 'cross-domain', source_type: 'deal', target_type: 'feature', cross_product_eligible: true },
+  // Win/loss LEARN loop (F3). Win/loss analysis is a research genre, not a new
+  // type — a research_study analyses the deal. Closes the pre-sale learning loop
+  // (the post-sale one already existed via support_ticket_reveals_need). Mirrors
+  // proof_point_derived_from_insight's provenance shape. cross_product_eligible:
+  // the study may live in a research graph distinct from the deal's field-ops
+  // graph. @example research_study "Q3 competitive win/loss" analyzes deal
+  // "Sterling Data Systems renewal".
+  research_study_analyzes_deal: { forward_verb: 'analyzes', reverse_verb: 'analyzed_by', classification: 'cross-domain', source_type: 'research_study', target_type: 'deal', cross_product_eligible: true },
+  // Account-scoped sensing (F5). Nearly every CS edge hung off product; only one
+  // scoped anything to an account. Mirrors product_supports_via_support_ticket.
+  // @example account "Northwind Logistics" raises support_ticket "onboarding SSO
+  // blocker".
+  account_raises_support_ticket: { forward_verb: 'raises', reverse_verb: 'raised_by', classification: 'cross-domain', source_type: 'account', target_type: 'support_ticket' },
+  // Account health (F5). Mirrors product_health_scored_via_customer_health_score.
+  // @example account health_scored_via customer_health_score "Northwind Q3 health".
+  account_health_scored_via_customer_health_score: { forward_verb: 'health_scored_via', reverse_verb: 'scores', classification: 'cross-domain', source_type: 'account', target_type: 'customer_health_score' },
+  // Account churn (F5). Churn lands on the account, not just the product. Mirrors
+  // product_loses_because_churn_reason. @example account lost_because churn_reason
+  // "switched to incumbent suite".
+  account_lost_because_churn_reason: { forward_verb: 'lost_because', reverse_verb: 'causes_churn_for', classification: 'cross-domain', source_type: 'account', target_type: 'churn_reason' },
+  // Onboarding / implementation (F5). Reuses the Program Management machinery
+  // (project/milestone/deliverable/status_report) for enterprise onboarding.
+  // Mirrors the operate-a-thing-via-a-plan shape of product_operated_via_playbook.
+  // @example account implements_via project "Northwind rollout".
+  account_implements_via_project: { forward_verb: 'implements_via', reverse_verb: 'implements', classification: 'cross-domain', source_type: 'account', target_type: 'project' },
+  // Renewal object-path (F5). A renewal is a deal of deal_type 'renewal'; this
+  // completes the lead→account→deal→subscription→deal cycle. Causal (a directional
+  // renewal event), mirroring quote_document_advances_deal. @example subscription
+  // "Northwind annual" renews_via deal "Northwind FY27 renewal".
+  subscription_renews_via_deal: { forward_verb: 'renews_via', reverse_verb: 'renews', classification: 'causal', source_type: 'subscription', target_type: 'deal' },
+  // Enterprise early access (F5, rider R1). An account participates in a beta
+  // program. Mirrors product_runs_beta_program's noun. @example account
+  // participates_in beta_program "SSO private beta".
+  account_participates_in_beta_program: { forward_verb: 'participates_in', reverse_verb: 'has_participant', classification: 'cross-domain', source_type: 'account', target_type: 'beta_program' },
+  // Security gate (F4, rider R2). The security questionnaire/review as a deal gate,
+  // reusing the Security noun rather than minting security_questionnaire. Mirrors
+  // service_level_agreement_covers_account's account↔security cross-domain shape.
+  // @example deal gated_by security_review "Northwind vendor security assessment".
+  deal_gated_by_security_review: { forward_verb: 'gated_by', reverse_verb: 'gates', classification: 'cross-domain', source_type: 'deal', target_type: 'security_review' },
+  // Audience-projection subject axis (Ruling 4, A15). messaging's only subject edge
+  // was positioning_communicated_via_messaging — messaging could not be ABOUT a
+  // feature, so audience-scoped feature projections were unexpressable at the root.
+  // Mirrors the positioning precedent. The rendered projection is NOT stored (views
+  // philosophy); this edge stores the atom the lens queries. @example feature "SAML
+  // SSO" communicated_via messaging "SSO beta enablement one-pager".
+  feature_communicated_via_messaging: { forward_verb: 'communicated_via', reverse_verb: 'communicates', classification: 'cross-domain', source_type: 'feature', target_type: 'messaging' },
+  // Launch coordination seam (Ruling 4, A16). launch had edges to
+  // release/feature/channel/campaign/metric/messaging but none to Program
+  // Management — the GTM readiness checklist (who builds the demo env, trains the
+  // SEs, by when) had no home. Reuses project/milestone/deliverable, the same move
+  // as account_implements_via_project. @example launch "SSO GA" coordinated_via
+  // project "SSO launch readiness".
+  launch_coordinated_via_project: { forward_verb: 'coordinated_via', reverse_verb: 'coordinates', classification: 'cross-domain', source_type: 'launch', target_type: 'project' },
+
 } satisfies Record<string, UPGEdgeDefinition>
 
 // ─── Polymorphic edge registry ──────────────────────────────────────

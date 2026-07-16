@@ -97,8 +97,10 @@ export interface PositioningProperties {
  * }
  */
 export interface MessagingProperties {
-  /** Channel this messaging variant is crafted for */
-  channel?: 'landing_page' | 'email' | 'social' | 'ad' | 'pitch' | 'press' | 'in_product' | 'other'
+  /** Channel this messaging variant is crafted for. `enablement` is the internal
+   * field-ops channel (SE/PMM/SA enablement one-pagers, battlecards' narrative),
+   * distinct from `pitch` (external, customer-facing). */
+  channel?: 'landing_page' | 'email' | 'social' | 'ad' | 'pitch' | 'press' | 'in_product' | 'enablement' | 'other'
   /** Marketing funnel stage this variant targets */
   funnel_stage?: 'awareness' | 'consideration' | 'conversion' | 'retention'
   /** Primary headline or hook */

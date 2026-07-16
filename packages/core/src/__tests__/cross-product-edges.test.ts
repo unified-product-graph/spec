@@ -248,6 +248,11 @@ const CURATED_GATE_EXCEPTIONS = [
   // epic/task/bug are product-local work items (not portfolio_shared), so the
   // curated flag overrides the type-gate — same class as feature_surfaces_product.
   'epic_decomposes_into_task', 'epic_affected_by_bug',
+  // 0.24.0 (Enterprise GTM batch): a deal (field-ops graph) blocked by a feature
+  // (product graph), and a win/loss research_study (research graph) analysing a
+  // deal. deal/feature/research_study are all product-local (not portfolio_shared),
+  // so the curated flag overrides the type-gate — same class as the epic edges above.
+  'deal_blocked_by_feature', 'research_study_analyzes_deal',
 ].sort()
 
 describe('cross-product 3-state derivation (0.18.0)', () => {
@@ -256,15 +261,15 @@ describe('cross-product 3-state derivation (0.18.0)', () => {
     expect([...UPG_PORTFOLIO_SHARED_TYPES].sort()).toEqual(EXPECTED_PORTFOLIO_SHARED_TYPES)
   })
 
-  it('every curated cross type classifies as scope "curated" (canonical 64 as of 0.23.2)', () => {
-    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(64)
+  it('every curated cross type classifies as scope "curated" (canonical 66 as of 0.24.0)', () => {
+    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(66)
     for (const t of UPG_CROSS_EDGE_TYPES) {
       expect(crossProductScope(t), `${t} should classify as curated`).toBe('curated')
       expect(isCuratedCrossEligible(t), `${t} should be curated-eligible`).toBe(true)
     }
   })
 
-  it('the gate covers every curated catalog edge EXCEPT exactly the 3 gate-exceptions', () => {
+  it('the gate covers every curated catalog edge EXCEPT exactly the listed gate-exceptions', () => {
     const exceptions = Object.keys(UPG_EDGE_CATALOG)
       .filter((k) => isCuratedCrossEligible(k))
       .filter((k) => {
