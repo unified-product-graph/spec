@@ -517,7 +517,12 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   // ── Program Management ──
   { name: 'program', type_id: 'ent_262', maturity: 'stable', since: '0.1.0' },
   { name: 'project', type_id: 'ent_263', maturity: 'stable', since: '0.1.0' },
-  { name: 'milestone', type_id: 'ent_264', maturity: 'stable', since: '0.1.0' },
+  // `portfolio_shared` (0.25.1 feedback): a milestone is often a cross-team gate,
+  // not one project's checkpoint — an org-wide "Open Beta" that several products'
+  // projects must all satisfy. Shared tier lets `project_targets_milestone` (and
+  // the other milestone edges) pass the cross-scope gate as `provisional`, same
+  // as `project_implements_initiative`. Precedent: `planning_cycle` (0.20.0).
+  { name: 'milestone', type_id: 'ent_264', maturity: 'stable', since: '0.1.0', portfolio_shared: true },
   { name: 'risk_register', type_id: 'ent_265', maturity: 'stable', since: '0.1.0' },
   { name: 'risk_item', type_id: 'ent_266', maturity: 'deprecated', since: '0.1.0', deprecated_in: '0.1.0', replacement: 'risk' },
   { name: 'change_request', type_id: 'ent_267', maturity: 'stable', since: '0.1.0' },

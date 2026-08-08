@@ -46,11 +46,46 @@ export interface UPGLifecycle {
   terminal_phases: string[]
 }
 
+/**
+ * The near-universal PM-tool status bucket a phase belongs to (0.25.1 feedback
+ * 1ee70102) — the same six-bucket system Linear, Jira, Asana, and GitHub
+ * Projects converge on. It exists for one job: mapping a graph entity's phases
+ * onto an external tool's workflow-state categories WITHOUT re-deriving the
+ * categorisation by trial and error inside the external tool's UI.
+ *
+ * Bucket semantics (assignment rules used across the catalog):
+ * - `triage`     — raised/identified/proposed; awaiting an acceptance decision.
+ * - `backlog`    — accepted or set aside deliberately; not scheduled (parked,
+ *                  paused, deferred, vacant, off).
+ * - `unstarted`  — committed/scheduled/ready; the work itself has not begun.
+ * - `started`    — any in-flight phase, AND any ongoing steady-state phase
+ *                  (active, live, production, mature): the entity is alive.
+ * - `completed`  — reached an end through the process itself, even when the
+ *                  outcome is negative (done, shipped, missed, failed,
+ *                  closed_lost, expired): the outcome is recorded, the flow ran.
+ * - `cancelled`  — deliberately ended without/before completion (won't-do,
+ *                  duplicate, abandoned, rejected, terminated).
+ *
+ * Spelling note: the spec uses `cancelled` (its established phase-id spelling);
+ * Linear's API spells the equivalent bucket `canceled`. Adapters map trivially.
+ */
+export type StatusCategory =
+  | 'triage'
+  | 'backlog'
+  | 'unstarted'
+  | 'started'
+  | 'completed'
+  | 'cancelled'
+
 /** A phase is one broad stage in the entity's lifecycle. */
 export interface LifecyclePhase {
   /** Machine-readable phase ID: the universal vocabulary.
    * @example "in_progress" */
   id: string
+  /** Which of the six near-universal PM-tool buckets this phase maps onto.
+   * See {@link StatusCategory} for the assignment rules.
+   * @example "started" */
+  status_category: StatusCategory
   /** Human-readable label.
    * @example "In Progress" */
   label: string
@@ -112,6 +147,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'concept',
+      status_category: 'triage',
       label: 'Concept',
       description:
         'Napkin idea. Problem shape and solution sketch, pre-validation.',
@@ -119,6 +155,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'validation',
+      status_category: 'started',
       label: 'Validation',
       description:
         'Testing demand. User conversations and experiments pressure-test assumptions before build commits.',
@@ -126,6 +163,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'build',
+      status_category: 'started',
       label: 'Build',
       description:
         'Actively developing v1. Core functionality is being authored, pre-user.',
@@ -133,6 +171,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'beta',
+      status_category: 'started',
       label: 'Beta',
       description:
         'Early users, iterating. Feature-complete enough to learn from, still changing weekly.',
@@ -140,6 +179,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'launch',
+      status_category: 'started',
       label: 'Launch',
       description:
         'Generally available. Announced to the target audience, open past beta access.',
@@ -147,6 +187,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'growth',
+      status_category: 'started',
       label: 'Growth',
       description:
         'Scaling users and revenue. Product fit validated; focus is acquisition, retention, expansion.',
@@ -154,6 +195,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'mature',
+      status_category: 'started',
       label: 'Mature',
       description:
         'Stable. Growth levelled; investment weights toward optimisation, efficiency, and durability.',
@@ -161,6 +203,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'maintenance',
+      status_category: 'started',
       label: 'Maintenance',
       description:
         'Sustaining. Minimal investment keeps the product running for existing users. Can transition back to `mature` on a strategic revival.',
@@ -168,6 +211,7 @@ const PRODUCT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'sunset',
+      status_category: 'completed',
       label: 'Sunset',
       description:
         'Winding down or retired. Existing users are being migrated or offboarded.',
@@ -201,6 +245,7 @@ const NEED_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'raw',
+      status_category: 'triage',
       label: 'Raw',
       description:
         'Captured from an interview, observation, or support ticket. Articulation may be rough; may duplicate an existing need.',
@@ -208,6 +253,7 @@ const NEED_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'validated',
+      status_category: 'started',
       label: 'Validated',
       description:
         'Corroborated by multiple data points or targeted research. The team agrees it is a real, recurring need.',
@@ -215,6 +261,7 @@ const NEED_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'prioritized',
+      status_category: 'completed',
       label: 'Prioritized',
       description:
         'Ranked against other needs. Ready to inform opportunity definition and solution exploration.',
@@ -237,6 +284,7 @@ const OPPORTUNITY_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'identified',
+      status_category: 'triage',
       label: 'Identified',
       description:
         'A problem worth solving has been named. Sources include needs, insights, market trends, or competitive signals. Sizing and validation come next.',
@@ -244,6 +292,7 @@ const OPPORTUNITY_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'validated',
+      status_category: 'started',
       label: 'Validated',
       description:
         'Research and evidence support pursuit. The problem is real, frequent, and painful enough to justify investment.',
@@ -251,6 +300,7 @@ const OPPORTUNITY_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deferred',
+      status_category: 'backlog',
       label: 'Deferred',
       description:
         'Acknowledged but parked. Capacity, priority, or strategic timing reasons. Can be reopened.',
@@ -274,6 +324,7 @@ const SOLUTION_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'proposed',
+      status_category: 'triage',
       label: 'Proposed',
       description:
         'Identified as a possible response to an opportunity. Pre-commitment, pre-feasibility.',
@@ -281,6 +332,7 @@ const SOLUTION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_progress',
+      status_category: 'started',
       label: 'In Progress',
       description:
         'A team is actively building, testing, or refining the solution.',
@@ -288,6 +340,7 @@ const SOLUTION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'shipped',
+      status_category: 'completed',
       label: 'Shipped',
       description:
         'Delivered to users. Live in the product.',
@@ -295,6 +348,7 @@ const SOLUTION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deferred',
+      status_category: 'backlog',
       label: 'Deferred',
       description:
         'Acknowledged but parked. Capacity, priority, or a change in direction. Can be reopened.',
@@ -328,6 +382,7 @@ const EXPERIMENT_PLAN_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'drafted',
+      status_category: 'unstarted',
       label: 'Drafted',
       description:
         'The plan is being written. Method, success criteria, target metric, projected reach/impact, ownership, and planned dates are being defined. Not yet approved.',
@@ -335,6 +390,7 @@ const EXPERIMENT_PLAN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'scheduled',
+      status_category: 'unstarted',
       label: 'Scheduled',
       description:
         'The plan is approved and slotted for execution. Resources committed; awaiting start date.',
@@ -342,6 +398,7 @@ const EXPERIMENT_PLAN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'approved',
+      status_category: 'completed',
       label: 'Approved',
         description:
         'Past scheduling: at least one run has started or completed against this plan. The plan is now a stable design artefact; future updates create a new plan.',
@@ -349,6 +406,7 @@ const EXPERIMENT_PLAN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'cancelled',
+      status_category: 'cancelled',
       label: 'Cancelled',
       description:
         'The plan was abandoned before any run started. Reason should be documented in description or via an attached decision.',
@@ -371,6 +429,7 @@ const RESEARCH_PLAN_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'draft',
+      status_category: 'started',
       label: 'Draft',
       description:
         'The plan is being written. Research question, suggested methods, and evidence threshold are being defined. Not yet approved for execution.',
@@ -378,6 +437,7 @@ const RESEARCH_PLAN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The plan has been approved and is being executed. Research sessions are underway or scheduled.',
@@ -385,6 +445,7 @@ const RESEARCH_PLAN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'completed',
+      status_category: 'completed',
       label: 'Completed',
       description:
         'The planned research has been carried out and learnings have been captured. The plan is a historical record.',
@@ -392,6 +453,7 @@ const RESEARCH_PLAN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'abandoned',
+      status_category: 'cancelled',
       label: 'Abandoned',
       description:
         'Not executed: changing priorities, a decision no longer needing validation, or resource constraints.',
@@ -414,6 +476,7 @@ const FEEDBACK_PROGRAM_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'planning',
+      status_category: 'unstarted',
       label: 'Planning',
       description:
         'The program is being designed. Goals, audience, collection method, and cadence are being defined. No feedback is being collected yet.',
@@ -421,6 +484,7 @@ const FEEDBACK_PROGRAM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The program is running. Feedback is being collected and processed on the defined cadence.',
@@ -428,6 +492,7 @@ const FEEDBACK_PROGRAM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'paused',
+      status_category: 'backlog',
       label: 'Paused',
       description:
         'Collection has been temporarily suspended. The program will resume.',
@@ -435,6 +500,7 @@ const FEEDBACK_PROGRAM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'retired',
+      status_category: 'completed',
       label: 'Retired',
       description:
         'The program has ended. It is no longer collecting feedback. Historical data is preserved.',
@@ -457,6 +523,7 @@ const FEATURE_REQUEST_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'new',
+      status_category: 'triage',
       label: 'New',
       description:
         'The request has been submitted. It has not yet been reviewed by the product team.',
@@ -464,6 +531,7 @@ const FEATURE_REQUEST_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'under_review',
+      status_category: 'triage',
       label: 'Under Review',
       description:
         'The request is being triaged. The product team is assessing feasibility, demand, and strategic fit.',
@@ -471,6 +539,7 @@ const FEATURE_REQUEST_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'planned',
+      status_category: 'unstarted',
       label: 'Planned',
       description:
         'The request has been accepted and is on the roadmap. It is scheduled for a future release cycle.',
@@ -478,6 +547,7 @@ const FEATURE_REQUEST_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_progress',
+      status_category: 'started',
       label: 'In Progress',
       description:
         'Work on fulfilling the request is actively underway.',
@@ -485,6 +555,7 @@ const FEATURE_REQUEST_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'shipped',
+      status_category: 'completed',
       label: 'Shipped',
       description:
         'The requested capability has been delivered to users.',
@@ -492,6 +563,7 @@ const FEATURE_REQUEST_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'wont_do',
+      status_category: 'cancelled',
       label: "Won't Do",
       description:
         'Declined: strategic misalignment, infeasibility, or insufficient demand.',
@@ -514,6 +586,7 @@ const BETA_PROGRAM_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'recruiting',
+      status_category: 'started',
       label: 'Recruiting',
       description:
         'The program is accepting applications. Beta participants are being identified and onboarded.',
@@ -521,6 +594,7 @@ const BETA_PROGRAM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'Beta participants have access and are using the feature. Feedback is being collected.',
@@ -528,6 +602,7 @@ const BETA_PROGRAM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'graduated',
+      status_category: 'completed',
       label: 'Graduated',
       description:
         'The beta was successful and the feature has progressed to general availability.',
@@ -535,6 +610,7 @@ const BETA_PROGRAM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'closed',
+      status_category: 'completed',
       label: 'Closed',
       description:
         'The beta ended without graduating to GA. The feature was deprioritised, pivoted, or missed exit criteria.',
@@ -557,6 +633,7 @@ const USER_ADVISORY_BOARD_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'recruiting',
+      status_category: 'started',
       label: 'Recruiting',
       description:
         'Members are being identified and invited. The board is not yet convened.',
@@ -564,6 +641,7 @@ const USER_ADVISORY_BOARD_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The board is convened and meeting regularly. Members are providing strategic input.',
@@ -571,6 +649,7 @@ const USER_ADVISORY_BOARD_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'paused',
+      status_category: 'backlog',
       label: 'Paused',
       description:
         'Board activities are temporarily suspended. Membership is retained and sessions will resume.',
@@ -578,6 +657,7 @@ const USER_ADVISORY_BOARD_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'retired',
+      status_category: 'completed',
       label: 'Retired',
       description:
         'The board has been disbanded. Members are no longer engaged in an advisory capacity.',
@@ -605,6 +685,7 @@ const OBJECTIVE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'draft',
+      status_category: 'started',
       label: 'Draft',
       description:
         'The objective is being written. Key results have not yet been attached or approved.',
@@ -612,6 +693,7 @@ const OBJECTIVE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The objective is in the current planning period. Key results are being measured and progress is tracked.',
@@ -619,6 +701,7 @@ const OBJECTIVE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'achieved',
+      status_category: 'completed',
       label: 'Achieved',
       description:
         'The objective was met or exceeded within the planning period.',
@@ -626,6 +709,7 @@ const OBJECTIVE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'missed',
+      status_category: 'completed',
       label: 'Missed',
       description:
         'The planning period ended without achieving the objective. Learnings inform the next cycle.',
@@ -633,6 +717,7 @@ const OBJECTIVE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deferred',
+      status_category: 'backlog',
       label: 'Deferred',
       description:
         'The objective was not completed this period and is being carried forward. Can be reopened as active.',
@@ -655,6 +740,7 @@ const KEY_RESULT_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'on_track',
+      status_category: 'started',
       label: 'On Track',
       description:
         'Current measured value is progressing at a rate that should reach the target by the deadline.',
@@ -662,6 +748,7 @@ const KEY_RESULT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'at_risk',
+      status_category: 'started',
       label: 'At Risk',
       description:
         'Progress is slowing. Without intervention, the target may not be reached by the deadline.',
@@ -669,6 +756,7 @@ const KEY_RESULT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'behind',
+      status_category: 'started',
       label: 'Behind',
       description:
         'Unlikely to reach the target at the current rate. The team needs to reassess strategy or accept a miss.',
@@ -676,6 +764,7 @@ const KEY_RESULT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'achieved',
+      status_category: 'completed',
       label: 'Achieved',
       description:
         'The target value has been reached or exceeded.',
@@ -697,6 +786,7 @@ const STRATEGIC_THEME_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The theme is a current organisational focus. Initiatives and objectives are being run under it.',
@@ -704,6 +794,7 @@ const STRATEGIC_THEME_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'paused',
+      status_category: 'backlog',
       label: 'Paused',
       description:
         'The theme is deprioritised for this period but is not being retired. It will resume.',
@@ -711,6 +802,7 @@ const STRATEGIC_THEME_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'completed',
+      status_category: 'completed',
       label: 'Completed',
       description:
         'The theme has run its course. The focus area has been addressed or superseded by a new theme.',
@@ -733,6 +825,7 @@ const INITIATIVE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'proposed',
+      status_category: 'triage',
       label: 'Proposed',
       description:
         'The initiative has been put forward but not yet approved for resourcing. Business case is being evaluated.',
@@ -740,6 +833,7 @@ const INITIATIVE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_progress',
+      status_category: 'started',
       label: 'In Progress',
       description:
         'The initiative has been approved and work is underway. Teams are executing against it.',
@@ -747,6 +841,7 @@ const INITIATIVE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'completed',
+      status_category: 'completed',
       label: 'Completed',
       description:
         'The initiative has achieved its goals and been formally closed.',
@@ -754,6 +849,7 @@ const INITIATIVE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'abandoned',
+      status_category: 'cancelled',
       label: 'Abandoned',
       description:
         'Stopped before completion: changing strategy, resource constraints, or learning that the goal is no longer relevant.',
@@ -775,6 +871,7 @@ const STRATEGIC_PILLAR_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'proposed',
+      status_category: 'triage',
       label: 'Proposed',
       description:
         'The pillar has been articulated but not yet ratified by leadership as a strategic commitment.',
@@ -782,6 +879,7 @@ const STRATEGIC_PILLAR_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The pillar is a live strategic commitment. Decisions, themes, and initiatives are aligned to it.',
@@ -789,6 +887,7 @@ const STRATEGIC_PILLAR_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'sunset',
+      status_category: 'completed',
       label: 'Sunset',
       description:
         'Retired: achieved, superseded by a new direction, or no longer reflects strategic reality.',
@@ -813,8 +912,8 @@ const STRATEGIC_QUESTION_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'open',
   terminal_phases: ['resolved'],
   phases: [
-    { id: 'open', label: 'Open', description: 'The question has been raised but not yet answered. The plan is exposed to it.', transitions_to: ['resolved'] },
-    { id: 'resolved', label: 'Resolved', description: 'The question has been answered; the resolution is captured. The plan is no longer exposed to it. May reopen if the answer unravels.', transitions_to: ['open'] },
+    { id: 'open', status_category: 'triage', label: 'Open', description: 'The question has been raised but not yet answered. The plan is exposed to it.', transitions_to: ['resolved'] },
+    { id: 'resolved', status_category: 'completed', label: 'Resolved', description: 'The question has been answered; the resolution is captured. The plan is no longer exposed to it. May reopen if the answer unravels.', transitions_to: ['open'] },
   ],
 }
 
@@ -836,10 +935,10 @@ const OUTCOME_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'identified',
   terminal_phases: ['achieved', 'abandoned'],
   phases: [
-    { id: 'identified', label: 'Identified', description: 'The outcome has been named: the team agrees on what success looks like, but is not yet measuring it.', transitions_to: ['measuring', 'abandoned'] },
-    { id: 'measuring', label: 'Measuring', description: 'Instrumentation is live. Progress is being tracked against the outcome.', transitions_to: ['achieved', 'abandoned'] },
-    { id: 'achieved', label: 'Achieved', description: 'The outcome was reached. Captured for the record; no further pursuit required.', transitions_to: [] },
-    { id: 'abandoned', label: 'Abandoned', description: 'Pursuit was stopped. Strategy shifted, the outcome lost relevance, or the cost outweighed value. May resume to `measuring` if the team revisits it.', transitions_to: ['measuring'] },
+    { id: 'identified', status_category: 'triage', label: 'Identified', description: 'The outcome has been named: the team agrees on what success looks like, but is not yet measuring it.', transitions_to: ['measuring', 'abandoned'] },
+    { id: 'measuring', status_category: 'started', label: 'Measuring', description: 'Instrumentation is live. Progress is being tracked against the outcome.', transitions_to: ['achieved', 'abandoned'] },
+    { id: 'achieved', status_category: 'completed', label: 'Achieved', description: 'The outcome was reached. Captured for the record; no further pursuit required.', transitions_to: [] },
+    { id: 'abandoned', status_category: 'cancelled', label: 'Abandoned', description: 'Pursuit was stopped. Strategy shifted, the outcome lost relevance, or the cost outweighed value. May resume to `measuring` if the team revisits it.', transitions_to: ['measuring'] },
   ],
 }
 
@@ -855,10 +954,10 @@ const VISION_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafting',
   terminal_phases: ['ratified', 'revised', 'archived'],
   phases: [
-    { id: 'drafting', label: 'Drafting', description: 'Vision is being authored or rewritten. Not yet adopted.', transitions_to: ['ratified', 'archived'] },
-    { id: 'ratified', label: 'Ratified', description: 'The current, in-force vision. The team has aligned around it.', transitions_to: ['revised', 'archived'] },
-    { id: 'revised', label: 'Revised', description: 'Superseded by a newer vision but kept as a recorded milestone. May reopen to drafting if revisited.', transitions_to: ['drafting'] },
-    { id: 'archived', label: 'Archived', description: 'No longer in force. Retained for historical reference.', transitions_to: ['drafting'] },
+    { id: 'drafting', status_category: 'started', label: 'Drafting', description: 'Vision is being authored or rewritten. Not yet adopted.', transitions_to: ['ratified', 'archived'] },
+    { id: 'ratified', status_category: 'completed', label: 'Ratified', description: 'The current, in-force vision. The team has aligned around it.', transitions_to: ['revised', 'archived'] },
+    { id: 'revised', status_category: 'completed', label: 'Revised', description: 'Superseded by a newer vision but kept as a recorded milestone. May reopen to drafting if revisited.', transitions_to: ['drafting'] },
+    { id: 'archived', status_category: 'completed', label: 'Archived', description: 'No longer in force. Retained for historical reference.', transitions_to: ['drafting'] },
   ],
 }
 
@@ -874,9 +973,9 @@ const MISSION_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafting',
   terminal_phases: ['active', 'archived'],
   phases: [
-    { id: 'drafting', label: 'Drafting', description: 'Mission is being authored or rewritten. Not yet adopted.', transitions_to: ['active', 'archived'] },
-    { id: 'active', label: 'Active', description: 'The current, in-force mission. Guides product and organisational decisions.', transitions_to: ['archived'] },
-    { id: 'archived', label: 'Archived', description: 'No longer in force. May reopen to drafting if the team revisits.', transitions_to: ['drafting'] },
+    { id: 'drafting', status_category: 'started', label: 'Drafting', description: 'Mission is being authored or rewritten. Not yet adopted.', transitions_to: ['active', 'archived'] },
+    { id: 'active', status_category: 'started', label: 'Active', description: 'The current, in-force mission. Guides product and organisational decisions.', transitions_to: ['archived'] },
+    { id: 'archived', status_category: 'completed', label: 'Archived', description: 'No longer in force. May reopen to drafting if the team revisits.', transitions_to: ['drafting'] },
   ],
 }
 
@@ -892,10 +991,10 @@ const CAPABILITY_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'planned',
   terminal_phases: ['operational', 'retired'],
   phases: [
-    { id: 'planned', label: 'Planned', description: 'Capability has been identified as needed but development has not started.', transitions_to: ['building', 'retired'] },
-    { id: 'building', label: 'Building', description: 'Active development: people, processes, or systems are being put in place.', transitions_to: ['operational', 'retired'] },
-    { id: 'operational', label: 'Operational', description: 'Capability is in place and functioning. The organisation can rely on it.', transitions_to: ['retired'] },
-    { id: 'retired', label: 'Retired', description: 'No longer maintained. May reopen to building if the capability is reinvested in.', transitions_to: ['building'] },
+    { id: 'planned', status_category: 'unstarted', label: 'Planned', description: 'Capability has been identified as needed but development has not started.', transitions_to: ['building', 'retired'] },
+    { id: 'building', status_category: 'started', label: 'Building', description: 'Active development: people, processes, or systems are being put in place.', transitions_to: ['operational', 'retired'] },
+    { id: 'operational', status_category: 'started', label: 'Operational', description: 'Capability is in place and functioning. The organisation can rely on it.', transitions_to: ['retired'] },
+    { id: 'retired', status_category: 'completed', label: 'Retired', description: 'No longer maintained. May reopen to building if the capability is reinvested in.', transitions_to: ['building'] },
   ],
 }
 
@@ -912,6 +1011,7 @@ const FEATURE_AREA_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'planned',
+      status_category: 'unstarted',
       label: 'Planned',
       description:
         'The feature area has been defined as an organising concept but no features have been built under it yet.',
@@ -919,6 +1019,7 @@ const FEATURE_AREA_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The feature area contains live features and is actively being developed.',
@@ -926,6 +1027,7 @@ const FEATURE_AREA_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deprecated',
+      status_category: 'completed',
       label: 'Deprecated',
       description:
         'The feature area is no longer being developed. It may still exist in the product but no new features are being added.',
@@ -947,6 +1049,7 @@ const FEATURE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'proposed',
+      status_category: 'triage',
       label: 'Proposed',
       description:
         'The feature has been suggested and is under consideration. It is not yet on the roadmap.',
@@ -954,6 +1057,7 @@ const FEATURE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_progress',
+      status_category: 'started',
       label: 'In Progress',
       description:
         'The feature is actively being designed and built.',
@@ -961,6 +1065,7 @@ const FEATURE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'shipped',
+      status_category: 'completed',
       label: 'Shipped',
       description:
         'The feature is live in the product and available to users.',
@@ -968,6 +1073,7 @@ const FEATURE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'archived',
+      status_category: 'completed',
       label: 'Archived',
       description:
         'The feature has been removed from the product or superseded. It is retained as a historical record.',
@@ -1002,6 +1108,7 @@ const RELEASE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'planned',
+      status_category: 'unstarted',
       label: 'Planned',
       description:
         'The release is defined and scheduled. Features are scoped but not all completed.',
@@ -1009,6 +1116,7 @@ const RELEASE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_progress',
+      status_category: 'started',
       label: 'In Progress',
       description:
         'Features are being built. The release is open for development.',
@@ -1016,6 +1124,7 @@ const RELEASE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'shipped',
+      status_category: 'completed',
       label: 'Shipped',
       description:
         'The release has been deployed to production and is available to users.',
@@ -1039,6 +1148,7 @@ const ROADMAP_ITEM_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'planned',
+      status_category: 'unstarted',
       label: 'Planned',
       description:
         'The item is on the roadmap and scheduled for a future period.',
@@ -1046,6 +1156,7 @@ const ROADMAP_ITEM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_progress',
+      status_category: 'started',
       label: 'In Progress',
       description:
         'Work on this roadmap item is underway.',
@@ -1053,6 +1164,7 @@ const ROADMAP_ITEM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'shipped',
+      status_category: 'completed',
       label: 'Shipped',
       description:
         'The roadmap item has been delivered.',
@@ -1060,6 +1172,7 @@ const ROADMAP_ITEM_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deferred',
+      status_category: 'backlog',
       label: 'Deferred',
       description:
         'The item has been pushed to a later period. It remains on the roadmap.',
@@ -1082,6 +1195,7 @@ const IP_ASSET_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'filed',
+      status_category: 'started',
       label: 'Filed',
       description:
         'The IP application has been submitted to the relevant authority. Acknowledgement of filing is pending.',
@@ -1089,6 +1203,7 @@ const IP_ASSET_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'pending',
+      status_category: 'started',
       label: 'Pending',
       description:
         'The application has been acknowledged and is under examination by the relevant authority.',
@@ -1096,6 +1211,7 @@ const IP_ASSET_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'granted',
+      status_category: 'completed',
       label: 'Granted',
       description:
         'The IP right has been formally granted. Protection is in force.',
@@ -1103,6 +1219,7 @@ const IP_ASSET_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'expired',
+      status_category: 'completed',
       label: 'Expired',
       description:
         'The IP protection period has ended naturally.',
@@ -1110,6 +1227,7 @@ const IP_ASSET_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'abandoned',
+      status_category: 'cancelled',
       label: 'Abandoned',
       description:
         'Abandoned: non-payment of renewal fees, withdrawal of the application, or a decision to stop defending it.',
@@ -1131,6 +1249,7 @@ const CONTRACT_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'draft',
+      status_category: 'started',
       label: 'Draft',
       description:
         'The contract is being written. Terms are not yet agreed by all parties.',
@@ -1138,6 +1257,7 @@ const CONTRACT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_review',
+      status_category: 'started',
       label: 'In Review',
       description:
         'The draft is under review by legal counsel or the counterparty. Negotiations may be ongoing.',
@@ -1145,6 +1265,7 @@ const CONTRACT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'signed',
+      status_category: 'completed',
       label: 'Signed',
       description:
         'All parties have signed. The contract is executed and legally binding, but the effective period may not have started yet.',
@@ -1152,6 +1273,7 @@ const CONTRACT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The contract is in its effective period. Obligations are in force.',
@@ -1159,6 +1281,7 @@ const CONTRACT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'expired',
+      status_category: 'completed',
       label: 'Expired',
       description:
         'The contract has reached its end date naturally.',
@@ -1166,6 +1289,7 @@ const CONTRACT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'terminated',
+      status_category: 'cancelled',
       label: 'Terminated',
       description:
         'Ended before natural expiry: mutual agreement, breach, or exercise of a termination clause.',
@@ -1188,6 +1312,7 @@ const DESIGN_CONCEPT_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'sketched',
+      status_category: 'started',
       label: 'Sketched',
       description:
         'The concept has been captured in early, rough form. It is an idea worth exploring but has not been refined or evaluated.',
@@ -1195,6 +1320,7 @@ const DESIGN_CONCEPT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'refined',
+      status_category: 'started',
       label: 'Refined',
       description:
         'The concept has been developed with more detail. It is being compared to other concepts in the selection process.',
@@ -1202,6 +1328,7 @@ const DESIGN_CONCEPT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'selected',
+      status_category: 'completed',
       label: 'Selected',
       description:
         'This concept has been chosen to move forward into prototyping or implementation.',
@@ -1209,6 +1336,7 @@ const DESIGN_CONCEPT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'rejected',
+      status_category: 'cancelled',
       label: 'Rejected',
       description:
         'This concept was evaluated and not selected. It is retained as a record of design exploration.',
@@ -1231,6 +1359,7 @@ const BRAND_IDENTITY_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'exploratory',
+      status_category: 'started',
       label: 'Exploratory',
       description:
         'The brand is in early formation. Names, values, visual directions, and positioning are being explored without commitment.',
@@ -1238,6 +1367,7 @@ const BRAND_IDENTITY_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'defined',
+      status_category: 'started',
       label: 'Defined',
       description:
         'Core brand elements have been decided. Name, values, visual identity, and voice are articulated. The brand is being applied but may still be evolving.',
@@ -1245,6 +1375,7 @@ const BRAND_IDENTITY_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'mature',
+      status_category: 'completed',
       label: 'Mature',
       description:
         'The brand identity is fully articulated and consistently applied. Guidelines are documented and followed across all touchpoints.',
@@ -1273,6 +1404,7 @@ const SCREEN_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'draft',
+      status_category: 'started',
       label: 'Draft',
       description:
         'The screen is a rough idea: named and scoped, but not yet worked in a design tool.',
@@ -1280,6 +1412,7 @@ const SCREEN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_design',
+      status_category: 'started',
       label: 'In Design',
       description:
         'The screen is being designed: wireframes, mockups, or prototypes are in progress. May fall back to `draft` if the approach is rethought from scratch.',
@@ -1287,6 +1420,7 @@ const SCREEN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'built',
+      status_category: 'started',
       label: 'Built',
       description:
         'The screen has been implemented in code. It exists in a build but is not yet live for users. May return to `in_design` if implementation surfaces a design gap.',
@@ -1294,6 +1428,7 @@ const SCREEN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'shipped',
+      status_category: 'completed',
       label: 'Shipped',
       description:
         'The screen is live in production and reachable by users.',
@@ -1301,6 +1436,7 @@ const SCREEN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deprecated',
+      status_category: 'completed',
       label: 'Deprecated',
       description:
         'The screen has been retired. It is no longer reachable, or is being phased out in favour of a replacement.',
@@ -1326,6 +1462,7 @@ const SERVICE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'development',
+      status_category: 'started',
       label: 'Development',
       description:
         'The service is being built. It is not available in any shared environment.',
@@ -1333,6 +1470,7 @@ const SERVICE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'staging',
+      status_category: 'started',
       label: 'Staging',
       description:
         'The service is deployed to a staging environment for integration testing and pre-release validation.',
@@ -1340,6 +1478,7 @@ const SERVICE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'production',
+      status_category: 'started',
       label: 'Production',
       description:
         'The service is live and serving real users.',
@@ -1347,6 +1486,7 @@ const SERVICE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deprecated',
+      status_category: 'completed',
       label: 'Deprecated',
       description:
         'The service is being phased out. A successor service is in place or the capability is no longer needed.',
@@ -1369,6 +1509,7 @@ const DEPLOYMENT_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'rolling',
+      status_category: 'started',
       label: 'Rolling',
       description:
         'The deployment is in progress. Instances are being updated. Not all traffic has shifted yet.',
@@ -1376,6 +1517,7 @@ const DEPLOYMENT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'success',
+      status_category: 'completed',
       label: 'Success',
       description:
         'The deployment completed successfully. All instances are running the new version.',
@@ -1383,6 +1525,7 @@ const DEPLOYMENT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'failure',
+      status_category: 'completed',
       label: 'Failure',
       description:
         'The deployment failed or was rolled back. The previous version is restored.',
@@ -1404,6 +1547,7 @@ const FEATURE_FLAG_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'off',
+      status_category: 'backlog',
       label: 'Off',
       description:
         'The flag is disabled. The associated feature or code path is not active for any users.',
@@ -1411,6 +1555,7 @@ const FEATURE_FLAG_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'rollout',
+      status_category: 'started',
       label: 'Rollout',
       description:
         'The flag is partially enabled. A percentage of users or a target segment has access.',
@@ -1418,6 +1563,7 @@ const FEATURE_FLAG_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'on',
+      status_category: 'completed',
       label: 'On',
       description:
         'The flag is fully enabled for all users. The feature is live. The flag can be cleaned up.',
@@ -1440,6 +1586,7 @@ const INVESTIGATION_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'open',
+      status_category: 'triage',
       label: 'Open',
       description:
         'The investigation has been opened. A problem has been identified but not yet actively worked.',
@@ -1447,6 +1594,7 @@ const INVESTIGATION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The investigation is being actively worked. Evidence is being gathered and hypotheses are being tested.',
@@ -1454,6 +1602,7 @@ const INVESTIGATION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'paused',
+      status_category: 'backlog',
       label: 'Paused',
       description:
         'On hold: awaiting additional data, unblocking conditions, or reprioritisation.',
@@ -1461,6 +1610,7 @@ const INVESTIGATION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'resolved',
+      status_category: 'completed',
       label: 'Resolved',
       description:
         'Root cause has been identified and documented. The investigation is closed.',
@@ -1468,6 +1618,7 @@ const INVESTIGATION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'abandoned',
+      status_category: 'cancelled',
       label: 'Abandoned',
       description:
         'Closed without resolution: the problem could not be reproduced, was deemed not worth pursuing, or became moot.',
@@ -1489,6 +1640,7 @@ const EXTERNAL_API_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'beta',
+      status_category: 'started',
       label: 'Beta',
       description:
         'The API is available for early access or testing. It may be unstable and subject to breaking changes.',
@@ -1496,6 +1648,7 @@ const EXTERNAL_API_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The API is stable and in production use. The provider guarantees availability per their SLA.',
@@ -1503,6 +1656,7 @@ const EXTERNAL_API_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deprecated',
+      status_category: 'started',
       label: 'Deprecated',
       description:
         'The provider has announced end-of-life. The API still works but a migration to a successor is required.',
@@ -1510,6 +1664,7 @@ const EXTERNAL_API_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'unavailable',
+      status_category: 'completed',
       label: 'Unavailable',
       description:
         'The API is no longer accessible. Any dependent service is broken until migrated.',
@@ -1532,6 +1687,7 @@ const DATABASE_SCHEMA_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'current',
+      status_category: 'started',
       label: 'Current',
       description:
         'The schema is up to date with the applied migrations. No pending changes.',
@@ -1539,6 +1695,7 @@ const DATABASE_SCHEMA_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'pending',
+      status_category: 'unstarted',
       label: 'Pending',
       description:
         'A migration is queued and ready to run. The schema will change when it is applied.',
@@ -1546,6 +1703,7 @@ const DATABASE_SCHEMA_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'failed',
+      status_category: 'completed',
       label: 'Failed',
       description:
         'A migration failed during application. The schema is in an inconsistent state and requires remediation before further changes can be applied.',
@@ -1568,6 +1726,7 @@ const INCIDENT_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'detected',
+      status_category: 'triage',
       label: 'Detected',
       description:
         'Identified by an alert, a user report, or direct observation. Response has not yet started.',
@@ -1575,6 +1734,7 @@ const INCIDENT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'triaged',
+      status_category: 'triage',
       label: 'Triaged',
       description:
         'The incident has been assessed for severity and impact. An on-call responder is assigned and is actively working it.',
@@ -1582,6 +1742,7 @@ const INCIDENT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'contained',
+      status_category: 'started',
       label: 'Contained',
       description:
         'Immediate user impact stopped via rollback, circuit breaker, or another emergency measure. Root cause fix is still pending.',
@@ -1589,6 +1750,7 @@ const INCIDENT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'resolved',
+      status_category: 'completed',
       label: 'Resolved',
       description:
         'Root cause has been identified and fixed. The system is back to normal. A postmortem is recommended.',
@@ -1596,6 +1758,7 @@ const INCIDENT_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'mitigated',
+      status_category: 'completed',
       label: 'Mitigated',
       description:
         'A compensating control is in place and user impact is stopped, but the root cause remains unfixed. A follow-up investigation or fix is required.',
@@ -1618,6 +1781,7 @@ const SECURITY_CONTROL_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'planned',
+      status_category: 'unstarted',
       label: 'Planned',
       description:
         'The control has been identified as required but implementation has not started.',
@@ -1625,6 +1789,7 @@ const SECURITY_CONTROL_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'in_progress',
+      status_category: 'started',
       label: 'In Progress',
       description:
         'The control is being implemented.',
@@ -1632,6 +1797,7 @@ const SECURITY_CONTROL_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'implemented',
+      status_category: 'started',
       label: 'Implemented',
       description:
         'The control is in place. It has not yet been independently tested or verified.',
@@ -1639,6 +1805,7 @@ const SECURITY_CONTROL_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'verified',
+      status_category: 'completed',
       label: 'Verified',
       description:
         'The control has been tested and confirmed effective. It provides the intended security assurance.',
@@ -1662,6 +1829,7 @@ const DATA_PIPELINE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'building',
+      status_category: 'started',
       label: 'Building',
       description:
         'The pipeline is under construction. It is not yet processing real data.',
@@ -1669,6 +1837,7 @@ const DATA_PIPELINE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The pipeline is running and processing data on its defined schedule.',
@@ -1676,6 +1845,7 @@ const DATA_PIPELINE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'paused',
+      status_category: 'backlog',
       label: 'Paused',
       description:
         'Deliberately suspended: maintenance, cost control, or upstream data unavailability.',
@@ -1683,6 +1853,7 @@ const DATA_PIPELINE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'failed',
+      status_category: 'started',
       label: 'Failed',
       description:
         'The pipeline has errored and is not processing data. Intervention is required to restore it.',
@@ -1690,6 +1861,7 @@ const DATA_PIPELINE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deprecated',
+      status_category: 'completed',
       label: 'Deprecated',
       description:
         'The pipeline is being retired. It is no longer maintained and will be shut down.',
@@ -1711,6 +1883,7 @@ const AI_MODEL_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'evaluating',
+      status_category: 'started',
       label: 'Evaluating',
       description:
         'The model is being assessed for quality, cost, safety, and fit. Eval runs are being analysed. No production traffic.',
@@ -1718,6 +1891,7 @@ const AI_MODEL_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'staging',
+      status_category: 'started',
       label: 'Staging',
       description:
         'The model has passed evaluation and is deployed to a staging environment for integration testing.',
@@ -1725,6 +1899,7 @@ const AI_MODEL_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'production',
+      status_category: 'started',
       label: 'Production',
       description:
         'The model is serving live product traffic.',
@@ -1732,6 +1907,7 @@ const AI_MODEL_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deprecated',
+      status_category: 'started',
       label: 'Deprecated',
       description:
         'A successor model is in production. This model is being phased out. Traffic is being migrated.',
@@ -1739,6 +1915,7 @@ const AI_MODEL_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'retired',
+      status_category: 'completed',
       label: 'Retired',
       description:
         'The model is fully decommissioned. No traffic. Historical records are preserved.',
@@ -1762,6 +1939,7 @@ const WORKFLOW_RUN_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'pending',
+      status_category: 'unstarted',
       label: 'Pending',
       description:
         'The run has been queued and is awaiting execution. Resources or dependencies are being provisioned.',
@@ -1769,6 +1947,7 @@ const WORKFLOW_RUN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'running',
+      status_category: 'started',
       label: 'Running',
       description:
         'The workflow is actively executing its steps.',
@@ -1776,6 +1955,7 @@ const WORKFLOW_RUN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'blocked',
+      status_category: 'started',
       label: 'Blocked',
       description:
         'Execution is paused at a review_gate awaiting human or automated approval before proceeding.',
@@ -1783,6 +1963,7 @@ const WORKFLOW_RUN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'completed',
+      status_category: 'completed',
       label: 'Completed',
       description:
         'All steps executed successfully. Outputs are available.',
@@ -1790,6 +1971,7 @@ const WORKFLOW_RUN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'failed',
+      status_category: 'completed',
       label: 'Failed',
       description:
         'The run encountered an unrecoverable error and stopped. Partial outputs may be available.',
@@ -1797,6 +1979,7 @@ const WORKFLOW_RUN_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'cancelled',
+      status_category: 'cancelled',
       label: 'Cancelled',
       description:
         'The run was deliberately stopped before completion.',
@@ -1818,6 +2001,7 @@ const AGENT_DEFINITION_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'testing',
+      status_category: 'started',
       label: 'Testing',
       description:
         'The agent is being validated in a controlled environment. Sessions are not running against real product data.',
@@ -1825,6 +2009,7 @@ const AGENT_DEFINITION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The agent is operational and creating sessions on demand.',
@@ -1832,6 +2017,7 @@ const AGENT_DEFINITION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'paused',
+      status_category: 'backlog',
       label: 'Paused',
       description:
         'The agent is temporarily suspended. It is not creating new sessions but its configuration is preserved.',
@@ -1839,6 +2025,7 @@ const AGENT_DEFINITION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'disabled',
+      status_category: 'backlog',
       label: 'Disabled',
       description:
         'Turned off: bug, policy change, or safety concern. Can be re-enabled after remediation.',
@@ -1846,6 +2033,7 @@ const AGENT_DEFINITION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'retired',
+      status_category: 'completed',
       label: 'Retired',
       description:
         'The agent has been permanently decommissioned. Sessions are no longer created from this definition.',
@@ -1867,6 +2055,7 @@ const AGENT_SESSION_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The session is running. The agent is processing input and producing output.',
@@ -1874,6 +2063,7 @@ const AGENT_SESSION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'completed',
+      status_category: 'completed',
       label: 'Completed',
       description:
         'The session ended normally. The task was completed or the conversation was concluded.',
@@ -1881,6 +2071,7 @@ const AGENT_SESSION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'crashed',
+      status_category: 'completed',
       label: 'Crashed',
       description:
         'The session terminated unexpectedly due to an unhandled error or infrastructure failure.',
@@ -1888,6 +2079,7 @@ const AGENT_SESSION_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'timed_out',
+      status_category: 'completed',
       label: 'Timed Out',
       description:
         'The session exceeded its maximum allowed duration and was automatically terminated.',
@@ -1909,6 +2101,7 @@ const REVIEW_GATE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'pending',
+      status_category: 'unstarted',
       label: 'Pending',
       description:
         'The gate is awaiting review. The workflow is blocked until a decision is made.',
@@ -1916,6 +2109,7 @@ const REVIEW_GATE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'approved',
+      status_category: 'completed',
       label: 'Approved',
       description:
         'The gate has been passed. The workflow continues.',
@@ -1923,6 +2117,7 @@ const REVIEW_GATE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'rejected',
+      status_category: 'cancelled',
       label: 'Rejected',
       description:
         'The gate was not passed. The workflow is blocked and the submitter must address the feedback before re-submitting.',
@@ -1930,6 +2125,7 @@ const REVIEW_GATE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'bypassed',
+      status_category: 'cancelled',
       label: 'Bypassed',
       description:
         'Deliberately overridden without normal review by an authorised person in an emergency. Create an audit trail entry.',
@@ -1952,6 +2148,7 @@ const TEST_SUITE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'draft',
+      status_category: 'started',
       label: 'Draft',
       description:
         'The test suite is being authored. It is not yet part of any CI or QA process.',
@@ -1959,6 +2156,7 @@ const TEST_SUITE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The suite is running in CI or scheduled QA processes.',
@@ -1966,6 +2164,7 @@ const TEST_SUITE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deprecated',
+      status_category: 'completed',
       label: 'Deprecated',
       description:
         'The suite is no longer being run. It may be superseded by a newer suite or the tested functionality may have been removed.',
@@ -1987,6 +2186,7 @@ const TEST_CASE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'draft',
+      status_category: 'started',
       label: 'Draft',
       description:
         'The test case is being written. Preconditions, steps, and expected results are being defined.',
@@ -1994,6 +2194,7 @@ const TEST_CASE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The test case is included in one or more test suites and is being executed.',
@@ -2001,6 +2202,7 @@ const TEST_CASE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'deprecated',
+      status_category: 'completed',
       label: 'Deprecated',
       description:
         'The test case is no longer executed. The feature it covered may have changed or been removed.',
@@ -2028,10 +2230,10 @@ const INSIGHT_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'proposed',
   terminal_phases: ['applied', 'retired'],
   phases: [
-    { id: 'proposed', label: 'Proposed', description: 'A pattern has been synthesised from observations. Not yet cross-checked.', transitions_to: ['validated', 'retired'] },
-    { id: 'validated', label: 'Validated', description: 'The insight has been cross-checked against additional evidence. Believed reliable.', transitions_to: ['applied', 'retired'] },
-    { id: 'applied', label: 'Applied', description: 'The insight drove a product decision. Captured for the record.', transitions_to: ['retired'] },
-    { id: 'retired', label: 'Retired', description: 'Superseded by newer insight, or no longer relevant. May reopen to proposed if revisited.', transitions_to: ['proposed'] },
+    { id: 'proposed', status_category: 'triage', label: 'Proposed', description: 'A pattern has been synthesised from observations. Not yet cross-checked.', transitions_to: ['validated', 'retired'] },
+    { id: 'validated', status_category: 'started', label: 'Validated', description: 'The insight has been cross-checked against additional evidence. Believed reliable.', transitions_to: ['applied', 'retired'] },
+    { id: 'applied', status_category: 'completed', label: 'Applied', description: 'The insight drove a product decision. Captured for the record.', transitions_to: ['retired'] },
+    { id: 'retired', status_category: 'completed', label: 'Retired', description: 'Superseded by newer insight, or no longer relevant. May reopen to proposed if revisited.', transitions_to: ['proposed'] },
   ],
 }
 
@@ -2047,10 +2249,10 @@ const RESEARCH_QUESTION_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'open',
   terminal_phases: ['answered', 'parked'],
   phases: [
-    { id: 'open', label: 'Open', description: 'Question has been articulated. Research has not started.', transitions_to: ['researching', 'parked'] },
-    { id: 'researching', label: 'Researching', description: 'Active investigation. Methods are being run, evidence is being gathered.', transitions_to: ['answered', 'parked'] },
-    { id: 'answered', label: 'Answered', description: 'Question has been resolved. Findings captured in linked insights.', transitions_to: [] },
-    { id: 'parked', label: 'Parked', description: 'Set aside due to capacity, priority, or dependency. May reopen to researching.', transitions_to: ['researching'] },
+    { id: 'open', status_category: 'triage', label: 'Open', description: 'Question has been articulated. Research has not started.', transitions_to: ['researching', 'parked'] },
+    { id: 'researching', status_category: 'started', label: 'Researching', description: 'Active investigation. Methods are being run, evidence is being gathered.', transitions_to: ['answered', 'parked'] },
+    { id: 'answered', status_category: 'completed', label: 'Answered', description: 'Question has been resolved. Findings captured in linked insights.', transitions_to: [] },
+    { id: 'parked', status_category: 'backlog', label: 'Parked', description: 'Set aside due to capacity, priority, or dependency. May reopen to researching.', transitions_to: ['researching'] },
   ],
 }
 
@@ -2066,10 +2268,10 @@ const INTERVIEW_GUIDE_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafting',
   terminal_phases: ['archived'],
   phases: [
-    { id: 'drafting', label: 'Drafting', description: 'Guide is being authored or revised. Not yet ready for use.', transitions_to: ['ready'] },
-    { id: 'ready', label: 'Ready', description: 'Guide is approved for use. May be picked up by a study.', transitions_to: ['in_use', 'drafting'] },
-    { id: 'in_use', label: 'In Use', description: 'Currently being run in one or more research_study entities.', transitions_to: ['ready', 'archived'] },
-    { id: 'archived', label: 'Archived', description: 'Retired from active use. May reopen to drafting if revived.', transitions_to: ['drafting'] },
+    { id: 'drafting', status_category: 'started', label: 'Drafting', description: 'Guide is being authored or revised. Not yet ready for use.', transitions_to: ['ready'] },
+    { id: 'ready', status_category: 'unstarted', label: 'Ready', description: 'Guide is approved for use. May be picked up by a study.', transitions_to: ['in_use', 'drafting'] },
+    { id: 'in_use', status_category: 'started', label: 'In Use', description: 'Currently being run in one or more research_study entities.', transitions_to: ['ready', 'archived'] },
+    { id: 'archived', status_category: 'completed', label: 'Archived', description: 'Retired from active use. May reopen to drafting if revived.', transitions_to: ['drafting'] },
   ],
 }
 
@@ -2085,10 +2287,10 @@ const TEST_PLAN_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafted',
   terminal_phases: ['completed', 'cancelled'],
   phases: [
-    { id: 'drafted', label: 'Drafted', description: 'Plan has been authored. Not yet started.', transitions_to: ['executing', 'cancelled'] },
-    { id: 'executing', label: 'Executing', description: 'Tests are running according to the plan.', transitions_to: ['completed', 'cancelled'] },
-    { id: 'completed', label: 'Completed', description: 'All tests in the plan have run. Outcomes captured in linked test_result entities.', transitions_to: ['executing'] },
-    { id: 'cancelled', label: 'Cancelled', description: 'Plan was abandoned mid-flight: assumption changed, priorities shifted, or the underlying code went away.', transitions_to: [] },
+    { id: 'drafted', status_category: 'unstarted', label: 'Drafted', description: 'Plan has been authored. Not yet started.', transitions_to: ['executing', 'cancelled'] },
+    { id: 'executing', status_category: 'started', label: 'Executing', description: 'Tests are running according to the plan.', transitions_to: ['completed', 'cancelled'] },
+    { id: 'completed', status_category: 'completed', label: 'Completed', description: 'All tests in the plan have run. Outcomes captured in linked test_result entities.', transitions_to: ['executing'] },
+    { id: 'cancelled', status_category: 'cancelled', label: 'Cancelled', description: 'Plan was abandoned mid-flight: assumption changed, priorities shifted, or the underlying code went away.', transitions_to: [] },
   ],
 }
 
@@ -2108,10 +2310,10 @@ const AI_DATASET_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'collecting',
   terminal_phases: ['versioned', 'archived'],
   phases: [
-    { id: 'collecting', label: 'Collecting', description: 'Examples are being gathered. Schema and labelling rules may still be in flux.', transitions_to: ['curated', 'archived'] },
-    { id: 'curated', label: 'Curated', description: 'Examples have been cleaned, deduped, and labelled. Ready for versioning.', transitions_to: ['versioned', 'collecting'] },
-    { id: 'versioned', label: 'Versioned', description: 'A specific cut has been pinned and is citable. New collection continues in a successor version.', transitions_to: ['archived'] },
-    { id: 'archived', label: 'Archived', description: 'No longer in active use. May reopen to collecting if revived.', transitions_to: ['collecting'] },
+    { id: 'collecting', status_category: 'started', label: 'Collecting', description: 'Examples are being gathered. Schema and labelling rules may still be in flux.', transitions_to: ['curated', 'archived'] },
+    { id: 'curated', status_category: 'started', label: 'Curated', description: 'Examples have been cleaned, deduped, and labelled. Ready for versioning.', transitions_to: ['versioned', 'collecting'] },
+    { id: 'versioned', status_category: 'completed', label: 'Versioned', description: 'A specific cut has been pinned and is citable. New collection continues in a successor version.', transitions_to: ['archived'] },
+    { id: 'archived', status_category: 'completed', label: 'Archived', description: 'No longer in active use. May reopen to collecting if revived.', transitions_to: ['collecting'] },
   ],
 }
 
@@ -2128,10 +2330,10 @@ const AI_GUARDRAIL_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'proposed',
   terminal_phases: ['active', 'relaxed', 'removed'],
   phases: [
-    { id: 'proposed', label: 'Proposed', description: 'Guardrail has been suggested. Not yet enforced.', transitions_to: ['active', 'removed'] },
-    { id: 'active', label: 'Active', description: 'Guardrail is enforced as designed. Currently the steady state.', transitions_to: ['relaxed', 'removed'] },
-    { id: 'relaxed', label: 'Relaxed', description: 'Guardrail is enforced more loosely than originally specified. Captured separately because the looser form has different implications.', transitions_to: ['active', 'removed'] },
-    { id: 'removed', label: 'Removed', description: 'Guardrail is no longer enforced. May reopen to active if reinstated.', transitions_to: ['active'] },
+    { id: 'proposed', status_category: 'triage', label: 'Proposed', description: 'Guardrail has been suggested. Not yet enforced.', transitions_to: ['active', 'removed'] },
+    { id: 'active', status_category: 'started', label: 'Active', description: 'Guardrail is enforced as designed. Currently the steady state.', transitions_to: ['relaxed', 'removed'] },
+    { id: 'relaxed', status_category: 'started', label: 'Relaxed', description: 'Guardrail is enforced more loosely than originally specified. Captured separately because the looser form has different implications.', transitions_to: ['active', 'removed'] },
+    { id: 'removed', status_category: 'cancelled', label: 'Removed', description: 'Guardrail is no longer enforced. May reopen to active if reinstated.', transitions_to: ['active'] },
   ],
 }
 
@@ -2148,10 +2350,10 @@ const MODEL_COMPARISON_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'planned',
   terminal_phases: ['published', 'archived'],
   phases: [
-    { id: 'planned', label: 'Planned', description: 'Comparison has been scoped: models, criteria, and methodology are agreed.', transitions_to: ['running', 'archived'] },
-    { id: 'running', label: 'Running', description: 'Models are being evaluated against the chosen criteria.', transitions_to: ['published', 'archived'] },
-    { id: 'published', label: 'Published', description: 'Results are written up and citable. Drives downstream model selection.', transitions_to: ['archived', 'planned'] },
-    { id: 'archived', label: 'Archived', description: 'Superseded by newer comparison. May reopen to planned if re-run.', transitions_to: ['planned'] },
+    { id: 'planned', status_category: 'unstarted', label: 'Planned', description: 'Comparison has been scoped: models, criteria, and methodology are agreed.', transitions_to: ['running', 'archived'] },
+    { id: 'running', status_category: 'started', label: 'Running', description: 'Models are being evaluated against the chosen criteria.', transitions_to: ['published', 'archived'] },
+    { id: 'published', status_category: 'completed', label: 'Published', description: 'Results are written up and citable. Drives downstream model selection.', transitions_to: ['archived', 'planned'] },
+    { id: 'archived', status_category: 'completed', label: 'Archived', description: 'Superseded by newer comparison. May reopen to planned if re-run.', transitions_to: ['planned'] },
   ],
 }
 
@@ -2167,10 +2369,10 @@ const PROMPT_VERSION_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafted',
   terminal_phases: ['active', 'deprecated'],
   phases: [
-    { id: 'drafted', label: 'Drafted', description: 'Prompt has been authored. Not yet evaluated.', transitions_to: ['testing', 'deprecated'] },
-    { id: 'testing', label: 'Testing', description: 'Running through eval benchmarks. Results inform whether to promote.', transitions_to: ['active', 'drafted', 'deprecated'] },
-    { id: 'active', label: 'Active', description: 'In production use.', transitions_to: ['deprecated'] },
-    { id: 'deprecated', label: 'Deprecated', description: 'Superseded by a successor version. Still available for backwards-compat. May reopen to testing if reinstated.', transitions_to: ['testing'] },
+    { id: 'drafted', status_category: 'unstarted', label: 'Drafted', description: 'Prompt has been authored. Not yet evaluated.', transitions_to: ['testing', 'deprecated'] },
+    { id: 'testing', status_category: 'started', label: 'Testing', description: 'Running through eval benchmarks. Results inform whether to promote.', transitions_to: ['active', 'drafted', 'deprecated'] },
+    { id: 'active', status_category: 'started', label: 'Active', description: 'In production use.', transitions_to: ['deprecated'] },
+    { id: 'deprecated', status_category: 'completed', label: 'Deprecated', description: 'Superseded by a successor version. Still available for backwards-compat. May reopen to testing if reinstated.', transitions_to: ['testing'] },
   ],
 }
 
@@ -2186,10 +2388,10 @@ const EVAL_BENCHMARK_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafted',
   terminal_phases: ['published', 'deprecated'],
   phases: [
-    { id: 'drafted', label: 'Drafted', description: 'Benchmark questions and scoring rubric are being designed.', transitions_to: ['running', 'deprecated'] },
-    { id: 'running', label: 'Running', description: 'Benchmark is being executed against models or prompt versions.', transitions_to: ['published', 'deprecated'] },
-    { id: 'published', label: 'Published', description: 'Results are citable. Benchmark is part of the standard eval rotation.', transitions_to: ['deprecated', 'running'] },
-    { id: 'deprecated', label: 'Deprecated', description: 'Benchmark no longer reflects what the team measures. May reopen to drafted if revisited.', transitions_to: ['drafted'] },
+    { id: 'drafted', status_category: 'unstarted', label: 'Drafted', description: 'Benchmark questions and scoring rubric are being designed.', transitions_to: ['running', 'deprecated'] },
+    { id: 'running', status_category: 'started', label: 'Running', description: 'Benchmark is being executed against models or prompt versions.', transitions_to: ['published', 'deprecated'] },
+    { id: 'published', status_category: 'completed', label: 'Published', description: 'Results are citable. Benchmark is part of the standard eval rotation.', transitions_to: ['deprecated', 'running'] },
+    { id: 'deprecated', status_category: 'completed', label: 'Deprecated', description: 'Benchmark no longer reflects what the team measures. May reopen to drafted if revisited.', transitions_to: ['drafted'] },
   ],
 }
 
@@ -2207,11 +2409,11 @@ const BUSINESS_MODEL_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafted',
   terminal_phases: ['validated', 'invalidated', 'pivoted'],
   phases: [
-    { id: 'drafted', label: 'Drafted', description: 'Model has been articulated. Not yet tested in market.', transitions_to: ['testing', 'invalidated'] },
-    { id: 'testing', label: 'Testing', description: 'Model is being tested against real customers and revenue. Evidence is accumulating.', transitions_to: ['validated', 'invalidated', 'pivoted'] },
-    { id: 'validated', label: 'Validated', description: 'Model holds up under real customer behaviour. Forms the operating basis.', transitions_to: ['testing', 'pivoted'] },
-    { id: 'invalidated', label: 'Invalidated', description: 'Model failed to hold up. May reopen to drafted for a new attempt.', transitions_to: ['drafted'] },
-    { id: 'pivoted', label: 'Pivoted', description: 'Model became something structurally different. Captured as a milestone before the new model takes over.', transitions_to: [] },
+    { id: 'drafted', status_category: 'unstarted', label: 'Drafted', description: 'Model has been articulated. Not yet tested in market.', transitions_to: ['testing', 'invalidated'] },
+    { id: 'testing', status_category: 'started', label: 'Testing', description: 'Model is being tested against real customers and revenue. Evidence is accumulating.', transitions_to: ['validated', 'invalidated', 'pivoted'] },
+    { id: 'validated', status_category: 'completed', label: 'Validated', description: 'Model holds up under real customer behaviour. Forms the operating basis.', transitions_to: ['testing', 'pivoted'] },
+    { id: 'invalidated', status_category: 'completed', label: 'Invalidated', description: 'Model failed to hold up. May reopen to drafted for a new attempt.', transitions_to: ['drafted'] },
+    { id: 'pivoted', status_category: 'cancelled', label: 'Pivoted', description: 'Model became something structurally different. Captured as a milestone before the new model takes over.', transitions_to: [] },
   ],
 }
 
@@ -2228,10 +2430,10 @@ const REVENUE_STREAM_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'proposed',
   terminal_phases: ['live', 'sunset'],
   phases: [
-    { id: 'proposed', label: 'Proposed', description: 'Stream has been hypothesised. Not yet built or sold.', transitions_to: ['piloting', 'sunset'] },
-    { id: 'piloting', label: 'Piloting', description: 'Stream is being trialled with a limited audience. Pricing and packaging may still be in flux.', transitions_to: ['live', 'sunset'] },
-    { id: 'live', label: 'Live', description: 'Stream is generally available and generating revenue.', transitions_to: ['sunset'] },
-    { id: 'sunset', label: 'Sunset', description: 'Stream is being wound down. May reopen to piloting if revived.', transitions_to: ['piloting'] },
+    { id: 'proposed', status_category: 'triage', label: 'Proposed', description: 'Stream has been hypothesised. Not yet built or sold.', transitions_to: ['piloting', 'sunset'] },
+    { id: 'piloting', status_category: 'started', label: 'Piloting', description: 'Stream is being trialled with a limited audience. Pricing and packaging may still be in flux.', transitions_to: ['live', 'sunset'] },
+    { id: 'live', status_category: 'started', label: 'Live', description: 'Stream is generally available and generating revenue.', transitions_to: ['sunset'] },
+    { id: 'sunset', status_category: 'completed', label: 'Sunset', description: 'Stream is being wound down. May reopen to piloting if revived.', transitions_to: ['piloting'] },
   ],
 }
 
@@ -2252,11 +2454,11 @@ const CUSTOMER_HEALTH_SCORE_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'monitoring',
   terminal_phases: ['recovered', 'churned'],
   phases: [
-    { id: 'monitoring', label: 'Monitoring', description: 'Customer is healthy. Score is being tracked passively.', transitions_to: ['at_risk', 'churned', 'recovered'] },
-    { id: 'at_risk', label: 'At Risk', description: 'Signals indicate trouble. Customer Success has flagged the account for attention.', transitions_to: ['monitoring', 'critical', 'churned', 'recovered'] },
-    { id: 'critical', label: 'Critical', description: 'Customer is on the verge of churning. Active intervention is underway.', transitions_to: ['at_risk', 'recovered', 'churned'] },
-    { id: 'recovered', label: 'Recovered', description: 'Customer health has returned to monitoring. Captured as a milestone. May reopen to monitoring naturally.', transitions_to: ['monitoring'] },
-    { id: 'churned', label: 'Churned', description: 'Customer left. Captured for analysis; reopen would mean a new customer relationship.', transitions_to: [] },
+    { id: 'monitoring', status_category: 'started', label: 'Monitoring', description: 'Customer is healthy. Score is being tracked passively.', transitions_to: ['at_risk', 'churned', 'recovered'] },
+    { id: 'at_risk', status_category: 'started', label: 'At Risk', description: 'Signals indicate trouble. Customer Success has flagged the account for attention.', transitions_to: ['monitoring', 'critical', 'churned', 'recovered'] },
+    { id: 'critical', status_category: 'started', label: 'Critical', description: 'Customer is on the verge of churning. Active intervention is underway.', transitions_to: ['at_risk', 'recovered', 'churned'] },
+    { id: 'recovered', status_category: 'completed', label: 'Recovered', description: 'Customer health has returned to monitoring. Captured as a milestone. May reopen to monitoring naturally.', transitions_to: ['monitoring'] },
+    { id: 'churned', status_category: 'cancelled', label: 'Churned', description: 'Customer left. Captured for analysis; reopen would mean a new customer relationship.', transitions_to: [] },
   ],
 }
 
@@ -2272,10 +2474,10 @@ const PLAYBOOK_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafted',
   terminal_phases: ['live', 'retired'],
   phases: [
-    { id: 'drafted', label: 'Drafted', description: 'Playbook is being authored. Not yet tested with customers.', transitions_to: ['tested', 'retired'] },
-    { id: 'tested', label: 'Tested', description: 'Playbook has been run through pilot customers. Adjustments may follow.', transitions_to: ['live', 'drafted'] },
-    { id: 'live', label: 'Live', description: 'Playbook is in active use across the customer success team.', transitions_to: ['retired', 'tested'] },
-    { id: 'retired', label: 'Retired', description: 'Playbook no longer in use. May reopen to drafted if revived.', transitions_to: ['drafted'] },
+    { id: 'drafted', status_category: 'unstarted', label: 'Drafted', description: 'Playbook is being authored. Not yet tested with customers.', transitions_to: ['tested', 'retired'] },
+    { id: 'tested', status_category: 'started', label: 'Tested', description: 'Playbook has been run through pilot customers. Adjustments may follow.', transitions_to: ['live', 'drafted'] },
+    { id: 'live', status_category: 'started', label: 'Live', description: 'Playbook is in active use across the customer success team.', transitions_to: ['retired', 'tested'] },
+    { id: 'retired', status_category: 'completed', label: 'Retired', description: 'Playbook no longer in use. May reopen to drafted if revived.', transitions_to: ['drafted'] },
   ],
 }
 
@@ -2292,11 +2494,11 @@ const TEAM_OKR_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafted',
   terminal_phases: ['completed', 'missed'],
   phases: [
-    { id: 'drafted', label: 'Drafted', description: 'OKR is being authored. Not yet committed to.', transitions_to: ['committed'] },
-    { id: 'committed', label: 'Committed', description: 'Team has agreed to pursue the OKR. Cycle has not yet started.', transitions_to: ['in_progress', 'drafted'] },
-    { id: 'in_progress', label: 'In Progress', description: 'Cycle is underway. Progress is being tracked.', transitions_to: ['completed', 'missed'] },
-    { id: 'completed', label: 'Completed', description: 'OKR was achieved within the cycle.', transitions_to: [] },
-    { id: 'missed', label: 'Missed', description: 'OKR was not achieved. May reopen to in_progress if carried forward.', transitions_to: ['in_progress'] },
+    { id: 'drafted', status_category: 'unstarted', label: 'Drafted', description: 'OKR is being authored. Not yet committed to.', transitions_to: ['committed'] },
+    { id: 'committed', status_category: 'unstarted', label: 'Committed', description: 'Team has agreed to pursue the OKR. Cycle has not yet started.', transitions_to: ['in_progress', 'drafted'] },
+    { id: 'in_progress', status_category: 'started', label: 'In Progress', description: 'Cycle is underway. Progress is being tracked.', transitions_to: ['completed', 'missed'] },
+    { id: 'completed', status_category: 'completed', label: 'Completed', description: 'OKR was achieved within the cycle.', transitions_to: [] },
+    { id: 'missed', status_category: 'completed', label: 'Missed', description: 'OKR was not achieved. May reopen to in_progress if carried forward.', transitions_to: ['in_progress'] },
   ],
 }
 
@@ -2313,10 +2515,10 @@ const RETROSPECTIVE_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'scheduled',
   terminal_phases: ['completed', 'actions_tracked'],
   phases: [
-    { id: 'scheduled', label: 'Scheduled', description: 'Retro is on the calendar. Not yet held.', transitions_to: ['in_progress', 'completed'] },
-    { id: 'in_progress', label: 'In Progress', description: 'Retro is being held.', transitions_to: ['completed'] },
-    { id: 'completed', label: 'Completed', description: 'Meeting is done. Action items captured but not yet tracked to closure.', transitions_to: ['actions_tracked'] },
-    { id: 'actions_tracked', label: 'Actions Tracked', description: 'Retro action items have been completed or explicitly dropped. Full loop closed.', transitions_to: [] },
+    { id: 'scheduled', status_category: 'unstarted', label: 'Scheduled', description: 'Retro is on the calendar. Not yet held.', transitions_to: ['in_progress', 'completed'] },
+    { id: 'in_progress', status_category: 'started', label: 'In Progress', description: 'Retro is being held.', transitions_to: ['completed'] },
+    { id: 'completed', status_category: 'completed', label: 'Completed', description: 'Meeting is done. Action items captured but not yet tracked to closure.', transitions_to: ['actions_tracked'] },
+    { id: 'actions_tracked', status_category: 'completed', label: 'Actions Tracked', description: 'Retro action items have been completed or explicitly dropped. Full loop closed.', transitions_to: [] },
   ],
 }
 
@@ -2331,10 +2533,10 @@ const DEPENDENCY_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'identified',
   terminal_phases: ['resolved'],
   phases: [
-    { id: 'identified', label: 'Identified', description: 'Dependency has been named. Not yet evaluated for impact.', transitions_to: ['blocked', 'in_progress', 'resolved'] },
-    { id: 'blocked', label: 'Blocked', description: 'Dependency is currently blocking work. Awaiting upstream action.', transitions_to: ['in_progress', 'resolved'] },
-    { id: 'in_progress', label: 'In Progress', description: 'Active work is happening to resolve the dependency.', transitions_to: ['blocked', 'resolved'] },
-    { id: 'resolved', label: 'Resolved', description: 'Dependency is no longer blocking. May reopen to blocked if regression.', transitions_to: ['blocked'] },
+    { id: 'identified', status_category: 'triage', label: 'Identified', description: 'Dependency has been named. Not yet evaluated for impact.', transitions_to: ['blocked', 'in_progress', 'resolved'] },
+    { id: 'blocked', status_category: 'started', label: 'Blocked', description: 'Dependency is currently blocking work. Awaiting upstream action.', transitions_to: ['in_progress', 'resolved'] },
+    { id: 'in_progress', status_category: 'started', label: 'In Progress', description: 'Active work is happening to resolve the dependency.', transitions_to: ['blocked', 'resolved'] },
+    { id: 'resolved', status_category: 'completed', label: 'Resolved', description: 'Dependency is no longer blocking. May reopen to blocked if regression.', transitions_to: ['blocked'] },
   ],
 }
 
@@ -2350,10 +2552,10 @@ const ROLE_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'proposed',
   terminal_phases: ['filled', 'vacant'],
   phases: [
-    { id: 'proposed', label: 'Proposed', description: 'Role has been described but not yet posted or staffed.', transitions_to: ['open', 'vacant'] },
-    { id: 'open', label: 'Open', description: 'Role is actively being recruited for.', transitions_to: ['filled', 'vacant'] },
-    { id: 'filled', label: 'Filled', description: 'Role is staffed. May reopen to open if the position becomes vacant again.', transitions_to: ['vacant'] },
-    { id: 'vacant', label: 'Vacant', description: 'Role exists but is unfilled. May reopen to open to start recruiting.', transitions_to: ['open'] },
+    { id: 'proposed', status_category: 'triage', label: 'Proposed', description: 'Role has been described but not yet posted or staffed.', transitions_to: ['open', 'vacant'] },
+    { id: 'open', status_category: 'started', label: 'Open', description: 'Role is actively being recruited for.', transitions_to: ['filled', 'vacant'] },
+    { id: 'filled', status_category: 'completed', label: 'Filled', description: 'Role is staffed. May reopen to open if the position becomes vacant again.', transitions_to: ['vacant'] },
+    { id: 'vacant', status_category: 'backlog', label: 'Vacant', description: 'Role exists but is unfilled. May reopen to open to start recruiting.', transitions_to: ['open'] },
   ],
 }
 
@@ -2368,11 +2570,11 @@ const CAPACITY_PLAN_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafted',
   terminal_phases: ['completed', 'revised'],
   phases: [
-    { id: 'drafted', label: 'Drafted', description: 'Plan is being authored. Not yet agreed.', transitions_to: ['committed', 'revised'] },
-    { id: 'committed', label: 'Committed', description: 'Plan has been agreed by stakeholders. Cycle has not yet started.', transitions_to: ['in_flight', 'revised'] },
-    { id: 'in_flight', label: 'In Flight', description: 'Cycle is underway. Capacity is being consumed.', transitions_to: ['completed', 'revised'] },
-    { id: 'completed', label: 'Completed', description: 'Cycle is done. Plan executed as agreed.', transitions_to: [] },
-    { id: 'revised', label: 'Revised', description: 'Plan was changed mid-flight. May reopen to drafted for the next iteration.', transitions_to: ['drafted'] },
+    { id: 'drafted', status_category: 'unstarted', label: 'Drafted', description: 'Plan is being authored. Not yet agreed.', transitions_to: ['committed', 'revised'] },
+    { id: 'committed', status_category: 'unstarted', label: 'Committed', description: 'Plan has been agreed by stakeholders. Cycle has not yet started.', transitions_to: ['in_flight', 'revised'] },
+    { id: 'in_flight', status_category: 'started', label: 'In Flight', description: 'Cycle is underway. Capacity is being consumed.', transitions_to: ['completed', 'revised'] },
+    { id: 'completed', status_category: 'completed', label: 'Completed', description: 'Cycle is done. Plan executed as agreed.', transitions_to: [] },
+    { id: 'revised', status_category: 'completed', label: 'Revised', description: 'Plan was changed mid-flight. May reopen to drafted for the next iteration.', transitions_to: ['drafted'] },
   ],
 }
 
@@ -2390,11 +2592,11 @@ const VARIANT_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'proposed',
   terminal_phases: ['winning', 'losing', 'retired'],
   phases: [
-    { id: 'proposed', label: 'Proposed', description: 'Variant has been designed. Not yet running.', transitions_to: ['live', 'retired'] },
-    { id: 'live', label: 'Live', description: 'Variant is being shown to users as part of an active test.', transitions_to: ['winning', 'losing', 'retired'] },
-    { id: 'winning', label: 'Winning', description: 'Variant beat the control. Captured for the record before rollout.', transitions_to: ['retired'] },
-    { id: 'losing', label: 'Losing', description: 'Variant did not beat the control. Captured for the record.', transitions_to: ['retired'] },
-    { id: 'retired', label: 'Retired', description: 'Variant is no longer running. May reopen to proposed if revisited in a future test.', transitions_to: ['proposed'] },
+    { id: 'proposed', status_category: 'triage', label: 'Proposed', description: 'Variant has been designed. Not yet running.', transitions_to: ['live', 'retired'] },
+    { id: 'live', status_category: 'started', label: 'Live', description: 'Variant is being shown to users as part of an active test.', transitions_to: ['winning', 'losing', 'retired'] },
+    { id: 'winning', status_category: 'completed', label: 'Winning', description: 'Variant beat the control. Captured for the record before rollout.', transitions_to: ['retired'] },
+    { id: 'losing', status_category: 'completed', label: 'Losing', description: 'Variant did not beat the control. Captured for the record.', transitions_to: ['retired'] },
+    { id: 'retired', status_category: 'completed', label: 'Retired', description: 'Variant is no longer running. May reopen to proposed if revisited in a future test.', transitions_to: ['proposed'] },
   ],
 }
 
@@ -2409,11 +2611,11 @@ const GROWTH_CAMPAIGN_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'drafted',
   terminal_phases: ['completed', 'paused'],
   phases: [
-    { id: 'drafted', label: 'Drafted', description: 'Campaign concept exists. Not yet planned for launch.', transitions_to: ['planning', 'paused'] },
-    { id: 'planning', label: 'Planning', description: 'Campaign creative, channels, and timing are being finalised.', transitions_to: ['live', 'paused'] },
-    { id: 'live', label: 'Live', description: 'Campaign is running across channels.', transitions_to: ['completed', 'paused'] },
-    { id: 'completed', label: 'Completed', description: 'Campaign ran to completion. Outcomes captured.', transitions_to: [] },
-    { id: 'paused', label: 'Paused', description: 'Campaign was halted before completion. May reopen to live if resumed.', transitions_to: ['live'] },
+    { id: 'drafted', status_category: 'unstarted', label: 'Drafted', description: 'Campaign concept exists. Not yet planned for launch.', transitions_to: ['planning', 'paused'] },
+    { id: 'planning', status_category: 'unstarted', label: 'Planning', description: 'Campaign creative, channels, and timing are being finalised.', transitions_to: ['live', 'paused'] },
+    { id: 'live', status_category: 'started', label: 'Live', description: 'Campaign is running across channels.', transitions_to: ['completed', 'paused'] },
+    { id: 'completed', status_category: 'completed', label: 'Completed', description: 'Campaign ran to completion. Outcomes captured.', transitions_to: [] },
+    { id: 'paused', status_category: 'backlog', label: 'Paused', description: 'Campaign was halted before completion. May reopen to live if resumed.', transitions_to: ['live'] },
   ],
 }
 
@@ -2438,10 +2640,10 @@ const PUBLISHING_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'draft',
   terminal_phases: ['archived'],
   phases: [
-    { id: 'draft', label: 'Draft', description: 'Being authored or revised. Not visible externally.', transitions_to: ['review'] },
-    { id: 'review', label: 'In Review', description: 'Under editorial or stakeholder review before publishing.', transitions_to: ['draft', 'published'] },
-    { id: 'published', label: 'Published', description: 'Live and visible to the intended audience.', transitions_to: ['archived', 'draft'] },
-    { id: 'archived', label: 'Archived', description: 'No longer current. Retained for historical reference.', transitions_to: ['draft'] },
+    { id: 'draft', status_category: 'started', label: 'Draft', description: 'Being authored or revised. Not visible externally.', transitions_to: ['review'] },
+    { id: 'review', status_category: 'started', label: 'In Review', description: 'Under editorial or stakeholder review before publishing.', transitions_to: ['draft', 'published'] },
+    { id: 'published', status_category: 'completed', label: 'Published', description: 'Live and visible to the intended audience.', transitions_to: ['archived', 'draft'] },
+    { id: 'archived', status_category: 'completed', label: 'Archived', description: 'No longer current. Retained for historical reference.', transitions_to: ['draft'] },
   ],
 }
 
@@ -2451,11 +2653,11 @@ const OPERATIONAL_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'planning',
   terminal_phases: ['completed', 'sunset'],
   phases: [
-    { id: 'planning', label: 'Planning', description: 'Being designed or scoped. Not yet started.', transitions_to: ['active'] },
-    { id: 'active', label: 'Active', description: 'Currently running or in operation.', transitions_to: ['paused', 'completed', 'sunset'] },
-    { id: 'paused', label: 'Paused', description: 'Temporarily halted. Can be resumed.', transitions_to: ['active', 'sunset'] },
-    { id: 'completed', label: 'Completed', description: 'Finished successfully. Outcomes captured.', transitions_to: [] },
-    { id: 'sunset', label: 'Sunset', description: 'Winding down or discontinued.', transitions_to: [] },
+    { id: 'planning', status_category: 'unstarted', label: 'Planning', description: 'Being designed or scoped. Not yet started.', transitions_to: ['active'] },
+    { id: 'active', status_category: 'started', label: 'Active', description: 'Currently running or in operation.', transitions_to: ['paused', 'completed', 'sunset'] },
+    { id: 'paused', status_category: 'backlog', label: 'Paused', description: 'Temporarily halted. Can be resumed.', transitions_to: ['active', 'sunset'] },
+    { id: 'completed', status_category: 'completed', label: 'Completed', description: 'Finished successfully. Outcomes captured.', transitions_to: [] },
+    { id: 'sunset', status_category: 'completed', label: 'Sunset', description: 'Winding down or discontinued.', transitions_to: [] },
   ],
 }
 
@@ -2469,24 +2671,34 @@ const APPROVAL_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   // UPGLifecycle.terminal_phases contract.
   terminal_phases: ['approved', 'rejected', 'deprecated'],
   phases: [
-    { id: 'proposed', label: 'Proposed', description: 'Submitted for consideration. Awaiting review.', transitions_to: ['reviewing'] },
-    { id: 'reviewing', label: 'Reviewing', description: 'Under active review by approvers.', transitions_to: ['approved', 'rejected', 'proposed'] },
-    { id: 'approved', label: 'Approved', description: 'Accepted and ready for implementation.', transitions_to: ['deprecated'] },
-    { id: 'rejected', label: 'Rejected', description: 'Not accepted. Reasons should be documented.', transitions_to: ['proposed'] },
-    { id: 'deprecated', label: 'Deprecated', description: 'Previously approved but no longer current.', transitions_to: [] },
+    { id: 'proposed', status_category: 'triage', label: 'Proposed', description: 'Submitted for consideration. Awaiting review.', transitions_to: ['reviewing'] },
+    { id: 'reviewing', status_category: 'started', label: 'Reviewing', description: 'Under active review by approvers.', transitions_to: ['approved', 'rejected', 'proposed'] },
+    { id: 'approved', status_category: 'completed', label: 'Approved', description: 'Accepted and ready for implementation.', transitions_to: ['deprecated'] },
+    { id: 'rejected', status_category: 'cancelled', label: 'Rejected', description: 'Not accepted. Reasons should be documented.', transitions_to: ['proposed'] },
+    { id: 'deprecated', status_category: 'completed', label: 'Deprecated', description: 'Previously approved but no longer current.', transitions_to: [] },
   ],
 }
 
-/** Work item: todo → in_progress → in_review → done */
+/**
+ * Work item: todo → in_progress → in_review → done, with a `cancelled` off-ramp.
+ *
+ * `cancelled` (0.25.1 feedback 25db13af): work items get cancelled or closed as
+ * duplicate/won't-do in source tools constantly, and `workflow_state_category`
+ * needs a canonical phase to bucket those states into — parity with the
+ * closed/wont_fix terminals the support-flow lifecycles already have. Reachable
+ * from every non-terminal phase; `cancelled → todo` is the reopen path (a
+ * late-state move per the `terminal_phases` contract, not forward progression).
+ */
 const WORK_ITEM_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   template_id: 'WORK_ITEM',
   initial_phase: 'todo',
-  terminal_phases: ['done'],
+  terminal_phases: ['done', 'cancelled'],
   phases: [
-    { id: 'todo', label: 'To Do', description: 'Identified but not yet started.', transitions_to: ['in_progress'] },
-    { id: 'in_progress', label: 'In Progress', description: 'Actively being worked on.', transitions_to: ['in_review', 'todo'] },
-    { id: 'in_review', label: 'In Review', description: 'Work completed, awaiting review or acceptance.', transitions_to: ['done', 'in_progress'] },
-    { id: 'done', label: 'Done', description: 'Completed and accepted.', transitions_to: [] },
+    { id: 'todo', status_category: 'unstarted', label: 'To Do', description: 'Identified but not yet started.', transitions_to: ['in_progress', 'cancelled'] },
+    { id: 'in_progress', status_category: 'started', label: 'In Progress', description: 'Actively being worked on.', transitions_to: ['in_review', 'todo', 'cancelled'] },
+    { id: 'in_review', status_category: 'started', label: 'In Review', description: 'Work completed, awaiting review or acceptance.', transitions_to: ['done', 'in_progress', 'cancelled'] },
+    { id: 'done', status_category: 'completed', label: 'Done', description: 'Completed and accepted.', transitions_to: [] },
+    { id: 'cancelled', status_category: 'cancelled', label: 'Cancelled', description: 'Deliberately closed without completion: won\'t-do, duplicate, or obsolete. May reopen to `todo` if circumstances change.', transitions_to: ['todo'] },
   ],
 }
 
@@ -2496,10 +2708,10 @@ const DISCOVERY_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'open',
   terminal_phases: ['resolved', 'parked'],
   phases: [
-    { id: 'open', label: 'Open', description: 'Identified as worth exploring. No work started yet.', transitions_to: ['exploring'] },
-    { id: 'exploring', label: 'Exploring', description: 'Actively being investigated or researched.', transitions_to: ['resolved', 'parked', 'open'] },
-    { id: 'resolved', label: 'Resolved', description: 'Answered or addressed. Findings captured.', transitions_to: [] },
-    { id: 'parked', label: 'Parked', description: 'Set aside for now. May revisit later.', transitions_to: ['open'] },
+    { id: 'open', status_category: 'triage', label: 'Open', description: 'Identified as worth exploring. No work started yet.', transitions_to: ['exploring'] },
+    { id: 'exploring', status_category: 'started', label: 'Exploring', description: 'Actively being investigated or researched.', transitions_to: ['resolved', 'parked', 'open'] },
+    { id: 'resolved', status_category: 'completed', label: 'Resolved', description: 'Answered or addressed. Findings captured.', transitions_to: [] },
+    { id: 'parked', status_category: 'backlog', label: 'Parked', description: 'Set aside for now. May revisit later.', transitions_to: ['open'] },
   ],
 }
 
@@ -2509,10 +2721,10 @@ const MATURITY_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'alpha',
   terminal_phases: ['deprecated'],
   phases: [
-    { id: 'alpha', label: 'Alpha', description: 'Early stage, internal use only. Expect breaking changes.', transitions_to: ['beta'] },
-    { id: 'beta', label: 'Beta', description: 'Feature complete but may have rough edges. Limited external use.', transitions_to: ['ga', 'alpha'] },
-    { id: 'ga', label: 'Generally Available', description: 'Stable, production-ready. Widely available.', transitions_to: ['deprecated'] },
-    { id: 'deprecated', label: 'Deprecated', description: 'Scheduled for removal. Migration path should be documented.', transitions_to: [] },
+    { id: 'alpha', status_category: 'started', label: 'Alpha', description: 'Early stage, internal use only. Expect breaking changes.', transitions_to: ['beta'] },
+    { id: 'beta', status_category: 'started', label: 'Beta', description: 'Feature complete but may have rough edges. Limited external use.', transitions_to: ['ga', 'alpha'] },
+    { id: 'ga', status_category: 'completed', label: 'Generally Available', description: 'Stable, production-ready. Widely available.', transitions_to: ['deprecated'] },
+    { id: 'deprecated', status_category: 'completed', label: 'Deprecated', description: 'Scheduled for removal. Migration path should be documented.', transitions_to: [] },
   ],
 }
 
@@ -2531,11 +2743,11 @@ const RISK_ITEM_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'identified',
   terminal_phases: ['mitigated', 'accepted', 'closed'],
   phases: [
-    { id: 'identified', label: 'Identified', description: 'Risk has been recognised and named. Not yet assessed for likelihood or impact.', transitions_to: ['assessed'] },
-    { id: 'assessed', label: 'Assessed', description: 'Likelihood and impact have been evaluated. Outcome is one of mitigated, accepted, or closed.', transitions_to: ['mitigated', 'accepted', 'closed'] },
-    { id: 'mitigated', label: 'Mitigated', description: 'Action has been taken to reduce likelihood or impact. The risk is no longer active.', transitions_to: [] },
-    { id: 'accepted', label: 'Accepted', description: 'Risk is acknowledged. Cost of mitigation outweighs exposure; the team chooses to live with it.', transitions_to: [] },
-    { id: 'closed', label: 'Closed', description: 'Risk became irrelevant without action; underlying conditions changed. May reopen to `assessed` if conditions change again.', transitions_to: ['assessed'] },
+    { id: 'identified', status_category: 'triage', label: 'Identified', description: 'Risk has been recognised and named. Not yet assessed for likelihood or impact.', transitions_to: ['assessed'] },
+    { id: 'assessed', status_category: 'started', label: 'Assessed', description: 'Likelihood and impact have been evaluated. Outcome is one of mitigated, accepted, or closed.', transitions_to: ['mitigated', 'accepted', 'closed'] },
+    { id: 'mitigated', status_category: 'completed', label: 'Mitigated', description: 'Action has been taken to reduce likelihood or impact. The risk is no longer active.', transitions_to: [] },
+    { id: 'accepted', status_category: 'completed', label: 'Accepted', description: 'Risk is acknowledged. Cost of mitigation outweighs exposure; the team chooses to live with it.', transitions_to: [] },
+    { id: 'closed', status_category: 'completed', label: 'Closed', description: 'Risk became irrelevant without action; underlying conditions changed. May reopen to `assessed` if conditions change again.', transitions_to: ['assessed'] },
   ],
 }
 
@@ -2552,11 +2764,11 @@ const SALES_DEAL_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'qualified',
   terminal_phases: ['closed_won', 'closed_lost'],
   phases: [
-    { id: 'qualified', label: 'Qualified', description: 'Lead has been qualified: there\'s a real budget, need, and decision-maker. Not yet pitched.', transitions_to: ['proposal'] },
-    { id: 'proposal', label: 'Proposal', description: 'A proposal has been delivered. Pricing and scope are on the table.', transitions_to: ['negotiation', 'closed_lost'] },
-    { id: 'negotiation', label: 'Negotiation', description: 'Terms are being finalised. Both sides are working toward agreement.', transitions_to: ['closed_won', 'closed_lost'] },
-    { id: 'closed_won', label: 'Closed Won', description: 'Deal signed. Customer is now active.', transitions_to: [] },
-    { id: 'closed_lost', label: 'Closed Lost', description: 'Deal did not close. A re-engaged prospect becomes a new `deal` rather than reviving this one.', transitions_to: [] },
+    { id: 'qualified', status_category: 'triage', label: 'Qualified', description: 'Lead has been qualified: there\'s a real budget, need, and decision-maker. Not yet pitched.', transitions_to: ['proposal'] },
+    { id: 'proposal', status_category: 'started', label: 'Proposal', description: 'A proposal has been delivered. Pricing and scope are on the table.', transitions_to: ['negotiation', 'closed_lost'] },
+    { id: 'negotiation', status_category: 'started', label: 'Negotiation', description: 'Terms are being finalised. Both sides are working toward agreement.', transitions_to: ['closed_won', 'closed_lost'] },
+    { id: 'closed_won', status_category: 'completed', label: 'Closed Won', description: 'Deal signed. Customer is now active.', transitions_to: [] },
+    { id: 'closed_lost', status_category: 'completed', label: 'Closed Lost', description: 'Deal did not close. A re-engaged prospect becomes a new `deal` rather than reviving this one.', transitions_to: [] },
   ],
 }
 
@@ -2578,11 +2790,11 @@ const VALIDATION_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'untested',
   terminal_phases: ['validated', 'invalidated', 'archived'],
   phases: [
-    { id: 'untested', label: 'Untested', description: 'Articulated but not yet examined against evidence.', transitions_to: ['testing'] },
-    { id: 'testing', label: 'Testing', description: 'Actively gathering evidence for or against the claim.', transitions_to: ['validated', 'invalidated'] },
-    { id: 'validated', label: 'Validated', description: 'Evidence supports the claim. Treated as true until contradicted.', transitions_to: ['archived'] },
-    { id: 'invalidated', label: 'Invalidated', description: 'Evidence contradicts the claim. May re-test if new evidence appears.', transitions_to: ['archived', 'testing'] },
-    { id: 'archived', label: 'Archived', description: 'Settled and retained for provenance. No longer active.', transitions_to: [] },
+    { id: 'untested', status_category: 'triage', label: 'Untested', description: 'Articulated but not yet examined against evidence.', transitions_to: ['testing'] },
+    { id: 'testing', status_category: 'started', label: 'Testing', description: 'Actively gathering evidence for or against the claim.', transitions_to: ['validated', 'invalidated'] },
+    { id: 'validated', status_category: 'completed', label: 'Validated', description: 'Evidence supports the claim. Treated as true until contradicted.', transitions_to: ['archived'] },
+    { id: 'invalidated', status_category: 'completed', label: 'Invalidated', description: 'Evidence contradicts the claim. May re-test if new evidence appears.', transitions_to: ['archived', 'testing'] },
+    { id: 'archived', status_category: 'completed', label: 'Archived', description: 'Settled and retained for provenance. No longer active.', transitions_to: [] },
   ],
 }
 
@@ -2607,12 +2819,12 @@ const INCIDENT_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'open',
   terminal_phases: ['resolved', 'closed', 'wont_fix'],
   phases: [
-    { id: 'open', label: 'Open', description: 'Surfaced and logged. Not yet triaged.', transitions_to: ['triaged'] },
-    { id: 'triaged', label: 'Triaged', description: 'Assessed for severity and ownership. Routed for work or dispositioned.', transitions_to: ['in_progress', 'resolved', 'wont_fix'] },
-    { id: 'in_progress', label: 'In Progress', description: 'Actively being worked toward a fix.', transitions_to: ['resolved', 'wont_fix'] },
-    { id: 'resolved', label: 'Resolved', description: 'Addressed and verified. May reopen to `triaged` on regression.', transitions_to: ['closed', 'triaged'] },
-    { id: 'closed', label: 'Closed', description: 'Administratively closed (duplicate, withdrawn, or no longer relevant).', transitions_to: [] },
-    { id: 'wont_fix', label: "Won't Fix", description: 'Triaged as not to be actioned. Reason should be documented.', transitions_to: [] },
+    { id: 'open', status_category: 'triage', label: 'Open', description: 'Surfaced and logged. Not yet triaged.', transitions_to: ['triaged'] },
+    { id: 'triaged', status_category: 'triage', label: 'Triaged', description: 'Assessed for severity and ownership. Routed for work or dispositioned.', transitions_to: ['in_progress', 'resolved', 'wont_fix'] },
+    { id: 'in_progress', status_category: 'started', label: 'In Progress', description: 'Actively being worked toward a fix.', transitions_to: ['resolved', 'wont_fix'] },
+    { id: 'resolved', status_category: 'completed', label: 'Resolved', description: 'Addressed and verified. May reopen to `triaged` on regression.', transitions_to: ['closed', 'triaged'] },
+    { id: 'closed', status_category: 'cancelled', label: 'Closed', description: 'Administratively closed (duplicate, withdrawn, or no longer relevant).', transitions_to: [] },
+    { id: 'wont_fix', status_category: 'cancelled', label: "Won't Fix", description: 'Triaged as not to be actioned. Reason should be documented.', transitions_to: [] },
   ],
 }
 
@@ -2630,11 +2842,11 @@ const STUDY_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   initial_phase: 'planned',
   terminal_phases: ['complete', 'abandoned'],
   phases: [
-    { id: 'planned', label: 'Planned', description: 'Scoped and scheduled. Not yet started.', transitions_to: ['running'] },
-    { id: 'running', label: 'Running', description: 'Actively executing: collecting data or running the protocol.', transitions_to: ['analysing', 'abandoned'] },
-    { id: 'analysing', label: 'Analysing', description: 'Execution done; results are being analysed and written up.', transitions_to: ['complete', 'abandoned'] },
-    { id: 'complete', label: 'Complete', description: 'Analysed and concluded. Findings captured.', transitions_to: [] },
-    { id: 'abandoned', label: 'Abandoned', description: 'Stopped before completion (killed, timed out, or superseded).', transitions_to: [] },
+    { id: 'planned', status_category: 'unstarted', label: 'Planned', description: 'Scoped and scheduled. Not yet started.', transitions_to: ['running'] },
+    { id: 'running', status_category: 'started', label: 'Running', description: 'Actively executing: collecting data or running the protocol.', transitions_to: ['analysing', 'abandoned'] },
+    { id: 'analysing', status_category: 'started', label: 'Analysing', description: 'Execution done; results are being analysed and written up.', transitions_to: ['complete', 'abandoned'] },
+    { id: 'complete', status_category: 'completed', label: 'Complete', description: 'Analysed and concluded. Findings captured.', transitions_to: [] },
+    { id: 'abandoned', status_category: 'cancelled', label: 'Abandoned', description: 'Stopped before completion (killed, timed out, or superseded).', transitions_to: [] },
   ],
 }
 
@@ -2823,6 +3035,7 @@ const FRAMEWORK_EXERCISE_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'draft',
+      status_category: 'started',
       label: 'Draft',
       description:
         'The exercise has been created and entities pulled into scope, but the framework\'s inputs have not all been filled in yet.',
@@ -2830,6 +3043,7 @@ const FRAMEWORK_EXERCISE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description:
         'The current, authoritative run of its framework. Its include edges carry the live results consumers read, rank, and render by.',
@@ -2837,6 +3051,7 @@ const FRAMEWORK_EXERCISE_LIFECYCLE: UPGLifecycle = {
     },
     {
       id: 'archived',
+      status_category: 'completed',
       label: 'Archived',
       description:
         'A past run, retained for provenance. Still queryable but superseded by a newer exercise and hidden from default views. Can be revived to active.',
@@ -2861,24 +3076,28 @@ const SPECIFICATION_LIFECYCLE: UPGLifecycle = {
   phases: [
     {
       id: 'draft',
+      status_category: 'started',
       label: 'Draft',
       description: 'Being authored. Not yet adopted as the canonical specification.',
       transitions_to: ['active', 'superseded'],
     },
     {
       id: 'active',
+      status_category: 'started',
       label: 'Active',
       description: 'In force. The current authoritative version products implement and conform to.',
       transitions_to: ['deprecated', 'superseded'],
     },
     {
       id: 'deprecated',
+      status_category: 'started',
       label: 'Deprecated',
       description: 'Still valid but no longer recommended; a successor exists or is imminent.',
       transitions_to: ['superseded'],
     },
     {
       id: 'superseded',
+      status_category: 'completed',
       label: 'Superseded',
       description: 'Replaced by a newer specification. Retained for historical reference.',
       transitions_to: [],
@@ -2900,9 +3119,9 @@ const PLANNING_CYCLE_LIFECYCLE: UPGLifecycle = {
   initial_phase: 'planned',
   terminal_phases: ['closed'],
   phases: [
-    { id: 'planned', label: 'Planned', description: 'The cycle is being shaped: dates set, goal written, work scheduled into it. It has not started yet.', transitions_to: ['active'] },
-    { id: 'active', label: 'Active', description: 'The team is inside the interval; work is flowing through it.', transitions_to: ['closed'] },
-    { id: 'closed', label: 'Closed', description: 'The interval has ended. Scheduled work has shipped, carried over, or been dropped. May reopen if the team extends or reruns it.', transitions_to: ['active'] },
+    { id: 'planned', status_category: 'unstarted', label: 'Planned', description: 'The cycle is being shaped: dates set, goal written, work scheduled into it. It has not started yet.', transitions_to: ['active'] },
+    { id: 'active', status_category: 'started', label: 'Active', description: 'The team is inside the interval; work is flowing through it.', transitions_to: ['closed'] },
+    { id: 'closed', status_category: 'completed', label: 'Closed', description: 'The interval has ended. Scheduled work has shipped, carried over, or been dropped. May reopen if the team extends or reruns it.', transitions_to: ['active'] },
   ],
 }
 

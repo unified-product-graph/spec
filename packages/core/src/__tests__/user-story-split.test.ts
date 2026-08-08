@@ -150,7 +150,7 @@ describe('Lifecycles', () => {
  const lifecycle = getLifecycleForType('task')!
  expect(lifecycle).toBeDefined()
  expect(lifecycle.initial_phase).toBe('todo')
- expect(lifecycle.terminal_phases).toEqual(['done'])
+ expect(lifecycle.terminal_phases).toEqual(['done', 'cancelled'])
  expect(getLifecycleForType('story_task')).toBeUndefined()
  })
 

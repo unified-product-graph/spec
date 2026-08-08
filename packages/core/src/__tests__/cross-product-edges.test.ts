@@ -227,14 +227,16 @@ describe('cross-product edge validation', () => {
 
 // The ratified portfolio-shared set (0.18.0): capability +
 // market_segment + classification_axis IN, design_token OUT. 0.20.0 added
-// planning_cycle (a coarse cadence interval is an org-shared node). Snapshot-guarded
+// planning_cycle (a coarse cadence interval is an org-shared node). 0.25.1
+// feedback (c4c0d5f4) added milestone: a cross-team gate ("Open Beta") that
+// several products' projects target via project_targets_milestone. Snapshot-guarded
 // so adding or removing a shared tag is a deliberate, reviewed change.
 const EXPECTED_PORTFOLIO_SHARED_TYPES = [
   'brand_identity', 'capability', 'classification_axis', 'classification_value',
   'competitor', 'competitor_feature', 'competitor_signal', 'department', 'dependency',
   'design_component', 'design_system', 'initiative', 'key_result', 'market_segment',
-  'metric', 'mission', 'objective', 'operating_lifecycle', 'operating_stage', 'outcome',
-  'planning_cycle',
+  'metric', 'milestone', 'mission', 'objective', 'operating_lifecycle', 'operating_stage',
+  'outcome', 'planning_cycle',
   'primitive', 'specification', 'strategic_pillar', 'strategic_theme', 'team', 'vision',
 ].sort()
 
@@ -256,9 +258,23 @@ const CURATED_GATE_EXCEPTIONS = [
 ].sort()
 
 describe('cross-product 3-state derivation (0.18.0)', () => {
-  it('the portfolio_shared entity-type set matches the ratified 27-name snapshot', () => {
-    expect(UPG_PORTFOLIO_SHARED_TYPES).toHaveLength(27)
+  it('the portfolio_shared entity-type set matches the ratified 28-name snapshot', () => {
+    expect(UPG_PORTFOLIO_SHARED_TYPES).toHaveLength(28)
     expect([...UPG_PORTFOLIO_SHARED_TYPES].sort()).toEqual(EXPECTED_PORTFOLIO_SHARED_TYPES)
+  })
+
+  it('milestone edges classify provisional via the shared-tier gate (0.25.1 feedback c4c0d5f4)', () => {
+    // A cross-team gate milestone ("Open Beta") targeted by several products'
+    // projects: milestone joined the shared tier, so its catalog edges pass the
+    // gate as provisional — parity with project_implements_initiative. None are
+    // added to the curated set.
+    for (const t of [
+      'project_targets_milestone', 'milestone_gates_release', 'milestone_triggers_release',
+      'milestone_gates_deliverable', 'status_report_reports_on_milestone',
+    ]) {
+      expect(crossProductScope(t), `${t} should be provisional`).toBe('provisional')
+      expect(isCuratedCrossEligible(t), `${t} must NOT join the curated set`).toBe(false)
+    }
   })
 
   it('every curated cross type classifies as scope "curated" (canonical 66 as of 0.24.0)', () => {
