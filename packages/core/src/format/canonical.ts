@@ -358,6 +358,57 @@ function portfolioBody(doc: UPGPortfolioDocument): Record<string, unknown> {
   }
 }
 
+// ─── Header counts derivation ───────────────────────────────────────────────
+//
+// `$upg.counts` is DERIVED data: a cheap size read that must always equal the
+// body it sits above. It is written by the serialiser and — since the
+// `checkHeaderSeal` addition — read back by verifiers. Both call the SAME
+// derivation below, so the writer and the verifier can never disagree about
+// what the counts should be. (Before this extraction the derivation was inline
+// in the two serialise paths and nothing read it back, which is precisely how a
+// git-merged file could declare 1274 nodes while holding 1275 and still pass
+// every drift class clean.)
+
+/** Element counts for a single-product document, as stamped into `$upg.counts`. */
+export function deriveSingleCounts(doc: UPGDocument): Record<string, number> {
+  return { nodes: doc.nodes?.length ?? 0, edges: doc.edges?.length ?? 0 }
+}
+
+/**
+ * Element counts for a portfolio document, as stamped into `$upg.counts`.
+ *
+ * `products` counts only `product`-kind members (0.10.0, #45): a watched
+ * competitor-intelligence graph, the org_rollup umbrella graph, or an
+ * operating_function graph (0.17.0) is registered for reference but is not a
+ * product under management. Members carry `member_kind` (absent = product,
+ * back-compat); the non-product kinds are surfaced separately so the breakdown
+ * stays legible, and are OMITTED when zero so existing portfolio files without
+ * them stay byte-identical.
+ */
+export function derivePortfolioCounts(doc: UPGPortfolioDocument): Record<string, number> {
+  const members = (doc.products ?? []) as Array<{ member_kind?: string }>
+  const memberKindOf = (p: { member_kind?: string }) => p.member_kind ?? 'product'
+  const watchedCount = members.filter((p) => memberKindOf(p) === 'watched').length
+  const rollupCount = members.filter((p) => memberKindOf(p) === 'org_rollup').length
+  const operatingFunctionCount = members.filter((p) => memberKindOf(p) === 'operating_function').length
+  return {
+    products: members.filter((p) => memberKindOf(p) === 'product').length,
+    ...(watchedCount > 0 ? { watched_products: watchedCount } : {}),
+    ...(rollupCount > 0 ? { org_rollups: rollupCount } : {}),
+    ...(operatingFunctionCount > 0 ? { operating_functions: operatingFunctionCount } : {}),
+    product_areas: doc.product_areas?.length ?? 0,
+    portfolios: doc.portfolios?.length ?? 0,
+    cross_edges: doc.cross_edges?.length ?? 0,
+  }
+}
+
+/** Dispatching form of the two count derivations above. */
+export function deriveCounts(doc: UPGDocument | UPGPortfolioDocument): Record<string, number> {
+  return isPortfolio(doc)
+    ? derivePortfolioCounts(doc as UPGPortfolioDocument)
+    : deriveSingleCounts(doc as UPGDocument)
+}
+
 /**
  * Deterministic checksum of the canonical body (volatile fields excluded by
  * construction, the body has no timestamps). Hex, first 32 chars.
@@ -426,7 +477,7 @@ function serializeSingleWithHeader(doc: UPGDocument, opts: SerializeOptions): st
   }
   const summary = deriveSummary(product.description)
   if (summary) header.summary = summary
-  header.counts = { nodes: doc.nodes?.length ?? 0, edges: doc.edges?.length ?? 0 }
+  header.counts = deriveSingleCounts(doc)
   // Member kind (0.10.0, #45): stamp non-default kinds so the graph carries its
   // own posture (org_rollup / watched / operating_function); ordinary products
   // stay clean (absent).
@@ -459,26 +510,8 @@ function serializePortfolioWithHeader(doc: UPGPortfolioDocument, opts: Serialize
   }
   const summary = deriveSummary(org.description)
   if (summary) header.summary = summary
-  // counts.products counts only `product`-kind members (0.10.0, #45): a watched
-  // competitor-intelligence graph, the org_rollup umbrella graph, or an
-  // operating_function graph (0.17.0) is registered for reference but is not a
-  // product under management. Members carry `member_kind` (absent = product,
-  // back-compat); the non-product kinds are surfaced separately so the breakdown
-  // stays legible.
-  const members = (doc.products ?? []) as Array<{ member_kind?: string }>
-  const memberKindOf = (p: { member_kind?: string }) => p.member_kind ?? 'product'
-  const watchedCount = members.filter((p) => memberKindOf(p) === 'watched').length
-  const rollupCount = members.filter((p) => memberKindOf(p) === 'org_rollup').length
-  const operatingFunctionCount = members.filter((p) => memberKindOf(p) === 'operating_function').length
-  header.counts = {
-    products: members.filter((p) => memberKindOf(p) === 'product').length,
-    ...(watchedCount > 0 ? { watched_products: watchedCount } : {}),
-    ...(rollupCount > 0 ? { org_rollups: rollupCount } : {}),
-    ...(operatingFunctionCount > 0 ? { operating_functions: operatingFunctionCount } : {}),
-    product_areas: doc.product_areas?.length ?? 0,
-    portfolios: doc.portfolios?.length ?? 0,
-    cross_edges: doc.cross_edges?.length ?? 0,
-  }
+  // See derivePortfolioCounts for the member-kind rules behind `counts.products`.
+  header.counts = derivePortfolioCounts(doc)
   header.provenance = buildProvenance(doc, opts)
   header.integrity = { algorithm: INTEGRITY_ALGORITHM, body: computeBodyChecksum(doc) }
 
@@ -589,4 +622,168 @@ export function isCanonical(text: string): boolean {
   // timestamp/source difference as non-canonical.
   const parsed = parseUpg(text)
   return text === serializeCanonical(parsed)
+}
+
+// ─── Header seal verification ───────────────────────────────────────────────
+//
+// `$upg.counts` and `$upg.integrity` are DERIVED: the serialiser computes both
+// from the body it is about to write. Until now nothing read them back, so a
+// file whose header and body had fallen out of step looked perfectly healthy to
+// every reader — `normalizeDocument` drops both fields on the way in, and the
+// in-memory document therefore has no memory of what the file CLAIMED.
+//
+// That gap is reachable without malice. Two branches each append one node to the
+// same graph; git merges the body cleanly (different array positions) but sees
+// `"nodes": 1273 → 1274` on both sides as the SAME one-line change and takes it
+// once. The merged file declares 1274 and holds 1275, with no conflict marker
+// anywhere. `upg fmt --check` catches it (byte-canonicality implies a fresh
+// header) but any reader that goes straight to the body does not.
+//
+// `checkHeaderSeal` closes that: it compares a file's header against that same
+// file's body. It is a self-consistency check on the ARTIFACT, so it needs no
+// session state and makes no claim about anyone's in-memory edits.
+
+/** One `$upg.counts` field whose declared value disagrees with the body. */
+export interface UPGHeaderCountsMismatch {
+  /** The counts key, e.g. `nodes`, `edges`, `products`, `cross_edges`. */
+  field: string
+  /** What `$upg.counts` claims (0 when the key is absent from the header). */
+  declared: number
+  /** What the body actually holds (0 when the key is not derived for this doc). */
+  actual: number
+}
+
+/** The `$upg.integrity.body` seal disagreeing with a recomputation over the body. */
+export interface UPGHeaderIntegrityMismatch {
+  /** The algorithm label the header declares, e.g. `sha256-128`. */
+  algorithm: string
+  /** The checksum recorded in `$upg.integrity.body`. */
+  declared: string
+  /** The checksum recomputed from the body as it stands. */
+  computed: string
+}
+
+/** Verdict of `checkHeaderSeal`: is a `.upg` file's header true to its own body? */
+export interface UPGHeaderSealReport {
+  /**
+   * False for a legacy flat file with no `$upg` block. Nothing was declared, so
+   * nothing can be stale: both drift arrays are empty and both `*_checked`
+   * flags are false. Never treat a headerless file as drifted.
+   */
+  header_present: boolean
+  /** True when `$upg.counts` was compared against the body. */
+  counts_checked: boolean
+  /** True when `$upg.integrity.body` was recomputed and compared. */
+  integrity_checked: boolean
+  /**
+   * Why a check was skipped despite a header being present — an unrecognised
+   * `format_version` (the body layout the seal was computed over may differ from
+   * this serialiser's), an unrecognised `integrity.algorithm`, or a missing
+   * block. Absent when everything applicable was checked.
+   */
+  skipped_reason?: string
+  /** Per-field counts disagreements. Empty when the counts are true. */
+  counts_drift: UPGHeaderCountsMismatch[]
+  /** At most one entry: the body seal is either intact or it is not. */
+  integrity_drift: UPGHeaderIntegrityMismatch[]
+}
+
+/**
+ * Compare a parsed `.upg` object's `$upg` header against its own body.
+ *
+ * Both checks are gated on `format_version` matching this serialiser's
+ * {@link UPG_CANONICAL_FORMAT_VERSION}: the counts keys and the canonical body
+ * layout are contracts OF a format version, so a file written under a different
+ * one must not be judged by this one's rules. A future format bump therefore
+ * degrades to "not checked" rather than to a wall of false positives.
+ *
+ * Pure and read-only — it neither repairs the document nor touches the file.
+ * `upg fmt` is the repair: it recomputes both fields from the body it writes.
+ *
+ * @param obj An already-parsed `.upg` document (canonical `$upg` envelope or
+ *   legacy flat). Pass the RAW parse, not a normalised document — normalisation
+ *   is what discards the header this function exists to read.
+ */
+export function checkHeaderSeal(obj: unknown): UPGHeaderSealReport {
+  const raw = obj as Record<string, unknown>
+  const header = raw?.$upg as UPGHeader | undefined
+
+  const report: UPGHeaderSealReport = {
+    header_present: !!header,
+    counts_checked: false,
+    integrity_checked: false,
+    counts_drift: [],
+    integrity_drift: [],
+  }
+  if (!header) return report
+
+  if (header.format_version !== UPG_CANONICAL_FORMAT_VERSION) {
+    report.skipped_reason =
+      `format_version "${header.format_version}" is not this serialiser's ` +
+      `"${UPG_CANONICAL_FORMAT_VERSION}"; counts keys and body layout are ` +
+      `format-version contracts, so neither seal can be judged here.`
+    return report
+  }
+
+  // Normalise once: the derivations and the checksum both operate on the
+  // in-memory document shape, exactly as the serialiser did when it stamped
+  // the header. parse → normalise → derive reproduces the write-time inputs.
+  const doc = normalizeDocument(raw)
+
+  // ── counts ────────────────────────────────────────────────────────────────
+  const declaredCounts = (header.counts ?? {}) as Record<string, unknown>
+  const actualCounts = deriveCounts(doc)
+  if (header.counts === undefined) {
+    report.skipped_reason = 'header has no `counts` block to compare.'
+  } else {
+    report.counts_checked = true
+    // Union of both key sets: a header key we no longer derive is stale in one
+    // direction (e.g. `watched_products: 1` left behind after the last watched
+    // member was removed — the serialiser omits that key at zero), and a
+    // derived key the header never mentions is stale in the other.
+    const fields = new Set([...Object.keys(declaredCounts), ...Object.keys(actualCounts)])
+    for (const field of [...fields].sort()) {
+      const declaredRaw = declaredCounts[field]
+      const declared = typeof declaredRaw === 'number' ? declaredRaw : 0
+      const actual = actualCounts[field] ?? 0
+      if (declared !== actual) report.counts_drift.push({ field, declared, actual })
+    }
+  }
+
+  // ── integrity ─────────────────────────────────────────────────────────────
+  const integrity = header.integrity
+  if (!integrity || typeof integrity.body !== 'string') {
+    report.skipped_reason = report.skipped_reason ?? 'header has no `integrity.body` seal to compare.'
+  } else if (integrity.algorithm !== INTEGRITY_ALGORITHM) {
+    // A different algorithm is not drift — we simply cannot recompute it. Say so
+    // rather than reporting a guaranteed-mismatching digest as tampering.
+    report.skipped_reason =
+      report.skipped_reason ??
+      `integrity.algorithm "${integrity.algorithm}" is not "${INTEGRITY_ALGORITHM}"; ` +
+        `the declared digest cannot be recomputed here.`
+  } else {
+    report.integrity_checked = true
+    const computed = computeBodyChecksum(doc)
+    if (computed !== integrity.body) {
+      report.integrity_drift.push({
+        algorithm: integrity.algorithm,
+        declared: integrity.body,
+        computed,
+      })
+    }
+  }
+
+  return report
+}
+
+/**
+ * Text-level form of {@link checkHeaderSeal}: strips a leading UTF-8 BOM, parses,
+ * and checks. The BOM strip mirrors the load path — editors that prepend one
+ * would otherwise make `JSON.parse` throw on a file that is otherwise valid.
+ *
+ * @throws SyntaxError when `text` is not valid JSON.
+ */
+export function checkHeaderSealText(text: string): UPGHeaderSealReport {
+  const noBom = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text
+  return checkHeaderSeal(JSON.parse(noBom))
 }
