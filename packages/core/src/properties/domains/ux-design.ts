@@ -409,6 +409,93 @@ export type SurfacePersistence = 'always' | 'conditional' | 'on_demand' | 'trans
  */
 export type SurfaceExtensibility = 'closed' | 'plugin_registerable' | 'user_configurable'
 
+/** How many instances of the surface exist, in UML multiplicity notation.
+ *
+ * `capacity` counts OCCUPANTS INSIDE one instance; `cardinality` counts the
+ * INSTANCES themselves. A slot with `capacity: 1` still says nothing about
+ * whether the product renders one such slot or forty.
+ *
+ * - `'1'` — exactly one instance, always present.
+ * - `'0..1'` — at most one; may not be rendered at all.
+ * - `'1..n'` — at least one, and more may be rendered.
+ * - `'0..n'` — any number, including none.
+ *
+ * Spelled in UML multiplicity rather than snake_case words because the notation
+ * is the lingua franca for the question and reads unambiguously in a diff. The
+ * registry already carries non-identifier enum values where the domain has its
+ * own notation (`headcount_band: '1-10'`, `openapi_version: 'v3.1'`).
+ */
+export type SurfaceCardinality = '1' | '0..1' | '1..n' | '0..n'
+
+/** What an instance of the surface is scoped to.
+ *
+ * Read with `cardinality`: together they say whether "the product has an
+ * inspector panel" is a true sentence, or whether the truth is "every document
+ * pane has its own inspector panel, and three can show different content at
+ * once". Without this, a graph asserts the former when it means the latter.
+ *
+ * - `global` — one instance serves the whole product; its state is shared.
+ * - `per_parent` — each containing surface owns its own instance with its own
+ *   state. "Parent" is the `surface_contains_surface` parent (or the
+ *   `screen_renders_surface` host when the surface sits at the top of a screen).
+ */
+export type SurfaceInstanceScope = 'global' | 'per_parent'
+
+/** How the occupants of a surface relate to one another.
+ *
+ * The three modes need genuinely different governance, and conflating them is
+ * what makes a contention check misfire:
+ *
+ * - `exclusive` — one occupant wins and the others are not rendered. This is
+ *   contention in the strict sense, and it is the mode that needs an
+ *   `arbitration_rule`.
+ * - `additive` — all occupants coexist and are rendered together. Nobody is
+ *   suppressed, so the open question is ORDER rather than victory; record the
+ *   ordering in `arbitration_rule`.
+ * - `chained` — each occupant WRAPS the next, typically by invoking a
+ *   render-default callback it is handed. Not contention but a trust model: an
+ *   occupant that never calls the callback silently deletes everything
+ *   downstream of it. Many occupants and no arbitration rule is the DESIGNED
+ *   shape here, not a defect, so `chained` is exempt from
+ *   `contended-surface-without-arbitration`.
+ *
+ * EXEMPTION IS DECLARE-TO-EARN. A surface that leaves `composition_mode` unset
+ * keeps firing the contention check: the default posture stays suspicious, and
+ * silence has to be claimed deliberately. Declaring `chained` is a factual
+ * claim about how the code composes, and claiming it falsely to quiet the check
+ * is the same category of error as filling `arbitration_rule` with a
+ * placeholder.
+ */
+export type SurfaceCompositionMode = 'exclusive' | 'additive' | 'chained'
+
+/** Whether the arbitration answer is enforced, written down, both, or neither.
+ *
+ * `arbitration_rule` is free text and its absence is meaningful, but absence
+ * alone conflates three very different situations with three very different
+ * remediations. This property separates them:
+ *
+ * - `enforced_documented` — the code enforces a rule and `arbitration_rule`
+ *   transcribes it. The healthy state.
+ * - `enforced_undocumented` — the code enforces a rule that was never written
+ *   down. Remediation is ten minutes of transcription, not a design decision.
+ * - `safe_by_coincidence` — nothing enforces anything, and the surface behaves
+ *   only because the occupants happen not to collide (disjoint enum values,
+ *   mutually exclusive conditions). The most dangerous state, because it looks
+ *   settled from the outside and breaks the first time an occupant is added.
+ * - `none` — nobody ever decided. Remediation is a design meeting.
+ *
+ * THIS IS NOT AN ESCAPE HATCH. Declaring `enforced_documented` does not by
+ * itself silence `contended-surface-without-arbitration`: the detector still
+ * requires a non-empty `arbitration_rule`, so claiming the rule is documented
+ * without documenting it changes nothing. `safe_by_coincidence` and `none`
+ * make the check fire whatever else is recorded, because both are admissions.
+ */
+export type SurfaceArbitrationState =
+  | 'enforced_documented'
+  | 'enforced_undocumented'
+  | 'safe_by_coincidence'
+  | 'none'
+
 /** A place in the UI, its occupants, and the rule that arbitrates between them.
  *
  * `screen` answers *which route is this?*; `feature_area` answers *who owns
@@ -430,6 +517,7 @@ export type SurfaceExtensibility = 'closed' | 'plugin_registerable' | 'user_conf
  *   what it draws with: `surface_renders_design_component`
  *   how it is judged: `surface_measured_by_metric`
  *   replacement: `surface_supersedes_surface`
+ *   intent-versus-reality: `surface_deviates_via_technical_debt_item`
  *
  * @example
  * const properties: SurfaceProperties = {
@@ -437,7 +525,11 @@ export type SurfaceExtensibility = 'closed' | 'plugin_registerable' | 'user_conf
  *   persistence: 'conditional',
  *   visibility_condition: 'A node is selected and the inspector is not collapsed.',
  *   capacity: 1,
+ *   cardinality: '0..n',
+ *   instance_scope: 'per_parent',
+ *   composition_mode: 'exclusive',
  *   arbitration_rule: 'The most recently selected node wins. A pinned inspector outranks selection until unpinned.',
+ *   arbitration_state: 'enforced_documented',
  *   extensibility: 'plugin_registerable',
  *   mutates_content: true,
  *   dimensional_constraint: '292px wide, fixed',
@@ -456,7 +548,16 @@ export interface SurfaceProperties {
    */
   visibility_condition?: string
   /**
-   * How many occupants the surface holds at once, as a non-negative count.
+   * How many occupants ONE INSTANCE of the surface holds at once, as a
+   * non-negative count. Count the instances themselves with `cardinality`.
+   *
+   * CAPACITY IS ALWAYS INTENT, NEVER OBSERVED BEHAVIOUR. It records the cap the
+   * design asserts, so a banner region declared `capacity: 1` keeps saying 1
+   * even after someone finds it rendering four. Reality that has drifted from
+   * the declared intent is recorded as a trackable, assignable debt item on
+   * `surface_deviates_via_technical_debt_item`, not by quietly editing this
+   * number up to match the bug. Editing it to match would destroy the only
+   * record that a gap exists.
    *
    * ABSENT MEANS UNBOUNDED. UPG has no union-typed property primitive
    * (`PropertyDefinition.type` is a single scalar kind), so the proposed
@@ -466,6 +567,24 @@ export interface SurfaceProperties {
    * "nothing may occupy this surface" (a reserved place), not "unbounded".
    */
   capacity?: number
+  /**
+   * How many instances of this surface exist. `capacity` counts occupants
+   * within one instance; this counts the instances.
+   */
+  cardinality?: SurfaceCardinality
+  /**
+   * What an instance is scoped to: one shared instance for the product, or one
+   * per containing surface. Decides whether "the product has this surface" is
+   * a true sentence or a per-parent one.
+   */
+  instance_scope?: SurfaceInstanceScope
+  /**
+   * How the occupants relate: one wins (`exclusive`), all coexist
+   * (`additive`), or each wraps the next (`chained`). Declaring `chained`
+   * exempts the surface from `contended-surface-without-arbitration`; leaving
+   * this unset does not.
+   */
+  composition_mode?: SurfaceCompositionMode
   /**
    * Who wins when more occupants want the surface than `capacity` allows, and
    * why.
@@ -477,6 +596,13 @@ export interface SurfaceProperties {
    * @example "Highest priority wins; ties break to the most recently updated."
    */
   arbitration_rule?: string
+  /**
+   * Whether the arbitration answer is enforced, written down, both, or neither.
+   * Separates "enforced in code but never transcribed" (ten minutes of typing)
+   * from "never decided" (a design meeting) from "safe only because nothing has
+   * collided yet" (the dangerous one).
+   */
+  arbitration_state?: SurfaceArbitrationState
   /** Who may add occupants to the surface. */
   extensibility?: SurfaceExtensibility
   /**

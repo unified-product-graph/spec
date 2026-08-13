@@ -812,7 +812,44 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     since: '0.27.0',
     name: 'Contended surface without arbitration',
     description:
-      'Features occupy surfaces in this graph, but at least one surface carries no arbitration_rule. A surface is a place features compete for; the arbitration rule is the recorded answer to "who wins here, and why". Left blank, that answer lives in whoever remembers the last argument.',
+      'Features occupy surfaces in this graph, and at least one surface has no recorded answer to "who wins here, and why". Either it carries no arbitration_rule and has not declared itself `chained`, or it admits through arbitration_state that the answer is absent (`none`) or accidental (`safe_by_coincidence`). Left unrecorded, that answer lives in whoever remembers the last argument.',
+    // 0.28.0 (feedback 852a9721, from a 30-surface field audit). Three changes,
+    // each earned by a reported false positive or a reported blind spot:
+    //
+    //  (a) rule-absence, EXCEPT chained. `composition_mode: 'chained'` means each
+    //      occupant wraps the next rather than competing with it. Many occupants
+    //      and no arbitration rule is the designed shape, so the reporter's 14
+    //      chained slots were 14 standing false positives — and because
+    //      `get_anti_pattern_violations_for` attributes by TYPE, they kept the
+    //      whole surface roster lit no matter how diligently the genuinely
+    //      contended surfaces were documented. The check could never be silenced
+    //      by correct modelling, which is the property a check has to have.
+    //      Exemption is DECLARE-TO-EARN: an unset `composition_mode` still fires,
+    //      so the default posture stays suspicious and silence must be claimed.
+    //  (b) `safe_by_coincidence` fires on its own, with no chained exemption. It
+    //      is the one state that a written `arbitration_rule` can mask: the field
+    //      audit found surfaces whose prose described disjoint enum values doing
+    //      the arbitrating with nothing guarding them. Branch (a) cannot see
+    //      those, because the rule text is present.
+    //  (c) `none` fires on its own too. A graph that says "nobody decided" while
+    //      carrying rule text is contradicting itself, and the admission is the
+    //      half to believe.
+    //
+    // `enforced_undocumented` deliberately gets NO branch and NO suppression. It
+    // needs none: a surface enforcing an untranscribed rule has no
+    // `arbitration_rule`, so branch (a) already fires. Nor does it earn a
+    // downgrade — severity is per-anti-pattern, not per-violation, so there is
+    // nowhere to put one; and the harm this pattern names is that the settlement
+    // is unrecorded, which is exactly what `enforced_undocumented` admits. The
+    // graph is the record; code is not. What the state buys is triage, so the
+    // remediation text below names the two costs separately.
+    //
+    // No new anti-pattern was minted for `safe_by_coincidence`. It is a value of
+    // the arbitration question, not a different question, and a second detector
+    // would fire on the same graphs and double-report through type-keyed
+    // attribution — making this family noisier on its first real deployment,
+    // which is the exact failure (a) exists to fix. If field evidence later shows
+    // it needs its own severity, mint it then.
     structured_condition: {
       operator: 'and',
       checks: [
@@ -827,19 +864,45 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
           },
         },
         {
-          check: {
-            type: 'entity_count',
-            entity_type: 'surface',
-            filter: { property: 'arbitration_rule', present: false },
-            comparison: 'nonzero',
-          },
+          operator: 'or',
+          checks: [
+            {
+              check: {
+                type: 'entity_count',
+                entity_type: 'surface',
+                filter: {
+                  property: 'arbitration_rule',
+                  present: false,
+                  except_property: 'composition_mode',
+                  except_value: 'chained',
+                },
+                comparison: 'nonzero',
+              },
+            },
+            {
+              check: {
+                type: 'entity_count',
+                entity_type: 'surface',
+                filter: { property: 'arbitration_state', value: 'safe_by_coincidence' },
+                comparison: 'nonzero',
+              },
+            },
+            {
+              check: {
+                type: 'entity_count',
+                entity_type: 'surface',
+                filter: { property: 'arbitration_state', value: 'none' },
+                comparison: 'nonzero',
+              },
+            },
+          ],
         },
       ],
     },
     why_it_matters:
-      'Contention over a UI place is settled every time it comes up, and an unrecorded settlement is re-argued at the next feature. The cost is paid in repeated decisions, not in a visible defect.',
+      'Contention over a UI place is settled every time it comes up, and an unrecorded settlement is re-argued at the next feature. The cost is paid in repeated decisions, not in a visible defect. A surface that is safe only by coincidence pays it all at once instead, the first time an occupant is added.',
     remediation:
-      'For each surface with more than one `feature_occupies_surface` edge, write the rule that settles contention into `arbitration_rule`, and record the constraint it works within (`capacity`, `dimensional_constraint`). Where a design system already answers it, link the source with `surface_governed_by_design_guideline`.',
+      'Read `arbitration_state` first: it says what the work actually is. `enforced_undocumented` means the rule already exists in code and needs transcribing into `arbitration_rule`: ten minutes, no meeting. `none` means nobody has decided and someone has to. `safe_by_coincidence` means nothing is enforcing anything and the surface only looks settled; that one wants a guard in code, not just prose. Record the constraint the rule works within (`capacity`, `dimensional_constraint`), and where a design system already answers it, link the source with `surface_governed_by_design_guideline`. Surfaces whose occupants wrap one another rather than compete should declare `composition_mode: \'chained\'`, which exempts them: that is a factual claim about how the code composes, not a way to quiet the check.',
     stages: ['build', 'beta', 'launch', 'growth', 'mature', 'maintenance'],
     severity: 'medium',
     source: { kind: 'fundamental' },
@@ -907,6 +970,102 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
 ] as const
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/**
+ * One `{ property, present, except_property, except_value }` filter declared
+ * somewhere in `UPG_ANTI_PATTERNS`, flattened for collectors.
+ *
+ * @see UPG_PRESENCE_EXCEPT_SPECS
+ */
+export interface UPGPresenceExceptSpec {
+  /** Entity type the count is taken over. */
+  entity_type: string
+  /** Property whose presence is being counted. */
+  property: string
+  /** Property that removes an entity from the counted population. */
+  except_property: string
+  /** Value of `except_property` that triggers the exclusion. */
+  except_value: string
+}
+
+/** Recursively collect except-filter specs from one condition tree. */
+function walkForExceptSpecs(
+  cond: IntelligenceCondition,
+  out: UPGPresenceExceptSpec[],
+): void {
+  if ('operator' in cond) {
+    for (const child of cond.checks) walkForExceptSpecs(child, out)
+    return
+  }
+  const check = cond.check
+  if (check.type !== 'entity_count' || !check.filter) return
+  const f = check.filter as Record<string, unknown>
+  if (
+    typeof f.property !== 'string' ||
+    typeof f.except_property !== 'string' ||
+    typeof f.except_value !== 'string'
+  ) {
+    return
+  }
+  const spec: UPGPresenceExceptSpec = {
+    entity_type: check.entity_type,
+    property: f.property,
+    except_property: f.except_property,
+    except_value: f.except_value,
+  }
+  const seen = out.some(
+    (s) =>
+      s.entity_type === spec.entity_type &&
+      s.property === spec.property &&
+      s.except_property === spec.except_property &&
+      s.except_value === spec.except_value,
+  )
+  if (!seen) out.push(spec)
+}
+
+/**
+ * Every except-qualified presence filter the catalog declares (0.28.0).
+ *
+ * A collector cannot compute joint property counts speculatively: indexing
+ * every (property, other-property, other-value) triple is quadratic in
+ * properties-per-node and would tax every `validate_graph` call to serve one
+ * detector. Nor can it derive the count arithmetically from the existing
+ * indexes, because those record marginals and the question is an intersection.
+ *
+ * So the catalog declares what it needs and collectors compute exactly that
+ * and no more. Today the list holds one entry (`surface.arbitration_rule`
+ * except `composition_mode: 'chained'`); it stays correct without maintenance
+ * because it is derived from the conditions themselves.
+ *
+ * @example
+ * UPG_PRESENCE_EXCEPT_SPECS[0]
+ * // → { entity_type: 'surface', property: 'arbitration_rule',
+ * //     except_property: 'composition_mode', except_value: 'chained' }
+ */
+export const UPG_PRESENCE_EXCEPT_SPECS: readonly UPGPresenceExceptSpec[] = (() => {
+  const out: UPGPresenceExceptSpec[] = []
+  for (const ap of UPG_ANTI_PATTERNS) {
+    if (ap.structured_condition) walkForExceptSpecs(ap.structured_condition, out)
+  }
+  return out
+})()
+
+/**
+ * Canonical key for an except-qualified presence count, shared by the
+ * collectors that build `countsByTypeAndPropertyPresenceExcept` and the
+ * evaluator that reads it. Both sides must agree, so neither spells it inline.
+ *
+ * @example
+ * presenceExceptKey('arbitration_rule', 'composition_mode', 'chained')
+ * // → "arbitration_rule!composition_mode=chained"
+ */
+export function presenceExceptKey(
+  property: string,
+  exceptProperty: string,
+  exceptValue: string,
+): string {
+  return `${property}!${exceptProperty}=${exceptValue}`
+}
 
 /**
  * Look up a curated anti-pattern by its slug id.

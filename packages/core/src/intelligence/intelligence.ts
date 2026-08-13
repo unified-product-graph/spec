@@ -30,6 +30,15 @@ export interface EntityCheck {
    * 2. `{ property, value }` (0.17.0) — count entities whose `property` equals
    *    `value`, e.g. `metric` where `designation === 'north_star'`.
    * 3. `{ status }` — count entities in a given lifecycle status.
+   * 4. `{ property, present, except_property, except_value }` (0.28.0) — form 1,
+   *    but entities whose `except_property` equals `except_value` are removed
+   *    from the counted population first. This is what lets a detector carry a
+   *    declared exemption: `surface` counts as missing an `arbitration_rule`
+   *    unless it has declared `composition_mode: 'chained'`, for which having
+   *    no rule is the designed shape rather than an omission. The exclusion is
+   *    an intersection, not a marginal, so it cannot be derived from forms 1-3;
+   *    collectors compute it from `UPG_PRESENCE_EXCEPT_SPECS`, which is derived
+   *    from these filters, and store it under `presenceExceptKey(...)`.
    */
   filter?: Record<string, unknown>
   /** Comparison operator */

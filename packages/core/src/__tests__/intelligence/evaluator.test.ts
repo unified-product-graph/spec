@@ -506,41 +506,164 @@ describe('Options + composite + stage gating', () => {
     expect(fired(ids, 'operating-function-without-north-star')).toBe(false)
   })
 
-  // ── surface (0.27.0) ──────────────────────────────────────────────────────
+  // ── surface (0.27.0, reworked 0.28.0) ─────────────────────────────────────
   // contended-surface-without-arbitration exercises the property-PRESENCE
-  // filter (`{ property, present: false }`), which the value-keyed filter
-  // cannot express: the collector only indexes values that exist, so "nobody
-  // filled this in" has to be derived from countsByType minus the presence
-  // count. These fixtures pin that derivation in both directions.
-  it('contended-surface-without-arbitration fires when features occupy surfaces that carry no arbitration_rule', () => {
+  // filter, which the value-keyed filter cannot express: the collector only
+  // indexes values that exist, so "nobody filled this in" has to be derived
+  // from countsByType minus the presence count.
+  //
+  // 0.28.0 qualifies that filter with a declared exemption
+  // (`composition_mode: 'chained'`) and adds two admission branches
+  // (`arbitration_state` of `safe_by_coincidence` / `none`). The helper below
+  // builds inputs the way a CURRENT collector would, so each test states only
+  // the surface population it cares about.
+  //
+  // The full firing matrix (rule = arbitration_rule, state = arbitration_state):
+  //
+  //   state                  rule      chained?  fires   via
+  //   ---------------------  --------  --------  ------  ------------------
+  //   (unset)                absent    no        YES     presence
+  //   (unset)                absent    YES       no      exempted
+  //   (unset)                present   either    no      -
+  //   enforced_documented    absent    no        YES     presence
+  //   enforced_documented    present   either    no      -
+  //   enforced_undocumented  absent    no        YES     presence
+  //   enforced_undocumented  present   either    no      -
+  //   safe_by_coincidence    present   either    YES     admission
+  //   none                   present   either    YES     admission
+  const surfaceInputs = (opts: {
+    total: number
+    /** Surfaces declaring composition_mode: 'chained'. */
+    chained?: number
+    /** Surfaces carrying a non-empty arbitration_rule AND not chained. */
+    ruleNotChained?: number
+    /** Surfaces carrying a non-empty arbitration_rule, chained or not. */
+    ruleAll?: number
+    /** arbitration_state value → count. */
+    states?: Record<string, number>
+    /** Omit the 0.28.0 index entirely, as a pre-0.28.0 collector would. */
+    staleCollector?: boolean
+  }) => {
     const i = emptyInputs()
-    i.totalEntityCount = 10
-    i.countsByType = { surface: 3, feature: 4 }
+    i.totalEntityCount = 10 + opts.total
+    i.countsByType = { surface: opts.total, feature: 4 }
     i.edgePresence = { [relKey('feature', 'feature_occupies_surface', 'surface')]: true }
-    // no countsByTypeAndPropertyPresence at all → all 3 surfaces read as unset
-    expect(fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')).toBe(true)
+    i.countsByTypeAndPropertyPresence = { surface: { arbitration_rule: opts.ruleAll ?? 0 } }
+    i.countsByTypeAndProperty = {
+      surface: {
+        composition_mode: { chained: opts.chained ?? 0 },
+        arbitration_state: opts.states ?? {},
+      },
+    }
+    if (!opts.staleCollector) {
+      i.countsByTypeAndPropertyPresenceExcept = {
+        surface: { 'arbitration_rule!composition_mode=chained': opts.ruleNotChained ?? 0 },
+      }
+    }
+    return i
+  }
+  const contended = (i: ReturnType<typeof surfaceInputs>) =>
+    fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')
+
+  it('fires when features occupy surfaces that carry no arbitration_rule', () => {
+    expect(contended(surfaceInputs({ total: 3 }))).toBe(true)
   })
-  it('contended-surface-without-arbitration still fires when only SOME surfaces carry a rule', () => {
-    const i = emptyInputs()
-    i.totalEntityCount = 10
-    i.countsByType = { surface: 3, feature: 4 }
-    i.edgePresence = { [relKey('feature', 'feature_occupies_surface', 'surface')]: true }
-    i.countsByTypeAndPropertyPresence = { surface: { arbitration_rule: 2 } }
-    expect(fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')).toBe(true)
+  it('still fires when only SOME surfaces carry a rule', () => {
+    expect(contended(surfaceInputs({ total: 3, ruleAll: 2, ruleNotChained: 2 }))).toBe(true)
   })
-  it('contended-surface-without-arbitration clears when every surface carries a rule', () => {
-    const i = emptyInputs()
-    i.totalEntityCount = 10
-    i.countsByType = { surface: 3, feature: 4 }
-    i.edgePresence = { [relKey('feature', 'feature_occupies_surface', 'surface')]: true }
-    i.countsByTypeAndPropertyPresence = { surface: { arbitration_rule: 3 } }
-    expect(fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')).toBe(false)
+  it('clears when every surface carries a rule', () => {
+    expect(contended(surfaceInputs({ total: 3, ruleAll: 3, ruleNotChained: 3 }))).toBe(false)
   })
-  it('contended-surface-without-arbitration clears when no feature occupies any surface', () => {
-    const i = emptyInputs()
-    i.totalEntityCount = 10
-    i.countsByType = { surface: 3, feature: 4 }
-    expect(fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')).toBe(false)
+  it('clears when no feature occupies any surface', () => {
+    const i = surfaceInputs({ total: 3 })
+    i.edgePresence = {}
+    expect(contended(i)).toBe(false)
+  })
+
+  // ── the chained exemption (the reported false positive) ────────────────────
+  it('clears when the ONLY rule-less surfaces have declared composition_mode chained', () => {
+    // The reported field case, reduced: 30 surfaces, 14 of them chained slots
+    // with many occupants and no rule BY DESIGN, the other 16 documented. Before
+    // 0.28.0 this graph could not be silenced by correct modelling at all — and
+    // because get_anti_pattern_violations_for attributes by TYPE, the 14 kept
+    // the whole surface roster lit.
+    expect(contended(surfaceInputs({ total: 30, chained: 14, ruleAll: 16, ruleNotChained: 16 })))
+      .toBe(false)
+  })
+  it('still fires when one non-chained surface remains undocumented among chained ones', () => {
+    // 30 surfaces, 14 chained, only 15 of the remaining 16 documented. The
+    // exemption must not blanket the neighbours.
+    expect(contended(surfaceInputs({ total: 30, chained: 14, ruleAll: 15, ruleNotChained: 15 })))
+      .toBe(true)
+  })
+  it('exemption is DECLARE-TO-EARN: an unset composition_mode still fires', () => {
+    // Same shape as the exempted case but with nothing declared. The default
+    // posture stays suspicious; silence has to be claimed.
+    expect(contended(surfaceInputs({ total: 30, chained: 0, ruleAll: 16, ruleNotChained: 16 })))
+      .toBe(true)
+  })
+  it('a chained surface that ALSO carries a rule does not over-credit the exemption', () => {
+    // 5 surfaces: 2 chained (1 of which also wrote a rule), 3 non-chained of
+    // which 2 wrote rules. Eligible = 3, with-rule-and-not-chained = 2, so one
+    // genuinely undocumented surface remains and the check must still fire.
+    expect(contended(surfaceInputs({ total: 5, chained: 2, ruleAll: 3, ruleNotChained: 2 })))
+      .toBe(true)
+  })
+
+  // ── arbitration_state: the admissions ──────────────────────────────────────
+  it('safe_by_coincidence fires even when every surface carries a rule', () => {
+    // The state a written rule can MASK: prose describing disjoint enum values
+    // doing the arbitrating with nothing guarding them reads as documented to
+    // the presence branch. This is the branch that catches it.
+    expect(contended(surfaceInputs({
+      total: 3, ruleAll: 3, ruleNotChained: 3, states: { safe_by_coincidence: 1 },
+    }))).toBe(true)
+  })
+  it('safe_by_coincidence fires even when the surface is chained', () => {
+    // No chained exemption on the admission branches on purpose: declaring the
+    // hazard outranks any claim about how occupants compose.
+    expect(contended(surfaceInputs({
+      total: 3, chained: 3, ruleAll: 3, ruleNotChained: 0, states: { safe_by_coincidence: 1 },
+    }))).toBe(true)
+  })
+  it('none fires even when every surface carries a rule', () => {
+    // A graph asserting "nobody decided" while carrying rule text contradicts
+    // itself. The admission is the half to believe.
+    expect(contended(surfaceInputs({
+      total: 3, ruleAll: 3, ruleNotChained: 3, states: { none: 1 },
+    }))).toBe(true)
+  })
+  it('enforced_undocumented does NOT suppress: it fires through the presence branch', () => {
+    // Enforced in code, never transcribed → no arbitration_rule → presence
+    // branch fires. The state changes the REMEDIATION (ten minutes of typing,
+    // not a design meeting), not whether the pattern is reported.
+    expect(contended(surfaceInputs({
+      total: 3, ruleAll: 0, ruleNotChained: 0, states: { enforced_undocumented: 3 },
+    }))).toBe(true)
+  })
+  it('enforced_documented does NOT silence the check on its own', () => {
+    // The escape-hatch guard. Claiming the rule is documented without writing
+    // one leaves the presence branch firing, so the enum cannot be used the way
+    // arbitration_rule's docs forbid placeholder text from being used.
+    expect(contended(surfaceInputs({
+      total: 3, ruleAll: 0, ruleNotChained: 0, states: { enforced_documented: 3 },
+    }))).toBe(true)
+  })
+  it('enforced_documented WITH a written rule clears, which is the only clean exit', () => {
+    expect(contended(surfaceInputs({
+      total: 3, ruleAll: 3, ruleNotChained: 3, states: { enforced_documented: 3 },
+    }))).toBe(false)
+  })
+
+  // ── degradation ────────────────────────────────────────────────────────────
+  it('a stale collector over-reports rather than silently under-reporting', () => {
+    // A pre-0.28.0 collector emits no except index. Reading it as zero means
+    // every eligible surface looks rule-less, so the check fires where it might
+    // not need to. For a detector whose job is noticing omissions, a false
+    // alarm is the safe failure and a missed one is not.
+    expect(contended(surfaceInputs({
+      total: 3, ruleAll: 3, ruleNotChained: 3, staleCollector: true,
+    }))).toBe(true)
   })
 
   it('surface-without-job fires when surfaces exist with no serves_job edge', () => {

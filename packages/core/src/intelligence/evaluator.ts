@@ -23,7 +23,7 @@ import type {
   UPGCuratedAntiPattern,
   UPGAntiPatternSeverity,
 } from './anti-patterns.js'
-import { UPG_ANTI_PATTERNS } from './anti-patterns.js'
+import { UPG_ANTI_PATTERNS, presenceExceptKey } from './anti-patterns.js'
 import { getBenchmark } from './benchmarks/index.js'
 import type { UPGProductStage } from './benchmarks/types.js'
 import { concernFor, concernEvaluatedFor } from './validation-profiles.js'
@@ -72,6 +72,29 @@ export interface AntiPatternInputs {
    * carries this property" rather than crashing.
    */
   countsByTypeAndPropertyPresence?: Record<string, Record<string, number>>
+
+  /**
+   * As `countsByTypeAndPropertyPresence`, but counted over a population that
+   * EXCLUDES entities carrying a declared exemption (0.28.0). Only required for
+   * anti-patterns with a `filter: { property, present, except_property,
+   * except_value }` clause (currently 1:
+   * `contended-surface-without-arbitration`, which exempts surfaces that have
+   * declared `composition_mode: 'chained'`).
+   *
+   * Shape: type → `presenceExceptKey(property, except_property, except_value)`
+   * → count of entities of that type that carry a value for `property` AND are
+   * NOT exempt. The evaluator derives the absent-and-not-exempt count from this
+   * plus `countsByType` and `countsByTypeAndProperty`, so collectors still
+   * never enumerate absences.
+   *
+   * Collectors build it by walking `UPG_PRESENCE_EXCEPT_SPECS` rather than
+   * indexing property pairs speculatively, which would be quadratic in
+   * properties-per-node for the benefit of one detector. Absent input reads as
+   * zero, which makes a stale collector OVER-report (every non-exempt entity
+   * reads as missing the property) rather than silently under-report — the safe
+   * direction for a check whose job is to notice omissions.
+   */
+  countsByTypeAndPropertyPresenceExcept?: Record<string, Record<string, number>>
 
   /**
    * Boolean presence per `(source_type, edge_type, target_type)` tuple.
@@ -317,11 +340,42 @@ function evaluateEntityCount(
   inputs: AntiPatternInputs,
 ): boolean {
   const filter = check.filter as
-    | { status?: unknown; property?: unknown; value?: unknown; present?: unknown }
+    | {
+        status?: unknown
+        property?: unknown
+        value?: unknown
+        present?: unknown
+        except_property?: unknown
+        except_value?: unknown
+      }
     | undefined
 
   let count = 0
-  if (filter && typeof filter.property === 'string' && typeof filter.present === 'boolean') {
+  if (
+    filter &&
+    typeof filter.property === 'string' &&
+    typeof filter.present === 'boolean' &&
+    typeof filter.except_property === 'string' &&
+    typeof filter.except_value === 'string'
+  ) {
+    // Except-qualified presence filter (0.28.0): as the presence filter below,
+    // but entities carrying the declared exemption are removed from BOTH sides
+    // of the subtraction first. Checked before the plain presence form because
+    // it is a strict refinement of it.
+    //
+    // eligible  = (all of type) - (those declaring the exemption)
+    // withValue = those carrying the property, exemption-holders already excluded
+    //             (the collector counts over the eligible population)
+    const key = presenceExceptKey(filter.property, filter.except_property, filter.except_value)
+    const exempt =
+      inputs.countsByTypeAndProperty?.[check.entity_type]?.[filter.except_property]?.[
+        filter.except_value
+      ] ?? 0
+    const eligible = Math.max(0, (inputs.countsByType[check.entity_type] ?? 0) - exempt)
+    const withValue =
+      inputs.countsByTypeAndPropertyPresenceExcept?.[check.entity_type]?.[key] ?? 0
+    count = filter.present ? Math.min(withValue, eligible) : Math.max(0, eligible - withValue)
+  } else if (filter && typeof filter.property === 'string' && typeof filter.present === 'boolean') {
     // Property-presence filter (0.27.0): count entities of this type that DO
     // (present: true) or DO NOT (present: false) carry a non-empty value for
     // the named property. The absence form is the one a value-keyed filter

@@ -663,9 +663,10 @@ export const UPG_EDGE_CATALOG = {
 
   // ── surface (0.27.0): the place inside a screen ─────────────────────────
   // `screen` is route-level; `surface` is the contested place within it. The
-  // ten edges below give a surface its spine (nesting), its guest list, its
+  // eleven edges below give a surface its spine (nesting), its guest list, its
   // purpose, its governing rule, its rendering vocabulary, its measurement,
-  // and its replacement path.
+  // its replacement path, and (0.28.0) the gap between what it intends and
+  // what it actually does.
   //
   // Classification adjudications, each anchored on the nearest precedent:
   //   contains        → hierarchy   (feature_area_contains_feature_area, planning_cycle_contains_planning_cycle)
@@ -701,6 +702,35 @@ export const UPG_EDGE_CATALOG = {
   surface_renders_design_component: { forward_verb: 'renders', reverse_verb: 'rendered_on', classification: 'hierarchy', source_type: 'surface', target_type: 'design_component', cross_product_eligible: true },
   surface_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'semantic', source_type: 'surface', target_type: 'metric', cross_product_eligible: true },
   surface_supersedes_surface: { forward_verb: 'supersedes', reverse_verb: 'superseded_by', classification: 'semantic', source_type: 'surface', target_type: 'surface' },
+  // ── surface, 0.28.0 addition: intent versus reality ─────────────────────────
+  // Every surface property records what the design INTENDS. `capacity: 1` on a
+  // banner region is an assertion, and a real product will eventually be found
+  // rendering four. Without somewhere to put that fact, the only ways to record
+  // it are to edit `capacity` up to 4 (which destroys the intent, and with it
+  // any evidence that a gap exists) or to leave the graph quietly wrong.
+  //
+  // This edge is the third option, and it is what lets `capacity` mean intent
+  // unconditionally: the deviation hangs off a `technical_debt_item`, which is
+  // already a trackable, assignable, prioritisable entity with an owner and a
+  // remediation cost. The gap becomes work rather than a discrepancy.
+  //
+  //   classification → cross-domain (ux_design → technical_debt). Crossing INTO
+  //     the debt domain from another ring is the established shape:
+  //     risk_manifests_as_technical_debt_item is cross-domain on exactly that
+  //     reasoning. NOT `causal`: `decision_incurs_technical_debt_item` is causal
+  //     because a decision BRINGS the debt into existence, whereas a surface
+  //     does not cause its own drift, it exhibits it. NOT `hierarchy`: that
+  //     would oblige a surface → technical_debt_item containment pair in
+  //     UPG_VALID_CHILDREN (guardrail G2b), and a surface does not own the debt
+  //     that afflicts it — service_carries_technical_debt_item can be hierarchy
+  //     because a service genuinely owns its backlog.
+  //   verbs → `deviates_via` / `causes_deviation_in`. The forward verb names
+  //     what the SOURCE does (the surface deviates), qualified by the debt that
+  //     accounts for it, so the edge key reads as the sentence it asserts. The
+  //     reverse says what the debt does to the place.
+  //   not cross_product_eligible → a deviation is a fact about one product's
+  //     code, and `surface` is not portfolio_shared in the first place.
+  surface_deviates_via_technical_debt_item: { forward_verb: 'deviates_via', reverse_verb: 'causes_deviation_in', classification: 'cross-domain', source_type: 'surface', target_type: 'technical_debt_item' },
   // Inbound. `feature_occupies_surface` is the guest list: the edge that makes
   // "what else lives here?" answerable, and the one the contention anti-pattern
   // counts. cross-domain (product_spec → ux_design), like screen_surfaces_feature
