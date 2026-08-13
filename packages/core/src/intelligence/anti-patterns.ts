@@ -799,6 +799,111 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     severity: 'medium',
     source: { kind: 'fundamental' },
   },
+
+  // ── surface (0.27.0): the place, its guest list, and its arbitration rule ──
+  // Three patterns, calibrated so the contention one leads and the two coverage
+  // companions sit a tier below it. Like every entry in this file, each detector
+  // is a WHOLE-GRAPH approximation of a per-node rule (cf. personas-without-jobs,
+  // which fires on "no persona anywhere links to a job", not per persona): the
+  // `IntelligenceCondition` language composes aggregate counts, not per-node
+  // predicates.
+  {
+    id: 'contended-surface-without-arbitration',
+    since: '0.27.0',
+    name: 'Contended surface without arbitration',
+    description:
+      'Features occupy surfaces in this graph, but at least one surface carries no arbitration_rule. A surface is a place features compete for; the arbitration rule is the recorded answer to "who wins here, and why". Left blank, that answer lives in whoever remembers the last argument.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        { check: { type: 'entity_count', entity_type: 'surface', comparison: 'nonzero' } },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'feature',
+            edge_type: 'feature_occupies_surface',
+            target_type: 'surface',
+            comparison: 'exists',
+          },
+        },
+        {
+          check: {
+            type: 'entity_count',
+            entity_type: 'surface',
+            filter: { property: 'arbitration_rule', present: false },
+            comparison: 'nonzero',
+          },
+        },
+      ],
+    },
+    why_it_matters:
+      'Contention over a UI place is settled every time it comes up, and an unrecorded settlement is re-argued at the next feature. The cost is paid in repeated decisions, not in a visible defect.',
+    remediation:
+      'For each surface with more than one `feature_occupies_surface` edge, write the rule that settles contention into `arbitration_rule`, and record the constraint it works within (`capacity`, `dimensional_constraint`). Where a design system already answers it, link the source with `surface_governed_by_design_guideline`.',
+    stages: ['build', 'beta', 'launch', 'growth', 'mature', 'maintenance'],
+    severity: 'medium',
+    source: { kind: 'fundamental' },
+  },
+
+  {
+    id: 'surface-without-job',
+    since: '0.27.0',
+    name: 'Surface without a job',
+    description:
+      'The graph has surfaces, but none links to the job it exists to serve. A surface with no job is a place that survives on precedent: it is there because it has always been there.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        { check: { type: 'entity_count', entity_type: 'surface', comparison: 'nonzero' } },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'surface',
+            edge_type: 'surface_serves_job',
+            target_type: 'job',
+            comparison: 'not_exists',
+          },
+        },
+      ],
+    },
+    why_it_matters:
+      'Without a job, there is no test for whether a surface still earns its space. Places accumulate, and the layout argument becomes a matter of taste rather than of purpose.',
+    remediation:
+      'Link each surface to the job it serves with `surface_serves_job`. A surface that cannot name one is a candidate for removal or for merging into its parent.',
+    stages: ['build', 'beta', 'launch', 'growth', 'mature'],
+    severity: 'low',
+    source: { kind: 'practitioner', attribution: 'Clayton Christensen, Jobs to Be Done' },
+  },
+
+  {
+    id: 'surface-without-measurement',
+    since: '0.27.0',
+    name: 'Surface without measurement',
+    description:
+      'The graph has surfaces, but none links to a metric. Nothing reports whether the place is used, ignored, or in the way.',
+    structured_condition: {
+      operator: 'and',
+      checks: [
+        { check: { type: 'entity_count', entity_type: 'surface', comparison: 'nonzero' } },
+        {
+          check: {
+            type: 'relationship',
+            source_type: 'surface',
+            edge_type: 'surface_measured_by_metric',
+            target_type: 'metric',
+            comparison: 'not_exists',
+          },
+        },
+      ],
+    },
+    why_it_matters:
+      'An unmeasured surface cannot be retired on evidence. It is defended by whoever built it and challenged by whoever wants its space, with no reading to settle the question.',
+    remediation:
+      'Attach the reading that would justify keeping the place with `surface_measured_by_metric`. Engagement, or the rate at which its occupants are actually invoked, is usually the honest one.',
+    stages: ['build', 'beta', 'launch', 'growth', 'mature'],
+    severity: 'low',
+    source: { kind: 'fundamental' },
+  },
 ] as const
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

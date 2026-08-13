@@ -61,6 +61,19 @@ export interface AntiPatternInputs {
   countsByTypeAndProperty?: Record<string, Record<string, Record<string, number>>>
 
   /**
+   * Per-type counts of entities that CARRY a non-empty value for a property
+   * (0.27.0). Only required for anti-patterns with a
+   * `filter: { property, present }` clause (e.g.
+   * `contended-surface-without-arbitration` counts surfaces with NO
+   * `arbitration_rule`). Shape: type → property key → count of entities of that
+   * type with a value. The evaluator derives the "absent" count by subtracting
+   * from `countsByType`, so a collector never has to enumerate absences.
+   * Absent input reads as zero, so a stale collector degrades to "nothing
+   * carries this property" rather than crashing.
+   */
+  countsByTypeAndPropertyPresence?: Record<string, Record<string, number>>
+
+  /**
    * Boolean presence per `(source_type, edge_type, target_type)` tuple.
    * Key format: `${source_type}|${edge_type}|${target_type}`.
    * `true` iff at least one edge of that exact shape exists in the graph.
@@ -304,11 +317,22 @@ function evaluateEntityCount(
   inputs: AntiPatternInputs,
 ): boolean {
   const filter = check.filter as
-    | { status?: unknown; property?: unknown; value?: unknown }
+    | { status?: unknown; property?: unknown; value?: unknown; present?: unknown }
     | undefined
 
   let count = 0
-  if (filter && typeof filter.property === 'string' && typeof filter.value === 'string') {
+  if (filter && typeof filter.property === 'string' && typeof filter.present === 'boolean') {
+    // Property-presence filter (0.27.0): count entities of this type that DO
+    // (present: true) or DO NOT (present: false) carry a non-empty value for
+    // the named property. The absence form is the one a value-keyed filter
+    // cannot express, because the collector only indexes values that exist;
+    // it is derived as (all of type) - (those carrying a value).
+    const withValue =
+      inputs.countsByTypeAndPropertyPresence?.[check.entity_type]?.[filter.property] ?? 0
+    count = filter.present
+      ? withValue
+      : Math.max(0, (inputs.countsByType[check.entity_type] ?? 0) - withValue)
+  } else if (filter && typeof filter.property === 'string' && typeof filter.value === 'string') {
     // Property-value filter (0.17.0): count entities of this type whose property
     // equals the value, e.g. metric where designation == 'north_star'.
     count = inputs.countsByTypeAndProperty?.[check.entity_type]?.[filter.property]?.[filter.value] ?? 0

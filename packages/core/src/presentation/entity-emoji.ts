@@ -276,6 +276,7 @@ export const ENTITY_EMOJI: Record<string, string> = {
   sales_motion: "🔁",
   screen: "🖥️",
   screen_state: "🔳",
+  surface: "🪟",
   security_audit: "🛃",
   security_control: "🎚️",
   security_policy: "🔐",

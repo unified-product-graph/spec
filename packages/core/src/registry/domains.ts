@@ -86,8 +86,8 @@ export const UPG_DOMAINS = [
   {
     id: 'ux_design',
     label: 'Experience Design',
-    description: 'How users experience and interact with your product. User journeys map end-to-end experiences, broken into journey steps. User flows chart navigation paths. Screens and screen states define what users see. Design questions frame open problems. Design concepts explore possible solutions. Prototypes and wireframes make ideas tangible. Connects User (who) to Product Specification (what) through Design System (how).',
-    types: ['user_journey', 'journey_step', 'journey_phase', 'journey_action', 'user_flow', 'screen', 'screen_state', 'design_question', 'design_concept', 'prototype', 'wireframe'],
+    description: 'How users experience and interact with your product. User journeys map end-to-end experiences, broken into journey steps. User flows chart navigation paths. Screens and screen states define what users see. Surfaces name the places inside a screen, who may occupy them, and the rule that settles contention. Design questions frame open problems. Design concepts explore possible solutions. Prototypes and wireframes make ideas tangible. Connects User (who) to Product Specification (what) through Design System (how).',
+    types: ['user_journey', 'journey_step', 'journey_phase', 'journey_action', 'user_flow', 'screen', 'screen_state', 'surface', 'design_question', 'design_concept', 'prototype', 'wireframe'],
   },
   {
     id: 'design_system',

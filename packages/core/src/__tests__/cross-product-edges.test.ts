@@ -255,6 +255,14 @@ const CURATED_GATE_EXCEPTIONS = [
   // deal. deal/feature/research_study are all product-local (not portfolio_shared),
   // so the curated flag overrides the type-gate — same class as the epic edges above.
   'deal_blocked_by_feature', 'research_study_analyzes_deal',
+  // 0.27.0 (feedback 20f0e46f): a surface (product graph) governed by a
+  // design_guideline (shared design-system graph). Neither endpoint type is
+  // portfolio_shared — design_system and design_component are, but
+  // design_guideline was never tagged — so the curated flag overrides the
+  // type-gate. Same class as screen_markets_product. Its two siblings,
+  // surface_renders_design_component and surface_measured_by_metric, pass the
+  // gate on their shared TARGET (design_component / metric) and need no entry.
+  'surface_governed_by_design_guideline',
 ].sort()
 
 describe('cross-product 3-state derivation (0.18.0)', () => {
@@ -277,8 +285,8 @@ describe('cross-product 3-state derivation (0.18.0)', () => {
     }
   })
 
-  it('every curated cross type classifies as scope "curated" (canonical 66 as of 0.24.0)', () => {
-    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(66)
+  it('every curated cross type classifies as scope "curated" (canonical 69 as of 0.27.0)', () => {
+    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(69)
     for (const t of UPG_CROSS_EDGE_TYPES) {
       expect(crossProductScope(t), `${t} should classify as curated`).toBe('curated')
       expect(isCuratedCrossEligible(t), `${t} should be curated-eligible`).toBe(true)

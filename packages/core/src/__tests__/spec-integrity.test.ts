@@ -368,7 +368,10 @@ describe('Edge pair uniqueness', () => {
  // 0.23.1 (feedback 27f64221) added dependency→objective {blocks (existing, the
  // dependency holds up an objective), resolved_by (new, an objective resolves the
  // dependency)} — same source/target pair, distinct relationship + verb. → 35.
- expect(multiPairs.length).toMatchInlineSnapshot(`35`)
+ // 0.27.0 (feedback 20f0e46f) added surface→surface {contains (hierarchy, the
+ // nesting spine), supersedes (semantic, a replacement place)} — same pattern as
+ // screen→screen, distinct relationship + classification. → 36.
+ expect(multiPairs.length).toMatchInlineSnapshot(`36`)
  })
 })
 

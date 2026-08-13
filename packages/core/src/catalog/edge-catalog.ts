@@ -661,6 +661,58 @@ export const UPG_EDGE_CATALOG = {
   journey_action_surfaces_need: { forward_verb: 'surfaces', reverse_verb: 'surfaced_in', classification: 'cross-domain', source_type: 'journey_action', target_type: 'need' },
   journey_action_realised_by_feature: { forward_verb: 'realised_by', reverse_verb: 'realises', classification: 'cross-domain', source_type: 'journey_action', target_type: 'feature' },
 
+  // ── surface (0.27.0): the place inside a screen ─────────────────────────
+  // `screen` is route-level; `surface` is the contested place within it. The
+  // ten edges below give a surface its spine (nesting), its guest list, its
+  // purpose, its governing rule, its rendering vocabulary, its measurement,
+  // and its replacement path.
+  //
+  // Classification adjudications, each anchored on the nearest precedent:
+  //   contains        → hierarchy   (feature_area_contains_feature_area, planning_cycle_contains_planning_cycle)
+  //   serves job      → cross-domain (ux_design → users_needs; cf. user_journey_addresses_job).
+  //                     Verb is `serves`, not `addresses`: a feature ADDRESSES a job
+  //                     (it satisfies the struggle); a surface SERVES it (it is the
+  //                     place where the job gets done). `serves`/`served_by` is an
+  //                     established house pair (service_serves_api_endpoint,
+  //                     api_endpoint_serves_feature, product_serves_account).
+  //   governed_by     → cross-domain (ux_design → design_system). The verb precedent
+  //                     design_component_governed_by_design_guideline is `hierarchy`,
+  //                     but both of its endpoints sit inside design_system; once the
+  //                     seam is crossed the catalog uses cross-domain
+  //                     (insight_informs_design_guideline). cross_product_eligible:
+  //                     the guideline usually lives in the shared design-system graph.
+  //   renders comp.   → hierarchy + cross_product_eligible, matching its direct
+  //                     sibling screen_renders_design_component verbatim.
+  //   measured_by     → semantic + cross_product_eligible. The enumerated
+  //                     *_measured_by_metric convention splits on OWNERSHIP, not on the
+  //                     verb: outcome / objective / strategic_pillar are `hierarchy`
+  //                     because those entities own their metrics as children (each has a
+  //                     UPG_VALID_CHILDREN entry to match, which the hierarchy-integrity
+  //                     guardrail enforces). A surface does not own a metric any more
+  //                     than a revenue_stream does, so it takes the `semantic` half of
+  //                     the convention (revenue_stream / cost_structure). It stays
+  //                     cross_product_eligible with the rest: a metric DEFINITION is
+  //                     portfolio_shared, so the reading it names commonly lives in the
+  //                     registry rather than in the product graph.
+  //   supersedes      → semantic (prompt_version_supersedes_prompt_version).
+  surface_contains_surface: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'surface', target_type: 'surface' },
+  surface_serves_job: { forward_verb: 'serves', reverse_verb: 'served_by', classification: 'cross-domain', source_type: 'surface', target_type: 'job' },
+  surface_governed_by_design_guideline: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'cross-domain', source_type: 'surface', target_type: 'design_guideline', cross_product_eligible: true },
+  surface_renders_design_component: { forward_verb: 'renders', reverse_verb: 'rendered_on', classification: 'hierarchy', source_type: 'surface', target_type: 'design_component', cross_product_eligible: true },
+  surface_measured_by_metric: { forward_verb: 'measured_by', reverse_verb: 'measures', classification: 'semantic', source_type: 'surface', target_type: 'metric', cross_product_eligible: true },
+  surface_supersedes_surface: { forward_verb: 'supersedes', reverse_verb: 'superseded_by', classification: 'semantic', source_type: 'surface', target_type: 'surface' },
+  // Inbound. `feature_occupies_surface` is the guest list: the edge that makes
+  // "what else lives here?" answerable, and the one the contention anti-pattern
+  // counts. cross-domain (product_spec → ux_design), like screen_surfaces_feature
+  // running the other way.
+  feature_occupies_surface: { forward_verb: 'occupies', reverse_verb: 'occupied_by', classification: 'cross-domain', source_type: 'feature', target_type: 'surface' },
+  screen_renders_surface: { forward_verb: 'renders', reverse_verb: 'rendered_by', classification: 'hierarchy', source_type: 'screen', target_type: 'surface' },
+  decision_affects_surface: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'decision', target_type: 'surface' },
+  // The finer-grained sibling of journey_step_shown_on_screen: a step happens on
+  // a PLACE, not just a route. Same semantic classification as that edge (a step
+  // is not contained by the surface; it references where it happens).
+  journey_step_occurs_on_surface: { forward_verb: 'occurs_on', reverse_verb: 'hosts', classification: 'semantic', source_type: 'journey_step', target_type: 'surface' },
+
   // 2.5 UI System Domain
   product_systematised_in_design_system: { forward_verb: 'systematised_in', reverse_verb: 'systematises', classification: 'hierarchy', source_type: 'product', target_type: 'design_system' },
   product_built_with_design_component: { forward_verb: 'built_with', reverse_verb: 'built_for', classification: 'hierarchy', source_type: 'product', target_type: 'design_component' },

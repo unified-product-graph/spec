@@ -45,6 +45,9 @@ export type UPGEntityType =
   // Experience Design
   | 'user_journey' | 'journey_step' | 'journey_phase' | 'journey_action' | 'design_question' | 'design_concept'
   | 'prototype' | 'wireframe' | 'user_flow' | 'screen' | 'screen_state'
+  // surface (0.27.0): the place inside a screen, its occupants, and the rule
+  // that arbitrates between them. Finer-grained than `screen` (route-level).
+  | 'surface'
   | 'annotation' | 'interaction_spec'
   // Design System
   | 'design_component' | 'design_token' | 'design_system' | 'design_pattern' | 'design_guideline'

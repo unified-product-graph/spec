@@ -52,9 +52,10 @@ describe('Evaluator sanity', () => {
     // should add matching fire/clear fixtures here. Stable count guard.
     // 13 original + 2 F5 enforcement + 2 operating-function (0.17.0) + 4
     // portfolio-scoped (3 foundations 0.9.13 + the 0.17.0 org-link, evaluated by
-    // portfolio_validate not here) + 1 planning-cadence (0.20.0) = 22.
-    expect(UPG_ANTI_PATTERNS.length).toBe(22)
-    expect(UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio').length).toBe(18)
+    // portfolio_validate not here) + 1 planning-cadence (0.20.0) + 3 surface
+    // (0.27.0) = 25.
+    expect(UPG_ANTI_PATTERNS.length).toBe(25)
+    expect(UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio').length).toBe(21)
   })
 
   it('empty graph produces no violations', () => {
@@ -505,6 +506,78 @@ describe('Options + composite + stage gating', () => {
     expect(fired(ids, 'operating-function-without-north-star')).toBe(false)
   })
 
+  // ── surface (0.27.0) ──────────────────────────────────────────────────────
+  // contended-surface-without-arbitration exercises the property-PRESENCE
+  // filter (`{ property, present: false }`), which the value-keyed filter
+  // cannot express: the collector only indexes values that exist, so "nobody
+  // filled this in" has to be derived from countsByType minus the presence
+  // count. These fixtures pin that derivation in both directions.
+  it('contended-surface-without-arbitration fires when features occupy surfaces that carry no arbitration_rule', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 10
+    i.countsByType = { surface: 3, feature: 4 }
+    i.edgePresence = { [relKey('feature', 'feature_occupies_surface', 'surface')]: true }
+    // no countsByTypeAndPropertyPresence at all → all 3 surfaces read as unset
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')).toBe(true)
+  })
+  it('contended-surface-without-arbitration still fires when only SOME surfaces carry a rule', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 10
+    i.countsByType = { surface: 3, feature: 4 }
+    i.edgePresence = { [relKey('feature', 'feature_occupies_surface', 'surface')]: true }
+    i.countsByTypeAndPropertyPresence = { surface: { arbitration_rule: 2 } }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')).toBe(true)
+  })
+  it('contended-surface-without-arbitration clears when every surface carries a rule', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 10
+    i.countsByType = { surface: 3, feature: 4 }
+    i.edgePresence = { [relKey('feature', 'feature_occupies_surface', 'surface')]: true }
+    i.countsByTypeAndPropertyPresence = { surface: { arbitration_rule: 3 } }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')).toBe(false)
+  })
+  it('contended-surface-without-arbitration clears when no feature occupies any surface', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 10
+    i.countsByType = { surface: 3, feature: 4 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'contended-surface-without-arbitration')).toBe(false)
+  })
+
+  it('surface-without-job fires when surfaces exist with no serves_job edge', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 10
+    i.countsByType = { surface: 2 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'surface-without-job')).toBe(true)
+  })
+  it('surface-without-job clears once a surface serves a job', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 10
+    i.countsByType = { surface: 2, job: 1 }
+    i.edgePresence = { [relKey('surface', 'surface_serves_job', 'job')]: true }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'surface-without-job')).toBe(false)
+  })
+
+  it('surface-without-measurement fires when surfaces exist with no metric edge', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 10
+    i.countsByType = { surface: 2 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'surface-without-measurement')).toBe(true)
+  })
+  it('surface-without-measurement clears once a surface is measured', () => {
+    const i = emptyInputs()
+    i.totalEntityCount = 10
+    i.countsByType = { surface: 2, metric: 1 }
+    i.edgePresence = { [relKey('surface', 'surface_measured_by_metric', 'metric')]: true }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'surface-without-measurement')).toBe(false)
+  })
+  it('both surface coverage companions are thin-graph advisory, the contention one is not', () => {
+    // They presuppose a graph big enough to expect breadth; a 3-node stub that
+    // sketched one surface has not drifted.
+    expect(isThinCoverageAdvisory('surface-without-job', THIN_GRAPH_THRESHOLD - 1)).toBe(true)
+    expect(isThinCoverageAdvisory('surface-without-measurement', THIN_GRAPH_THRESHOLD - 1)).toBe(true)
+    expect(isThinCoverageAdvisory('contended-surface-without-arbitration', THIN_GRAPH_THRESHOLD - 1)).toBe(false)
+  })
+
   it('every graph-scoped UPG_ANTI_PATTERNS id has a fire fixture in this file', () => {
     // Self-checks the per-pattern coverage above. If a pattern is added to
     // UPG_ANTI_PATTERNS without a matching test, surface here. Portfolio-scoped
@@ -531,6 +604,9 @@ describe('Options + composite + stage gating', () => {
       'planning-cycle-without-scheduled-work',
       'roadmap-feature-without-outcome-link',
       'single-domain-graph',
+      'contended-surface-without-arbitration',
+      'surface-without-job',
+      'surface-without-measurement',
       'untested-hypothesis-pile-up',
     ].sort()
     expect(ids).toEqual(expected)

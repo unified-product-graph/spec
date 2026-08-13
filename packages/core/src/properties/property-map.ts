@@ -10,7 +10,7 @@ import type { OpportunityProperties, SolutionProperties, FeasibilityStudyPropert
 import type { HypothesisProperties, HypothesisEvidenceProperties, ExperimentProperties, ExperimentPlanProperties, ExperimentRunProperties, LearningProperties, EvidenceProperties, ResearchPlanProperties } from './domains/validation.js'
 import type { CompetitorProperties, CompetitorFeatureProperties, MarketTrendProperties, MarketSegmentProperties, CompetitiveAnalysisProperties, CompetitorSignalProperties, ClassificationAxisProperties, ClassificationValueProperties, ClassificationCommitment, ClassificationCapability, ClassificationCapabilitySurface, EmptyCell, EmptyCellRationaleKind } from './domains/market.js'
 import type { ResearchStudyProperties, ParticipantProperties, ObservationProperties, QuoteProperties, AffinityClusterProperties, ResearchQuestionProperties, InterviewGuideProperties, SurveyResponseProperties } from './domains/user-research.js'
-import type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, AnnotationProperties, InteractionSpecProperties } from './domains/ux-design.js'
+import type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, SurfaceProperties, AnnotationProperties, InteractionSpecProperties } from './domains/ux-design.js'
 import type { DesignComponentProperties, DesignTokenProperties, DesignSystemProperties, DesignPatternProperties, DesignGuidelineProperties } from './domains/design-system.js'
 import type { BrandIdentityProperties, BrandColourProperties, BrandTypographyProperties, BrandVoiceProperties, BrandLogoProperties, BrandImageryProperties } from './domains/brand.js'
 import type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, UserStoryProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, RoadmapThemeProperties, ChangelogProperties, PlanningCycleProperties } from './domains/product-spec.js'
@@ -52,7 +52,7 @@ export type { OpportunityProperties, SolutionProperties, FeasibilityStudyPropert
 export type { HypothesisProperties, HypothesisEvidenceProperties, ExperimentProperties, ExperimentPlanProperties, ExperimentRunProperties, LearningProperties, EvidenceProperties, ResearchPlanProperties }
 export type { CompetitorProperties, CompetitorFeatureProperties, MarketTrendProperties, MarketSegmentProperties, CompetitiveAnalysisProperties, CompetitorSignalProperties, ClassificationAxisProperties, ClassificationValueProperties, ClassificationCommitment, ClassificationCapability, ClassificationCapabilitySurface, EmptyCell, EmptyCellRationaleKind }
 export type { ResearchStudyProperties, ParticipantProperties, ObservationProperties, QuoteProperties, AffinityClusterProperties, ResearchQuestionProperties, InterviewGuideProperties, SurveyResponseProperties }
-export type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, AnnotationProperties, InteractionSpecProperties }
+export type { UserJourneyProperties, JourneyStepProperties, JourneyPhaseProperties, JourneyActionProperties, DesignQuestionProperties, DesignConceptProperties, PrototypeProperties, WireframeProperties, UserFlowProperties, ScreenProperties, ScreenStateProperties, SurfaceProperties, AnnotationProperties, InteractionSpecProperties }
 export type { DesignComponentProperties, DesignTokenProperties, DesignSystemProperties, DesignPatternProperties, DesignGuidelineProperties }
 export type { BrandIdentityProperties, BrandColourProperties, BrandTypographyProperties, BrandVoiceProperties, BrandLogoProperties, BrandImageryProperties }
 export type { OutcomeProperties, ObjectiveProperties, KeyResultProperties, FeatureAreaProperties, FeatureProperties, EpicProperties, UserStoryProperties, StoryTaskProperties, AcceptanceCriterionProperties, ReleaseProperties, TaskProperties, BugProperties, RoadmapProperties, RoadmapItemProperties, RoadmapThemeProperties, ChangelogProperties }
@@ -234,6 +234,8 @@ export interface UPGPropertyMap {
   screen: ScreenProperties
   /** A specific UI state of a screen (empty, loading, error, etc.) */
   screen_state: ScreenStateProperties
+  /** A place in the UI, its occupants, and the rule that arbitrates between them */
+  surface: SurfaceProperties
   /** A design annotation on a screen or component */
   annotation: AnnotationProperties
   /** An interaction specification defining animation and transition behaviour */

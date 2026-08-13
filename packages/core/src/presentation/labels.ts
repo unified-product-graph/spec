@@ -625,6 +625,7 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   design_system: { alt_labels: ['component library', 'style system', 'ui kit'] },
   screen: { alt_labels: ['page', 'view', 'route', 'ui state'] },
   screen_state: { alt_labels: ['view state', 'empty state', 'loading state', 'error state'] },
+  surface: { alt_labels: ['slot', 'pane', 'region', 'zone', 'shell', 'panel', 'placement', 'ui surface'] },
 
   // Brand layer
   brand_identity: { alt_labels: ['brand', 'brand guidelines', 'brand book'] },

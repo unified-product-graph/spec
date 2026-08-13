@@ -325,7 +325,7 @@ const UX_DESIGN_GUIDE: UPGDomainUsageGuide = {
   // of a journey_step, so the step must precede the action. The journey is the
   // anchor; phases are the band overlay; steps are the timeline; actions
   // decompose a step into service-blueprint rows.
-  creation_sequence: ['user_journey', 'journey_phase', 'journey_step', 'journey_action', 'screen', 'screen_state', 'user_flow', 'wireframe', 'prototype', 'design_question', 'design_concept'],
+  creation_sequence: ['user_journey', 'journey_phase', 'journey_step', 'journey_action', 'screen', 'screen_state', 'surface', 'user_flow', 'wireframe', 'prototype', 'design_question', 'design_concept'],
   patterns: [
     {
       name: 'Journey to Screen Flow',
@@ -333,14 +333,22 @@ const UX_DESIGN_GUIDE: UPGDomainUsageGuide = {
       entity_types: ['user_journey', 'journey_step', 'screen', 'prototype'],
       edge_chain: ['persona_experiences_user_journey', 'user_journey_contains_journey_step', 'journey_step_shown_on_screen', 'prototype_simulates_screen'],
     },
+    {
+      name: 'Surface Contention',
+      description: 'A screen renders surfaces, features occupy them, and the surface records the rule that settles who wins. Nest the place (shell, pane, region, slot), list the occupants, then write the arbitration rule down once so it is not re-argued at the next feature.',
+      entity_types: ['screen', 'surface', 'feature'],
+      edge_chain: ['screen_renders_surface', 'surface_contains_surface', 'feature_occupies_surface', 'surface_serves_job'],
+    },
   ],
   required_bridges: [
     { edge_type: 'persona_experiences_user_journey', target_domain: 'user', when: 'Every journey must be anchored to a persona' },
+    { edge_type: 'feature_occupies_surface', target_domain: 'product_spec', when: 'A surface should list the features that occupy it; the guest list is what makes contention visible' },
     { edge_type: 'prototype_tests_hypothesis', target_domain: 'validation', when: 'Prototypes should test design hypotheses before building' },
     { edge_type: 'screen_surfaces_feature', target_domain: 'product_spec', when: 'Screens should connect to the features they surface' },
   ],
   anti_patterns: [
     { description: 'Screens without journeys: isolated screens miss the experience context' },
+    { description: 'Surfaces without an arbitration rule: a place two features both want, with no recorded answer for who wins, is a decision that gets made again every time it comes up. Fill `arbitration_rule`, or link the design guideline that already answers it via surface_governed_by_design_guideline.' },
     { description: 'Prototypes without testing: if nobody tests the prototype, it is just art' },
     { description: 'Design questions left open: exploration status should progress to resolved or parked' },
     { description: 'Touchpoints stuffed in the deprecated journey_step.touchpoint string. Touchpoints belong in one of two layers: journey_action is the in-product blueprint layer (the finest band of a journey_step), and the touchpoint entity is the cross-channel customer-success layer (touchpoint_occurs_in_journey_step). Pick the layer; do not duplicate the touch as a free-text string.' },

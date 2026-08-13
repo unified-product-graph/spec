@@ -688,6 +688,10 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "leaf",
       },
       {
+        type: "surface",
+        role: "container",
+      },
+      {
         type: "wireframe",
         role: "leaf",
       },
@@ -796,11 +800,23 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "design_system_contains_design_component",
       "brand_identity_coloured_with_brand_colour",
       "design_component_composes_design_component",
+      "screen_renders_surface",
+      "surface_contains_surface",
     ],
     boundary_edges: [
       {
         direction: "import",
         edge_id: "need_reframed_as_design_question",
+        crosses_into: "users_needs",
+      },
+      {
+        direction: "import",
+        edge_id: "feature_occupies_surface",
+        crosses_into: "product_delivery",
+      },
+      {
+        direction: "export",
+        edge_id: "surface_serves_job",
         crosses_into: "users_needs",
       },
       {

@@ -1,7 +1,7 @@
 /**
  * UPG Property Schemas: UX Design Domain.
  * UserJourney, JourneyStep, DesignQuestion, DesignConcept, Prototype,
- * Wireframe, UserFlow, Screen, ScreenState, Annotation, InteractionSpec.
+ * Wireframe, UserFlow, Screen, ScreenState, Surface, Annotation, InteractionSpec.
  * https://unifiedproductgraph.org/spec | MIT
  */
 
@@ -366,6 +366,132 @@ export interface ScreenStateProperties {
   condition?: string
   /** User-visible copy */
   message?: string
+}
+
+/** Structural kind of a surface. Determines what may legally nest inside it
+ * (see `UPG_VALID_CHILDREN.surface` and `surface_contains_surface`).
+ *
+ * - `shell` — the outermost frame a product renders into (window chrome, app shell).
+ * - `tool` — a self-contained working environment hosted by the shell (a canvas, an editor).
+ * - `pane` — a resizable division of a tool or shell (sidebar, inspector, split view).
+ * - `region` — a named zone inside a pane with its own layout rules (header, body, footer).
+ * - `slot` — a single addressable insertion point that holds one occupant at a time.
+ * - `gutter` — a narrow margin rail alongside content (line numbers, field affordances).
+ * - `action_bar` — a strip that collects invocable controls (toolbar, footer bar, command row).
+ * - `overlay` — a surface drawn above the stack, temporarily taking focus (modal, popover, sheet).
+ * - `ambient` — a non-focus-taking surface that reports state (toast rail, status line, presence layer).
+ */
+export type SurfaceKind =
+  | 'shell'
+  | 'tool'
+  | 'pane'
+  | 'region'
+  | 'slot'
+  | 'gutter'
+  | 'action_bar'
+  | 'overlay'
+  | 'ambient'
+
+/** How reliably a surface is present.
+ *
+ * - `always` — rendered in every state of its parent.
+ * - `conditional` — rendered when `visibility_condition` holds.
+ * - `on_demand` — rendered only after the user invokes it.
+ * - `transient` — appears and self-dismisses without user action.
+ */
+export type SurfacePersistence = 'always' | 'conditional' | 'on_demand' | 'transient'
+
+/** Who may add occupants to a surface.
+ *
+ * - `closed` — the occupant set is fixed by the product team.
+ * - `plugin_registerable` — extensions may register occupants through a published contract.
+ * - `user_configurable` — the end user chooses what occupies it.
+ */
+export type SurfaceExtensibility = 'closed' | 'plugin_registerable' | 'user_configurable'
+
+/** A place in the UI, its occupants, and the rule that arbitrates between them.
+ *
+ * `screen` answers *which route is this?*; `feature_area` answers *who owns
+ * this?*; `bounded_context` answers *what architecture is this?*. None of them
+ * answer *what else occupies the same place, and who wins when two things want
+ * it?* A `surface` is that place: the shell, tool, pane, slot, gutter, action
+ * bar, or overlay that features compete to occupy. Contention over UI places is
+ * decided constantly and, when the decision lives only in prose, rediscovered
+ * forever. Recording the place as an entity makes the guest list queryable and
+ * the arbitration rule durable.
+ *
+ * Per UPG principle P14, structural relationships are edges:
+ *   nesting: `surface_contains_surface` (the spine; legality is constrained by
+ *     `surface_kind` via `UPG_VALID_CHILDREN`)
+ *   the guest list: `feature_occupies_surface` (inbound; the most important edge)
+ *   the host screen: `screen_renders_surface` (inbound)
+ *   purpose: `surface_serves_job`
+ *   the governing rule: `surface_governed_by_design_guideline`
+ *   what it draws with: `surface_renders_design_component`
+ *   how it is judged: `surface_measured_by_metric`
+ *   replacement: `surface_supersedes_surface`
+ *
+ * @example
+ * const properties: SurfaceProperties = {
+ *   surface_kind: 'pane',
+ *   persistence: 'conditional',
+ *   visibility_condition: 'A node is selected and the inspector is not collapsed.',
+ *   capacity: 1,
+ *   arbitration_rule: 'The most recently selected node wins. A pinned inspector outranks selection until unpinned.',
+ *   extensibility: 'plugin_registerable',
+ *   mutates_content: true,
+ *   dimensional_constraint: '292px wide, fixed',
+ * }
+ */
+export interface SurfaceProperties {
+  /** Structural kind. Determines what may legally nest inside this surface. */
+  surface_kind?: SurfaceKind
+  /** How reliably the surface is present. */
+  persistence?: SurfacePersistence
+  /**
+   * When the surface appears, in plain language. Pairs with
+   * `persistence: 'conditional'`, which states *that* it is conditional; this
+   * states *what* the condition is.
+   * @example "A node is selected", "Only for workspace admins"
+   */
+  visibility_condition?: string
+  /**
+   * How many occupants the surface holds at once, as a non-negative count.
+   *
+   * ABSENT MEANS UNBOUNDED. UPG has no union-typed property primitive
+   * (`PropertyDefinition.type` is a single scalar kind), so the proposed
+   * `integer | unbounded` shape is expressed as an optional number whose
+   * absence carries the "no cap" reading, rather than a magic sentinel value
+   * that every consumer would have to special-case. `0` is a real cap meaning
+   * "nothing may occupy this surface" (a reserved place), not "unbounded".
+   */
+  capacity?: number
+  /**
+   * Who wins when more occupants want the surface than `capacity` allows, and
+   * why.
+   *
+   * ABSENCE IS MEANINGFUL: a null or empty `arbitration_rule` on a contested
+   * surface means nobody decided, which is exactly what the
+   * `contended-surface-without-arbitration` anti-pattern detects. Do not fill
+   * this in with a placeholder to silence the check.
+   * @example "Highest priority wins; ties break to the most recently updated."
+   */
+  arbitration_rule?: string
+  /** Who may add occupants to the surface. */
+  extensibility?: SurfaceExtensibility
+  /**
+   * Whether occupying this surface can change the underlying content, as
+   * opposed to only selecting or revealing it. The selector-versus-mutator
+   * distinction: a gutter that toggles a value is a mutator, a gutter that
+   * jumps the cursor is not.
+   */
+  mutates_content?: boolean
+  /**
+   * The hard spatial budget the surface imposes on its occupants, in whatever
+   * unit the design system speaks.
+   * @example "292px wide", "25px per field", "two grid columns"
+   */
+  dimensional_constraint?: string
 }
 
 /** Design annotation on a screen.

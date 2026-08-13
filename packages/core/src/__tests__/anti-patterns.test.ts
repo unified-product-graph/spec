@@ -61,9 +61,9 @@ function walkCondition(cond: IntelligenceCondition | undefined, fn: (leaf: objec
 // ─── Per-rule integrity ──────────────────────────────────────────────────────
 
 describe('UPG_ANTI_PATTERNS shape', () => {
-  it('contains 13–22 entries (ticket scope + F5 enforcement + 0.9.13 foundations + 0.17.0 operating + 0.20.0 planning cadence)', () => {
+  it('contains 13–25 entries (ticket scope + F5 enforcement + 0.9.13 foundations + 0.17.0 operating + 0.20.0 planning cadence + 0.27.0 surface)', () => {
     expect(UPG_ANTI_PATTERNS.length).toBeGreaterThanOrEqual(13)
-    expect(UPG_ANTI_PATTERNS.length).toBeLessThanOrEqual(22)
+    expect(UPG_ANTI_PATTERNS.length).toBeLessThanOrEqual(25)
   })
 
   it('scope is graph (default) or portfolio, and the two carry conditions consistently', () => {
@@ -206,10 +206,13 @@ describe('Helpers', () => {
 // ─── Cross-cutting ───────────────────────────────────────────────────────────
 
 describe('Coverage', () => {
-  it('the curated set spans high + medium severity tiers', () => {
+  it('the curated set spans all three severity tiers', () => {
     const severities = new Set(UPG_ANTI_PATTERNS.map((ap) => ap.severity))
     expect(severities.has('high')).toBe(true)
     expect(severities.has('medium')).toBe(true)
+    // `low` entries exist since 0.21.x and grew two surface companions in
+    // 0.27.0; the paper's §3.8 claims three tiers, so the test guards three.
+    expect(severities.has('low')).toBe(true)
   })
 
   it('the curated set spans both leaf and compound conditions', () => {

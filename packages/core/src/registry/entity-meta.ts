@@ -229,6 +229,11 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'user_flow', type_id: 'ent_068', maturity: 'stable', since: '0.1.0' },
   { name: 'screen', type_id: 'ent_069', maturity: 'stable', since: '0.1.0' },
   { name: 'screen_state', type_id: 'ent_070', maturity: 'stable', since: '0.1.0' },
+  // surface (0.27.0): the place inside a screen. `screen` is route-level
+  // (route / viewport / access_level); `surface` is the contested slot within
+  // it, carrying its occupants and the rule that arbitrates between them.
+  // Enters `proposed` per the maturity rubric (precedent: planning_cycle 0.20.0).
+  { name: 'surface', type_id: 'ent_359', maturity: 'proposed', since: '0.27.0' },
   { name: 'journey_phase', type_id: 'ent_330', maturity: 'proposed', since: '0.2.0' },
   { name: 'journey_action', type_id: 'ent_331', maturity: 'proposed', since: '0.2.0' },
   { name: 'design_decision', type_id: 'ent_319', maturity: 'deprecated', since: '0.2.0', deprecated_in: '0.2.0', replacement: 'decision' },

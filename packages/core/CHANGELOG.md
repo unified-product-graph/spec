@@ -7,6 +7,22 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.27.0] - 2026-08-12
+
+**A `surface` entity gives the UI a place: what occupies it, and who wins when two things want it.** The catalog could say who OWNS a thing (`feature_area`) and what ARCHITECTURE it belongs to (`bounded_context`), but nothing answered *what else occupies the same place?*. `screen` is route-level (route / viewport / access_level) and too coarse for a shell, a pane, a slot, a field gutter, an action bar, or an overlay. Those places are contested, and the arbitration rule is decided constantly and then rediscovered forever, because prose is where it lands. `surface` records the place, its guest list, and the rule. Additive; no breaking change.
+
+### Added
+- **`surface` entity** (`proposed`, `ent_359`) — a place in the UI, in the `ux_design` domain beside `screen`. Reached through the screen that renders it and self-nesting from there (shell holds panes, panes hold regions, regions hold slots). Lifecycle `draft → in_design → built → shipped → deprecated`, shared verbatim with `screen` so a screen and the surfaces inside it report progress on one vocabulary. Eight properties: `surface_kind` (shell / tool / pane / region / slot / gutter / action_bar / overlay / ambient), `persistence`, `visibility_condition`, `capacity`, `arbitration_rule`, `extensibility`, `mutates_content`, `dimensional_constraint`.
+- **Ten surface edges.** Outbound: `surface_contains_surface` (hierarchy, the nesting spine), `surface_serves_job` (cross-domain), `surface_governed_by_design_guideline` (cross-domain, cross-product-eligible), `surface_renders_design_component` (hierarchy, cross-product-eligible), `surface_measured_by_metric` (semantic, cross-product-eligible), `surface_supersedes_surface` (semantic). Inbound: `feature_occupies_surface` (cross-domain, the guest list), `screen_renders_surface` (hierarchy), `decision_affects_surface` (cross-domain), `journey_step_occurs_on_surface` (semantic, the finer-grained sibling of `journey_step_shown_on_screen`).
+- **Three anti-patterns.** `contended-surface-without-arbitration` (medium) fires when features occupy surfaces and at least one carries no `arbitration_rule`. `surface-without-job` and `surface-without-measurement` (low, both thin-graph advisory) are its coverage companions.
+- **Property-presence filter on `EntityCheck`** — `filter: { property, present }` counts entities that do or do not carry a value for a named property, backed by a new optional `countsByTypeAndPropertyPresence` input. The pre-existing value-keyed filter cannot express absence, because a collector only indexes values that exist; without this, a detector keyed on an unfilled field could never fire.
+
+### Notes
+- `surface_measured_by_metric` is `semantic`, not `hierarchy`. The `*_measured_by_metric` convention splits on ownership: `outcome` / `objective` / `strategic_pillar` are `hierarchy` because they own their metrics as children, and each carries a matching `UPG_VALID_CHILDREN` entry. A surface owns no metric, so it takes the `revenue_stream` / `cost_structure` half of the convention.
+- `capacity` is a plain optional number whose ABSENCE means unbounded. `PropertyDefinition.type` is a single scalar kind with no union form, so a sentinel value was the alternative, and a sentinel every consumer must special-case is worse than a documented absence.
+
+---
+
 ## [0.20.1] - 2026-07-04
 
 **Three edges close the alignment-sheet seam: an initiative can now reach directly into the OKR ladder and the roadmap, and a strategic pillar gets its own north-star metric.** Composed flat region surfaces spanning org/team/product altitudes surfaced two gaps in the strategic cascade: an initiative's only path to a key result or a roadmap theme ran through its parent `strategic_theme`, and `strategic_pillar` — durable, multi-year, org-wide — had no measuring metric of its own, unlike every other rung of the cascade (`objective_measured_by_metric`, `key_result_quantified_by_metric`). Additive; no breaking change.

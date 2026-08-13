@@ -12,7 +12,7 @@
  * wall-clock timestamp: generation is deterministic). This file is a GATED
  * artifact — check:generated re-runs the generator and fails on any drift, so
  * edit the sources above, never this file.
- * Entity types with properties: 323
+ * Entity types with properties: 324
  */
 
 export interface PropertyDefinition {
@@ -2732,6 +2732,17 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     signal_sentiment: { type: 'string', enum: ['positive', 'neutral', 'negative', 'mixed'], description: 'Detected sentiment of the customer\'s message' },
     signal_channel: { type: 'string', description: 'Channel through which the signal was received' },
     signal_urgency: { type: 'string', enum: ['low', 'medium', 'high', 'critical'], description: 'Perceived urgency of the customer\'s request' },
+  },
+  // SurfaceProperties: A place in the UI, its occupants, and the rule that arbitrates between them.
+  surface: {
+    surface_kind: { type: 'string', enum: ['shell', 'tool', 'pane', 'region', 'slot', 'gutter', 'action_bar', 'overlay', 'ambient'], description: 'Structural kind. Determines what may legally nest inside this surface.' },
+    persistence: { type: 'string', enum: ['always', 'conditional', 'on_demand', 'transient'], description: 'How reliably the surface is present.' },
+    visibility_condition: { type: 'string', description: 'When the surface appears, in plain language. Pairs with `persistence: \'conditional\'`, which states *that* it is conditional; this states *what* the condition is. @example "A node is selected", "Only for workspace admins"' },
+    capacity: { type: 'number', description: 'How many occupants the surface holds at once, as a non-negative count. ABSENT MEANS UNBOUNDED. UPG has no union-typed property primitive (`PropertyDefinition.type` is a single scalar kind), so the proposed `integer | unbounded` shape is expressed as an optional number whose absence carries the "no cap" reading, rather than a magic sentinel value that every consumer would have to special-case. `0` is a real cap meaning "nothing may occupy this surface" (a reserved place), not "unbounded".' },
+    arbitration_rule: { type: 'string', description: 'Who wins when more occupants want the surface than `capacity` allows, and why. ABSENCE IS MEANINGFUL: a null or empty `arbitration_rule` on a contested surface means nobody decided, which is exactly what the `contended-surface-without-arbitration` anti-pattern detects. Do not fill this in with a placeholder to silence the check. @example "Highest priority wins; ties break to the most recently updated."' },
+    extensibility: { type: 'string', enum: ['closed', 'plugin_registerable', 'user_configurable'], description: 'Who may add occupants to the surface.' },
+    mutates_content: { type: 'boolean', description: 'Whether occupying this surface can change the underlying content, as opposed to only selecting or revealing it. The selector-versus-mutator distinction: a gutter that toggles a value is a mutator, a gutter that jumps the cursor is not.' },
+    dimensional_constraint: { type: 'string', description: 'The hard spatial budget the surface imposes on its occupants, in whatever unit the design system speaks. @example "292px wide", "25px per field", "two grid columns"' },
   },
   // SurveyResponseProperties: Aggregated survey response data.
   survey_response: {

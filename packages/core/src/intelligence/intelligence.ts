@@ -17,7 +17,20 @@ export interface EntityCheck {
   type: 'entity_count'
   /** The UPG entity type to count */
   entity_type: UPGEntityType
-  /** Optional property filter (e.g. { status: 'untested' }) */
+  /**
+   * Optional filter narrowing which entities of `entity_type` are counted.
+   * Three recognised forms, checked in this order:
+   *
+   * 1. `{ property, present }` (0.27.0) — count entities whose `property`
+   *    carries a non-empty value (`present: true`) or does NOT
+   *    (`present: false`). The absence form is what lets a pattern key on a
+   *    field nobody filled in, e.g. a `surface` with no `arbitration_rule`.
+   *    A value-keyed filter cannot express absence, because the collector only
+   *    indexes values that exist.
+   * 2. `{ property, value }` (0.17.0) — count entities whose `property` equals
+   *    `value`, e.g. `metric` where `designation === 'north_star'`.
+   * 3. `{ status }` — count entities in a given lifecycle status.
+   */
   filter?: Record<string, unknown>
   /** Comparison operator */
   comparison: 'eq' | 'gt' | 'lt' | 'gte' | 'lte' | 'zero' | 'nonzero'

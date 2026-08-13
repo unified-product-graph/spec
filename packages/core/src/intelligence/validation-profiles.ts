@@ -121,6 +121,13 @@ export const COVERAGE_ANTI_PATTERNS: ReadonlySet<string> = new Set([
   'single-domain-graph',
   'persona-count-below-stage-benchmark',
   'competitors-missing-past-validation',
+  // surface companions (0.27.0): both presuppose the graph has grown past the
+  // point where a place is worth justifying and measuring. A stub that has
+  // sketched one surface has not yet drifted. `contended-surface-without-
+  // arbitration` is deliberately NOT here: it only fires once features actually
+  // occupy surfaces, which is itself the evidence that the graph has grown.
+  'surface-without-job',
+  'surface-without-measurement',
 ])
 
 /** A graph with fewer than this many entities is treated as too thin to grade on

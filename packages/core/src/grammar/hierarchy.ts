@@ -395,7 +395,24 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'design_component', 'design_token', 'design_guideline', 'brand_identity',
     'user_journey', 'user_flow', 'insight',
   ],
-  screen: ['screen_state', 'screen', 'design_component', 'wireframe'], // self-nesting + components + wireframes
+  screen: ['screen_state', 'screen', 'surface', 'design_component', 'wireframe'], // self-nesting + surfaces + components + wireframes
+
+  // surface (0.27.0): the place inside a screen. Self-nests, so a shell holds
+  // panes, a pane holds regions, a region holds slots. A surface is reached
+  // through the screen that renders it (`screen: [... 'surface']`), never as a
+  // top-level product child: every UPG_VALID_CHILDREN pair must be backed by a
+  // hierarchy-classified edge (guardrail G2b), and the ratified ten do not
+  // include a product-to-surface verb. An app-shell surface therefore hangs off
+  // the screen that mounts it.
+  //
+  // NOTE: `surface_kind` narrows this further than UPG_VALID_CHILDREN can
+  // express. UPG_VALID_CHILDREN is keyed on entity TYPE, so it can only say
+  // "a surface may contain a surface"; the kind ordering (shell > tool > pane >
+  // region > slot / gutter / action_bar, with overlay and ambient parented by
+  // whatever raises them) is a property-level rule documented on `SurfaceKind`
+  // and enforced by validators, not by this table. Precedent: the same split
+  // applies to `planning_cycle`, whose `cadence_kind` narrows its self-nesting.
+  surface: ['surface', 'design_component'],
 
   // ── Marketing & Communications hierarchy ────────────────────────────────────
   marketing_strategy: [

@@ -1445,6 +1445,68 @@ const SCREEN_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
+/**
+ * surface (Experience Design domain)
+ *
+ * The same build-pipeline chain as `screen`, deliberately. A surface is the
+ * same kind of artefact one level finer: a place that gets named, designed,
+ * implemented, shipped, and eventually retired. Adopting SCREEN_LIFECYCLE's
+ * phases verbatim means a screen and the surfaces inside it report progress on
+ * one shared vocabulary, so "which parts of this screen are still in design?"
+ * is answerable without translating between two ladders. MATURITY
+ * (alpha/beta/ga) was rejected for `screen` in Q3 for the same reason
+ * it is rejected here: it measures how proven a concept is, not where the thing
+ * sits in the pipeline. Retirement pairs with `surface_supersedes_surface`,
+ * which names the replacement.
+ */
+const SURFACE_LIFECYCLE: UPGLifecycle = {
+  entity_type: 'surface',
+  initial_phase: 'draft',
+  terminal_phases: ['deprecated'],
+  phases: [
+    {
+      id: 'draft',
+      status_category: 'started',
+      label: 'Draft',
+      description:
+        'The surface is a rough idea: named and scoped, but not yet worked in a design tool. Its occupants and arbitration rule are usually still undecided.',
+      transitions_to: ['in_design'],
+    },
+    {
+      id: 'in_design',
+      status_category: 'started',
+      label: 'In Design',
+      description:
+        'The surface is being designed: its dimensions, occupants, and arbitration rule are being settled. May fall back to `draft` if the approach is rethought from scratch.',
+      transitions_to: ['built', 'draft'],
+    },
+    {
+      id: 'built',
+      status_category: 'started',
+      label: 'Built',
+      description:
+        'The surface has been implemented in code. It exists in a build but is not yet live for users. May return to `in_design` if implementation surfaces a layout or contention gap.',
+      transitions_to: ['shipped', 'in_design'],
+    },
+    {
+      id: 'shipped',
+      status_category: 'completed',
+      label: 'Shipped',
+      description:
+        'The surface is live in production and reachable by users. Its occupants are the real guest list.',
+      transitions_to: ['deprecated'],
+    },
+    {
+      id: 'deprecated',
+      status_category: 'completed',
+      label: 'Deprecated',
+      description:
+        'The surface has been retired. Its occupants have moved elsewhere, or a replacement has taken the place; record the replacement with `surface_supersedes_surface`.',
+      transitions_to: [],
+    },
+  ],
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Engineering & Operations
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3167,6 +3229,7 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
   DESIGN_CONCEPT_LIFECYCLE,
   BRAND_IDENTITY_LIFECYCLE,
   SCREEN_LIFECYCLE,
+  SURFACE_LIFECYCLE,
 
   // Engineering & Operations
   SERVICE_LIFECYCLE,
