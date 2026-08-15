@@ -285,7 +285,7 @@ const PRODUCT_SPEC_GUIDE: UPGDomainUsageGuide = {
   // registered to product_spec but missing from the navigation order).
   // `changelog` lives here because it is a structural product-shipping
   // artefact; content domain references it only via cross-domain bridges.
-  creation_sequence: ['feature_area', 'feature', 'epic', 'user_story', 'acceptance_criterion', 'task', 'bug', 'release', 'roadmap', 'roadmap_item', 'roadmap_theme', 'changelog', 'planning_cycle'],
+  creation_sequence: ['feature_area', 'feature', 'epic', 'user_story', 'acceptance_criterion', 'task', 'bug', 'release', 'roadmap', 'roadmap_item', 'roadmap_theme', 'changelog', 'planning_cycle', 'configuration_axis'],
   patterns: [
     {
       name: 'Feature Decomposition',

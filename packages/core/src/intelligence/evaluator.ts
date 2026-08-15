@@ -131,7 +131,7 @@ export interface AntiPatternInputs {
    * collector that omits it loses attribution and changes no verdict.
    *
    * Bounded by declaration, like every other spec-driven input here: the whole
-   * catalog declares five filters, so this is a handful of predicate
+   * catalog declares four filters, so this is a handful of predicate
    * evaluations per node rather than an index over every property.
    */
   nodesByEntityFilter?: Record<string, string[]>

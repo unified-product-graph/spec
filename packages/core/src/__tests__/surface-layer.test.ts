@@ -6,7 +6,7 @@
  * `bounded_context` answers what ARCHITECTURE it belongs to; neither answers
  * "what else occupies the same place?". `screen` is route-level and too coarse
  * for the question. This suite pins the entity, its twelve properties, the
- * eleven edges with their adjudicated classifications, the nesting grammar, the
+ * thirteen edges with their adjudicated classifications, the nesting grammar, the
  * lifecycle, and the three anti-patterns.
  *
  * 0.28.0 adds four field-data properties (`cardinality`, `instance_scope`,
@@ -172,7 +172,7 @@ describe('surface properties (eight ratified, four added by field data)', () => 
 
 // ─── The ten edges ───────────────────────────────────────────────────────────
 
-describe('the eleven surface edges', () => {
+describe('the thirteen surface edges', () => {
   // key → [source, target, forward, reverse, classification]
   const EXPECTED: Record<string, [string, string, string, string, string]> = {
     surface_contains_surface: ['surface', 'surface', 'contains', 'belongs_to', 'hierarchy'],
@@ -186,9 +186,18 @@ describe('the eleven surface edges', () => {
     decision_affects_surface: ['decision', 'surface', 'affects', 'affected_by', 'cross-domain'],
     journey_step_occurs_on_surface: ['journey_step', 'surface', 'occurs_on', 'hosts', 'semantic'],
     surface_deviates_via_technical_debt_item: ['surface', 'technical_debt_item', 'deviates_via', 'causes_deviation_in', 'cross-domain'],
+    // 0.30.0: composition that varies by configuration.
+    surface_varies_by_configuration_axis: ['surface', 'configuration_axis', 'varies_by', 'varies', 'cross-domain'],
+    // Semantic, alongside `supersedes`: neither surface owns the other, and a
+    // hierarchy classification would demand a UPG_VALID_CHILDREN pair that is
+    // false. Reverse verb equals forward verb because alternation is symmetric;
+    // the direction convention (source is the surface under the axis default)
+    // is guidance, deliberately not a validator check, since an axis with no
+    // default is legal modelling.
+    surface_alternates_with_surface: ['surface', 'surface', 'alternates_with', 'alternates_with', 'semantic'],
   }
 
-  it('registers exactly eleven, and no more', () => {
+  it('registers exactly thirteen, and no more', () => {
     const surfaceEdges = Object.entries(cat)
       .filter(([, d]) => d.source_type === 'surface' || d.target_type === 'surface')
       .map(([k]) => k)

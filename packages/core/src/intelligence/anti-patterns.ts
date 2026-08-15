@@ -1320,10 +1320,17 @@ function walkForEntityFilterSpecs(
  * Every `entity_count` filter the catalog declares (0.29.0), so collectors can
  * record which nodes matched each one without indexing the whole graph.
  *
- * The catalog declares five filters in total, which is what makes per-node
- * attribution affordable here: a handful of predicate evaluations per node,
- * rather than an id list for every (type, property, value) triple that happens
- * to exist in the data.
+ * The catalog declares FOUR filters in total (one status form, three value
+ * forms), which is what makes per-node attribution affordable here: a handful
+ * of predicate evaluations per node, rather than an id list for every (type,
+ * property, value) triple that happens to exist in the data.
+ *
+ * Note there is no `present` form among them since 0.29.0, when the contention
+ * branch moved to `EdgeCountVsPropertyCheck`. The only `present: false` left in
+ * the catalog is that check's `node_filter`, which this walk correctly does not
+ * collect: it is a per-node clause on a different check type, tallied through
+ * `UPG_EDGE_COUNT_SPECS` instead. The count is asserted in the tests rather
+ * than trusted to this comment.
  */
 export const UPG_ENTITY_FILTER_SPECS: readonly UPGEntityFilterSpec[] = (() => {
   const out: UPGEntityFilterSpec[] = []

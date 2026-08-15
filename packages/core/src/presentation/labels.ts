@@ -648,6 +648,7 @@ const STANDARD_LABELS: Record<string, Pick<UPGTypeLabel, 'alt_labels'>> = {
   roadmap_item: { alt_labels: ['roadmap entry', 'planned item'] },
   roadmap_theme: { alt_labels: ['product theme', 'roadmap theme'] }, //: renamed from bare 'theme' (N6 lineage)
   planning_cycle: { alt_labels: ['sprint', 'iteration', 'cycle', 'program increment', 'pi', 'cadence', 'time-box', 'cooldown', 'quarter'] },
+  configuration_axis: { alt_labels: ['configuration', 'config axis', 'lever', 'variant axis', 'plan axis', 'flag axis', 'entitlement axis'] },
 
   // Engineering layer
   bounded_context: { alt_labels: ['context', 'domain boundary', 'module boundary'] },

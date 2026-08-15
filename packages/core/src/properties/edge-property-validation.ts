@@ -80,7 +80,54 @@ function validateValue(key: string, def: PropertyDefinition, val: unknown): stri
       }
       break
     }
-    // string[] / object / object[]: not used by edge property schemas today; no strict check.
+    case 'string[]': {
+      // 0.30.0: `present_under` is exactly this shape, and the write path used
+      // to accept a bare string for it. A single string is not a one-element
+      // list to any reader: the projection operator ignores it, so the surface
+      // silently reverts to invariant and appears in every configuration. The
+      // write path must not admit what the read path cannot honour.
+      if (!Array.isArray(val)) {
+        errors.push(`property "${key}" must be an array of strings`)
+        break
+      }
+      if (val.some((v) => typeof v !== 'string')) {
+        errors.push(`property "${key}" must contain only strings`)
+      }
+      if (val.length === 0) {
+        errors.push(`property "${key}" must not be empty`)
+      }
+      break
+    }
+    case 'object': {
+      if (typeof val !== 'object' || val === null || Array.isArray(val)) {
+        errors.push(`property "${key}" must be an object`)
+        break
+      }
+      const obj = val as Record<string, unknown>
+      // Required keys, then each declared sub-property. An `active_when`
+      // missing its `values` reads as ABSENT to the projection operator, which
+      // makes the edge invariant rather than conditional: the write silently
+      // means the opposite of what the author intended.
+      for (const req of def.required ?? []) {
+        if (obj[req] === undefined || obj[req] === null) {
+          errors.push(`property "${key}" is missing required key "${req}"`)
+        }
+      }
+      for (const [subKey, subDef] of Object.entries(def.properties ?? {})) {
+        const subVal = obj[subKey]
+        if (subVal === undefined || subVal === null) continue
+        errors.push(...validateValue(`${key}.${subKey}`, subDef, subVal))
+      }
+      for (const presentKey of Object.keys(obj)) {
+        if (def.properties && !(presentKey in def.properties)) {
+          errors.push(
+            `property "${key}" has unknown key "${presentKey}" (allowed: ${Object.keys(def.properties).join(', ')})`,
+          )
+        }
+      }
+      break
+    }
+    // object[]: no edge property schema declares one today.
   }
   return errors
 }

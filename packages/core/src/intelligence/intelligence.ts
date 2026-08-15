@@ -35,6 +35,18 @@ export interface EntityCheck {
    *    field nobody filled in, e.g. a `surface` with no `arbitration_rule`.
    *    A value-keyed filter cannot express absence, because the collector only
    *    indexes values that exist.
+   *
+   *    NON-EMPTY VALUE HERE MEANS NON-EMPTY *STRING*. The aggregate indexes
+   *    backing this form record string values only, so a numeric `0` or a
+   *    boolean `false` counts as ABSENT to this filter. That is a known wart,
+   *    documented rather than fixed in 0.29.0: broadening it would change which
+   *    graphs existing detectors fire on, which is not a change to make in a
+   *    release already carrying correctness fixes. It costs nothing today (no
+   *    catalog filter uses this form since the contention branch moved to
+   *    `EdgeCountVsPropertyCheck`), and the broadening question is banked as
+   *    a tracked follow-up. A detector that needs to see a declared
+   *    zero should use `EdgeCountVsPropertyCheck.node_filter`, whose presence
+   *    test is deliberately broader.
    * 2. `{ property, value }` (0.17.0) — count entities whose `property` equals
    *    `value`, e.g. `metric` where `designation === 'north_star'`.
    * 3. `{ status }` — count entities in a given lifecycle status.
@@ -201,12 +213,25 @@ export interface EdgeCountVsPropertyCheck {
    */
   node_comparison: 'gt' | 'gte' | 'lt' | 'lte' | 'eq'
   /**
-   * Optional additional per-node requirement, stated in the vocabulary of
-   * `EntityCheck.filter`'s presence form: the node must carry
-   * (`present: true`) or must not carry (`present: false`) a non-empty value
-   * for `property`.
+   * Optional additional per-node requirement: the node must carry
+   * (`present: true`) or must not carry (`present: false`) a value for
+   * `property`.
    *
-   * THIS IS WHY THE FORM IS PER-NODE RATHER THAN TWO ANDED AGGREGATES.
+   * PRESENT MEANS ANY VALUE, NOT ANY NON-EMPTY STRING. Only `undefined`,
+   * `null` and the empty string read as absent here. `capacity: 0` is a real
+   * cap (a reserved place nothing may occupy) and `mutates_content: false` is a
+   * real answer, so treating either as an omission would be wrong: this check
+   * form exists to read NUMERIC intents, and a form that could not see a
+   * declared zero would misread the surfaces it was built for.
+   *
+   * THIS DELIBERATELY DIFFERS FROM `EntityCheck.filter`'s presence form, which
+   * is string-only because the aggregate indexes behind it only hold strings.
+   * The asymmetry is a real difference in what the two can see, not a style
+   * choice, so this field does not borrow that vocabulary. Collectors express
+   * the split as two named predicates (`isPropertyPresent` here,
+   * `isStringPropertyPresent` there) rather than one helper with a comment.
+   *
+   * THIS IS ALSO WHY THE FORM IS PER-NODE RATHER THAN TWO ANDED AGGREGATES.
    * "Some surface is over capacity" AND "some surface has no arbitration rule"
    * are both true of a graph where those are DIFFERENT surfaces, so composing
    * two aggregate checks would keep firing on exactly the graphs this release

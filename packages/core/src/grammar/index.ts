@@ -4,6 +4,8 @@
  */
 
 export * from './hierarchy.js'
+export * from './projection.js'
+export * from './configuration-drift.js'
 export * from './lifecycles.js'
 export * from './scales.js'
 export * from './enum-scales.js'

@@ -104,6 +104,6 @@ describe('edge duplicate gate — (source,target,classification) collisions are 
     expect(
       collisionGroups,
       'a new (source,target,classification) collision was introduced; if intentional (distinct verbs), update this baseline.',
-    ).toBeLessThanOrEqual(26)
+    ).toBeLessThanOrEqual(27)
   })
 })

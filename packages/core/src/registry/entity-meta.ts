@@ -234,6 +234,7 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   // it, carrying its occupants and the rule that arbitrates between them.
   // Enters `proposed` per the maturity rubric (precedent: planning_cycle 0.20.0).
   { name: 'surface', type_id: 'ent_359', maturity: 'proposed', since: '0.27.0' },
+  { name: 'configuration_axis', type_id: 'ent_360', maturity: 'proposed', since: '0.30.0' },
   { name: 'journey_phase', type_id: 'ent_330', maturity: 'proposed', since: '0.2.0' },
   { name: 'journey_action', type_id: 'ent_331', maturity: 'proposed', since: '0.2.0' },
   { name: 'design_decision', type_id: 'ent_319', maturity: 'deprecated', since: '0.2.0', deprecated_in: '0.2.0', replacement: 'decision' },

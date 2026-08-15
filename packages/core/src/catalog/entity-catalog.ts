@@ -57,6 +57,7 @@ export type UPGEntityType =
   | 'feature_area' | 'feature' | 'epic' | 'user_story' | 'story_statement' | 'story_task' | 'acceptance_criterion' | 'release'
   | 'task' | 'bug' | 'roadmap' | 'roadmap_item' | 'theme' | 'roadmap_theme' | 'changelog'
   | 'planning_cycle'
+  | 'configuration_axis'
   // Engineering
   | 'bounded_context' | 'service' | 'domain_event' | 'api_contract'
   | 'technical_debt_item' | 'feature_flag' | 'deployment' | 'aggregate' | 'domain_entity'

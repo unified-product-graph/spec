@@ -228,6 +228,7 @@ export const ENTITY_EMOJI: Record<string, string> = {
   pipeline_sales: "🪈",
   pipeline_stage: "🧽",
   planning_cycle: "🗓️",
+  configuration_axis: "🎚️",
   playbook: "📒",
   portfolio: "🧸",
   positioning: "🎪",

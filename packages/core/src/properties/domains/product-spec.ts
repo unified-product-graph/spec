@@ -447,3 +447,100 @@ export interface PlanningCycleProperties {
   /** Shape Up appetite: the fixed time budget a cycle is willing to spend on a bet (e.g. "6 weeks", "2 weeks"). */
   appetite?: string
 }
+
+// ---------------------------------------------------------------------------
+// CONFIGURATION
+// ---------------------------------------------------------------------------
+
+/** What kind of lever this axis is. Names the mechanism family so a reader
+ * knows what changing the value would mean operationally.
+ *
+ * - `feature_flag` — a runtime toggle owned by the product team.
+ * - `plan_tier` — what the customer bought.
+ * - `permission_level` — what this user is allowed to see.
+ * - `beta_program` — enrolment in an early-access cohort.
+ * - `other` — a lever that is none of these and is described in the node's
+ *   description rather than forced into a category that fits badly.
+ */
+export type ConfigurationAxisKind =
+  | 'feature_flag'
+  | 'plan_tier'
+  | 'permission_level'
+  | 'beta_program'
+  | 'other'
+
+/** A named dimension along which the product's composition differs.
+ *
+ * The stored graph is the UNION of a configuration family; an axis names one
+ * dimension of that family, and a projection picks one value on it. A graph
+ * that declares no axis describes a product with one configuration, which is
+ * what every graph written before this entity existed already meant. That is
+ * the zero-migration guarantee: silence still means "true everywhere".
+ *
+ * ONE AXIS PER SEMANTIC LEVER, NOT PER CODE FLAG. The unit is the decision a
+ * reader makes ("are we on the new navigation or the old one?"), not the
+ * boolean a deploy system stores. Two flags that cannot be set independently
+ * — one forcing the other on — are ONE axis with two values, and modelling
+ * them as two axes would assert a four-configuration family, three members of
+ * which do not exist. Link each driving flag with
+ * `feature_flag_drives_configuration_axis`: the mechanism lives in
+ * engineering, the lever lives here.
+ *
+ * VALUES ARE CLOSED. Every `present_under` and every `active_when.values`
+ * entry must name a member of this list, and `validate_graph`'s
+ * `configuration_drift` scope says so. An axis whose values are open cannot
+ * support a projection, because nothing bounds the family being projected
+ * from.
+ *
+ * NOT `classification_axis`. That instrument sorts SUBJECTS into cells: a
+ * subject may sit in several at once, each placement carries evidence and
+ * confidence, and the axis describes a landscape. This one selects WHICH
+ * GRAPH YOU ARE READING: exactly one value holds at a time, placements carry
+ * no evidence, and changing the value changes what exists. The shapes rhyme;
+ * the questions do not.
+ *
+ * Per UPG principle P14, structural relationships are edges:
+ *   the product that defines it: `product_defines_configuration_axis` (inbound)
+ *   the driving mechanism: `feature_flag_drives_configuration_axis` (inbound)
+ *   what varies along it: `surface_varies_by_configuration_axis` (inbound)
+ *
+ * @example
+ * const properties: ConfigurationAxisProperties = {
+ *   values: ['legacy_nav', 'split_nav'],
+ *   default_value: 'legacy_nav',
+ *   kind: 'feature_flag',
+ * }
+ */
+export interface ConfigurationAxisProperties {
+  /**
+   * The closed set of values this axis can take. Required: an axis with no
+   * values selects nothing and cannot be projected along.
+   *
+   * Two values is the common case and three is not unusual (a plan ladder).
+   * Order is not significant; the axis is categorical, not ordinal. Where the
+   * ordering does matter (an entitlement ladder in which each tier includes
+   * the one below), that is a classification question, and
+   * `classification_axis` with `axis_kind: 'ordinal'` is the instrument for it.
+   */
+  values: string[]
+  /**
+   * The value this axis is understood to sit at when nobody says otherwise.
+   * Must be a member of `values`.
+   *
+   * NOTHING APPLIES IT AUTOMATICALLY. Omitting `configuration` on a read
+   * returns the UNION, not this projection, because the union is the honest
+   * answer to an unqualified question: it is every configuration at once, and
+   * silently substituting one of them would hide the others from a reader who
+   * did not know to ask. What the field does carry is the declaration
+   * convention for `surface_alternates_with_surface` (declare the edge from the
+   * surface present under the default) and a documented anchor for tools that
+   * later want to offer a starting configuration.
+   *
+   * It is a claim about the model, not about deployment: it says which value
+   * most of the graph was written against, not which configuration most
+   * customers are on.
+   */
+  default_value?: string
+  /** What kind of lever this is. Names the mechanism family. */
+  kind?: ConfigurationAxisKind
+}

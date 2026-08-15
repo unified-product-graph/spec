@@ -149,6 +149,68 @@ export const DEFER_EDGE_PROPERTY_SCHEMA: PropertySchema = {
   },
 }
 
+/**
+ * Property schema carried by `surface_varies_by_configuration_axis` (0.30.0).
+ *
+ * CONDITIONAL EXISTENCE, expressed as an edge. The surface exists in the stored
+ * graph regardless; this edge says which members of the configuration family it
+ * appears in. No edge at all means invariant, which is why every graph written
+ * before this existed keeps meaning exactly what it meant.
+ */
+export const CONFIGURATION_VARIANCE_EDGE_PROPERTY_SCHEMA: PropertySchema = {
+  present_under: {
+    type: 'string[]',
+    description:
+      'Values of the axis under which this surface exists. Every entry must name a member of the axis\'s closed `values` list, and an empty list is a modelling error rather than a way to say "never" (a surface that exists under no configuration should be deleted, not declared). Omitting the edge entirely is how a surface says it is present in every configuration. @example ["legacy_nav"]',
+  },
+}
+
+/**
+ * Property schema carried by the two surface-composition edges
+ * (`surface_contains_surface` and `feature_occupies_surface`), 0.30.0.
+ *
+ * A single `active_when` key qualifies the relationship by a configuration
+ * axis: the edge holds only under the named values, and is absent from every
+ * other projection.
+ *
+ * SCOPE IS THE POINT, NOT AN OVERSIGHT. These two edges are the whole legal
+ * surface for the qualifier, and `validate_graph` rejects `active_when` on any
+ * other edge type. UPG is not adding a general modality system on one field
+ * report; it is answering the composition question that report actually asked.
+ * Any further edge earns the qualifier on field evidence, one at a time.
+ *
+ * A QUALIFIER CANNOT EXPRESS NON-EXISTENCE. If the surface itself is absent
+ * under a value, say so on the node with `surface_varies_by_configuration_axis`;
+ * the projection then drops this edge as dangling and the qualifier is
+ * redundant. Reach for `active_when` only when BOTH endpoints exist and the
+ * RELATIONSHIP is what changes: the occupant that moves to a different row, the
+ * feature that occupies a different place under the flag.
+ *
+ * ONE AXIS PER QUALIFIER. An edge conditional on two axes at once is a stated
+ * non-goal; where it is genuinely needed, the honest model is one axis whose
+ * values are the combinations that actually occur, which is the same discipline
+ * as "one axis per semantic lever".
+ */
+export const CONFIGURATION_QUALIFIER_EDGE_PROPERTY_SCHEMA: PropertySchema = {
+  active_when: {
+    type: 'object',
+    description:
+      'Configuration condition under which this relationship holds. The edge is present in a projection that sets `axis` to one of `values`, and absent otherwise. Omit the key entirely for an invariant relationship: absence means "always", never "unknown".',
+    properties: {
+      axis: {
+        type: 'string',
+        description: 'Node id of the `configuration_axis` this condition reads.',
+      },
+      values: {
+        type: 'string[]',
+        description:
+          'Values of that axis under which the relationship holds. Every entry must be a member of the axis\'s closed `values` list.',
+      },
+    },
+    required: ['axis', 'values'],
+  },
+}
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 // `satisfies` preserves literal key types for downstream
@@ -696,7 +758,7 @@ export const UPG_EDGE_CATALOG = {
   //                     portfolio_shared, so the reading it names commonly lives in the
   //                     registry rather than in the product graph.
   //   supersedes      → semantic (prompt_version_supersedes_prompt_version).
-  surface_contains_surface: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'surface', target_type: 'surface' },
+  surface_contains_surface: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'surface', target_type: 'surface', carries_properties: true, property_schema: CONFIGURATION_QUALIFIER_EDGE_PROPERTY_SCHEMA },
   surface_serves_job: { forward_verb: 'serves', reverse_verb: 'served_by', classification: 'cross-domain', source_type: 'surface', target_type: 'job' },
   surface_governed_by_design_guideline: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'cross-domain', source_type: 'surface', target_type: 'design_guideline', cross_product_eligible: true },
   surface_renders_design_component: { forward_verb: 'renders', reverse_verb: 'rendered_on', classification: 'hierarchy', source_type: 'surface', target_type: 'design_component', cross_product_eligible: true },
@@ -731,11 +793,53 @@ export const UPG_EDGE_CATALOG = {
   //   not cross_product_eligible → a deviation is a fact about one product's
   //     code, and `surface` is not portfolio_shared in the first place.
   surface_deviates_via_technical_debt_item: { forward_verb: 'deviates_via', reverse_verb: 'causes_deviation_in', classification: 'cross-domain', source_type: 'surface', target_type: 'technical_debt_item' },
+  // ── surface, 0.30.0: composition that varies by configuration ───────────────
+  // A product's surface tree is not one tree; it is a family of trees selected
+  // by a configuration lever. The stored graph is the UNION of that family and
+  // a single configuration is a PROJECTION of it, so these two edges are how a
+  // graph says which member a fact belongs to. Silence still means "every
+  // member", which is why a graph written before 0.30.0 needs no migration.
+  //
+  //   varies_by   — CONDITIONAL EXISTENCE. The surface exists only under the
+  //                 values in `present_under`. An edge qualifier cannot say
+  //                 this: the reported case was a set of named chips REPLACED
+  //                 by one generic badge, where which surface EXISTS changes,
+  //                 and the two carry different capacities and occupants.
+  //   alternates  — "one of these, depending" as distinct from "both,
+  //                 together". Semantic, matching its sibling
+  //                 `surface_supersedes_surface`: neither surface owns the
+  //                 other, and a hierarchy classification would demand a
+  //                 UPG_VALID_CHILDREN pair that would be false. Explicit and
+  //                 validator-checked (same axis, disjoint present_under);
+  //                 never auto-derived, because disjointness is necessary for
+  //                 alternation and nowhere near sufficient.
+  //
+  // Direction on `alternates_with` is a CONVENTION, not an enforcement: declare
+  // it once, sourced from the surface present under the axis's `default_value`.
+  // An axis with no default is legal modelling, so a check keyed on the
+  // convention would fire on a correct graph, which is the one thing a check
+  // must never do.
+  // ── configuration_axis, 0.30.0: the lever itself ───────────────────────────
+  // Three layers, three owners, and keeping them apart is what makes the model
+  // honest: `engineering` owns the MECHANISM (`feature_flag`, with its key and
+  // rollout percentage), `product_spec` owns the LEVER (the named dimension
+  // along which what-you-ship differs), `ux_design` owns the PLACE (`surface`).
+  // Two code flags that move together are ONE lever with two values.
+  //
+  // `defines` is hierarchy so the axis has a home in `get_tree`. It earns the
+  // UPG_VALID_CHILDREN.product pair (guardrail G2b) on an honest verb: an axis
+  // exists only within the product whose composition it varies. The rejected
+  // alternative mirrors `classification_axis_owned_by_product`, a cross-domain
+  // ownership edge that leaves the node unparented and invisible in every tree.
+  product_defines_configuration_axis: { forward_verb: 'defines', reverse_verb: 'defined_by', classification: 'hierarchy', source_type: 'product', target_type: 'configuration_axis' },
+  feature_flag_drives_configuration_axis: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'feature_flag', target_type: 'configuration_axis' },
+  surface_varies_by_configuration_axis: { forward_verb: 'varies_by', reverse_verb: 'varies', classification: 'cross-domain', source_type: 'surface', target_type: 'configuration_axis', carries_properties: true, property_schema: CONFIGURATION_VARIANCE_EDGE_PROPERTY_SCHEMA },
+  surface_alternates_with_surface: { forward_verb: 'alternates_with', reverse_verb: 'alternates_with', classification: 'semantic', source_type: 'surface', target_type: 'surface' },
   // Inbound. `feature_occupies_surface` is the guest list: the edge that makes
   // "what else lives here?" answerable, and the one the contention anti-pattern
   // counts. cross-domain (product_spec → ux_design), like screen_surfaces_feature
   // running the other way.
-  feature_occupies_surface: { forward_verb: 'occupies', reverse_verb: 'occupied_by', classification: 'cross-domain', source_type: 'feature', target_type: 'surface' },
+  feature_occupies_surface: { forward_verb: 'occupies', reverse_verb: 'occupied_by', classification: 'cross-domain', source_type: 'feature', target_type: 'surface', carries_properties: true, property_schema: CONFIGURATION_QUALIFIER_EDGE_PROPERTY_SCHEMA },
   screen_renders_surface: { forward_verb: 'renders', reverse_verb: 'rendered_by', classification: 'hierarchy', source_type: 'screen', target_type: 'surface' },
   decision_affects_surface: { forward_verb: 'affects', reverse_verb: 'affected_by', classification: 'cross-domain', source_type: 'decision', target_type: 'surface' },
   // The finer-grained sibling of journey_step_shown_on_screen: a step happens on

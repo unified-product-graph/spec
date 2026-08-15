@@ -37,6 +37,10 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     'brand_identity',
     // Product Specification
     'feature', 'feature_area', 'release', 'roadmap', 'roadmap_theme', 'planning_cycle',
+    // Configuration (0.30.0): the levers whose values select which surface tree
+    // the product renders. Few per product, and top-level because an axis is a
+    // product-wide fact rather than a child of any one feature or surface.
+    'configuration_axis',
     // Engineering
     'bounded_context', 'code_repository', 'integration_pattern', 'external_api', 'data_flow',
     // Growth

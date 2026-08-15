@@ -985,6 +985,11 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
         role: "container",
         notes: "self-nesting cadence axis",
       },
+      {
+        type: "configuration_axis",
+        role: "leaf",
+        notes: "the configuration lever whose values select which surface tree the product renders",
+      },
     ],
     anchor: {
       type: "feature",

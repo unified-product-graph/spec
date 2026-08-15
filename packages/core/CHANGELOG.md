@@ -7,7 +7,24 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [0.29.0] - 2026-08-15
+## [0.30.0] - 2026-08-15
+
+**A surface tree is often not one tree but a family of trees selected by configuration, and the graph can now say so.** A feature flag, a plan tier, a permission level or a beta programme changes which surfaces exist and what contains what; until now every surface fact was implicitly qualified by "in whatever configuration someone happened to be looking at", unrecorded. The stored graph is now the union of that family, a single configuration is a projection of it, unqualified facts are invariant, and a graph declaring no variance is semantically identical to before. Zero migration; additive; no breaking change.
+
+### Added
+- **`configuration_axis` entity** (`proposed`, `ent_360`) — one node per semantic lever, with a closed `values` list, a `default_value`, and a `kind` (`feature_flag | plan_tier | permission_level | beta_program | other`). One axis per lever, not one per code flag: the axis names what the team pulls, the flag names how the code implements it.
+- **Four edges.** `product_defines_configuration_axis` (hierarchy — the axis renders in the tree), `surface_varies_by_configuration_axis` (carries `present_under: [values]`; no edge means invariant), `feature_flag_drives_configuration_axis` (mechanism vs lever), and `surface_alternates_with_surface` ("one of these, depending" — validated against the axis declarations, direction by convention only).
+- **`active_when` qualifier** on `surface_contains_surface` and `feature_occupies_surface` — and deliberately on no other edge: conditional composition is the question this release answers, and a general modality system is not. The scope is enforced: a qualifier on any other edge type is a `configuration_drift` error.
+- **Projection operator** — node exclusion, then edge deactivation, then dangling removal; commutative across axes; identity on graphs declaring no variance.
+- **`configuration_drift` validate scope** — ten checks covering unresolved axes, empty value lists, illegal qualifiers, contradictory alternations, and projection-stranded children. Error-severity drift gates `valid` and `structurally_valid`.
+- **Per-projection anti-pattern evaluation.** Findings true everywhere report unqualified, exactly as before. Findings true in only some configurations report once, annotated (`configurations: [{axis, value}]`). Findings true only in the union are suppressed and counted (`suppressed_union_artifacts`) — they are superposition artifacts, the double-count class 0.28.0 removed. Findings true only in a projection are surfaced — a check may legitimately fire for one plan tier and no other, and the union cannot see it.
+- **`configuration` parameter** on `query`, `get_tree`, and `validate_graph` — read or validate one member of the family. Every other tool rejects the argument by name rather than silently reading the union. Configuration-vs-configuration diffing rides `query`'s existing `diff_from`, which now reports edge deltas when `edge_include` is set. Tool count unchanged at 98.
+
+### Changed
+- The one-named-configuration convention (published with 0.29.0) becomes the documented fallback for graphs that do not declare variance: the configuration you named is the projection you were implicitly describing, and nothing needs migrating when you begin declaring axes.
+
+### Notes
+- Truth: 322 entities · 1073 edges · 69 cross-edges · 98 tools. Zero new anti-patterns — the drift checks carry the invariants, and a detector with no field evidence behind it is how a check family gets noisy.
 
 **The contention check learns to read `capacity`, violations learn to name their nodes, and a batch write learns to un-say a property.** All three came from the same field reporter measuring the check on a real 43-surface graph: 10 surfaces flagged, 7 correctly, 3 falsely — and every false positive had an occupant count at or below its stated capacity. A surface whose occupants all fit is partitioned, not contended. Additive; no breaking change.
 

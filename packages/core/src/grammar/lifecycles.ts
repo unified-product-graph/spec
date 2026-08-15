@@ -3354,6 +3354,11 @@ export const UPG_LIFECYCLE_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   'competitor', 'competitor_feature', 'competitor_signal', 'market_trend', 'market_segment',
   'classification_axis', 'classification_value',
 
+  // ── Product Specification (1): a configuration_axis is a structural
+  //    DECLARATION (a lever and its closed value set), not a thing that
+  //    progresses through states. Same reading as classification_axis above.
+  'configuration_axis',
+
   // ── User Research (5 of 8): participants, quotes, observations,
   //    clusters, survey responses are immutable data points ────────────────
   'participant', 'observation', 'quote', 'affinity_cluster', 'survey_response',

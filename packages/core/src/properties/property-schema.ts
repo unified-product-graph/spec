@@ -12,7 +12,7 @@
  * wall-clock timestamp: generation is deterministic). This file is a GATED
  * artifact — check:generated re-runs the generator and fails on any drift, so
  * edit the sources above, never this file.
- * Entity types with properties: 324
+ * Entity types with properties: 325
  */
 
 export interface PropertyDefinition {
@@ -684,6 +684,12 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   compliance_requirement: {
     regulation: { type: 'string', enum: ['gdpr', 'ccpa', 'hipaa', 'soc2', 'iso27001', 'pci_dss', 'other'], description: 'Regulation or standard this requirement derives from' },
     compliance_status: { type: 'string', enum: ['compliant', 'non_compliant', 'in_progress', 'not_applicable'], description: 'Current compliance posture' },
+  },
+  // ConfigurationAxisProperties: A named dimension along which the product's composition differs.
+  configuration_axis: {
+    values: { type: 'string[]', description: 'The closed set of values this axis can take. Required: an axis with no values selects nothing and cannot be projected along. Two values is the common case and three is not unusual (a plan ladder). Order is not significant; the axis is categorical, not ordinal. Where the ordering does matter (an entitlement ladder in which each tier includes the one below), that is a classification question, and `classification_axis` with `axis_kind: \'ordinal\'` is the instrument for it.' },
+    default_value: { type: 'string', description: 'The value this axis is understood to sit at when nobody says otherwise. Must be a member of `values`. NOTHING APPLIES IT AUTOMATICALLY. Omitting `configuration` on a read returns the UNION, not this projection, because the union is the honest answer to an unqualified question: it is every configuration at once, and silently substituting one of them would hide the others from a reader who did not know to ask. What the field does carry is the declaration convention for `surface_alternates_with_surface` (declare the edge from the surface present under the default) and a documented anchor for tools that later want to offer a starting configuration. It is a claim about the model, not about deployment: it says which value most of the graph was written against, not which configuration most customers are on.' },
+    kind: { type: 'string', enum: ['feature_flag', 'plan_tier', 'permission_level', 'beta_program', 'other'], description: 'What kind of lever this is. Names the mechanism family.' },
   },
   // ConstraintProperties: Constraint: a named limitation or boundary on product creation.
   constraint: {

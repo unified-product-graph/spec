@@ -108,7 +108,7 @@ export const UPG_DOMAINS = [
     types: [
       'feature', 'feature_area', 'epic', 'user_story', 'acceptance_criterion', 'release',
       'task', 'bug', 'roadmap', 'roadmap_item', 'roadmap_theme', 'changelog',
-      'planning_cycle',
+      'planning_cycle', 'configuration_axis',
     ],
   },
   {
