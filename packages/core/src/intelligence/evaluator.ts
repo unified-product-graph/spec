@@ -3,7 +3,7 @@
  * Walks `UPG_ANTI_PATTERNS`, evaluates each `structured_condition` against
  * `AntiPatternInputs`, returns the violations.
  *
- * Synchronous. Collectors live per server (`packages/upg-mcp-server/src/lib/anti-pattern-inputs.ts`).
+ * Synchronous. Collectors live outside this package (`packages/upg-sdk/src/lib/anti-pattern-inputs.ts`).
  * Covers every leaf check type in `IntelligenceCondition`; composes recursively.
  *
  * https://unifiedproductgraph.org | MIT
@@ -18,12 +18,19 @@ import type {
   DomainCountCheck,
   DomainPopulationCheck,
   OrphanCheck,
+  EdgeCountVsPropertyCheck,
 } from './intelligence.js'
 import type {
   UPGCuratedAntiPattern,
   UPGAntiPatternSeverity,
 } from './anti-patterns.js'
-import { UPG_ANTI_PATTERNS, presenceExceptKey } from './anti-patterns.js'
+import {
+  UPG_ANTI_PATTERNS,
+  presenceExceptKey,
+  edgeCountSpecKey,
+  entityFilterKey,
+  checkToEdgeCountSpec,
+} from './anti-patterns.js'
 import { getBenchmark } from './benchmarks/index.js'
 import type { UPGProductStage } from './benchmarks/types.js'
 import { concernFor, concernEvaluatedFor } from './validation-profiles.js'
@@ -97,6 +104,39 @@ export interface AntiPatternInputs {
   countsByTypeAndPropertyPresenceExcept?: Record<string, Record<string, number>>
 
   /**
+   * Node ids matching each declared per-node edge-count check (0.29.0). Shape:
+   * `edgeCountSpecKey(spec)` → the ids of the nodes that matched.
+   *
+   * The COUNT is the array length, so this input carries both halves of the
+   * check: what fired, and which nodes it fired about. Collectors build it by
+   * walking `UPG_EDGE_COUNT_SPECS`, never speculatively.
+   *
+   * A SEEDED-BUT-EMPTY entry and a MISSING entry mean different things, and
+   * collectors must keep them distinct. Empty means "nothing matched" and the
+   * check clears. Missing means "this collector predates the spec", and the
+   * evaluator falls back to assuming every node of the type matched, preserving
+   * the 0.28.0 property that a stale collector over-reports rather than
+   * silently retiring the detector. Attribution stays empty on that path: a
+   * fabricated node id is worse than an unattributed violation.
+   */
+  nodesByEdgeCountSpec?: Record<string, string[]>
+
+  /**
+   * Node ids matching each declared `entity_count` filter (0.29.0), for
+   * ATTRIBUTION ONLY. Shape: `entityFilterKey(entity_type, filter)` → ids.
+   *
+   * Counts are unaffected: every `entity_count` comparison still reads the
+   * aggregate tallies above, exactly as it did before this input existed. This
+   * runs alongside purely so a fired violation can name nodes, which means a
+   * collector that omits it loses attribution and changes no verdict.
+   *
+   * Bounded by declaration, like every other spec-driven input here: the whole
+   * catalog declares five filters, so this is a handful of predicate
+   * evaluations per node rather than an index over every property.
+   */
+  nodesByEntityFilter?: Record<string, string[]>
+
+  /**
    * Boolean presence per `(source_type, edge_type, target_type)` tuple.
    * Key format: `${source_type}|${edge_type}|${target_type}`.
    * `true` iff at least one edge of that exact shape exists in the graph.
@@ -151,6 +191,32 @@ export interface AntiPatternViolation {
   concern: UPGAntiPatternConcern
   /** Entity-type strings the catalog references. Phase 1: types, not ids. */
   target_entities: string[]
+  /**
+   * The specific nodes this violation is about (0.29.0), where the fired
+   * condition could name them. Sorted, deduplicated, and drawn only from the
+   * branches that actually contributed to the fire.
+   *
+   * ABSENT MEANS "THIS DETECTOR CANNOT NAME NODES", NOT "NO NODES". Most
+   * patterns here are whole-graph approximations of per-node rules: they
+   * compare aggregate tallies against constants, so they can say a graph has a
+   * problem without knowing where it lives. Only checks that evaluate nodes one
+   * at a time attribute, plus the declared `entity_count` filters.
+   *
+   * ATTRIBUTION IS PARTIAL, AND PARTIAL PER TYPE. A violation may name nodes of
+   * one type while saying nothing about another type in `target_entities`: the
+   * contention detector names surfaces and never the features occupying them,
+   * though both types appear there. So a consumer must NOT read a non-empty
+   * list as "these are the only implicated entities".
+   *
+   * The contract for a reverse lookup is: this list is authoritative for the
+   * types it actually covers, and silent about every other type, which must
+   * keep resolving through `target_entities`. Reading it as globally
+   * authoritative makes entities of the uncovered types unreachable, which is
+   * a reachability regression dressed up as precision.
+   *
+   * Optional so every existing consumer keeps compiling and behaving as before.
+   */
+  target_node_ids?: string[]
   description: string
   why_it_matters: string
   remediation: string
@@ -225,7 +291,15 @@ export function evaluateAntiPatterns(
     if (!concernEvaluatedFor(inputs.memberKind, concern)) continue
 
     if (evaluateCondition(ap.structured_condition, inputs)) {
-      fires.push(buildViolation(ap, concern))
+      // Attribution runs as a SECOND walk, only on patterns that actually
+      // fired. Keeping it out of `evaluateCondition` means the verdict path is
+      // byte-identical to its pre-0.29.0 behaviour: attribution can be wrong,
+      // absent or stale without ever changing whether a pattern fires.
+      const ids = new Set<string>()
+      collectAttribution(ap.structured_condition, inputs, ids)
+      const violation = buildViolation(ap, concern)
+      if (ids.size > 0) violation.target_node_ids = [...ids].sort()
+      fires.push(violation)
     }
   }
 
@@ -237,6 +311,51 @@ export function evaluateAntiPatterns(
   })
 
   return fires
+}
+
+// ─── Attribution ─────────────────────────────────────────────────────────────
+
+/**
+ * Walk a FIRED condition tree and collect the node ids the fire is about.
+ *
+ * Only called after the pattern has already fired, so this never influences a
+ * verdict. Two rules decide what contributes:
+ *
+ *  1. ONLY TRUE BRANCHES. Under `or`, a branch that did not fire says nothing
+ *     about any node, so its ids stay out. Under `and`, every child is true by
+ *     construction, so every attributing child contributes.
+ *  2. ONLY ACCUSING CHECKS. An unfiltered `entity_count` ("this graph has
+ *     surfaces") is a population GATE, not an accusation, and attributing every
+ *     surface to a violation because the gate passed would reproduce the exact
+ *     "whole roster stays lit" problem attribution exists to fix. So bare
+ *     counts, relationship shapes, benchmarks and graph-shape checks attribute
+ *     nothing; filtered `entity_count` checks and `edge_count_vs_property`
+ *     checks attribute.
+ */
+function collectAttribution(
+  cond: IntelligenceCondition,
+  inputs: AntiPatternInputs,
+  out: Set<string>,
+): void {
+  if ('operator' in cond) {
+    for (const child of cond.checks) {
+      // Rule 1: under `or`, skip branches that did not themselves fire.
+      if (cond.operator === 'or' && !evaluateCondition(child, inputs)) continue
+      collectAttribution(child, inputs, out)
+    }
+    return
+  }
+  const check = cond.check
+  if (check.type === 'edge_count_vs_property') {
+    const key = edgeCountSpecKey(checkToEdgeCountSpec(check))
+    for (const id of inputs.nodesByEdgeCountSpec?.[key] ?? []) out.add(id)
+    return
+  }
+  if (check.type === 'entity_count' && check.filter) {
+    // Rule 2: filtered counts accuse; bare counts gate.
+    const key = entityFilterKey(check.entity_type, check.filter)
+    for (const id of inputs.nodesByEntityFilter?.[key] ?? []) out.add(id)
+  }
 }
 
 // ─── Condition dispatch ──────────────────────────────────────────────────────
@@ -270,11 +389,14 @@ type LeafCheck =
   | DomainCountCheck
   | DomainPopulationCheck
   | OrphanCheck
+  | EdgeCountVsPropertyCheck
 
 function evaluateLeaf(check: LeafCheck, inputs: AntiPatternInputs): boolean {
   switch (check.type) {
     case 'entity_count':
       return evaluateEntityCount(check, inputs)
+    case 'edge_count_vs_property':
+      return evaluateEdgeCountVsProperty(check, inputs)
     case 'relationship':
       return evaluateRelationship(check, inputs)
     case 'benchmark':
@@ -398,6 +520,46 @@ function evaluateEntityCount(
   return compareNumber(count, check.comparison, check.threshold)
 }
 
+/**
+ * Per-node edge-count check (0.29.0). The collector has already done the
+ * per-node arithmetic and handed us the ids that matched; the evaluator's job
+ * is only the aggregate comparison over how many there were.
+ *
+ * The division of labour matters for projection (0.30.0): because the matching
+ * happens in the collector, over whatever node and edge set the collector was
+ * given, running this check against one configuration of a graph costs nothing
+ * beyond building the collector on a filtered store. A check that reached past
+ * the collector to the live store would be permanently blind to that.
+ */
+function evaluateEdgeCountVsProperty(
+  check: EdgeCountVsPropertyCheck,
+  inputs: AntiPatternInputs,
+): boolean {
+  const key = edgeCountSpecKey(checkToEdgeCountSpec(check))
+  const matched = inputs.nodesByEdgeCountSpec?.[key]
+  if (matched === undefined) {
+    // STALE COLLECTOR, not an honest zero. Collectors SEED every declared spec
+    // with an empty array before walking, precisely so these two cases are
+    // distinguishable: a present-but-empty entry means "nothing matched", a
+    // missing entry means "this collector predates the spec and computed
+    // nothing". Reading the second as zero would silently retire the check
+    // against any older collector in the tree.
+    //
+    // So fall back to the worst case the aggregate tallies can support: assume
+    // every node of the type matched. That preserves the 0.28.0 property that a
+    // stale collector OVER-reports rather than under-reporting, which is the
+    // safe failure for a detector whose job is noticing omissions. Attribution
+    // deliberately yields nothing in this path: the ids would be guesses, and a
+    // fabricated node id is worse than an unattributed violation.
+    return compareNumber(
+      inputs.countsByType[check.entity_type] ?? 0,
+      check.comparison,
+      check.threshold,
+    )
+  }
+  return compareNumber(matched.length, check.comparison, check.threshold)
+}
+
 function relationshipKey(
   source_type: string,
   edge_type: string,
@@ -518,10 +680,13 @@ function buildViolation(ap: UPGCuratedAntiPattern, concern: UPGAntiPatternConcer
 /**
  * Walk the condition and return the unique entity-type strings it references.
  *
- * Phase 1: target_entities = entity-type strings, not specific ids. Phase 1.x
- * will promote to ids once collectors track them.
+ * This is what fills `target_entities`, so it is the type half of every
+ * consumer's reachability. A check form missing from the walk produces a
+ * violation nothing can find by type, which is why the walk is exported: it is
+ * testable in isolation, against conditions built to defeat the masking that
+ * hides an omission inside a real multi-check pattern.
  */
-function collectTargetEntities(cond: IntelligenceCondition | undefined): string[] {
+export function collectTargetEntities(cond: IntelligenceCondition | undefined): string[] {
   const types = new Set<string>()
   if (!cond) return []
   walk(cond)
@@ -530,7 +695,11 @@ function collectTargetEntities(cond: IntelligenceCondition | undefined): string[
   function walk(c: IntelligenceCondition): void {
     if ('check' in c) {
       const leaf = c.check
-      if (leaf.type === 'entity_count' || leaf.type === 'benchmark') {
+      if (
+        leaf.type === 'entity_count' ||
+        leaf.type === 'benchmark' ||
+        leaf.type === 'edge_count_vs_property'
+      ) {
         types.add(leaf.entity_type as string)
       } else if (leaf.type === 'relationship') {
         types.add(leaf.source_type as string)
@@ -538,6 +707,13 @@ function collectTargetEntities(cond: IntelligenceCondition | undefined): string[
       }
       // total_entity_count / domain_count / domain_population / orphan_count
       // don't reference a specific entity type; leave them out.
+      //
+      // `edge_count_vs_property` DOES name one and must be listed above. It is
+      // currently masked in the one pattern that uses it, whose sibling checks
+      // already contribute `surface`, but a pattern whose only typed check is
+      // this form would otherwise report an EMPTY target_entities: no type
+      // match, and so unreachable through the type half of any consumer. Every
+      // check that names an entity type belongs here, mask or no mask.
       return
     }
     for (const child of c.checks) walk(child)

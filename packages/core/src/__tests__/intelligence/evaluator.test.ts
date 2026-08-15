@@ -13,7 +13,11 @@ import {
   evaluateAntiPatterns,
   type AntiPatternInputs,
 } from '../../intelligence/evaluator.js'
-import { UPG_ANTI_PATTERNS } from '../../intelligence/anti-patterns.js'
+import {
+  UPG_ANTI_PATTERNS,
+  UPG_EDGE_COUNT_SPECS,
+  edgeCountSpecKey,
+} from '../../intelligence/anti-patterns.js'
 import { isThinCoverageAdvisory, THIN_GRAPH_THRESHOLD } from '../../intelligence/validation-profiles.js'
 
 // ─── Fixture builder ─────────────────────────────────────────────────────────
@@ -531,6 +535,15 @@ describe('Options + composite + stage gating', () => {
   //   enforced_undocumented  present   either    no      -
   //   safe_by_coincidence    present   either    YES     admission
   //   none                   present   either    YES     admission
+  // Derived from the catalog, never spelled out: if the contention check's spec
+  // changes shape, this key follows it and every fixture below stays honest. A
+  // hardcoded key would let the check drift away from its own tests silently.
+  const CONTENDED_SPEC_KEY = edgeCountSpecKey(
+    UPG_EDGE_COUNT_SPECS.find(
+      (s) => s.entity_type === 'surface' && s.edge_type === 'feature_occupies_surface',
+    )!,
+  )
+
   const surfaceInputs = (opts: {
     total: number
     /** Surfaces declaring composition_mode: 'chained'. */
@@ -541,8 +554,16 @@ describe('Options + composite + stage gating', () => {
     ruleAll?: number
     /** arbitration_state value → count. */
     states?: Record<string, number>
-    /** Omit the 0.28.0 index entirely, as a pre-0.28.0 collector would. */
+    /** Omit the per-node index entirely, as a pre-0.29.0 collector would. */
     staleCollector?: boolean
+    /**
+     * Surfaces that are rule-less and not chained but whose occupancy is WITHIN
+     * their stated capacity (0.29.0). They are partitioned, not contended, so a
+     * current collector does not match them and the check must not fire on them.
+     * Defaults to 0, which reproduces the pre-0.29.0 reading in which every
+     * rule-less surface was assumed contended.
+     */
+    withinCapacity?: number
   }) => {
     const i = emptyInputs()
     i.totalEntityCount = 10 + opts.total
@@ -555,9 +576,19 @@ describe('Options + composite + stage gating', () => {
         arbitration_state: opts.states ?? {},
       },
     }
+    // 0.29.0: branch (a) is per-node. The collector hands the evaluator the ids
+    // of surfaces that are over capacity AND rule-less AND not chained; the
+    // count is the array length. Eligible = total - chained; of those,
+    // `ruleNotChained` carry a rule, and `withinCapacity` more are inside their
+    // declared capacity, so neither group is contended.
     if (!opts.staleCollector) {
-      i.countsByTypeAndPropertyPresenceExcept = {
-        surface: { 'arbitration_rule!composition_mode=chained': opts.ruleNotChained ?? 0 },
+      const eligible = Math.max(0, opts.total - (opts.chained ?? 0))
+      const contendedCount = Math.max(
+        0,
+        eligible - (opts.ruleNotChained ?? 0) - (opts.withinCapacity ?? 0),
+      )
+      i.nodesByEdgeCountSpec = {
+        [CONTENDED_SPEC_KEY]: Array.from({ length: contendedCount }, (_, n) => `surface_${n}`),
       }
     }
     return i
@@ -657,13 +688,44 @@ describe('Options + composite + stage gating', () => {
 
   // ── degradation ────────────────────────────────────────────────────────────
   it('a stale collector over-reports rather than silently under-reporting', () => {
-    // A pre-0.28.0 collector emits no except index. Reading it as zero means
-    // every eligible surface looks rule-less, so the check fires where it might
-    // not need to. For a detector whose job is noticing omissions, a false
+    // A pre-0.29.0 collector emits no per-node index at all. The evaluator must
+    // tell that apart from an honest "nothing matched" (which collectors record
+    // as a seeded empty array) and fall back to the worst case the aggregate
+    // tallies support. For a detector whose job is noticing omissions, a false
     // alarm is the safe failure and a missed one is not.
+    //
+    // This property predates 0.29.0 and survived the move to the per-node form
+    // deliberately: reading a missing index as zero would have retired the
+    // check against any older collector in the tree without a word.
     expect(contended(surfaceInputs({
       total: 3, ruleAll: 3, ruleNotChained: 3, staleCollector: true,
     }))).toBe(true)
+  })
+
+  // ── capacity (0.29.0): partitioned is not contended ────────────────────────
+  it('clears when a rule-less surface holds no more than its stated capacity', () => {
+    // The reported false-positive class, reduced: a field header row declaring
+    // capacity 4 and holding exactly 4 occupants, positioned side by side. All
+    // four fit by design, so nothing is displaced and there is nothing to
+    // arbitrate. Before 0.29.0 this fired purely because it had two occupants
+    // and no rule.
+    expect(contended(surfaceInputs({ total: 3, withinCapacity: 3 }))).toBe(false)
+  })
+  it('still fires for the over-capacity surface among within-capacity neighbours', () => {
+    // The exemption must not blanket the graph: 3 surfaces, 2 comfortably
+    // within capacity and 1 genuinely over it.
+    expect(contended(surfaceInputs({ total: 3, withinCapacity: 2 }))).toBe(true)
+  })
+  it("the reporter's measured tally: 7 true positives survive, 3 false positives clear", () => {
+    // The acceptance fixture for this release, from a 43-surface field audit:
+    // 10 surfaces flagged by the 0.28.0 check, of which 7 were right (a
+    // capacity-1 panel with 3 occupants, plus 4 unbounded surfaces holding 7,
+    // 7, 10 and 3) and 3 were wrong (occupancy at or below a stated capacity).
+    // Under the capacity rule the 3 fall away and the 7 remain, so the check
+    // still fires overall, and does so about seven nodes rather than ten.
+    const i = surfaceInputs({ total: 43, withinCapacity: 3, ruleNotChained: 33 })
+    expect(contended(i)).toBe(true)
+    expect(i.nodesByEdgeCountSpec?.[CONTENDED_SPEC_KEY]).toHaveLength(7)
   })
 
   it('surface-without-job fires when surfaces exist with no serves_job edge', () => {

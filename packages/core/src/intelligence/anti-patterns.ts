@@ -16,7 +16,7 @@
  * https://unifiedproductgraph.org | MIT
  */
 
-import type { IntelligenceCondition } from './intelligence.js'
+import type { IntelligenceCondition, EdgeCountVsPropertyCheck } from './intelligence.js'
 import type { UPGProductStage, UPGBenchmarkSource } from './benchmarks/types.js'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -812,7 +812,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     since: '0.27.0',
     name: 'Contended surface without arbitration',
     description:
-      'Features occupy surfaces in this graph, and at least one surface has no recorded answer to "who wins here, and why". Either it carries no arbitration_rule and has not declared itself `chained`, or it admits through arbitration_state that the answer is absent (`none`) or accidental (`safe_by_coincidence`). Left unrecorded, that answer lives in whoever remembers the last argument.',
+      'At least one surface in this graph has no recorded answer to "who wins here, and why". Either it holds more occupants than its stated `capacity` allows (or holds several while stating no limit at all) and carries no arbitration_rule, or it admits through arbitration_state that the answer is absent (`none`) or accidental (`safe_by_coincidence`). Left unrecorded, that answer lives in whoever remembers the last argument.',
     // 0.28.0 (feedback 852a9721, from a 30-surface field audit). Three changes,
     // each earned by a reported false positive or a reported blind spot:
     //
@@ -850,6 +850,68 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     // attribution — making this family noisier on its first real deployment,
     // which is the exact failure (a) exists to fix. If field evidence later shows
     // it needs its own severity, mint it then.
+    //
+    // 0.29.0 (feedback af9ae4c2, the same reporter's measured follow-up: 43
+    // surfaces, 10 flagged, 7 rightly and 3 wrongly). Branch (a) moved from an
+    // aggregate presence count to the per-node `edge_count_vs_property` form.
+    //
+    //  (d) CAPACITY IS NOW READ. The old branch was a pure edge count: any
+    //      surface with more than one occupant and no rule. That flags a header
+    //      row declaring room for four and holding exactly four, which is not
+    //      contended but PARTITIONED — everyone fits, by design, so nothing is
+    //      displaced and there is nothing to decide. All three of the reporter's
+    //      false positives were this, and all three had occupancy at or below a
+    //      stated capacity. The rule is now `occupancy > (capacity ?? 1)`.
+    //
+    //      ABSENT CAPACITY BEHAVES AS 1, NOT AS INFINITY. Absence means
+    //      unbounded, and it is tempting to read unbounded as "never flag". The
+    //      opposite is right: a surface that states no limit has stated no
+    //      answer, so two or more occupants is precisely the unrecorded decision
+    //      this pattern names. That keeps all four of the reporter's unbounded
+    //      true positives (7, 7, 10 and 3 occupants) firing.
+    //
+    //      The check had to become per-node rather than two ANDed aggregates:
+    //      "some surface is over capacity" and "some surface has no rule" are
+    //      both true when they are DIFFERENT surfaces, which would have kept
+    //      every false positive alive. See `EdgeCountVsPropertyCheck.node_filter`.
+    //
+    // ADJUDICATED: DOES A CAPACITY-SATISFIED `additive` SURFACE STILL NEED AN
+    // ORDERING RULE? The reporter's capacity rule and their own earlier report
+    // pull in opposite directions here: 0.28.0 documented that `additive`
+    // occupants raise a question of ORDER rather than victory and that the order
+    // belongs in `arbitration_rule`, while the capacity rule says a surface
+    // where everyone fits has nothing to settle. Ruling: BOTH ARE RIGHT, because
+    // they are about different failures, and this detector owns only one of them.
+    //
+    //   - Contention is about DISPLACEMENT: who is not rendered. Capacity settles
+    //     it. If everyone fits, nobody is displaced, and "who wins" is genuinely
+    //     moot. That is why reading capacity removes real false positives rather
+    //     than merely quieting the check.
+    //   - Ordering is about ARRANGEMENT: in what sequence coexisting occupants
+    //     appear. Capacity says nothing about it. The reporter's own four-occupant
+    //     header row, positioned by runtime width measurement, has a live ordering
+    //     question and no displacement question at all.
+    //
+    // So this check reads capacity and stops at displacement. The ordering concern
+    // stays documented on `composition_mode: 'additive'` as guidance, NOT as a
+    // detector: minting `additive-surface-without-ordering` today would repeat the
+    // 0.28.0 mistake of shipping a second detector on no field evidence, and it
+    // would double-report against this one. Mint it when a graph shows unrecorded
+    // ordering causing a real defect, with its own severity and remediation.
+    //
+    // Known consequence, recorded rather than papered over: `arbitration_rule` is
+    // now visibly OVERLOADED. It holds a displacement rule for `exclusive`
+    // surfaces and an ordering rule for `additive` ones, and this check reads it
+    // for only the first. Splitting it (`arbitration_rule` vs `ordering_rule`) is
+    // the natural move if the ordering detector is ever minted; it is not worth a
+    // breaking property change before then.
+    //
+    // STILL OPEN (banked at 0.28.0, deliberately NOT changed here): a `chained`
+    // slot that honestly declares `arbitration_state: 'none'` re-fires through
+    // branch (c), which carries no chained exemption. Current guidance stands:
+    // leave `arbitration_state` unset on chained surfaces. Changing (b)/(c) was
+    // out of scope for this release and still awaits the field confirmation the
+    // reporter will produce populating their 14 chained slots.
     structured_condition: {
       operator: 'and',
       checks: [
@@ -868,14 +930,16 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
           checks: [
             {
               check: {
-                type: 'entity_count',
+                type: 'edge_count_vs_property',
                 entity_type: 'surface',
-                filter: {
-                  property: 'arbitration_rule',
-                  present: false,
-                  except_property: 'composition_mode',
-                  except_value: 'chained',
-                },
+                edge_type: 'feature_occupies_surface',
+                direction: 'inbound',
+                property: 'capacity',
+                property_absent_default: 1,
+                node_comparison: 'gt',
+                node_filter: { property: 'arbitration_rule', present: false },
+                except_property: 'composition_mode',
+                except_value: 'chained',
                 comparison: 'nonzero',
               },
             },
@@ -902,7 +966,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     why_it_matters:
       'Contention over a UI place is settled every time it comes up, and an unrecorded settlement is re-argued at the next feature. The cost is paid in repeated decisions, not in a visible defect. A surface that is safe only by coincidence pays it all at once instead, the first time an occupant is added.',
     remediation:
-      'Read `arbitration_state` first: it says what the work actually is. `enforced_undocumented` means the rule already exists in code and needs transcribing into `arbitration_rule`: ten minutes, no meeting. `none` means nobody has decided and someone has to. `safe_by_coincidence` means nothing is enforcing anything and the surface only looks settled; that one wants a guard in code, not just prose. Record the constraint the rule works within (`capacity`, `dimensional_constraint`), and where a design system already answers it, link the source with `surface_governed_by_design_guideline`. Surfaces whose occupants wrap one another rather than compete should declare `composition_mode: \'chained\'`, which exempts them: that is a factual claim about how the code composes, not a way to quiet the check.',
+      'The violation names the offending surfaces in `target_node_ids`; start there rather than re-reading the whole roster. Read `arbitration_state` first: it says what the work actually is. `enforced_undocumented` means the rule already exists in code and needs transcribing into `arbitration_rule`: ten minutes, no meeting. `none` means nobody has decided and someone has to. `safe_by_coincidence` means nothing is enforcing anything and the surface only looks settled; that one wants a guard in code, not just prose. If a flagged surface genuinely holds everything it was designed to hold, the honest fix is to state its `capacity`, not to invent a rule: a surface whose occupancy is at or below a stated capacity is partitioned rather than contended, and it stops firing. Where a design system already answers the question, link the source with `surface_governed_by_design_guideline`. Surfaces whose occupants wrap one another rather than compete should declare `composition_mode: \'chained\'`, which exempts them: that is a factual claim about how the code composes, not a way to quiet the check.',
     stages: ['build', 'beta', 'launch', 'growth', 'mature', 'maintenance'],
     severity: 'medium',
     source: { kind: 'fundamental' },
@@ -1033,14 +1097,21 @@ function walkForExceptSpecs(
  * indexes, because those record marginals and the question is an intersection.
  *
  * So the catalog declares what it needs and collectors compute exactly that
- * and no more. Today the list holds one entry (`surface.arbitration_rule`
- * except `composition_mode: 'chained'`); it stays correct without maintenance
- * because it is derived from the conditions themselves.
+ * and no more. It stays correct without maintenance because it is derived from
+ * the conditions themselves.
+ *
+ * EMPTY SINCE 0.29.0, AND THAT IS NOT A REGRESSION. Its one declarer was the
+ * arbitration branch of `contended-surface-without-arbitration`, which moved to
+ * the per-node `edge_count_vs_property` form because the aggregate could not
+ * ask "over capacity" and "no rule" of the SAME surface. The mechanism stays
+ * supported and tested: an except-qualified presence count is still the right
+ * instrument for a detector that needs an intersection of two marginals and no
+ * per-node arithmetic, and a future pattern declaring one gets it for free.
  *
  * @example
- * UPG_PRESENCE_EXCEPT_SPECS[0]
- * // → { entity_type: 'surface', property: 'arbitration_rule',
- * //     except_property: 'composition_mode', except_value: 'chained' }
+ * // The shape, as the 0.28.0 contention branch declared it:
+ * // { entity_type: 'surface', property: 'arbitration_rule',
+ * //   except_property: 'composition_mode', except_value: 'chained' }
  */
 export const UPG_PRESENCE_EXCEPT_SPECS: readonly UPGPresenceExceptSpec[] = (() => {
   const out: UPGPresenceExceptSpec[] = []
@@ -1066,6 +1137,262 @@ export function presenceExceptKey(
 ): string {
   return `${property}!${exceptProperty}=${exceptValue}`
 }
+
+/**
+ * One `edge_count_vs_property` check declared somewhere in
+ * `UPG_ANTI_PATTERNS`, flattened for collectors (0.29.0).
+ *
+ * @see UPG_EDGE_COUNT_SPECS
+ */
+export interface UPGEdgeCountSpec {
+  /** Entity type whose nodes are evaluated one at a time. */
+  entity_type: string
+  /** Edge type counted against each node. */
+  edge_type: string
+  /** Which end of the edge the evaluated node sits on. */
+  direction: 'inbound' | 'outbound'
+  /** The node's own numeric property the count is compared against. */
+  property: string
+  /** Value used when the node does not carry `property` at all. */
+  property_absent_default: number
+  /** How the count must relate to the property for the node to match. */
+  node_comparison: 'gt' | 'gte' | 'lt' | 'lte' | 'eq'
+  /** Optional extra per-node presence requirement. */
+  node_filter?: { property: string; present: boolean }
+  /** Property that removes a node from the evaluated population. */
+  except_property?: string
+  /** Value of `except_property` that triggers the exclusion. */
+  except_value?: string
+}
+
+/**
+ * Canonical key for one edge-count spec, shared by the collectors that build
+ * `nodesByEdgeCountSpec` and the evaluator that reads it. Both sides must
+ * agree, so neither spells it inline.
+ *
+ * Every discriminating field is in the key. Two detectors asking about the same
+ * edge and property but with different thresholds, filters or exemptions are
+ * different questions and must not collide on one tally.
+ *
+ * @example
+ * edgeCountSpecKey({ entity_type: 'surface', edge_type: 'feature_occupies_surface',
+ *   direction: 'inbound', property: 'capacity', property_absent_default: 1,
+ *   node_comparison: 'gt', node_filter: { property: 'arbitration_rule', present: false },
+ *   except_property: 'composition_mode', except_value: 'chained' })
+ * // → "surface|feature_occupies_surface|inbound|capacity|1|gt|arbitration_rule=absent|composition_mode=chained"
+ */
+export function edgeCountSpecKey(spec: UPGEdgeCountSpec): string {
+  const filter = spec.node_filter
+    ? `${spec.node_filter.property}=${spec.node_filter.present ? 'present' : 'absent'}`
+    : '*'
+  const except =
+    spec.except_property !== undefined && spec.except_value !== undefined
+      ? `${spec.except_property}=${spec.except_value}`
+      : '*'
+  return [
+    spec.entity_type,
+    spec.edge_type,
+    spec.direction,
+    spec.property,
+    String(spec.property_absent_default),
+    spec.node_comparison,
+    filter,
+    except,
+  ].join('|')
+}
+
+/**
+ * Canonical key for one `entity_count` filter, shared by the collectors that
+ * build `nodesByEntityFilter` and the evaluator that reads it (0.29.0).
+ *
+ * Covers all four filter forms in `EntityCheck.filter`. The key encodes the
+ * filter as the detector wrote it, so a `present: false` filter and a
+ * `present: true` filter over the same property are different keys holding
+ * different node sets, and neither has to be derived from the other by
+ * subtraction.
+ *
+ * @example
+ * entityFilterKey('surface', { property: 'arbitration_state', value: 'none' })
+ * // → "surface|arbitration_state=none"
+ * entityFilterKey('hypothesis', { status: 'drafted' })
+ * // → "hypothesis|status=drafted"
+ */
+export function entityFilterKey(
+  entityType: string,
+  filter: Record<string, unknown>,
+): string {
+  const kind = classifyEntityFilter(filter)
+  switch (kind) {
+    case 'presence':
+      return `${entityType}|${filter.property as string}=${filter.present ? 'present' : 'absent'}`
+    case 'value':
+      return `${entityType}|${filter.property as string}=${filter.value as string}`
+    case 'status':
+      return `${entityType}|status=${filter.status as string}`
+    case 'unrecognized':
+      // Unreachable through the catalog: `walkForEntityFilterSpecs` throws on
+      // this shape at module load, so a filter that gets here never made it
+      // into a shipped condition. Kept as a distinct key rather than a silent
+      // catch-all so that if it somehow IS reached, two different unrecognized
+      // filters cannot collide on one tally and dedup each other away.
+      return `${entityType}|<unrecognized>`
+  }
+}
+
+/**
+ * Which of the recognised `EntityCheck.filter` shapes this is.
+ *
+ * The presence form deliberately does NOT branch on `except_property` /
+ * `except_value`. Those belong to the aggregate
+ * `countsByTypeAndPropertyPresenceExcept` mechanism, which is still supported
+ * for counting; ATTRIBUTION for that shape has no declarer, no collector path
+ * and no test, and shipping an unexercised parallel path is how the next drift
+ * starts. When a detector declares one, its attribution lands with it and with
+ * a test. Until then such a filter classifies as `presence` and is attributed
+ * on the presence predicate alone, which is a superset and therefore never
+ * names a node the detector did not implicate.
+ */
+export function classifyEntityFilter(
+  filter: Record<string, unknown>,
+): 'presence' | 'value' | 'status' | 'unrecognized' {
+  const hasProperty = typeof filter.property === 'string'
+  if (hasProperty && typeof filter.present === 'boolean') return 'presence'
+  if (hasProperty && typeof filter.value === 'string') return 'value'
+  if (typeof filter.status === 'string') return 'status'
+  return 'unrecognized'
+}
+
+/**
+ * One `entity_count` filter declared somewhere in `UPG_ANTI_PATTERNS`,
+ * flattened for collectors (0.29.0). Attribution only: the counts these
+ * filters drive are unchanged and still read the aggregate tallies.
+ *
+ * @see UPG_ENTITY_FILTER_SPECS
+ */
+export interface UPGEntityFilterSpec {
+  /** Entity type the filter is applied to. */
+  entity_type: string
+  /** The filter exactly as the detector declared it. */
+  filter: Record<string, unknown>
+  /**
+   * Which recognised shape this filter is, resolved once at derivation.
+   *
+   * Carrying it means a collector switches exhaustively on a closed set rather
+   * than re-sniffing the shape and quietly skipping anything it was not taught.
+   * A silent skip there produces a forever-empty match list: attribution dies
+   * with no error and no failing test, which is the worst possible failure for
+   * a feature whose whole job is to name things.
+   */
+  kind: 'presence' | 'value' | 'status'
+}
+
+/** Recursively collect entity-count filter specs from one condition tree. */
+function walkForEntityFilterSpecs(
+  cond: IntelligenceCondition,
+  out: UPGEntityFilterSpec[],
+): void {
+  if ('operator' in cond) {
+    for (const child of cond.checks) walkForEntityFilterSpecs(child, out)
+    return
+  }
+  const check = cond.check
+  if (check.type !== 'entity_count' || !check.filter) return
+  const kind = classifyEntityFilter(check.filter)
+  if (kind === 'unrecognized') {
+    // LOUD, AND AT MODULE LOAD. A filter shape nothing can classify would
+    // otherwise reach the collector, match nothing forever, and cost the
+    // detector its attribution in total silence. Failing here means a spec
+    // author learns at the moment they write it, and no shipped build can
+    // contain one.
+    throw new Error(
+      `Unrecognized entity_count filter shape on "${check.entity_type}": ` +
+        `${JSON.stringify(check.filter)}. Recognised shapes are ` +
+        `{ property, present }, { property, value } and { status }. ` +
+        `Teach classifyEntityFilter + the collector before declaring a new one.`,
+    )
+  }
+  const key = entityFilterKey(check.entity_type, check.filter)
+  if (out.some((s) => entityFilterKey(s.entity_type, s.filter) === key)) return
+  out.push({ entity_type: check.entity_type, filter: check.filter, kind })
+}
+
+/**
+ * Every `entity_count` filter the catalog declares (0.29.0), so collectors can
+ * record which nodes matched each one without indexing the whole graph.
+ *
+ * The catalog declares five filters in total, which is what makes per-node
+ * attribution affordable here: a handful of predicate evaluations per node,
+ * rather than an id list for every (type, property, value) triple that happens
+ * to exist in the data.
+ */
+export const UPG_ENTITY_FILTER_SPECS: readonly UPGEntityFilterSpec[] = (() => {
+  const out: UPGEntityFilterSpec[] = []
+  for (const ap of UPG_ANTI_PATTERNS) {
+    if (ap.structured_condition) walkForEntityFilterSpecs(ap.structured_condition, out)
+  }
+  return out
+})()
+
+/**
+ * Normalise one `edge_count_vs_property` check into its spec.
+ *
+ * THE ONLY PLACE THIS SHAPE IS CONSTRUCTED. The spec has nine fields and every
+ * one of them is keyed into `edgeCountSpecKey`, so a second construction site
+ * that forgot to apply the `direction` default (or added a field) would produce
+ * a key that silently misses the collector's entry, and the check would read as
+ * "no node matched" rather than failing. Collector, evaluator and attribution
+ * all route through here.
+ */
+export function checkToEdgeCountSpec(check: EdgeCountVsPropertyCheck): UPGEdgeCountSpec {
+  return {
+    entity_type: check.entity_type,
+    edge_type: check.edge_type,
+    direction: check.direction ?? 'inbound',
+    property: check.property,
+    property_absent_default: check.property_absent_default,
+    node_comparison: check.node_comparison,
+    node_filter: check.node_filter,
+    except_property: check.except_property,
+    except_value: check.except_value,
+  }
+}
+
+/** Recursively collect edge-count specs from one condition tree. */
+function walkForEdgeCountSpecs(
+  cond: IntelligenceCondition,
+  out: UPGEdgeCountSpec[],
+): void {
+  if ('operator' in cond) {
+    for (const child of cond.checks) walkForEdgeCountSpecs(child, out)
+    return
+  }
+  const check = cond.check
+  if (check.type !== 'edge_count_vs_property') return
+  const spec = checkToEdgeCountSpec(check)
+  const key = edgeCountSpecKey(spec)
+  if (!out.some((s) => edgeCountSpecKey(s) === key)) out.push(spec)
+}
+
+/**
+ * Every per-node edge-count check the catalog declares (0.29.0).
+ *
+ * Same contract as `UPG_PRESENCE_EXCEPT_SPECS`: the catalog states what it
+ * needs, collectors compute exactly that and nothing more. Indexing every
+ * (type, edge type, property) triple speculatively would tax every
+ * `validate_graph` call to serve one detector, and unlike the aggregate counts
+ * these tallies cannot be derived from each other.
+ *
+ * Today the list holds one entry (surface occupancy against `capacity`), and it
+ * stays correct without maintenance because it is derived from the conditions
+ * themselves.
+ */
+export const UPG_EDGE_COUNT_SPECS: readonly UPGEdgeCountSpec[] = (() => {
+  const out: UPGEdgeCountSpec[] = []
+  for (const ap of UPG_ANTI_PATTERNS) {
+    if (ap.structured_condition) walkForEdgeCountSpecs(ap.structured_condition, out)
+  }
+  return out
+})()
 
 /**
  * Look up a curated anti-pattern by its slug id.

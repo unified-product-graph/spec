@@ -7,6 +7,37 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.29.0] - 2026-08-15
+
+**The contention check learns to read `capacity`, violations learn to name their nodes, and a batch write learns to un-say a property.** All three came from the same field reporter measuring the check on a real 43-surface graph: 10 surfaces flagged, 7 correctly, 3 falsely — and every false positive had an occupant count at or below its stated capacity. A surface whose occupants all fit is partitioned, not contended. Additive; no breaking change.
+
+### Changed
+- **`contended-surface-without-arbitration` is capacity-aware.** The rule-absence branch now fires per surface only when `occupancy > (capacity ?? 1)` — occupants within a stated capacity are partitioned by design, and an unbounded surface (absent capacity) with several occupants still fires, because no stated limit means no stated answer. Contention is *displacement* (who is not rendered), which capacity settles; *ordering* of coexisting occupants remains guidance on `composition_mode: 'additive'`, deliberately not a second detector.
+- **Violations carry `target_node_ids`.** Attribution rides the same collector aggregates as the verdicts: a fired check names the offending nodes instead of only the entity types, and `get_anti_pattern_violations_for` matches by id exactly for the types the id list covers (`matched_by: 'node' | 'type'`), keeping type-level reach for types never attributed. The payload reserves an empty `configurations` field for per-projection attribution (0.30.0).
+
+### Added
+- **`edge_count_vs_property` check form** — a general per-node comparison of an edge count against a numeric property with a declared absence default. Deliberately not a one-off: the form fits any place the graph states a numeric intent.
+- **`unset_properties` on `batch_update_nodes`** — batch parity with `update_node`'s existing affordance, so returning a property to *absent* no longer requires literal nulls. For `capacity` the distinction is load-bearing: absent (unbounded), `0` (reserved), and `null` are three different states.
+- **`product.described_configuration`** (optional string) — names the configuration a graph describes, the typed home for the one-named-configuration convention published alongside this release. Naming, not configuring: a label for readers, read by no tool.
+
+### Notes
+- Backfilled below: 0.28.0 shipped 2026-08-13 without a changelog entry; it is recorded now so this entry does not sit on a gap.
+
+---
+
+## [0.28.0] - 2026-08-13
+
+**Four field-data additions teach `surface` to tell the truth about multiplicity, composition, arbitration, and drift.** All four came from one reporter populating 0.27.0's `surface` against a real 30-surface product (three parallel code audits, 329 file:line citations) before writing a single node. Additive; no breaking change. *(Backfilled 2026-08-15 — this release shipped without an entry.)*
+
+### Added
+- **`cardinality`** (`1 | 0..1 | 1..n | 0..n`) and **`instance_scope`** (`global | per_parent`) — `capacity` counts occupants per instance; these count instances. Without them the graph says "the product has an inspector panel" when the truth is "each document pane has its own."
+- **`composition_mode`** (`exclusive | additive | chained`) — how co-occupants relate. `chained` (each occupant wraps the next) is a trust model, not contention, and is exempt from `contended-surface-without-arbitration` — declare-to-earn: an unset `composition_mode` still fires.
+- **`arbitration_state`** (`enforced_documented | enforced_undocumented | safe_by_coincidence | none`) — routes remediation instead of guessing it. `safe_by_coincidence` and `none` fire the contention check on their own admission; a written rule cannot mask them.
+- **`surface_deviates_via_technical_debt_item`** edge — `capacity` always means *intent*, and drift from it becomes a trackable, assignable debt item instead of a lie or an endorsement.
+- **Except-form on the presence filter** — `filter: { property, present, except_property, except_value }`, needed because the chained exemption is an intersection the marginal forms could not express.
+
+---
+
 ## [0.27.0] - 2026-08-12
 
 **A `surface` entity gives the UI a place: what occupies it, and who wins when two things want it.** The catalog could say who OWNS a thing (`feature_area`) and what ARCHITECTURE it belongs to (`bounded_context`), but nothing answered *what else occupies the same place?*. `screen` is route-level (route / viewport / access_level) and too coarse for a shell, a pane, a slot, a field gutter, an action bar, or an overlay. Those places are contested, and the arbitration rule is decided constantly and then rediscovered forever, because prose is where it lands. `surface` records the place, its guest list, and the rule. Additive; no breaking change.

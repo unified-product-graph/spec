@@ -37,7 +37,11 @@ import {
   presenceExceptKey,
   UPG_ANTI_PATTERNS,
   UPG_PRESENCE_EXCEPT_SPECS,
+  UPG_EDGE_COUNT_SPECS,
+  edgeCountSpecKey,
 } from '../intelligence/anti-patterns.js'
+import { collectTargetEntities } from '../intelligence/evaluator.js'
+import type { IntelligenceCondition } from '../intelligence/intelligence.js'
 import { COVERAGE_ANTI_PATTERNS } from '../intelligence/validation-profiles.js'
 
 const cat = UPG_EDGE_CATALOG as Record<string, UPGEdgeDefinition>
@@ -349,6 +353,16 @@ describe('the three surface anti-patterns', () => {
     return out
   }
 
+  /** The contention check's per-node spec, resolved from the derived list so a
+   *  change to the condition shows up here rather than drifting past it. */
+  const contentionSpec = () => {
+    const spec = UPG_EDGE_COUNT_SPECS.find(
+      (s) => s.entity_type === 'surface' && s.edge_type === 'feature_occupies_surface',
+    )
+    expect(spec, 'contention check must declare an edge-count spec').toBeDefined()
+    return spec!
+  }
+
   it('the contention pattern leads, the two companions sit a tier below', () => {
     const main = getAntiPatternById('contended-surface-without-arbitration')
     const job = getAntiPatternById('surface-without-job')
@@ -372,25 +386,40 @@ describe('the three surface anti-patterns', () => {
 
   it('the contention detector keys on arbitration_rule ABSENCE, not on a value', () => {
     // A value-keyed filter cannot express "nobody filled this in": the collector
-    // only indexes values that exist. The presence filter is what makes the
-    // ratified detector able to fire at all. 0.28.0 qualifies it with the
-    // chained exemption but keeps absence as the primary trigger, so a graph
-    // that adopted 0.27.0 and filled in rules sees no change.
-    expect(allFilters()).toContainEqual({
+    // only indexes values that exist. Absence is what makes the detector able to
+    // fire at all. 0.29.0 moved this branch to the per-node form, where the
+    // absence requirement lives in `node_filter` alongside the capacity
+    // comparison, so that both halves are asked of the SAME surface.
+    expect(contentionSpec().node_filter).toEqual({
       property: 'arbitration_rule',
       present: false,
-      except_property: 'composition_mode',
-      except_value: 'chained',
     })
   })
 
-  it('the chained exemption is DECLARE-TO-EARN: it lives on the filter, not on the population', () => {
+  it('the chained exemption is DECLARE-TO-EARN: it lives on the check, not on the population', () => {
     // The exemption must be a property a surface CLAIMS, never a default. A
-    // filter without the except clause would exempt nobody; a condition that
-    // dropped the presence clause would exempt everybody. Pin both halves.
-    const f = allFilters().find((x) => x.property === 'arbitration_rule')
-    expect(f?.present).toBe(false)
-    expect(f?.except_value).toBe('chained')
+    // check without the except clause would exempt nobody; one that dropped the
+    // absence clause would exempt everybody. Pin both halves.
+    const spec = contentionSpec()
+    expect(spec.node_filter?.present).toBe(false)
+    expect(spec.except_property).toBe('composition_mode')
+    expect(spec.except_value).toBe('chained')
+  })
+
+  it('capacity is read, and an absent capacity behaves as 1 rather than as unbounded', () => {
+    // The 0.29.0 fix (feedback af9ae4c2). Occupancy is compared against the
+    // surface's OWN capacity, so a place holding no more than it declared is
+    // partitioned rather than contended. The absent-default is the subtle half:
+    // absence means unbounded, and it is tempting to read unbounded as "never
+    // flag", but a surface that states no limit has stated no answer. Setting
+    // the default to 1 keeps every unbounded multi-occupant surface firing,
+    // which is where 4 of the reporter's 7 true positives lived.
+    const spec = contentionSpec()
+    expect(spec.edge_type).toBe('feature_occupies_surface')
+    expect(spec.direction).toBe('inbound')
+    expect(spec.property).toBe('capacity')
+    expect(spec.property_absent_default).toBe(1)
+    expect(spec.node_comparison).toBe('gt')
   })
 
   it('safe_by_coincidence and none each fire on their own, unqualified', () => {
@@ -434,19 +463,61 @@ describe('the three surface anti-patterns', () => {
     ])
   })
 
-  it('the catalog declares exactly one except-spec, and it is the chained exemption', () => {
-    // UPG_PRESENCE_EXCEPT_SPECS is derived from the conditions themselves, so it
+  it('the catalog declares exactly one edge-count spec, and it is the contention check', () => {
+    // UPG_EDGE_COUNT_SPECS is derived from the conditions themselves, so it
     // cannot drift from them. Pinning its contents pins the collector contract:
-    // a spec added without a collector update reads as zero, which over-reports
-    // rather than silently under-reporting.
-    expect(UPG_PRESENCE_EXCEPT_SPECS).toEqual([
+    // the collector computes exactly these per-node tallies and no others.
+    expect(UPG_EDGE_COUNT_SPECS).toEqual([
       {
         entity_type: 'surface',
-        property: 'arbitration_rule',
+        edge_type: 'feature_occupies_surface',
+        direction: 'inbound',
+        property: 'capacity',
+        property_absent_default: 1,
+        node_comparison: 'gt',
+        node_filter: { property: 'arbitration_rule', present: false },
         except_property: 'composition_mode',
         except_value: 'chained',
       },
     ])
+    // The key is what collector and evaluator must agree on; neither spells it
+    // inline, and every discriminating field is in it.
+    expect(edgeCountSpecKey(UPG_EDGE_COUNT_SPECS[0]!)).toBe(
+      'surface|feature_occupies_surface|inbound|capacity|1|gt|arbitration_rule=absent|composition_mode=chained',
+    )
+  })
+
+  it('edge_count_vs_property contributes its entity_type to target_entities', () => {
+    // Regression guard. `collectTargetEntities` walks the condition for the
+    // types a violation is about; a missing case for this check form is masked
+    // wherever a sibling check names the same type (as it is in the contention
+    // pattern, whose entity_count gate also says `surface`). It bites the first
+    // pattern whose ONLY typed check is this form: target_entities comes back
+    // empty, and the violation becomes unreachable through the type half of
+    // every consumer. Asserted here against a condition built for the purpose,
+    // so the mask cannot hide it.
+    const pureCondition: IntelligenceCondition = {
+      check: {
+        type: 'edge_count_vs_property',
+        entity_type: 'surface',
+        edge_type: 'feature_occupies_surface',
+        property: 'capacity',
+        property_absent_default: 1,
+        node_comparison: 'gt',
+        comparison: 'nonzero',
+      },
+    }
+    expect(collectTargetEntities(pureCondition)).toEqual(['surface'])
+  })
+
+  it('the except-spec list is now empty, and that is the 0.29.0 move rather than a regression', () => {
+    // Its one declarer was this same contention branch, which moved to the
+    // per-node form because the aggregate could not ask "over capacity" and "no
+    // rule" of the SAME surface. The mechanism stays supported and tested for
+    // the next detector that needs an intersection of two marginals; it simply
+    // has no declarer today. Pinned so the emptiness is a recorded decision
+    // rather than something a reader has to reverse-engineer.
+    expect(UPG_PRESENCE_EXCEPT_SPECS).toEqual([])
     expect(presenceExceptKey('arbitration_rule', 'composition_mode', 'chained')).toBe(
       'arbitration_rule!composition_mode=chained',
     )

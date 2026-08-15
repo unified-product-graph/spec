@@ -1,9 +1,17 @@
 /**
  * UPG Intelligence Conditions: structured, machine-evaluable graph predicates.
  *
- * Three check types: `EntityCheck` (count by criteria), `RelationshipCheck`
- * (edge existence/count), `BenchmarkCheck` (compare against stage benchmark).
+ * Check types: `EntityCheck` (count by criteria), `RelationshipCheck`
+ * (edge existence/count), `BenchmarkCheck` (compare against stage benchmark),
+ * `EdgeCountVsPropertyCheck` (per-node: edge count against the node's own
+ * numeric property), plus the graph-shape counts (total / domain / orphan).
  * Composable via `and` / `or` operators.
+ *
+ * All but `EdgeCountVsPropertyCheck` are AGGREGATE checks — whole-graph tallies
+ * compared against constants. That is why most detectors here are whole-graph
+ * approximations of per-node rules, and why they can say a graph has a problem
+ * without saying where. `EdgeCountVsPropertyCheck` (0.29.0) is the exception,
+ * and it is what lets a violation name the nodes it is about.
  */
 
 import type { UPGEntityType } from '../catalog/entity-catalog.js'
@@ -130,6 +138,96 @@ export interface OrphanCheck {
   threshold?: number
 }
 
+/**
+ * Count entities whose EDGE COUNT stands in a stated relation to one of their
+ * own NUMERIC PROPERTIES (0.29.0).
+ *
+ * The first genuinely per-node check form. Every other check in this file is an
+ * aggregate: it compares a whole-graph tally against a constant. This one
+ * compares two values that both live on the same node, so it cannot be
+ * expressed by any composition of the others — a graph-wide edge count says
+ * nothing about which node holds which capacity, and the presence filters key
+ * on whether a property EXISTS, never on what it says relative to anything else.
+ *
+ * The motivating case (feedback `af9ae4c2`, measured on a 43-surface field
+ * graph): `contended-surface-without-arbitration` counted
+ * `feature_occupies_surface` edges and never read `capacity`, so a header row
+ * declaring room for four occupants and holding exactly four was flagged as
+ * contended alongside a capacity-1 panel holding three. Ten surfaces flagged,
+ * three of them wrongly, and all three wrong for this one reason.
+ *
+ * DELIBERATELY GENERAL. The shape is "edge count versus numeric property", not
+ * "occupancy versus capacity". A surface's guest list against its capacity is
+ * the first instance, but the form fits any place the graph states a numeric
+ * intent and the edges record what actually arrived.
+ *
+ * COLLECTORS ARE DRIVEN BY DECLARED SPECS, never by speculative indexing.
+ * `UPG_EDGE_COUNT_SPECS` is derived from the conditions in this catalog, so a
+ * collector computes exactly the per-node tallies some detector asked for, and
+ * seeds every declared spec before walking so that "nothing matched" and "this
+ * collector is stale" stay distinguishable. The evaluator treats the second as
+ * a worst case and over-reports, which is the safe failure for a detector whose
+ * job is noticing omissions.
+ */
+export interface EdgeCountVsPropertyCheck {
+  /** Discriminator, always `'edge_count_vs_property'` for this check type */
+  type: 'edge_count_vs_property'
+  /** The entity type whose nodes are evaluated one at a time. */
+  entity_type: UPGEntityType
+  /** The edge type counted against each node of `entity_type`. */
+  edge_type: UPGEdgeType
+  /**
+   * Which end of `edge_type` the evaluated node sits on. `inbound` (the
+   * default) counts edges that POINT AT the node, which is the occupancy
+   * reading: `feature_occupies_surface` runs feature → surface, so a surface's
+   * guest list is its inbound count.
+   */
+  direction?: 'inbound' | 'outbound'
+  /** The node's own numeric property the count is compared against. */
+  property: string
+  /**
+   * What to compare against when the node does not carry `property` at all.
+   *
+   * ABSENCE IS A READING, NOT A HOLE. On `surface.capacity` absence means
+   * unbounded, and an unbounded surface is not thereby exempt: it has stated no
+   * limit, so it has stated no answer, and more than one occupant is exactly
+   * the situation worth naming. Setting this to `1` encodes that — an
+   * unqualified place holding two things has an unrecorded decision in it.
+   */
+  property_absent_default: number
+  /**
+   * How a node's edge count must relate to the property value for that node to
+   * be counted. `gt` reads "more arrived than the design said would fit".
+   */
+  node_comparison: 'gt' | 'gte' | 'lt' | 'lte' | 'eq'
+  /**
+   * Optional additional per-node requirement, stated in the vocabulary of
+   * `EntityCheck.filter`'s presence form: the node must carry
+   * (`present: true`) or must not carry (`present: false`) a non-empty value
+   * for `property`.
+   *
+   * THIS IS WHY THE FORM IS PER-NODE RATHER THAN TWO ANDED AGGREGATES.
+   * "Some surface is over capacity" AND "some surface has no arbitration rule"
+   * are both true of a graph where those are DIFFERENT surfaces, so composing
+   * two aggregate checks would keep firing on exactly the graphs this release
+   * exists to stop firing on. Both halves have to be asked of the same node.
+   */
+  node_filter?: { property: string; present: boolean }
+  /**
+   * Optional exemption, mirroring the 0.28.0 `except_property` /
+   * `except_value` form on `EntityCheck`. A node declaring the exemption is
+   * removed from the evaluated population entirely — it is not counted, and it
+   * is not attributed.
+   */
+  except_property?: string
+  /** Value of `except_property` that triggers the exemption. */
+  except_value?: string
+  /** Aggregate comparison applied to the number of nodes that matched. */
+  comparison: 'eq' | 'gt' | 'lt' | 'gte' | 'lte' | 'zero' | 'nonzero'
+  /** Threshold value (not needed for 'zero' / 'nonzero') */
+  threshold?: number
+}
+
 // ─── Condition Composition ──────────────────────────────────────────────────
 
 /**
@@ -156,5 +254,6 @@ export type IntelligenceCondition =
         | DomainCountCheck
         | DomainPopulationCheck
         | OrphanCheck
+        | EdgeCountVsPropertyCheck
     }
   | { operator: 'and' | 'or'; checks: IntelligenceCondition[] }

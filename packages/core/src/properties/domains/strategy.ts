@@ -35,6 +35,23 @@ export interface ProductProperties {
   logo_url?: string
   /** When the product became generally available (ISO 8601) */
   launched_at?: ISODateTime
+  /**
+   * The product configuration this graph describes, named in plain language.
+   *
+   * A product's composition often differs by feature flag, plan tier,
+   * permission level or beta programme: surfaces appear, disappear, or are
+   * replaced by different surfaces with different occupants. A graph that
+   * models one of those without saying which is qualified by a condition
+   * nobody wrote down, and every fact in it inherits that silence.
+   *
+   * NAMING, NOT CONFIGURING. This is a label for readers. Nothing reads it to
+   * gate, filter, or alter how a tool interprets the graph, and it makes no
+   * claim about which configuration most customers are on.
+   *
+   * @example "Enterprise plan, split-navigation flag on"
+   * @example "Default: free tier, all flags off"
+   */
+  described_configuration?: string
 }
 
 // ---------------------------------------------------------------------------

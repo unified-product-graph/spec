@@ -565,6 +565,21 @@ export interface SurfaceProperties {
    * absence carries the "no cap" reading, rather than a magic sentinel value
    * that every consumer would have to special-case. `0` is a real cap meaning
    * "nothing may occupy this surface" (a reserved place), not "unbounded".
+   *
+   * THREE STATES, AND THEY ARE ALL DIFFERENT. Absent = unbounded, no cap
+   * stated. `0` = a reserved place nothing may occupy. `null` = neither of
+   * those, and nothing this field defines; it is what you get by writing an
+   * explicit null rather than removing the key, and no consumer reads it as a
+   * cap. To return this property to ABSENT, remove the key with
+   * `update_node`'s or `batch_update_nodes`' `unset_properties`, since a
+   * property merge preserves anything you omit.
+   *
+   * UNBOUNDED IS NOT AN EXEMPTION FROM SCRUTINY. The contention detector reads
+   * an absent capacity as a threshold of 1, on the reasoning that a surface
+   * which states no limit has stated no answer either, so several occupants is
+   * exactly the unrecorded decision worth naming. Declaring a real capacity is
+   * therefore the way to quiet the check honestly, and the only way that also
+   * records something true.
    */
   capacity?: number
   /**
