@@ -17,6 +17,66 @@ export type { FrameworkCategory, StructurePattern }
 
 // ─── Slots ──────────────────────────────────────────────────────────────────
 
+/**
+ * One declared, deterministic test over a single property. Atoms combine into a
+ * slot's membership rule; an atom is never a membership rule by itself.
+ *
+ * `scope` says whose property is read, reusing the discriminator that already
+ * exists on `PropertyRequirementLike` rather than inventing a parallel axis:
+ * `'entity'` reads a property of the entity itself (an assumption's
+ * `risk_level`), `'framework'` reads a measured property held on the exercise
+ * edge (Kano's `functional_response`).
+ *
+ * Semantics a consumer must honour — each exists because its violation is a way
+ * a grid could silently lie:
+ *
+ * - **Pure and total.** A function of the entity's and the exercise edge's
+ *   properties, and nothing else. No clock, no random, no ambient read.
+ * - **Mutually exclusive.** No entity may satisfy two sibling predicates.
+ *   Overlapping predicates make a framework invalid; that is an authoring bug to
+ *   reject, never a tie for the renderer to break by declaration order.
+ * - **Not exhaustive.** The complement of the union is the legitimate, expected
+ *   set of unplaced entities. Do not add a catch-all.
+ * - **Absence is not a value.** A missing property, a null, or an assessment
+ *   without a value fails every predicate. It never compares as zero and never
+ *   sorts into a corner cell.
+ * - **Thresholds are declared, never inferred.** Every boundary is a literal
+ *   here; the renderer contributes no default of its own.
+ *
+ * Ruling and rationale (including Amendment 1, which set the arity):
+ * the zone-predicate hook ruling (internal decision record, 2026-08-07)
+ */
+export type FrameworkSlotPredicateAtom = {
+  /** Whose property is being read: the entity's own, or the framework exercise's */
+  scope: 'entity' | 'framework'
+  /** The property name being tested */
+  property: string
+} & (
+  | { op: 'eq'; value: string | number | boolean }
+  | { op: 'in'; value: ReadonlyArray<string | number> }
+  | { op: 'gte'; value: number }
+  | { op: 'lt'; value: number }
+  /** Half-open interval `[min, max)` — min inclusive, max exclusive */
+  | { op: 'band'; value: readonly [number, number] }
+)
+
+/**
+ * A slot's membership rule: a conjunction. An entity belongs iff EVERY atom
+ * holds; absence of any atom's property fails the whole conjunction.
+ *
+ * A list rather than a single atom because every real quadrant framework
+ * partitions on two properties at once — an assumption map on risk AND
+ * confidence, Kano on functional AND dysfunctional response. A one-atom rule
+ * cannot tell "test first" from "monitor", and declaring both as "risk is high"
+ * would make them overlap, which is invalid.
+ *
+ * Always a list, even for one atom, so consumers never branch on arity.
+ * Conjunction only: express a disjunction as two slots, which gives each
+ * disjunct its own visible cell. Empty is invalid — it would match everything,
+ * which is a catch-all cell in disguise.
+ */
+export type FrameworkSlotPredicate = readonly FrameworkSlotPredicateAtom[]
+
 /** A named position within a framework's visual structure, populated by an entity type */
 export interface FrameworkSlot {
   /** Display label for this slot (e.g. "Key Partners", "Problem", "Reach") */
@@ -40,6 +100,18 @@ export interface FrameworkSlot {
    * off `scope: 'framework'` properties, not roles.
    */
   role?: string
+  /**
+   * The membership rule for this slot, when membership is decided by a property
+   * value rather than by entity type or framework role.
+   *
+   * Carrying it here — beside `role` — is what keeps the zone class computable
+   * from the spec record alone: a slot with a `predicate` is a PREDICATE-zone.
+   * The two are not alternatives. On a predicate zone, `role` stops being the
+   * membership channel and becomes the manual-override channel.
+   *
+   * Additive and optional. A slot without one is unaffected.
+   */
+  predicate?: FrameworkSlotPredicate
   /** Explanation of what this slot represents in the framework */
   description?: string
 }
@@ -397,6 +469,176 @@ export interface FrameworkPresentationSpec {
   colour_map?: Record<string, string>
 }
 
+// ─── Relational Layer ───────────────────────────────────────────────────────
+
+/**
+ * One traversal step along a declared edge path.
+ *
+ * `direction` is EXPLICIT and never inferred. Inferring it from endpoint types
+ * fails on self-edges — the experiment family has one
+ * (`experiment_run_tested_via_experiment_run`), where source and target are the
+ * same type and the endpoint types cannot disambiguate the reading.
+ *
+ * `forward` walks source → target as the catalog declares it; `reverse` walks
+ * target → source.
+ */
+export interface RelationalEdgeStep {
+  /** Canonical edge type id from the UPG edge catalog */
+  edge: string
+  /** Which way this step traverses the edge. Never inferred. */
+  direction: 'forward' | 'reverse'
+}
+
+/**
+ * A column rendering a property of the ROW entity itself.
+ *
+ * A field column declares NO entity type, deliberately. Its entity is the spine
+ * by definition, and asking what type it "contains" is a category error. This is
+ * the difference that dissolves the Status trap: under `slots`, a column showing
+ * a property of the row had to name an `entityTypeId`, which made it look like a
+ * second zone holding the same type as the first — something a partition forbids.
+ * A field column has no such artefact to explain away.
+ */
+export interface RelationalFieldColumn {
+  kind: 'field'
+  /** Stable machine-readable column id (snake_case), unique within the surface */
+  id: string
+  /** Display header */
+  label: string
+  /** Property key on the spine entity */
+  property: string
+  /** Whether the column can be sorted */
+  sortable?: boolean
+}
+
+/**
+ * A column rendering a declared expression over the ROW entity's own properties.
+ *
+ * Every operand must be a property the spine entity actually declares. An
+ * expression reaching a property held by another entity on a path is INVALID —
+ * it would evaluate to nothing for every row forever, which is a column that is
+ * 100% honest gap, i.e. a lie about what the framework measures.
+ */
+export interface RelationalComputedColumn {
+  kind: 'computed'
+  /** Stable machine-readable column id (snake_case), unique within the surface */
+  id: string
+  /** Display header */
+  label: string
+  /** Arithmetic expression over spine properties */
+  expression: string
+  /** How to render the computed value */
+  format?: 'number' | 'percentage' | 'currency' | 'duration'
+  /** Whether the column can be sorted */
+  sortable?: boolean
+}
+
+/**
+ * A column rendering the entities reached from the row along a declared edge path.
+ *
+ * A PROJECTION IS NOT A PARTITION, and the distinction is load-bearing rather
+ * than stylistic. A partition claims exclusive membership and is a function of
+ * the entity alone; a projection reports a relationship and is a function of the
+ * (row, path) pair. The same entity legitimately appears in several columns, and
+ * in the same column of several rows — that is the edge structure being reported
+ * accurately, not the "rendering illusion" that property-partitioned frameworks
+ * suffer from. Nothing lands in a projection cell by index, by order, or by
+ * count: the edge exists in the graph or it does not.
+ *
+ * Consequently, and this is a rule rather than an observation: **sibling columns
+ * are NOT required to be mutually exclusive, and must not be validated as if
+ * they were.** Mutual exclusivity is a predicate-zone rule. Enforcing it on a
+ * join would forbid the join.
+ *
+ * EVERY PROJECTION IS MANY-VALUED. The edge catalog declares no cardinality on
+ * any edge, so a projection resolves to a set of size 0..n and must be rendered
+ * as one. Taking the first member because "a run has one hypothesis" asserts a
+ * cardinality the spec does not declare, and selecting from an unordered set by
+ * position is the offset-windowing defect at a different arity.
+ *
+ * ABSENCE IS NOT A VALUE. An empty projection renders as a typed, labelled gap,
+ * never as a blank cell — three states must stay distinguishable: no edge along
+ * the path, an edge to an entity whose rendered field is empty, and not yet
+ * loaded. A blank cell collapses all three into one shrug.
+ */
+export interface RelationalProjectionColumn {
+  kind: 'projection'
+  /** Stable machine-readable column id (snake_case), unique within the surface */
+  id: string
+  /** Display header */
+  label: string
+  /**
+   * The traversal from the spine to the projected entities. A LIST, not a single
+   * edge.
+   *
+   * Multi-hop is required, not a generality. Reaching a `hypothesis` from an
+   * `experiment_run` is a two-hop reverse traversal, and the spec has twice
+   * REFUSED to mint the shortcut edge that would flatten it, because doing so
+   * would dissolve the plan/run split made in/323. A single-hop-only
+   * declaration would leave authors needing that column with no legal way to
+   * declare it — and the illegal way is the edge the spec already rejected.
+   */
+  path: RelationalEdgeStep[]
+  /** Property keys to render for each projected entity */
+  fields: string[]
+  /**
+   * Maximum entities to RENDER in a cell. A declared literal; the renderer
+   * contributes no default. Truncates rendering only, never membership, and a
+   * truncated cell must report the full count.
+   */
+  limit?: number
+  /** Whether the column can be sorted */
+  sortable?: boolean
+}
+
+/** Any column on a relational surface */
+export type RelationalColumn =
+  | RelationalFieldColumn
+  | RelationalComputedColumn
+  | RelationalProjectionColumn
+
+/**
+ * A relational / join surface: rows are the instances of one declared spine
+ * type, columns are fields of the row or projections along declared edge paths.
+ *
+ * Additive and optional. A framework without this block is unaffected; a
+ * consumer that does not understand it ignores it. It exists because the zoned
+ * grid partitions ONE set into cells and cannot express a surface that JOINS
+ * several sets along the relationships between them — the shape of the `table`
+ * pattern, the second-largest structural family in this spec.
+ *
+ * Rules a consumer must honour, stated here because they are contract, not
+ * rendering preference:
+ *
+ * 1. **The spine is the population.** Row count is the number of spine entities
+ *    in scope. No column may filter the row set; a column that removes rows is a
+ *    partition wearing a projection's clothes.
+ * 2. **Counts are entity-distinct per column** — the number of DISTINCT entities
+ *    appearing anywhere in the column, never the sum of cell sizes. Where the two
+ *    differ, both may be shown only if labelled ("7 learnings across 9 rows").
+ *    Reporting the sum as a population is this surface's characteristic lie.
+ * 3. **Unreferenced entities must be reported.** An entity of a type appearing in
+ *    any declared path — endpoint OR intermediate — that no row reaches is
+ *    invisible by construction. It must be surfaced, always, with a count and its
+ *    type, even at zero. Otherwise the surface silently under-reports the graph.
+ * 4. **Determinism.** A projection is a function of the graph's edges and the
+ *    projected entities' properties, and nothing else. No clock, no random, no
+ *    ambient read. Same graph, same table, every machine.
+ */
+export interface RelationalSurfaceSpec {
+  /** The UPG entity type whose instances are the rows */
+  spine: string
+  /** Ordered columns; at least one */
+  columns: RelationalColumn[]
+  /** Declared row order. Never inferred; the renderer contributes no default. */
+  sort: {
+    /** `id` of a column in `columns` */
+    column: string
+    /** Sort direction */
+    direction: 'asc' | 'desc'
+  }
+}
+
 // ─── Education Layer ────────────────────────────────────────────────────────
 
 /** One step in a guided walkthrough of how to use a framework */
@@ -506,6 +748,18 @@ export interface UPGFramework {
   structure: FrameworkStructureSpec
   /** How the framework should be rendered */
   presentation: FrameworkPresentationSpec
+  /**
+   * A relational / join surface, for frameworks whose columns are projections
+   * along edges rather than a partition of one set.
+   *
+   * Additive and optional. When present it is the authoritative column
+   * declaration and `presentation.layout` describes only chrome — the two must
+   * not be read as competing rosters. `slots` should be omitted on a framework
+   * that declares this block: a slot cannot express an edge path, and forcing a
+   * table into slots is what produced the duplicate-`entityTypeId` artefact this
+   * block removes.
+   */
+  relational?: RelationalSurfaceSpec
   /** Educational context and guided walkthrough */
   education: FrameworkEducation
   /** IDs of other frameworks this one can be composed with */

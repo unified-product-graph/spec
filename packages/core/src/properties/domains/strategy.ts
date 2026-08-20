@@ -37,19 +37,22 @@ export interface ProductProperties {
   launched_at?: ISODateTime
   /**
    * The product configuration this graph describes, named in plain language.
+   * A label for readers: nothing reads it to gate, filter, or alter how a tool
+   * interprets the graph.
    *
+   * @example "Enterprise plan, split-navigation flag on"
+   *
+   * @remarks
    * A product's composition often differs by feature flag, plan tier,
    * permission level or beta programme: surfaces appear, disappear, or are
    * replaced by different surfaces with different occupants. A graph that
-   * models one of those without saying which is qualified by a condition
-   * nobody wrote down, and every fact in it inherits that silence.
+   * models one of those without saying which is qualified by a condition nobody
+   * wrote down, and every fact in it inherits that silence.
    *
-   * NAMING, NOT CONFIGURING. This is a label for readers. Nothing reads it to
-   * gate, filter, or alter how a tool interprets the graph, and it makes no
-   * claim about which configuration most customers are on.
-   *
-   * @example "Enterprise plan, split-navigation flag on"
-   * @example "Default: free tier, all flags off"
+   * It makes no claim about which configuration most customers are on. Where a
+   * product genuinely ships several and the differences matter, declare a
+   * `configuration_axis` instead and let each fact say which values it holds
+   * under.
    */
   described_configuration?: string
 }

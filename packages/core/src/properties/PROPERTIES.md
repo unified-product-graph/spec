@@ -4,6 +4,48 @@ Authoritative guide to which property keys have a canonical shape across the spe
 
 Every `*Properties` interface in `properties/domains/` should match this reference when it uses one of the listed keys.
 
+## Writing a property doc: two tiers
+
+A property's JSDoc is the vocabulary of record, so every downstream surface inherits it: the hover card on the reference page, the entity reference itself, `get_entity_schema` in an agent's context window, and the `.d.ts` a consumer reads in their editor. Those surfaces want different amounts of the same thing, and a single block written for the most demanding one is wrong for all the others. A capacity doc that filled a reviewer's viewport is what prompted the split.
+
+**Write the contract as the summary. Write everything else under `@remarks`.**
+
+```ts
+/**
+ * How many occupants ONE INSTANCE of the surface holds at once. Absent means
+ * unbounded, `0` means a reserved place nothing may occupy.
+ *
+ * @remarks
+ * Intent, not observation: a region declared `capacity: 1` keeps saying 1 even
+ * after someone finds it rendering four. The drift belongs on a debt item, and
+ * editing the number to match the bug would destroy the only record a gap
+ * exists.
+ */
+capacity?: number
+```
+
+**The summary is the contract.** What the property means, and the semantics a caller must not get wrong. Two or three sentences. If a reader would produce broken data without knowing it, it belongs here.
+
+**`@remarks` is everything else.** Rationale, edge cases, workflow recipes, design history, the alternatives that were rejected and why. There is no length limit, because nothing renders it by default.
+
+### The rules that keep it honest
+
+- **Breaking-change and migration notices are contract tier, always.** A BREAKING marker, a retired enum value, a one-to-one migration table: these go in the summary, never under `@remarks`. The test is who needs them and when. A caller holding legacy data needs to know their values no longer type-check *before* they write anything, and `get_entity_schema` does not send `notes` unless asked, so a demoted notice is a notice the agent never sees. `EvidenceDirection`'s two sibling properties are the worked example: `result_direction` keeps its v0.4.0 notice in the summary, and `HypothesisEvidence.direction` briefly lost its own to `@remarks` during the two-tier sweep, which is exactly the accident this rule exists to prevent.
+- **Move, never delete.** Semantics that stop being findable are worse than semantics that are long. A field reporter once concluded a capability did not exist because it was documented where they did not look; the reference page therefore renders both halves, and only the hover and the default schema response trim.
+- **The summary must stand alone.** A reader who never opens the disclosure should still use the property correctly. If the summary only makes sense once you have read the remarks, the split is in the wrong place.
+- **Do not split a short doc.** The median property description is about 70 characters and needs no tiers. Reach for `@remarks` when the doc has grown past roughly 400 characters, or when you notice yourself writing "the reason for this is".
+
+### What consumes which tier
+
+| Surface | Reads |
+|---|---|
+| Hover card on the reference page | summary, trimmed to whole sentences |
+| Entity reference page | summary, plus remarks behind a "Full semantics" disclosure |
+| `get_entity_schema` | summary by default; remarks only with `include_notes: true` |
+| Generated `.d.ts` | the whole JSDoc block, as written |
+
+The generator (`scripts/generate-property-registry.ts`) reads the split and emits `description` (summary) and `notes` (remarks) as separate fields on `PropertyDefinition`. Both are derived from one JSDoc block, so the source of truth stays in one place.
+
 ## Canonical primitive types
 
 Defined once in `primitives.ts`, re-used everywhere. These are the only primitives you should reach for when declaring a new property.

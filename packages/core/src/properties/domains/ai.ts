@@ -107,14 +107,90 @@ export interface PromptVersionProperties {
  * }
  */
 export interface EvalBenchmarkProperties {
-  /** Measured dimension */
-  benchmark_type?: 'accuracy' | 'latency' | 'cost' | 'safety' | 'custom'
+  /**
+   * Measured dimension.
+   *
+   * @remarks
+   * Widened in 0.31.0 with the three dimensions an eval suite actually reports
+   * and this set could not express: `precision_recall` (two numbers, not one
+   * accuracy figure, and the pair is the point, because a detector that fires on
+   * everything scores perfectly on recall alone), `task_success` (did the agent
+   * achieve the goal), and `coherence` (rubric-graded, for multi-step runs).
+   *
+   * THIS ENUM IS A DIMENSION AXIS, AND IT SHOULD STAY ONE. An eval suite's
+   * families are a SUBJECT axis (what is under test), and a dimension cannot
+   * separate subjects, which is why several families legitimately share
+   * `task_success`.
+   *
+   * The subject is expressed on the EDGE, not here: `eval_benchmark_measures_node`
+   * names what a benchmark measures by pointing at it. So "which benchmarks cover
+   * the importer" is a traversal, and this property stays a clean answer to a
+   * different question, "what dimension does this benchmark report". The
+   * commissioning brief hoped the enum would carry both; splitting them across the
+   * enum and the edge is the better answer, and it needs no third mechanism.
+   *
+   * Corollary worth stating, since it is load-bearing: do NOT add subject-shaped
+   * values here. `tool_use` or `documentation` would encode on this axis what the
+   * edge already carries, and the two would drift the first time a benchmark
+   * measured something its enum value did not admit.
+   */
+  benchmark_type?:
+    | 'accuracy'
+    | 'latency'
+    | 'cost'
+    | 'safety'
+    | 'precision_recall'
+    | 'task_success'
+    | 'coherence'
+    | 'custom'
   /** Test cases in the suite */
   test_case_count?: number
   /** Minimum passing score */
   passing_threshold?: number
   /** ISO date of the most recent run */
   last_run?: ISODate
+}
+
+/** One metric's score inside `EvalRunProperties.metric_scores`.
+ *
+ * Every field is required, including `sample_size`. A score without its
+ * denominator is not a smaller measurement, it is not a measurement, and an
+ * optional denominator is how a run quietly stops reporting one.
+ *
+ * @example
+ * const scores: MetricScore[] = [
+ *   { metric: 'precision', value: 0.94, sample_size: 250 },
+ *   { metric: 'recall', value: 0.71, sample_size: 250 },
+ * ]
+ */
+export interface MetricScore {
+  /** What was measured, named as the metric names itself: `precision`, `recall`, `faithfulness`. */
+  metric: string
+  /**
+   * The score, normalized to 0 through 1, where 1 is the best result.
+   *
+   * @remarks
+   * Normalization is the contract rather than a suggestion, because comparing
+   * runs is the whole reason this array exists and two runs on different raw
+   * scales do not compare. A rating collected on 1 through 5 is divided before
+   * it lands here, and the raw scale belongs in the metric name if a reader
+   * needs it (`faithfulness_of_5`).
+   *
+   * Measurements that are not rates do not belong here at all. Wall-clock time,
+   * token counts, and cost already have typed fields on `eval_run`, so a metric
+   * that cannot be expressed as a rate is a sign the value wanted one of those.
+   */
+  value: number
+  /**
+   * How many cases the score was computed over.
+   *
+   * @remarks
+   * Required so a comparison across runs can never quietly compare different
+   * sample sizes. It is the one field an author is most tempted to omit and the
+   * one whose absence is least visible afterwards: a precision of 0.94 reads the
+   * same whether it was measured over 250 cases or 4.
+   */
+  sample_size: number
 }
 
 /** Evaluation run.
@@ -147,6 +223,32 @@ export interface EvalRunProperties {
   error_rate?: number
   /** Feedback score summary (human or automated) */
   feedback_scores?: string
+  /**
+   * Per-metric scores, one entry per measured metric.
+   *
+   * @remarks
+   * Added in 0.31.0 because `score` is a single aggregate and the forcing case
+   * needs two numbers: precision and recall, reported separately. An aggregate
+   * hides the only interesting failure mode, which is a detector that catches
+   * everything by firing on everything.
+   *
+   * `sample_size` is not optional decoration, and as of 0.31.0 the type says so:
+   * it is a REQUIRED member of `MetricScore`. A sampled run reports its sample
+   * size beside its score, always, so a comparison across runs can never quietly
+   * compare different sample sizes. A number without its denominator is not a
+   * smaller measurement, it is not a measurement, and a remark saying `always`
+   * over a field typed optional is a contract only the careful reader honours.
+   *
+   * The entry shape is the exported `MetricScore` interface rather than an
+   * anonymous literal, so a consumer can name the thing it is building. This is
+   * one of two `object[]` properties in the spec; the other, `composition.members`,
+   * already exports `CompositionMember`.
+   *
+   * The rejected alternative was two runs per benchmark, which needs no spec
+   * change and makes every question about a benchmark's quality a join, encoding
+   * a measurement artifact as graph structure.
+   */
+  metric_scores?: MetricScore[]
 }
 
 /** AI cost tracker.

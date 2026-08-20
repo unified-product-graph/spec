@@ -1038,12 +1038,21 @@ const PORTFOLIO_GUIDE: UPGDomainUsageGuide = {
 const WORKSPACE_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'workspace',
   anchor_entity: 'workspace',
-  creation_sequence: ['workspace', 'framework_exercise'],
-  patterns: [],
+  creation_sequence: ['workspace', 'framework_exercise', 'composition'],
+  patterns: [
+    {
+      name: 'Canvas to published view',
+      description: 'A workspace arranges the entities being thought about, produces the composition published from it, and the composition names what it focuses on so the published view stays answerable to the graph',
+      entity_types: ['workspace', 'composition'],
+      edge_chain: ['workspace_arranges_node', 'workspace_produced_node', 'composition_focuses_node'],
+    },
+  ],
   required_bridges: [],
   anti_patterns: [
     { description: 'Workspaces are containers for exploration: do not over-structure them' },
     { description: 'Workspace content is transient by default: promote discoveries to the graph, do not leave them in the workspace' },
+    { description: 'Treating a canvas arrangement as structure: a workspace_arranges_node edge says where a card sits, never what contains what. The arranged entity keeps its real parent' },
+    { description: 'Writing every scratch canvas into a shared graph: only a workspace someone deliberately kept (retention: durable) belongs in a file other people pull' },
   ],
 }
 

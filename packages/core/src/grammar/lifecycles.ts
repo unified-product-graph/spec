@@ -3122,6 +3122,57 @@ const FRAMEWORK_EXERCISE_LIFECYCLE: UPGLifecycle = {
   ],
 }
 
+/**
+ * composition (Workspace domain)
+ *
+ * A named, published view assembled from a canvas. `draft` while it is being
+ * arranged and has never been published, `published` once it is live at its
+ * slug and people can link to it, `archived` when withdrawn but kept so old
+ * links resolve to something honest rather than nothing.
+ *
+ * Bespoke rather than the `PUBLISHING` template, and the difference is one
+ * phase: `PUBLISHING` routes `draft` through `review` and offers no direct
+ * `draft -> published` transition. Publishing a composition is a single act by
+ * its author, with no editorial gate, so a `review` phase would be a step
+ * nobody takes that every consumer would have to model.
+ *
+ * REPUBLISHING IS NOT A PHASE CHANGE. Re-publishing the same slug bumps
+ * `properties.rev` and `properties.published_at` and leaves the composition in
+ * `published`. The phases track whether the view is live; `rev` tracks how many
+ * prints have been taken from the plate.
+ */
+const COMPOSITION_LIFECYCLE: UPGLifecycle = {
+  entity_type: 'composition',
+  initial_phase: 'draft',
+  terminal_phases: ['archived'],
+  phases: [
+    {
+      id: 'draft',
+      status_category: 'started',
+      label: 'Draft',
+      description:
+        'Being arranged. It has a slug reserved and members placed, but has never been published, so nothing resolves at its address yet.',
+      transitions_to: ['published', 'archived'],
+    },
+    {
+      id: 'published',
+      status_category: 'completed',
+      label: 'Published',
+      description:
+        'Live at its slug and linkable. Republishing the same slug stays in this phase and bumps the revision rather than moving the composition.',
+      transitions_to: ['archived', 'draft'],
+    },
+    {
+      id: 'archived',
+      status_category: 'completed',
+      label: 'Archived',
+      description:
+        'Withdrawn from the published set but retained, so an existing link resolves to a view marked out of date rather than to nothing. Can be republished.',
+      transitions_to: ['published', 'draft'],
+    },
+  ],
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Registry
 // ─────────────────────────────────────────────────────────────────────────────
@@ -3279,6 +3330,7 @@ export const UPG_LIFECYCLES: readonly UPGLifecycle[] = [
 
   // Workspace
   FRAMEWORK_EXERCISE_LIFECYCLE,
+  COMPOSITION_LIFECYCLE,
 
   // ── Template-generated lifecycles ─────────────────────────────────
   ...TEMPLATE_LIFECYCLES,

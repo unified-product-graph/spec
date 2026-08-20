@@ -280,7 +280,7 @@ export const UPG_DOMAINS = [
   {
     id: 'program_mgmt',
     label: 'Program Management',
-    description: 'Coordinating delivery across teams and timelines. Programs are the highest container. Projects break programs down. Milestones mark key dates. Risk registers track threats to delivery. Change requests manage scope changes. Deliverables define what ships. Resource allocations assign effort. Status reports communicate progress. Connects Product Specification (what to deliver) to Team & Organisation (who delivers).',
+    description: 'Coordinating delivery across teams and timelines. Programs are the highest container. Projects break programs down. Milestones mark key dates, and hang from either a project or, where a product owns the date outright with no program above it, from the product itself. Risk registers track threats to delivery. Change requests manage scope changes. Deliverables define what ships. Resource allocations assign effort. Status reports communicate progress. Connects Product Specification (what to deliver) to Team & Organisation (who delivers).',
     types: [
       'program', 'project', 'milestone', 'risk_register', 'change_request',
       'deliverable', 'resource_allocation', 'status_report',
@@ -342,8 +342,8 @@ export const UPG_DOMAINS = [
   {
     id: 'workspace',
     label: 'Workspace',
-    description: 'Spatial thinking spaces for arranging entities, debating decisions, and committing to the graph. Workspaces are transient canvases that sit alongside all other domains, letting you compose and explore relationships before they become permanent graph structure. A framework exercise is a structured workspace: one run of a framework (MoSCoW, RICE, Kano, …) applied to a chosen set of entities, with each entity\'s result recorded on the exercise-to-entity edge rather than the entity itself.',
-    types: ['workspace', 'framework_exercise'],
+    description: 'Spatial thinking spaces for arranging entities, debating decisions, and committing to the graph. Workspaces are transient canvases that sit alongside all other domains, letting you compose and explore relationships before they become permanent graph structure. A framework exercise is a structured workspace: one run of a framework (MoSCoW, RICE, Kano, …) applied to a chosen set of entities, with each entity\'s result recorded on the exercise-to-entity edge rather than the entity itself. A composition is the durable other half: a named, published view assembled from a canvas, with a stable slug people link to and a revision history, whose frozen arrangement holds pointers rather than copied content.',
+    types: ['workspace', 'framework_exercise', 'composition'],
   },
   {
     id: 'foundations',

@@ -22,14 +22,17 @@ import type { Cadence, DataSensitivity, ISODate, ISODateTime, UPGAssessment, Rul
  */
 export interface ThreatModelProperties {
   /**
-   * Methodology.
-   * `stride` = Spoofing, Tampering, Repudiation, Information Disclosure, DoS,
-   *   Elevation of Privilege (OWASP standard).
-   * `dread` = Damage, Reproducibility, Exploitability, Affected users,
-   *   Discoverability (numeric scoring).
-   * `pasta` = Process for Attack Simulation and Threat Analysis (7-stage).
-   * `attack_tree` = hierarchical tree of attack paths.
+   * Threat-modelling methodology: `stride`, `dread`, `pasta`, or `attack_tree`.
+   *
    * @example "stride" is the most widely used methodology for web applications
+   *
+   * @remarks
+   * `stride` is the OWASP standard (Spoofing, Tampering, Repudiation,
+   * Information Disclosure, Denial of Service, Elevation of Privilege).
+   * `dread` is numeric scoring (Damage, Reproducibility, Exploitability,
+   * Affected users, Discoverability). `pasta` is the seven-stage Process for
+   * Attack Simulation and Threat Analysis. `attack_tree` is a hierarchical tree
+   * of attack paths.
    */
   methodology?: 'stride' | 'dread' | 'pasta' | 'attack_tree' | 'other'
   /**
@@ -124,13 +127,17 @@ export interface VulnerabilityProperties {
    */
   cvss_score?: number
   /**
-   * Categorical severity derived from CVSS.
-   * Impact severity (UPGAssessment on the `severity_5` scale). Score alone is
-   * insufficient for triage; severity drives filtering and prioritisation.
-   * Migrated from the inline `critical|high|medium|low|informational` enum
-   * ( Option C): map `critical` -> 5, `high` -> 4, `medium` -> 3,
-   * `low` -> 2, `informational` -> 1; carry the old word in `label`.
+   * Categorical severity derived from CVSS, as a UPGAssessment on the
+   * `severity_5` scale. Score alone is insufficient for triage: severity is
+   * what drives filtering and prioritisation.
+   *
    * @example value 5, label 'Critical', scale_id 'severity_5' (a remotely exploitable, no-auth vuln)
+   *
+   * @remarks
+   * Migrated from the inline `critical|high|medium|low|informational` enum
+   * ( Option C): map `critical` to 5, `high` to 4, `medium` to 3, `low`
+   * to 2, `informational` to 1, carrying the old word in `label` so the
+   * original vocabulary survives the move.
    */
   severity?: UPGAssessment
   /**
@@ -224,6 +231,8 @@ export interface SecurityPolicyProperties {
   policy_status?: 'draft' | 'active' | 'under_review' | 'retired'
   /** Imperative force */
   rule_strength?: RuleStrength
+  /** Owning person or team accountable for the policy. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
+  owner?: string
 }
 
 /** Penetration test.

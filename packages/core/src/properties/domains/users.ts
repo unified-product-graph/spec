@@ -35,23 +35,32 @@ export interface PersonaProperties {
    *  @example "10+ years SaaS experience", "New to healthcare IT" */
   domain_expertise?: string
   /**
-   * Role in the buying / adoption decision (the decision-making-unit split):
-   * who signs (buyer) vs who uses (user) vs who advocates internally (champion)
-   * vs who shapes the choice (influencer) vs who delivers / implements
-   * (partner). A portfolio must separate the economic buyer from the
-   * practitioner user; they are distinct personas with distinct jobs. Closed
-   * set so roles compare across products.
+   * Role in the buying or adoption decision: who signs (`buyer`), who uses
+   * (`user`), who advocates internally (`champion`), who shapes the choice
+   * (`influencer`), and who delivers it (`partner`). A closed set, so roles
+   * compare across products.
+   *
    * @example "buyer"
+   *
+   * @remarks
+   * A portfolio must separate the economic buyer from the practitioner user:
+   * they are distinct personas with distinct jobs, and collapsing them is how a
+   * product ends up built for whoever was easiest to interview.
    */
   audience_role?: 'buyer' | 'user' | 'champion' | 'influencer' | 'partner'
   /**
-   * Who performs the work: a human archetype (default), an autonomous AI agent
-   * (e.g. Content Agent), or a non-agentic platform service. Absent = `human`, so
-   * existing personas need no migration. An `agent` persona is a first-class actor
-   * that participates in journeys via the same persona machinery and that humans
-   * delegate to via `persona_delegates_to_persona`. Human-coverage / segmentation
-   * metrics count `human` only; agent/system are opt-in.
+   * Who performs the work: a human archetype, an autonomous AI agent, or a
+   * non-agentic platform service. Absent means `human`, so existing personas
+   * need no migration.
+   *
    * @example "agent"
+   *
+   * @remarks
+   * An `agent` persona is a first-class actor: it participates in journeys
+   * through the same persona machinery, and humans delegate to it via
+   * `persona_delegates_to_persona`. Human-coverage and segmentation metrics
+   * count `human` only, so agent and system personas are opt-in rather than
+   * silently inflating a coverage number.
    */
   actor_kind?: 'human' | 'agent' | 'system'
 }

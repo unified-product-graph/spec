@@ -62,6 +62,14 @@ export interface BrandAssetProperties {
 
 /** Internal document.
  *
+ * @deprecated since 0.2.0. Use `DocumentProperties` (`document` with an internal
+ * audience). `internal_doc` is absent from the entity-catalog union, so no
+ * conformant graph can hold a node of this type — these properties are
+ * unreachable in practice. Migration is lossless: `doc_type` → `document_type`
+ * (its enum already contains rfc/runbook/guide/spec/onboarding), `url` →
+ * `source_url`. Retained only because this interface is part of the published
+ * type surface; RETIREMENT SCHEDULED for the next MAJOR (docket wave 2, item 3).
+ *
  * @example
  * const properties: InternalDocProperties = {
  *   doc_type: 'rfc',
@@ -69,9 +77,9 @@ export interface BrandAssetProperties {
  * }
  */
 export interface InternalDocProperties {
-  /** Classification of the document */
+  /** Classification of the document. @deprecated use `document.document_type` */
   doc_type?: 'rfc' | 'runbook' | 'guide' | 'spec' | 'onboarding' | 'other'
-  /** URL or path to the document */
+  /** URL or path to the document. @deprecated use `document.source_url` */
   url?: string
 }
 

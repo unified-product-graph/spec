@@ -102,10 +102,19 @@ describe('T1.1 spec guardrail — *_status enums do not newly shadow a lifecycle
 describe('T1.8 spec guardrail — no property announces a past-window removal yet lingers', () => {
   const REMOVED_MARKER = /\bRemoved in \d+\.\d+/
 
+  // Scans BOTH documentation tiers. Since 0.30.0 a property doc splits into a
+  // contract summary (`description`) and longform prose under `@remarks`
+  // (`notes`), and removal notices are exactly the design-history register that
+  // the split sends to `notes`. A guard reading `description` alone would have
+  // been silently defeated by the convention that introduced the second tier —
+  // the ghost would still be in the schema, just documented one field over.
+  // Same union rule as `documented()` in surface-layer.test.ts: which tier holds
+  // the sentence is editorial, so no check may depend on the answer.
   const ghosts: string[] = []
   for (const [type, props] of Object.entries(UPG_PROPERTY_SCHEMA)) {
-    for (const [name, def] of Object.entries(props as Record<string, { description?: string }>)) {
-      if (REMOVED_MARKER.test(def?.description ?? '')) ghosts.push(`${type}.${name}`)
+    for (const [name, def] of Object.entries(props as Record<string, { description?: string; notes?: string }>)) {
+      const documented = `${def?.description ?? ''}\n${def?.notes ?? ''}`
+      if (REMOVED_MARKER.test(documented)) ghosts.push(`${type}.${name}`)
     }
   }
 

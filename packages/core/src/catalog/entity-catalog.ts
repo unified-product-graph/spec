@@ -123,7 +123,7 @@ export type UPGEntityType =
   // Portfolio & Organisation
   | 'organization' | 'portfolio' | 'product_area'
   // Workspace
-  | 'workspace' | 'framework_exercise'
+  | 'workspace' | 'framework_exercise' | 'composition'
   // Sales
   | 'account' | 'contact' | 'lead' | 'deal' | 'pipeline_sales' | 'pipeline_stage'
   | 'quote_document' | 'subscription' | 'invoice' | 'forecast'

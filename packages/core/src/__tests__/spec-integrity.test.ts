@@ -35,7 +35,8 @@ import {
  isLifecycleFreeType,
  isLifecyclePlannedType,
 } from '../grammar/lifecycles.js'
-import { UPG_MIGRATIONS } from '../grammar/migrations.js'
+import { UPG_MIGRATIONS, UPG_SPLIT_MIGRATIONS } from '../grammar/migrations.js'
+import { UPG_PROPERTY_SCHEMA } from '../properties/property-schema.js'
 import { pickCanonicalEdge, resolveAllEdges, resolveContainmentEdge } from '../index.js'
 
 // ─── Layer 4: Frameworks ────────────────────────────────────────────────────
@@ -371,7 +372,7 @@ describe('Edge pair uniqueness', () => {
  // 0.27.0 (feedback 20f0e46f) added surface→surface {contains (hierarchy, the
  // nesting spine), supersedes (semantic, a replacement place)} — same pattern as
  // screen→screen, distinct relationship + classification. → 36.
- expect(multiPairs.length).toMatchInlineSnapshot(`36`)
+ expect(multiPairs.length).toMatchInlineSnapshot(`37`)
  })
 })
 
@@ -536,14 +537,65 @@ describe('Polymorphic edge allow-list', () => {
  expect(divergent, `Edges where derived polymorphism disagrees with allow-list:\n${divergent.join('\n')}`).toEqual([])
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (18 entries, 8 families)', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (21 entries, 10 families)', () => {
+ // 20 -> 21 in 0.31.0, and a 10th family: `eval_benchmark_measures_node`, the
+ // benchmark SUBJECT. Registered deliberately as an OVER-WIDE edge: a benchmark
+ // measures a measurable thing, not literally any node. The width is the price
+ // of not answering "what is a tool in the graph" as a side effect of building
+ // an eval harness. `semantic`, so it enters neither containment nor the tree.
  // Bumping this? You added a polymorphic edge — follow the ripple checklist in
  // CONTRIBUTING.md ("How to propose a new edge type") so the fixture, cross-edge
  // registration, and paper move with it.
+ // 18 -> 20, and a 9th family: `workspace_arranges_node` and
+ // `composition_focuses_node`. Both are `cross-domain`, so neither enters
+ // UPG_VALID_CHILDREN and neither can be walked as containment.
  expect(
  UPG_POLYMORPHIC_EDGE_KEYS.length,
  'UPG_POLYMORPHIC_EDGE_KEYS count changed — update this assertion AND see CONTRIBUTING.md edge-add checklist',
- ).toBe(18)
+ ).toBe(21)
+ })
+
+ it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly ten named families', () => {
+ // The JSDoc above the array enumerates the sanctioned families in prose, and
+ // prose has nothing checking it: the list still read "Eight semantic families"
+ // after the ninth and tenth had shipped. This partition is the check. A new
+ // polymorphic key fails here until its author names the family it joins, which
+ // is exactly the decision the doc list exists to record, so the two cannot
+ // drift apart again without a red test.
+ const FAMILIES: Record<string, readonly string[]> = {
+ 'universal semantic verbs': ['node_informs_node', 'node_constrains_node', 'node_inspires_node'],
+ 'decision-to-anything': ['decision_influences_node', 'decision_constrained_by_node', 'decision_produces_node'],
+ 'universal ownership': [
+ 'node_owned_by_team',
+ 'node_owned_by_role',
+ 'node_owned_by_stakeholder',
+ 'node_owned_by_department',
+ 'node_owned_by_person',
+ ],
+ 'universal architecture references': ['node_belongs_to_bounded_context'],
+ 'framework exercises': ['framework_exercise_includes_node'],
+ 'universal classification': ['node_classified_as_classification_value'],
+ 'work-item issue links': [
+ 'work_item_blocks_work_item',
+ 'work_item_relates_to_work_item',
+ 'work_item_duplicates_work_item',
+ ],
+ 'workspace provenance': ['workspace_produced_node'],
+ 'canvas arrangement and published-view focus': ['workspace_arranges_node', 'composition_focuses_node'],
+ 'benchmark subject': ['eval_benchmark_measures_node'],
+ }
+
+ expect(
+ Object.keys(FAMILIES),
+ 'family count changed: update the numbered list in the UPG_POLYMORPHIC_EDGE_KEYS JSDoc to match',
+ ).toHaveLength(10)
+
+ const assigned = Object.values(FAMILIES).flat()
+ expect(new Set(assigned).size, 'a polymorphic key is claimed by two families').toBe(assigned.length)
+ expect(
+ [...assigned].sort(),
+ 'every polymorphic key belongs to exactly one named family, and every named key is in the array',
+ ).toEqual([...UPG_POLYMORPHIC_EDGE_KEYS].sort())
  })
 })
 
@@ -819,6 +871,64 @@ describe('Migration integrity', () => {
  expect(bad).toEqual([])
  })
 
+ // ── Migration defaults ↔ property schema ───────────────────────────────────
+ //
+ // The spec gates each half separately: property schemas are generated and
+ // drift-checked from their domain interfaces; migrations are checked for
+ // chain-walking and target validity. Nothing crossed the two — so eight of the
+ // 21 `defaults` entries stamped a property their target type never declared,
+ // and shipped that way through 0.25.1 (decision 2026-08-07). This is the
+ // crossing check, the property-side counterpart of
+ // `findInvalidStatusMigrationTargets`.
+ //
+ // A default is only worth writing if the value survives into a typed field.
+ const defaultDefects = (
+  label: string,
+  to: string,
+  defaults: Record<string, unknown> | undefined,
+  where: string,
+ ): string[] => {
+  if (!defaults) return []
+  const schema = (UPG_PROPERTY_SCHEMA[to] ?? {}) as Record<
+   string,
+   { enum?: readonly unknown[] } | undefined
+  >
+  const out: string[] = []
+  for (const [key, value] of Object.entries(defaults)) {
+   const def = schema[key]
+   if (!def) {
+    out.push(`${label} ${where} → ${to}: '${key}' is not declared on ${to}`)
+   } else if (def.enum && !def.enum.includes(value)) {
+    out.push(
+     `${label} ${where} → ${to}: '${key}' = ${JSON.stringify(value)} is not in enum [${def.enum.join(', ')}]`,
+    )
+   }
+  }
+  return out
+ }
+
+ it('every type-migration default names a declared property with an in-enum value', () => {
+  const bad: string[] = []
+  for (const [version, migrations] of Object.entries(UPG_MIGRATIONS)) {
+   for (const m of migrations) {
+    bad.push(...defaultDefects(version, m.to, m.defaults, m.from))
+   }
+  }
+  expect(bad, `Migration defaults stamping undeclared properties:\n${bad.join('\n')}`).toEqual([])
+ })
+
+ it('every split-migration target default names a declared property with an in-enum value', () => {
+  const bad: string[] = []
+  for (const [version, migrations] of Object.entries(UPG_SPLIT_MIGRATIONS)) {
+   for (const m of migrations) {
+    for (const target of m.produces) {
+     bad.push(...defaultDefects(version, target.type, target.defaults, `${m.from} (${target.ref})`))
+    }
+   }
+  }
+  expect(bad, `Split-migration defaults stamping undeclared properties:\n${bad.join('\n')}`).toEqual([])
+ })
+
  // Edge migrations deleted — one-time migration applied to all .upg files
 })
 
@@ -932,15 +1042,29 @@ describe('Framework slot entityTypeId integrity', () => {
  expect(bad).toEqual([])
  })
 
- it('every framework has at least one slot', () => {
- const missing: string[] = []
- for (const fw of UPG_FRAMEWORKS) {
- if (!fw.slots || fw.slots.length === 0) {
- missing.push(fw.id)
- }
- }
- expect(missing, `Frameworks without slots:\n${missing.join('\n')}`).toEqual([])
- })
+ it('every framework declares an entity surface: slots or relational', () => {
+    // AMENDED 2026-08-07 (relational/join adapter). The invariant is that every
+    // framework declares its entity surface SOMEWHERE, not that it uses `slots`
+    // specifically.
+    //
+    // `slots` cannot express a column that projects along an edge path, so a
+    // join surface declares `relational` and omits `slots` deliberately (see
+    // `experiment-tracker`). Keeping the old wording would have forced a join
+    // framework to carry vestigial slots purely to satisfy a test — which is
+    // how the duplicate-`entityTypeId` "Status" artefact reached the spec in
+    // the first place.
+    //
+    // NOT weakened: a framework with neither surface still fails.
+    const missing: string[] = []
+    for (const fw of UPG_FRAMEWORKS) {
+      const hasSlots = Array.isArray(fw.slots) && fw.slots.length > 0
+      const hasRelational = Boolean(fw.relational)
+      if (!hasSlots && !hasRelational) {
+        missing.push(fw.id)
+      }
+    }
+    expect(missing, `Frameworks with neither slots nor relational:\n${missing.join('\n')}`).toEqual([])
+  })
 
  it('no duplicate slot labels within a single framework', () => {
  const bad: string[] = []

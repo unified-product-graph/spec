@@ -56,10 +56,17 @@ export interface ProjectProperties {
  */
 export interface MilestoneProperties {
   /**
-   * Display order of this milestone within its parent project (0-indexed). The
-   * scalar ordering convention shared with `journey_step.step_order` and
+   * Display order of this milestone within its parent (0-indexed). The scalar
+   * ordering convention shared with `journey_step.step_order` and
    * `journey_action.action_order` ( /). Orders the delivery
-   * milestones a project moves through, independent of `due_date`.
+   * milestones a parent moves through, independent of `due_date`.
+   *
+   * @remarks
+   * The parent is whichever of the two milestone parents the graph actually
+   * uses: a `project` via `project_targets_milestone`, or a `product` directly
+   * via `product_targets_milestone` (Portfolio Phase 2, for milestones a
+   * product owns outright with no program or project above them). The order is
+   * scoped to that one parent, never global.
    */
   milestone_order?: number
   /** Target due date (ISO format) */

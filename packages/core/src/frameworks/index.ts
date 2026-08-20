@@ -19,3 +19,8 @@ export * from './types.js'
 export * from './categories.js'
 export * from './validate.js'
 export * from './canonical.js'
+// The SHARED relational path resolver. Exported so a renderer resolves a
+// declared edge path with the same function the validator and the shape audit
+// use — a renderer carrying its own copy is how a surface starts accepting
+// declarations the validator refuses, or refusing ones it accepts.
+export * from './relational-paths.js'

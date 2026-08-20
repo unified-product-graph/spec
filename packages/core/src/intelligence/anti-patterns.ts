@@ -812,7 +812,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     since: '0.27.0',
     name: 'Contended surface without arbitration',
     description:
-      'At least one surface in this graph has no recorded answer to "who wins here, and why". Either it holds more occupants than its stated `capacity` allows (or holds several while stating no limit at all) and carries no arbitration_rule, or it admits through arbitration_state that the answer is absent (`none`) or accidental (`safe_by_coincidence`). Left unrecorded, that answer lives in whoever remembers the last argument.',
+      'At least one surface has no recorded answer to "who wins here, and why". Either it holds more occupants than its stated `capacity` allows (or holds several while stating no limit) and carries no arbitration_rule, or it admits through arbitration_state that the answer is absent (`none`) or accidental (`safe_by_coincidence`). Unrecorded, that answer lives in whoever remembers the last argument.',
     // 0.28.0 (feedback 852a9721, from a 30-surface field audit). Three changes,
     // each earned by a reported false positive or a reported blind spot:
     //
@@ -906,12 +906,26 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     // the natural move if the ordering detector is ever minted; it is not worth a
     // breaking property change before then.
     //
-    // STILL OPEN (banked at 0.28.0, deliberately NOT changed here): a `chained`
-    // slot that honestly declares `arbitration_state: 'none'` re-fires through
-    // branch (c), which carries no chained exemption. Current guidance stands:
-    // leave `arbitration_state` unset on chained surfaces. Changing (b)/(c) was
-    // out of scope for this release and still awaits the field confirmation the
-    // reporter will produce populating their 14 chained slots.
+    // CLOSED (banked at 0.28.0, field-confirmed and resolved here): a `chained`
+    // slot that honestly declared `arbitration_state: 'none'` used to re-fire
+    // through branch (c), which carries no chained exemption. The field
+    // confirmation arrived from a second reporter whose census left the state
+    // unset on every one of its chained frames and named this branch as the
+    // reason. THE FIX WAS THE VOCABULARY, NOT THE DETECTOR. Branch (c) matches
+    // the literal string 'none', so the new fifth `SurfaceArbitrationState`
+    // member `no_contention_by_design` never matches it and NOTHING in this
+    // file, the evaluator, or the collector changed.
+    //
+    // Exempting `chained` from (c) was the alternative and it lost on both
+    // correctness and cost. Correctness: `none` is defined as "nobody ever
+    // decided", which is FALSE on a chained shell that has no decision to make,
+    // and silencing a check on a false statement is worse than the empty field
+    // it replaces. Cost: `evaluateEntityCount`'s except form covers the
+    // PRESENCE filter only; the value-keyed path is a bare indexed lookup with
+    // no exception arm, so giving it one means a parallel derived spec set, a
+    // new collector aggregate keyed by (type, property, value, except_property,
+    // except_value), the derivation walk, and its tests. That is the whole
+    // 0.28.0 evaluator rider again, spent to make a false statement quiet.
     structured_condition: {
       operator: 'and',
       checks: [
@@ -965,8 +979,22 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     },
     why_it_matters:
       'Contention over a UI place is settled every time it comes up, and an unrecorded settlement is re-argued at the next feature. The cost is paid in repeated decisions, not in a visible defect. A surface that is safe only by coincidence pays it all at once instead, the first time an occupant is added.',
+    // Remediation is deliberately the ACTIONABLE CORE only. It is read by
+    // someone who has already been told there is a problem and now needs the
+    // next move, so rationale in it is strictly in the way. The reasoning that
+    // used to live here (why transcription is ten minutes rather than a
+    // meeting, why safe_by_coincidence is the dangerous state, why declaring
+    // capacity is the honest fix rather than inventing a rule, and why the
+    // chained exemption is a factual claim rather than a mute button) is all
+    // above in this comment block, which is where a reader who wants it looks.
     remediation:
-      'The violation names the offending surfaces in `target_node_ids`; start there rather than re-reading the whole roster. Read `arbitration_state` first: it says what the work actually is. `enforced_undocumented` means the rule already exists in code and needs transcribing into `arbitration_rule`: ten minutes, no meeting. `none` means nobody has decided and someone has to. `safe_by_coincidence` means nothing is enforcing anything and the surface only looks settled; that one wants a guard in code, not just prose. If a flagged surface genuinely holds everything it was designed to hold, the honest fix is to state its `capacity`, not to invent a rule: a surface whose occupancy is at or below a stated capacity is partitioned rather than contended, and it stops firing. Where a design system already answers the question, link the source with `surface_governed_by_design_guideline`. Surfaces whose occupants wrap one another rather than compete should declare `composition_mode: \'chained\'`, which exempts them: that is a factual claim about how the code composes, not a way to quiet the check.',
+      // Remediation is read by someone already told there is a problem and now
+      // wanting the action, so rationale is strictly in the way. The reasoning
+      // trimmed out in 0.31.0: a surface at its designed capacity should state
+      // that capacity rather than invent an arbitration rule it does not need,
+      // and leaving the state empty on a chained surface reads as unassessed
+      // rather than as "nothing to arbitrate".
+      'Start from `target_node_ids`, then read `arbitration_state`: `enforced_undocumented` needs the rule transcribed into `arbitration_rule`, `none` needs a decision, `safe_by_coincidence` needs a guard in code. A surface holding all it was designed to should state its `capacity`. Occupants that wrap rather than compete declare `composition_mode: \'chained\'` with `arbitration_state: \'no_contention_by_design\'`.',
     stages: ['build', 'beta', 'launch', 'growth', 'mature', 'maintenance'],
     severity: 'medium',
     source: { kind: 'fundamental' },

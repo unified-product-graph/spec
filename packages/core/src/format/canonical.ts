@@ -290,16 +290,38 @@ function canonicalProduct(product: Record<string, unknown>): Record<string, unkn
  * summary, and the header all re-derive from current data on every write. This
  * is self-healing: a file that already drifted is corrected on its next write.
  * No matching node (product is root-only): returned unchanged.
+ *
+ * STAGE AUTHORITY (0.30.1). Because this overlay runs on EVERY serialize, the
+ * node — not the summary — is the authoritative store of a product's stage, and
+ * `$upg.product.stage` / `doc.product.stage` are its denormalised projection.
+ * The corollary is a rule every writer must obey: **a stage write that touches
+ * only the summary is a no-op on disk**, because this function re-derives the
+ * summary from the untouched node before the bytes are written. `updateProduct`
+ * and `update_node` therefore write the node carriers too (sdk `lib/workspace.ts`,
+ * `lib/tools.ts` §B). Resolution order below is the SAME order those writers and
+ * `get_graph_digest` read in — `properties.stage`, then `status` — so the
+ * serialiser can never disagree with what a read reports. (Two different
+ * precedence orders in one system is precisely how a silent no-op survives:
+ * the writer synced the header from `properties.stage` while the serialiser
+ * overlaid `status` back over it.)
  */
 function effectiveRootProduct(doc: UPGDocument): UPGProduct {
   const node = doc.nodes?.find((n) => n.type === 'product' && n.id === doc.product.id)
   if (!node) return doc.product
+  // A product's lifecycle status IS its stage, the same axis (grammar/lifecycles),
+  // and `properties.stage` is the spec's declared carrier for it on a product node
+  // (the `properties.stage → status` lift was deliberately retired in 0.9.10 #33
+  // because product stage is its own 9-phase axis). Prefer the declared carrier,
+  // fall back to `status`, then to the summary.
+  const propStage = (node.properties as Record<string, unknown> | undefined)?.stage
+  const nodeStage =
+    (typeof propStage === 'string' ? (propStage as UPGProductStage) : undefined) ??
+    (node.status as UPGProductStage | undefined)
   return {
     ...doc.product,
     title: node.title ?? doc.product.title,
     description: node.description ?? doc.product.description,
-    // A product's lifecycle status IS its stage, the same axis (grammar/lifecycles).
-    stage: (node.status as UPGProductStage | undefined) ?? doc.product.stage,
+    stage: nodeStage ?? doc.product.stage,
   }
 }
 

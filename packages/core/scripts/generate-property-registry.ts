@@ -75,6 +75,8 @@ interface ParsedProperty {
   enum?: string[]
   scale_id?: string
   description?: string
+  /** The `@remarks` half: rationale, edge cases, recipes, design history. */
+  notes?: string
   properties?: Record<string, { type: string; description?: string; enum?: string[] }>
   required?: string[]
 }
@@ -349,13 +351,60 @@ function getJsDocDescription(
   node: ts.Node,
   opts: { includeTags: boolean; firstLineOnly?: boolean },
 ): string | undefined {
+  return getJsDocParts(node, opts).description
+}
+
+/**
+ * Read both documentation tiers from a node in ONE traversal.
+ *
+ * The two tiers come from a single JSDoc block, so reading them with two
+ * independent walks parsed every comment on every member twice for a result
+ * that was already in hand the first time. At roughly 1500 members that is a
+ * doubling of the generator's parse cost for nothing.
+ *
+ * Each tier keeps its own first-match-wins rule, unchanged: the description is
+ * the first JSDoc block yielding non-empty joined text, the notes are the first
+ * `@remarks` tag with non-empty content. They are resolved independently and
+ * the walk stops as soon as both are settled.
+ *
+ * Canonical statement of the two-tier convention:
+ * packages/upg-spec/src/properties/PROPERTIES.md. Restated here for the reader
+ * in front of it; if the two disagree, PROPERTIES.md wins.
+ */
+function getJsDocParts(
+  node: ts.Node,
+  opts: { includeTags: boolean; firstLineOnly?: boolean },
+): { description?: string; notes?: string } {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const jsdocs = (ts as any).getJSDocCommentsAndTags(node) as ts.Node[]
-  if (!jsdocs || jsdocs.length === 0) return undefined
+  if (!jsdocs || jsdocs.length === 0) return {}
+
+  let description: string | undefined
+  let notes: string | undefined
 
   for (const j of jsdocs) {
     if (j.kind !== ts.SyntaxKind.JSDoc) continue
     const jd = j as ts.JSDoc
+
+    if (notes === undefined && jd.tags) {
+      for (const tag of jd.tags) {
+        if (tag.tagName.text !== 'remarks') continue
+        const tc = tag.comment
+        let text = ''
+        if (typeof tc === 'string') text = tc
+        else if (Array.isArray(tc)) text = tc.map((p) => p.text).join('')
+        const trimmed = normalizeWhitespace(text)
+        if (trimmed) {
+          notes = trimmed
+          break
+        }
+      }
+    }
+
+    if (description !== undefined) {
+      if (notes !== undefined) break
+      continue
+    }
 
     // 1) Body text (the comment block before any @tags)
     const parts: string[] = []
@@ -389,7 +438,11 @@ function getJsDocDescription(
         // Mirror the regex's de facto inclusion set — everything that
         // appeared in the comment block as continuation lines. @param /
         // @returns / @template / @internal were not present on properties.
-        if (tagName === 'param' || tagName === 'returns' || tagName === 'template' || tagName === 'internal') continue
+        // `@remarks` is the LONGFORM half of the two-tier convention and is
+        // extracted separately into `notes`. Excluding it here is what keeps a
+        // summary short: everything a caller must not get wrong stays in the
+        // description, the rationale and edge cases move behind the tag.
+        if (tagName === 'param' || tagName === 'returns' || tagName === 'template' || tagName === 'internal' || tagName === 'remarks') continue
 
         let tagText = ''
         const tc = tag.comment
@@ -408,9 +461,10 @@ function getJsDocDescription(
     }
 
     const joined = parts.join(' ').trim()
-    if (joined) return normalizeWhitespace(joined)
+    if (joined) description = normalizeWhitespace(joined)
+    if (description !== undefined && notes !== undefined) break
   }
-  return undefined
+  return { description, notes }
 }
 
 function normalizeWhitespace(s: string): string {
@@ -452,7 +506,7 @@ function parseFile(filePath: string): ParsedInterface[] {
           ? getPropertyDefaultScale(entityType, propName)
           : undefined
 
-        const propDescription = getJsDocDescription(member, { includeTags: true })
+        const { description: propDescription, notes: propNotes } = getJsDocParts(member, { includeTags: true })
         properties.push({
           name: propName,
           type: inferred.type,
@@ -461,6 +515,7 @@ function parseFile(filePath: string): ParsedInterface[] {
           ...(inferred.properties ? { properties: inferred.properties } : {}),
           ...(inferred.required ? { required: inferred.required } : {}),
           ...(propDescription ? { description: propDescription } : {}),
+          ...(propNotes ? { notes: propNotes } : {}),
         })
       }
 
@@ -530,7 +585,23 @@ const lines: string[] = [
   '',
   'export interface PropertyDefinition {',
   "  type: 'string' | 'number' | 'boolean' | 'string[]' | 'object' | 'object[]' | 'assessment'",
+  '  /**',
+  '   * The CONTRACT: what the property means and the semantics a caller must',
+  '   * not get wrong. Two or three sentences. This is what a hover card, a',
+  '   * tooltip and a token-conscious agent read.',
+  '   */',
   '  description?: string',
+  '  /**',
+  '   * The LONGFORM half (`@remarks` in the source JSDoc): rationale, edge',
+  '   * cases, workflow recipes, design history. The reference page renders it',
+  '   * behind a disclosure; hovers and schema summaries leave it out.',
+  '   *',
+  '   * Semantics MOVE here, they are never deleted. A field that stops being',
+  '   * findable is worse than a field that is long, which is the lesson a',
+  '   * reporter taught by concluding a capability did not exist when it was',
+  '   * documented somewhere they did not read.',
+  '   */',
+  '  notes?: string',
   '  enum?: string[]',
   "  /** For 'assessment'-typed fields: the canonical UPG scale this property is rated on (e.g. 'confidence_5'). */",
   '  scale_id?: string',
@@ -588,6 +659,7 @@ for (const iface of allInterfaces) {
     if (prop.enum) parts.push(`enum: [${prop.enum.map((v) => `'${v}'`).join(', ')}]`)
     if (prop.scale_id) parts.push(`scale_id: '${prop.scale_id}'`)
     if (prop.description) parts.push(`description: '${escapeSingleQuotes(prop.description)}'`)
+    if (prop.notes) parts.push(`notes: '${escapeSingleQuotes(prop.notes)}'`)
     // Re-emit the curated modifier LAST (matches the audit annotation order:
     // `{ type, [enum], [scale_id], [description], modifier }`). Only scalar
     // properties carry modifiers; a nested-object property never does.
@@ -600,6 +672,7 @@ for (const iface of allInterfaces) {
       const headerParts = [`type: '${prop.type}'`]
       if (prop.scale_id) headerParts.push(`scale_id: '${prop.scale_id}'`)
       if (prop.description) headerParts.push(`description: '${escapeSingleQuotes(prop.description)}'`)
+      if (prop.notes) headerParts.push(`notes: '${escapeSingleQuotes(prop.notes)}'`)
       lines.push(`    ${prop.name}: {`)
       lines.push(`      ${headerParts.join(', ')},`)
       lines.push('      properties: {')

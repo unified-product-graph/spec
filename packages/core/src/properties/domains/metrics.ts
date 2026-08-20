@@ -132,15 +132,16 @@ export interface MetricProperties {
 
   // ── Health ──
   /**
-   * Universal health rollup. Orthogonal to lifecycle and `guardrail_status`.
-   * Applies to every metric regardless of `designation`.
-   *   `healthy` = trending well against target / inside safe range.
-   *   `at_risk` = drifting, approaching breach or target shortfall.
-   *   `unhealthy` = missed target or breached; action needed.
-   *   `unknown` = no current reading or not yet measured.
+   * Universal health rollup, applying to every metric regardless of
+   * `designation`: `healthy` is inside range, `at_risk` is drifting toward a
+   * breach or shortfall, `unhealthy` has missed or breached, `unknown` has no
+   * current reading.
    *
-   * For guardrails specifically, `guardrail_status` remains the
-   * breach-specific signal (`safe`/`warning`/`breached`).
+   * @remarks
+   * Orthogonal to lifecycle and to `guardrail_status`. For guardrails
+   * specifically, `guardrail_status` remains the breach-specific signal
+   * (`safe` / `warning` / `breached`), so a guardrail carries both: one says
+   * how it is trending, the other says whether it has been crossed.
    */
   metric_health?: MetricHealth
 

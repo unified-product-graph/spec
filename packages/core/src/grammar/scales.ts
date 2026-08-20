@@ -10,9 +10,29 @@
  *  encoding (value) so UIs can display labels and formulas can compute
  *  scores. */
 export interface UPGAssessment {
-  /** The numeric value, used for computation. */
+  /** The numeric value, used for computation. Must fall within the referenced
+   *  scale's `min`..`max`. This is the ONLY field that carries cross-tool meaning. */
   value: number
-  /** The qualitative label: what the assessor actually meant. */
+  /** The qualitative label: what the assessor actually meant.
+   *
+   *  FREE TEXT BY CONTRACT (docket wave 2 item 7; clarification STAGED, release
+   *  number assigned at release prep). This is the
+   *  assessor's own word and is NOT required to equal the `UPGScalePoint.label` of
+   *  the matching point. The two are different vocabularies serving different jobs:
+   *  `UPGScalePoint.label` is the scale's display name for a point (what a picker
+   *  offers); `UPGAssessment.label` is the judgment as it was actually authored
+   *  (what a human wrote). `{ value: 5, label: 'critical' }` on a `severity_5`
+   *  property is CONFORMANT even though point 5 displays as "Blocker" — indeed
+   *  several property descriptions instruct writers to "carry the old word in
+   *  `label`" when migrating a legacy enum.
+   *
+   *  Consequently: never reconcile stored labels against scale point labels, and
+   *  never widen a scale's `points` to admit authored words. Compare on `value`.
+   *
+   *  The one exception is `friendly_aliases`. An alias (`low`/`medium`/`high`) is a
+   *  writer-side shorthand, not a judgment — expanding it MUST yield both the
+   *  canonical `value` and the canonical point label, so an unexpanded alias left
+   *  sitting in `label` is a writer bug. */
   label: string
   /** Which assessment scale this was rated on.
    *  References a scale definition in the spec or in the document's

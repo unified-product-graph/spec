@@ -83,7 +83,11 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     // Sales & Revenue
     'pipeline_sales', 'account', 'lead', 'subscription', 'forecast',
     // Program Management
-    'program',
+    // `milestone` is a SECOND, shallower parent here (Portfolio Phase 2,
+    // 2026-08-14), alongside its existing `project` parent: a product can own a
+    // milestone outright with no program/project above it. Required by the
+    // hierarchy-orphan guard now that `product_targets_milestone` exists.
+    'program', 'milestone',
     // Marketing
     'marketing_strategy', 'press_release', 'event', 'community_initiative',
     // Customer Success
@@ -590,6 +594,14 @@ export const UPG_CONTAINMENT_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   // and read against the whole point of the exercise model (relational, not
   // hierarchical). Same posture as `person`. See ADR 2026-06-02-framework-exercises.
   'framework_exercise',
+  // A composition has no structural parent for the same reason a
+  // framework_exercise does not: it anchors to what it SHOWS, relationally, via
+  // `composition_focuses_node`. Modelling it as a product child would force a
+  // containment edge that reads against the point — a published view is not a
+  // part of the product, it is a lens onto one. This is also what keeps the
+  // type to two edges rather than three: no provenance edge is minted (that is
+  // `workspace_produced_node`, reused) and no parent edge is needed.
+  'composition',
 ])
 
 /**

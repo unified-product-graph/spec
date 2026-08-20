@@ -33,7 +33,7 @@ import type { PricingStrategyProperties, DiscountStrategyProperties, TrialConfig
 import type { AiModelProperties, PromptTemplateProperties, PromptVersionProperties, EvalBenchmarkProperties, EvalRunProperties, AiCostTrackerProperties, HallucinationReportProperties, AiGuardrailProperties, ModelComparisonProperties, AiExperimentProperties, AiDatasetProperties, AiTraceProperties } from './domains/ai.js'
 import type { WorkflowTemplateProperties, WorkflowRunProperties, AgentDefinitionProperties, AgentSessionProperties, ReviewGateProperties, ApprovalRecordProperties, AgentSkillProperties, AgentHookProperties, WorkflowArtifactProperties, AgentTaskProperties } from './domains/automation.js'
 import type { OrganizationProperties, PortfolioProperties, ProductAreaProperties } from './domains/portfolio.js'
-import type { WorkspaceProperties, FrameworkExerciseProperties } from './domains/workspace.js'
+import type { WorkspaceProperties, FrameworkExerciseProperties, CompositionProperties } from './domains/workspace.js'
 import type { AccountProperties, ContactProperties, LeadProperties, DealProperties, PipelineSalesProperties, PipelineStageProperties, QuoteDocumentProperties, SubscriptionProperties, InvoiceProperties, ForecastProperties } from './domains/sales.js'
 import type { ProgramProperties, ProjectProperties, MilestoneProperties, RiskRegisterProperties, ChangeRequestProperties, DeliverableProperties, ResourceAllocationProperties, StatusReportProperties } from './domains/programs.js'
 import type { MarketingStrategyProperties, MarketingChannelProperties, MarketingCampaignPlanProperties, EmailSequenceProperties, SocialPostProperties, SeoKeywordProperties, AdCreativeProperties, PressReleaseProperties, EventProperties, CommunityInitiativeProperties } from './domains/marketing.js'
@@ -685,6 +685,8 @@ export interface UPGPropertyMap {
   workspace: WorkspaceProperties
   /** A framework exercise: one run of a framework over a set of entities */
   framework_exercise: FrameworkExerciseProperties
+  /** A composition: a named, published view assembled from a canvas */
+  composition: CompositionProperties
 
   // ─── Sales ───────────────────────────────────────────────────────────────────
   /** An account: a company or organisation in the CRM */

@@ -160,6 +160,19 @@ export interface InsightProperties {
    */
   source_method?: string
   /**
+   * Which discipline the insight came out of. The second provenance axis,
+   * symmetrical with `source_method`: that one is HOW the insight was produced,
+   * this one is WHICH PRACTICE produced it, and neither substitutes for the
+   * other.
+   *
+   * @example "ux", "support", "sales", "data_science"
+   *
+   * @remarks
+   * Declared in v0.26.0 so the retired `ux_insight` type's migration default
+   * (`source_domain: 'ux'`) lands in a typed field rather than being lost.
+   */
+  source_domain?: string
+  /**
    * Insight statement in plain language. Write as an active, present-tense assertion.
    * @example "Users consistently skip the tutorial because they trust their ability to explore independently."
    */

@@ -7,6 +7,30 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.31.0] - 2026-08-19
+
+**The eval harness gets the four spec affordances its architecture brief asked for, and the workspace canvas learns what a tool-owned key is.** Two threads converge: the eval-architecture design cycle (ratified 2026-08-16) needed benchmarks that can name what they measure and runs that can carry more than one number; and the image-artifact pilot found two namespacing conventions already coexisting in one canvas bag, with the spec silent on which was right. Additive; no breaking change; no migration of any `.upg` file.
+
+### Added
+- **`eval_benchmark_measures_node`** (semantic, polymorphic). A benchmark names its SUBJECT by pointing at it: a tool, a document, a check, an importer, a feature. The wildcard is deliberately wider than the truth (a benchmark cannot meaningfully measure a persona); that over-width is stated on the label as an honest deferral of "what is a tool in the graph", which this release does not answer. Coexists with the typed `eval_benchmark_measures_feature` on the `constraint_constrains_feature` / `node_constrains_node` precedent.
+- **`eval_benchmark_draws_cases_from_ai_dataset`** (semantic). A labeled corpus IS an `ai_dataset`; this is the one join edge that makes it so, per the recurrence discipline that tries the existing type before minting one.
+- **`metric_scores` on `eval_run`** — an exported `MetricScore[]` (`metric`, `value`, `sample_size`), so a run reports precision AND recall as separate numbers instead of one aggregate `score` or a stringly-typed pair. `value` is normalized 0 through 1 (1 best) because comparing runs is the entire reason the array exists and two runs on different raw scales do not compare; non-rate measurements (wall-clock, tokens, cost) stay on their typed fields. `sample_size` is required: a sampled run reports its sample size beside its score, always, so a comparison across runs can never quietly compare different sample sizes.
+- **`benchmark_type` widened** with `precision_recall`, `task_success`, `coherence`. The enum is a DIMENSION axis (what kind of number); the subject axis lives on `eval_benchmark_measures_node`. Do not add subject-shaped values here — they would encode on the dimension axis what the edge already carries, and the two would drift.
+- **Namespaced keys on the workspace canvas.** The rule, now in spec: a tool-owned key is `<tool>:<key>` (colon, because an underscore key is indistinguishable from an ordinary property name — which is also why no validator can police this rule, and enforcement is documentation plus the type); every consumer preserves unknown keys byte for byte; **no consumer interprets a key it does not own** — preservation is a storage guarantee that says nothing about meaning. `WorkspaceCanvas` carries a template-literal index signature encoding the colon form at compile time.
+- **`composition` type-scope sentence** (F4) clarifying which entity kinds an identity rule reaches.
+
+### Changed
+- The driving query of a query-driven layer is declared in spec, not in a bag key — a consequence of the no-foreign-interpretation rule: a bag-held query would make every future gallery proprietary to one application. The LOCATION is ruled here; the SHAPE is held for the next minor, since the field pilot measured that the hole exists, not what fills it.
+- `entopo_views` (underscore) migrates to `entopo:views` (colon) in the same window as this release, executed by the Entopo Local lane: same-day rename, one release of tolerant reading for dev-written files carrying the old form, tolerance retiring at 0.32.0. Tolerance converts an undetectable failure into a scheduled one.
+
+### Notes
+- Truth: 323 entities · 1079 edges · 69 cross-edges · 25 anti-patterns · 98 tools. Zero new checks; the syntax rule introduces none because none could see the half that matters.
+- Polymorphic edge families: 10 (21 entries), asserted as data in the spec-integrity test (a `FAMILIES` record that must partition the array exactly).
+- Fixture coverage: both new edges carry saturated-graph instances; `eval_benchmark_measures_node` points at an `api_endpoint` deliberately, so the example teaches the wildcard where the typed feature edge does not belong.
+- The 0.30.0 package shipped a CHANGELOG whose `[0.29.0]` heading had been lost to a release-prep edit; this release carries the corrected ladder.
+
+---
+
 ## [0.30.0] - 2026-08-15
 
 **A surface tree is often not one tree but a family of trees selected by configuration, and the graph can now say so.** A feature flag, a plan tier, a permission level or a beta programme changes which surfaces exist and what contains what; until now every surface fact was implicitly qualified by "in whatever configuration someone happened to be looking at", unrecorded. The stored graph is now the union of that family, a single configuration is a projection of it, unqualified facts are invariant, and a graph declaring no variance is semantically identical to before. Zero migration; additive; no breaking change.
@@ -25,6 +49,10 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Notes
 - Truth: 322 entities · 1073 edges · 69 cross-edges · 98 tools. Zero new anti-patterns — the drift checks carry the invariants, and a detector with no field evidence behind it is how a check family gets noisy.
+
+---
+
+## [0.29.0] - 2026-08-15
 
 **The contention check learns to read `capacity`, violations learn to name their nodes, and a batch write learns to un-say a property.** All three came from the same field reporter measuring the check on a real 43-surface graph: 10 surfaces flagged, 7 correctly, 3 falsely — and every false positive had an occupant count at or below its stated capacity. A surface whose occupants all fit is partitioned, not contended. Additive; no breaking change.
 

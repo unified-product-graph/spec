@@ -141,6 +141,8 @@ export interface DataProductProperties {
   data_product_type?: 'report' | 'dataset' | 'stream' | 'api' | 'ml_feature' | 'other'
   /** Freshness SLA commitment (e.g. "< 1 hour") */
   sla_freshness?: string
+  /** Owning person or team. Sibling of `data_domain.steward`: use `owner` for the accountable party of a single data product, `steward` for a whole domain. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
+  owner?: string
 }
 
 /** DataPipeline entity.
@@ -195,6 +197,8 @@ export interface GlossaryTermProperties {
   term_definition?: string
   /** Alternative names or abbreviations for this term */
   synonyms?: string[]
+  /** Person or team accountable for keeping the definition current. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
+  owner?: string
 }
 
 /** DataDomain. A coarse-grained grouping of related data assets (sources,

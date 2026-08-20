@@ -54,6 +54,21 @@ const norm = (s: string): string => s.trim().toLowerCase()
  *  - insight / "root cause":  RCA-framework slot label for the derived insight.
  *  - key_activity / "service":  BMC key-activity slot framed as a service.
  *  - portfolio / "initiative":  portfolio-framework slot framed as an initiative.
+ *  - solution / "product":    Roman Pichler's Product Vision Board names its
+ *      fourth slot "Product" ("what is the product, and what makes it stand
+ *      out?"). The record cites the methodology's own labels, so the slot cannot
+ *      be renamed without misquoting it. Same class as portfolio/"initiative":
+ *      a framework legitimately calling one type by another type's name.
+ *      VERIFIED not to misresolve: `UPG_TYPE_ALIASES['product']` still resolves
+ *      to `product`, because the `product` type precedes `solution` in
+ *      `UPG_ACTIVE_TYPES` and `buildTypeAliases` is first-wins. Added
+ *      2026-08-06 with `product-vision-board` (grid-campaign wave 2).
+ *  - assumption / "monitor":  the Assumption Map's high-risk/high-confidence
+ *    quadrant is called "Monitor" and holds an `assumption`; `monitor` is also a
+ *    canonical entity type (the ops-plane one). Surfaced by promoting
+ *    `assumption-map` into the canonical set (adapter campaign, 2026-08-07) —
+ *    the framework's own vocabulary, not a resolver alias, exactly like BMC's
+ *    "Service" naming a `key_activity` above.
  */
 const FRAMEWORK_SLOT_EXEMPTIONS: Record<string, string[]> = {
   need: ['symptom'],
@@ -61,6 +76,8 @@ const FRAMEWORK_SLOT_EXEMPTIONS: Record<string, string[]> = {
   insight: ['root cause'],
   key_activity: ['service'],
   portfolio: ['initiative'],
+  solution: ['product'],
+  assumption: ['monitor'],
 }
 
 /**

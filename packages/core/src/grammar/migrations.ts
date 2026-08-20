@@ -165,8 +165,7 @@ export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
     {
       from: 'metric_definition',
       to: 'metric',
-      defaults: { has_implementation: false },
-      reason: 'A metric definition is a metric without implementation. Lifecycle property, not a separate type.',
+      reason: 'A metric definition is a metric without implementation. Lifecycle state, not a separate type. (Corrected in v0.26.0: the default previously stamped `has_implementation: false`, a property `metric` has never declared. Dropped rather than declared, because a metric with no live reading simply has no `current_value`, and a boolean restating that would immediately drift from it.)',
     },
 
     // ── Experiment consolidation ────────────────────────────────────────────
@@ -193,8 +192,8 @@ export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
     {
       from: 'risk_item',
       to: 'risk',
-      defaults: { risk_domain: 'program' },
-      reason: 'risk_item (Program Mgmt) is identical to risk (Legal). Consolidated with risk_domain property.',
+      defaults: { risk_type: 'program' },
+      reason: 'risk_item (Program Mgmt) is identical to risk (Legal). Consolidated onto the single kind axis, `risk_type`. (Corrected in v0.26.0: the default previously named `risk_domain`, a property `risk` has never declared; `program` was added to the `risk_type` enum rather than giving risk a second, drift-prone classification vocabulary.)',
     },
     {
       from: 'security_incident',
@@ -205,8 +204,8 @@ export const UPG_MIGRATIONS: Record<string, UPGTypeMigration[]> = {
     {
       from: 'defect_report',
       to: 'support_ticket',
-      defaults: { ticket_designation: 'defect' },
-      reason: 'Defect report is a support ticket with ticket_designation=defect. Same signal interface.',
+      defaults: { ticket_type: 'bug' },
+      reason: 'Defect report is a support ticket with ticket_type=bug. Same signal interface. (Corrected: the default previously named `ticket_designation`, a property `support_ticket` has never declared, so every migrated node was stamped with an undeclared field.)',
     },
     {
       from: 'onboarding_flow',

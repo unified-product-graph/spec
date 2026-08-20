@@ -51,8 +51,18 @@ export interface TestPlanProperties {
  * }
  */
 export interface TestSuiteProperties {
-  /** Category of test suite */
-  suite_type?: 'unit' | 'integration' | 'e2e' | 'performance' | 'security' | 'accessibility'
+  /**
+   * Category of test suite. The single canonical verification-method vocabulary
+   * in the spec: do not mint a second one at criterion level.
+   *
+   * @remarks
+   * `visual` covers visual-regression and screenshot-diff suites, whose
+   * evidence is a rendered-output comparison rather than an assertion over
+   * behaviour. Before it existed, producers mapped visual suites onto
+   * `integration` as the least-wrong stock value, which made them
+   * indistinguishable from genuine integration coverage.
+   */
+  suite_type?: 'unit' | 'integration' | 'e2e' | 'performance' | 'security' | 'accessibility' | 'visual'
   /** Number of tests in the suite */
   test_count?: number
   /** Percentage of tests passing (0-100) */
@@ -133,6 +143,21 @@ export interface QaSessionProperties {
   duration_minutes?: number
   /** Number of bugs found during the session */
   bugs_found?: number
+  /**
+   * Environment the session was run against. Single-valued, unlike
+   * `TestPlanProperties.environments` (a plan spans several); the enum is the
+   * same one, mirroring `TestEnvironmentProperties.env_type`.
+   */
+  environment?: 'local' | 'ci' | 'staging' | 'sandbox' | 'production_mirror'
+  /**
+   * Plain-English outcome of the session: what it established, not how many
+   * bugs it counted (`bugs_found`). Named `outcome_summary`, matching
+   * `ExperimentRunProperties.outcome_summary`, because a bare `outcome` would
+   * collide with the `outcome` entity type.
+   */
+  outcome_summary?: string
+  /** ISO timestamp of when the session was run. Mirrors `TestResultProperties.executed_at`. */
+  executed_at?: ISODateTime
 }
 
 /** Regression test.

@@ -62,12 +62,18 @@ export interface ContactProperties {
   /** Whether this person has purchasing authority */
   is_decision_maker?: boolean
   /**
-   * Role this contact plays in the buying committee (the decision-making unit).
-   * The substrate of enterprise multi-threading and of qualification frameworks
-   * (MEDDICC/SPICED): a deal with no `champion` and no `economic_buyer` mapped is
-   * single-threaded and at risk. `is_decision_maker` becomes largely derivable
-   * (`buying_role = economic_buyer`) but is kept for back-compat.
+   * Role this contact plays in the buying committee, the decision-making unit.
+   *
    * @example 'economic_buyer'
+   *
+   * @remarks
+   * The substrate of enterprise multi-threading and of qualification frameworks
+   * such as MEDDICC and SPICED: a deal with no `champion` and no
+   * `economic_buyer` mapped is single-threaded and at risk, which is a fact the
+   * graph can answer rather than a judgement someone has to make.
+   *
+   * `is_decision_maker` becomes largely derivable from this
+   * (`buying_role = economic_buyer`) but is kept for back-compat.
    */
   buying_role?: 'champion' | 'economic_buyer' | 'technical_evaluator' | 'end_user' | 'detractor' | 'influencer' | 'procurement' | 'legal' | 'security'
 }
@@ -108,13 +114,16 @@ export interface DealProperties {
   /** Likelihood of closing (0-100%) */
   probability?: number
   /**
-   * Terminal result of the deal. An Event-axis outcome (the verdict on a
-   * one-time event), NOT a lifecycle phase, so it is `deal_outcome` and not
-   * `deal_status` per the status-convention Rule 3. Lifecycle (open/won/lost as
-   * phases) belongs on the base `status` slot; this records the win/loss verdict
-   * a closed deal carries and gives `deal_lost_to_competitor` / win-loss study
-   * derivations their anchor.
+   * Terminal result of the deal: the win or loss verdict a closed deal carries.
+   *
    * @example 'won'
+   *
+   * @remarks
+   * An Event-axis outcome (the verdict on a one-time event) and NOT a lifecycle
+   * phase, so it is `deal_outcome` rather than `deal_status`, per
+   * status-convention Rule 3. Lifecycle (open, won and lost as phases) belongs
+   * on the base `status` slot. This field is what gives
+   * `deal_lost_to_competitor` and win-loss study derivations their anchor.
    */
   deal_outcome?: 'won' | 'lost' | 'no_decision'
   /**
@@ -146,6 +155,8 @@ export interface DealProperties {
    * `qualification_framework`).
    */
   qualification_score?: UPGAssessment
+  /** Accountable person or team carrying the deal. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
+  owner?: string
 }
 
 /** Sales pipeline.

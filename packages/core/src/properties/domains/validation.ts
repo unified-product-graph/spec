@@ -65,15 +65,17 @@ export interface HypothesisEvidenceProperties {
    */
   evidence_type?: 'experiment_run' | 'observation' | 'quote' | 'metric_change' | 'market_data' | 'interview'
   /**
-   * Direction relative to the parent claim. Canonical direction axis aligned to
-   * `Evidence.direction` so every direction-of-evidence property uses the same vocab.
-   *   `supports` = paired with the `supports` edge.
-   *   `refutes` = paired with the `refutes` edge.
-   *   `neutral` = data insufficient or noisy.
+   * Direction relative to the parent claim: `supports` and `refutes` pair with
+   * the edges of the same name, `neutral` means the data is insufficient or
+   * noisy.
    *
-   * BREAKING in v0.4.0: legacy `'confirms'`, `'disconfirms'`, `'inconclusive'` no
-   * longer type-check. Migration: `confirms → supports`, `disconfirms → refutes`,
-   * `inconclusive → neutral`.
+   * BREAKING in v0.4.0: `confirms`, `disconfirms` and `inconclusive` no longer
+   * type-check. Migration is one-to-one: confirms to supports, disconfirms to
+   * refutes, inconclusive to neutral.
+   *
+   * @remarks
+   * Aligned to `Evidence.direction` so every direction-of-evidence property in
+   * the spec shares one vocabulary.
    */
   direction?: EvidenceDirection
   /** Strength of the evidence (UPGAssessment, scale `scale_5`). */
@@ -189,6 +191,20 @@ export interface ExperimentPlanProperties {
  * }
  */
 export interface ExperimentRunProperties {
+  /**
+   * What sort of experiment this run is: `ab_test` is a controlled split
+   * between variants, `growth` an acquisition or activation experiment,
+   * `pricing` a packaging or willingness-to-pay one. Distinct from
+   * `disposition`, which is the outcome axis.
+   *
+   * @remarks
+   * Three retired types (`ab_test`, `growth_experiment`, `pricing_experiment`)
+   * collapsed into `experiment_run` precisely along this axis, and the
+   * migration defaults stamp it so the distinction survives consolidation.
+   *
+   * Extensible: further kinds may be added in a minor release.
+   */
+  experiment_type?: 'ab_test' | 'growth' | 'pricing'
   /** ISO actual start date (may differ from the plan's `planned_start_date`) */
   actual_start_date?: ISODate
   /** ISO actual end date */

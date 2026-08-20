@@ -24,6 +24,8 @@ export interface ComplianceRequirementProperties {
   regulation?: 'gdpr' | 'ccpa' | 'hipaa' | 'soc2' | 'iso27001' | 'pci_dss' | 'other'
   /** Current compliance posture */
   compliance_status?: 'compliant' | 'non_compliant' | 'in_progress' | 'not_applicable'
+  /** Accountable person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable. */
+  owner?: string
 }
 
 /** Risk.
@@ -36,8 +38,15 @@ export interface ComplianceRequirementProperties {
  * }
  */
 export interface RiskProperties {
-  /** Domain the risk belongs to */
-  risk_type?: 'technical' | 'business' | 'legal' | 'security' | 'operational'
+  /**
+   * Domain the risk belongs to. The single kind axis for `risk`: there is no
+   * second classification vocabulary.
+   *
+   * `program` added in v0.26.0 so the retired `risk_item` (Program Management)
+   * type has a home on the canonical `risk` after consolidation, rather than a
+   * parallel `risk_domain` field free to drift from this one.
+   */
+  risk_type?: 'technical' | 'business' | 'legal' | 'security' | 'operational' | 'program'
   /** How likely this risk is to materialise (1 = unlikely, 5 = near certain) */
   probability?: UPGAssessment
   /** Severity of consequences if the risk materialises (1 = negligible, 5 = catastrophic) */
@@ -62,6 +71,8 @@ export interface DataContractProperties {
   deletion_policy?: string
   /** Whether data is shared with third parties */
   third_party_sharing?: boolean
+  /** Owning person or team accountable for the contract. Promote to a `node_owned_by_team` edge if ownership must be queryable. */
+  owner?: string
 }
 
 /** Audit log policy.

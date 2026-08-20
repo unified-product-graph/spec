@@ -12,12 +12,28 @@
  * wall-clock timestamp: generation is deterministic). This file is a GATED
  * artifact — check:generated re-runs the generator and fails on any drift, so
  * edit the sources above, never this file.
- * Entity types with properties: 325
+ * Entity types with properties: 326
  */
 
 export interface PropertyDefinition {
   type: 'string' | 'number' | 'boolean' | 'string[]' | 'object' | 'object[]' | 'assessment'
+  /**
+   * The CONTRACT: what the property means and the semantics a caller must
+   * not get wrong. Two or three sentences. This is what a hover card, a
+   * tooltip and a token-conscious agent read.
+   */
   description?: string
+  /**
+   * The LONGFORM half (`@remarks` in the source JSDoc): rationale, edge
+   * cases, workflow recipes, design history. The reference page renders it
+   * behind a disclosure; hovers and schema summaries leave it out.
+   *
+   * Semantics MOVE here, they are never deleted. A field that stops being
+   * findable is worse than a field that is long, which is the lesson a
+   * reporter taught by concluding a capability did not exist when it was
+   * documented somewhere they did not read.
+   */
+  notes?: string
   enum?: string[]
   /** For 'assessment'-typed fields: the canonical UPG scale this property is rated on (e.g. 'confidence_5'). */
   scale_id?: string
@@ -108,7 +124,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   acceptance_criterion: {
     condition: { type: 'string', description: 'Required condition (Given/When/Then or plain text)' },
     test_type: { type: 'string', enum: ['manual', 'automated'], description: 'Test mode' },
-    pass_status: { type: 'string', enum: ['untested', 'pass', 'fail'], description: 'Current pass/fail' },
+    pass_status: { type: 'string', enum: ['untested', 'pass', 'fail', 'regressed', 'blocked'], description: 'Current verification state of this criterion. `untested` means never attempted; `blocked` means attempted but not verifiable for an environmental reason; `regressed` means previously passing, now failing.', notes: '`blocked` is a distinct state from `untested` (a missing credential or an unreachable dependency is not the same as nobody having tried), which the earlier three-value enum conflated into a silent gap. `regressed` is a criterion-level state and is NOT derivable here, because `acceptance_criterion` stores current state only and keeps no result history. The history lives on the `test_case` to `test_result` series, where a single execution\'s outcome is `TestResultProperties.result_status` and can never itself be "regressed".' },
   },
   // AccessPolicyProperties: Access policy.
   access_policy: {
@@ -547,14 +563,14 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // ClassificationAxisProperties: ClassificationAxis: a dimension along which subjects are classified.
   classification_axis: {
     axis_kind: { type: 'string', enum: ['categorical', 'ordinal', 'continuous'], description: 'Structural kind of values on this axis. `categorical` = discrete, unordered (most common; CMS architectures). `ordinal` = discrete, ordered (maturity tiers, T-shirt sizes). `continuous` = numeric range (latency budget, price points).' },
-    cardinality: { type: 'string', enum: ['single', 'multi'], description: 'How many values a subject may hold on this axis at once (UPG 0.11.3). `single` (default) = a subject sits at exactly one value; a re-classification to a new value SUPERSEDES the prior one (the classify writer retires the old same-axis edge and records the move in the reclassification history). `multi` = a subject may legitimately hold several values at once (e.g. an axis like "supported frameworks"); re-classifying ADDS a value and does not supersede. A separate axis from `axis_kind`: an axis can be `categorical` (unordered) yet `single`-select, or `categorical` yet `multi`-select.' },
+    cardinality: { type: 'string', enum: ['single', 'multi'], description: 'How many values a subject may hold on this axis at once. `single` (the default) means re-classifying SUPERSEDES the prior value; `multi` means it ADDS one.', notes: 'Under `single` the classify writer retires the old same-axis edge and records the move in the reclassification history, so the change is traceable rather than silent. `multi` suits an axis like "supported frameworks", where holding several values at once is the truth. A separate axis from `axis_kind`: an axis can be `categorical` (unordered) yet single-select, or `categorical` yet multi-select. The two answer different questions and neither implies the other.' },
   },
   // ClassificationValueProperties: ClassificationValue: a value on a classification axis.
   classification_value: {
     rationale: { type: 'string', description: 'Short paragraph: why this value earns its own row/column. Longer narrative belongs in `summary_md` or attached `content_piece` nodes.' },
     exemplars: { type: 'string[]', description: 'Free-text examples of products occupying this value. For queryable occupancy, prefer `competitor` nodes with `classified_as` edges. @example [\'Nimbus\', \'Larch\', \'Prism\']' },
-    commitments: { type: 'object[]', description: 'The N (typically 2–4) load-bearing commitments that define this category. Each commitment is a structural axis; removing it changes the category. Pairs with `capabilities`: commitments are the *load-bearing definition*; capabilities are the *surface offering*. @example [ { name: \'Typed content graph\', description: \'Schemas in code; references as edges; content is structured data.\' }, { name: \'Real-time backend\', description: \'Live queries, CRDT collaboration, sub-second propagation.\' }, { name: \'Embeddable studio\', description: \'Editor is a library hosted inside the team app, not an external portal.\' }, ]' },
-    capabilities: { type: 'object[]', description: 'Structured capability bullets across the six canonical surfaces. Each surface appears at most once per `classification_value`. Pairs with `commitments`: capabilities describe what the category *offers*; commitments describe what *defines* it. @example [ { surface: \'delivery\', bullets: [\'NQL\', \'GraphQL\', \'REST\', \'Live Sync API\', \'Asset CDN\'] }, { surface: \'extensibility\', bullets: [\'Custom input components\', \'editor plugins\'] }, ]' },
+    commitments: { type: 'object[]', description: 'The load-bearing commitments that define this category, typically two to four. Each is a structural axis: removing it changes the category.', notes: 'Pairs with `capabilities`, and the distinction matters when deciding where a bullet belongs: commitments are the load-bearing DEFINITION, capabilities are the surface OFFERING. A capability can be dropped without the category changing; a commitment cannot. A worked set: [ { name: \'Typed content graph\', description: \'Schemas in code; references as edges; content is structured data.\' }, { name: \'Real-time backend\', description: \'Live queries, CRDT collaboration, sub-second propagation.\' }, { name: \'Embeddable studio\', description: \'Editor is a library hosted inside the team app, not an external portal.\' }, ]' },
+    capabilities: { type: 'object[]', description: 'Structured capability bullets across the six canonical surfaces. Each surface appears at most once per `classification_value`. @example [ { surface: \'delivery\', bullets: [\'NQL\', \'GraphQL\', \'REST\', \'Live Sync API\', \'Asset CDN\'] }, { surface: \'extensibility\', bullets: [\'Custom input components\', \'editor plugins\'] }, ]', notes: 'Pairs with `commitments`, and the distinction decides where a bullet belongs: capabilities describe what the category OFFERS, commitments describe what DEFINES it. Dropping a capability leaves the category intact; dropping a commitment does not.' },
   },
   // CodeRepositoryProperties: Code repository.
   code_repository: {
@@ -589,7 +605,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     analysis_type: { type: 'string', enum: ['feature_comparison', 'positioning', 'swot', 'pricing'], description: 'Type of analysis. `feature_comparison` = side-by-side matrix. `positioning` = competitor positioning relative to each other. `swot` = strengths, weaknesses, opportunities, threats. `pricing` = pricing structure comparison.' },
     analysis_date: { type: 'string', description: 'ISO date conducted. Competitive intelligence decays quickly; track snapshot age. @example "2026-03-15"' },
     framework_id: { type: 'string', description: 'Framework ID (references `UPGFramework.id`). @example "porter-five-forces", "swot-analysis", "competitive-matrix"' },
-    empty_cells: { type: 'object[]', description: 'Empty cells in a 2-axis classification matrix that earn explicit commentary. Only the strategically interesting cells. Opportunity-kind cells are the most valuable; they identify unoccupied strategic space. Each entry references two `classification_value` nodes by id (one from each `classification_axis` child of this `competitive_analysis`). `validate_graph` enforces that the refs resolve to `classification_value` nodes whose parents are distinct `classification_axis` instances. See `ClassificationValueProperties.commitments` for the inverse "occupied cell" structural-definition shape. @example [ { axis_a_value_ref: \'val-git-based\', axis_b_value_ref: \'val-structured-text\', rationale_kind: \'opportunity\', rationale_md: \'No technical reason; only adoption inertia. Watching brief.\' }, { axis_a_value_ref: \'val-composable\', axis_b_value_ref: \'val-wysiwyg\', rationale_kind: \'structural\', rationale_md: \'Composable rejects HTML blobs; WYSIWYG requires them.\' }, ]' },
+    empty_cells: { type: 'object[]', description: 'Empty cells in a two-axis classification matrix that earn explicit commentary, and only the strategically interesting ones. Opportunity-kind cells are the most valuable: they identify unoccupied strategic space.', notes: 'Each entry references two `classification_value` nodes by id, one from each `classification_axis` child of this `competitive_analysis`. `validate_graph` enforces that the refs resolve to `classification_value` nodes whose parents are distinct `classification_axis` instances, so a cell cannot name two values from the same axis. See `ClassificationValueProperties.commitments` for the inverse "occupied cell" structural-definition shape. A worked pair, one of each rationale kind: [ { axis_a_value_ref: \'val-git-based\', axis_b_value_ref: \'val-structured-text\', rationale_kind: \'opportunity\', rationale_md: \'No technical reason; only adoption inertia. Watching brief.\' }, { axis_a_value_ref: \'val-composable\', axis_b_value_ref: \'val-wysiwyg\', rationale_kind: \'structural\', rationale_md: \'Composable rejects HTML blobs; WYSIWYG requires them.\' }, ]' },
     last_updated: { type: 'string', description: 'Provenance: ISO date-time this record was last observed or refreshed. Distinct from `analysis_date` (when the analysis was conducted). @example "2026-06-13"' },
     source: { type: 'string', description: 'Provenance: where this was observed. A changelog, pricing, or docs URL, an analyst report, or a research note. @example "https://docs.larch.example/changelog/"' },
     confidence: {
@@ -653,7 +669,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // CompetitorSignalProperties: Competitor signal: a dated competitor move mapped onto our portfolio.
   competitor_signal: {
     observed_at: { type: 'string', description: 'ISO date-time the move was observed. @example "2026-06-10"' },
-    signal_type: { type: 'string', enum: ['feature_launch', 'pricing_change', 'acquisition', 'partnership', 'market_entry', 'reclassification'], description: 'Kind of move. `feature_launch` = shipped a feature. `pricing_change` = a plan or tier change. `acquisition` / `partnership` / `market_entry` = strategic moves. `reclassification` = the competitor moved between classification cells on an axis (e.g. ai_integrated to ai_agentic); auto-emitted at the classify-write chokepoint and carries `axis` / `from_value` / `to_value` / `competitor`.' },
+    signal_type: { type: 'string', enum: ['feature_launch', 'pricing_change', 'acquisition', 'partnership', 'market_entry', 'reclassification'], description: 'Kind of move: a shipped `feature_launch`, a `pricing_change`, the strategic `acquisition` / `partnership` / `market_entry`, or a `reclassification` when the competitor moves between classification cells on an axis.', notes: '`reclassification` is auto-emitted at the classify-write chokepoint rather than authored, and carries `axis`, `from_value`, `to_value` and `competitor` so the move is reconstructable without diffing two snapshots.' },
     summary: { type: 'string', description: 'One-line factual summary of the move (what shipped, not marketing copy).' },
     impact: { type: 'string', enum: ['high', 'medium', 'low'], description: 'Expected impact on our position.' },
     competitor: { type: 'string', description: 'Reclassification only. The qualified id of the competitor that moved, as the classify cross-edge source (e.g. `p_rival/n_acme`). Identifies both the subject and its owning product, so `diff_classification({ product })` can filter the history stream.' },
@@ -684,11 +700,19 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   compliance_requirement: {
     regulation: { type: 'string', enum: ['gdpr', 'ccpa', 'hipaa', 'soc2', 'iso27001', 'pci_dss', 'other'], description: 'Regulation or standard this requirement derives from' },
     compliance_status: { type: 'string', enum: ['compliant', 'non_compliant', 'in_progress', 'not_applicable'], description: 'Current compliance posture' },
+    owner: { type: 'string', description: 'Accountable person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
+  },
+  // CompositionProperties
+  composition: {
+    members: { type: 'object[]', description: 'The frozen member arrangement, captured at publish. Layout and pointers only, never resolved content.' },
+    rev: { type: 'number', description: 'Monotonic revision, bumped on each republish of the same slug.', notes: 'A published revision is a fact about the composition, user-visible as a new print from the same plate, so it is serialised. Worth distinguishing from a store\'s concurrency token, which shares the name in some backends but is a fact about the table rather than about the thing, and is not spec data.' },
+    published_at: { type: 'string', description: 'ISO timestamp of the most recent publish or republish.' },
+    published_by: { type: 'string', description: 'Publisher handle or email. Display scalar, same posture as `WorkspaceProperties.owner`.' },
   },
   // ConfigurationAxisProperties: A named dimension along which the product's composition differs.
   configuration_axis: {
-    values: { type: 'string[]', description: 'The closed set of values this axis can take. Required: an axis with no values selects nothing and cannot be projected along. Two values is the common case and three is not unusual (a plan ladder). Order is not significant; the axis is categorical, not ordinal. Where the ordering does matter (an entitlement ladder in which each tier includes the one below), that is a classification question, and `classification_axis` with `axis_kind: \'ordinal\'` is the instrument for it.' },
-    default_value: { type: 'string', description: 'The value this axis is understood to sit at when nobody says otherwise. Must be a member of `values`. NOTHING APPLIES IT AUTOMATICALLY. Omitting `configuration` on a read returns the UNION, not this projection, because the union is the honest answer to an unqualified question: it is every configuration at once, and silently substituting one of them would hide the others from a reader who did not know to ask. What the field does carry is the declaration convention for `surface_alternates_with_surface` (declare the edge from the surface present under the default) and a documented anchor for tools that later want to offer a starting configuration. It is a claim about the model, not about deployment: it says which value most of the graph was written against, not which configuration most customers are on.' },
+    values: { type: 'string[]', description: 'The closed set of values this axis can take. Required: an axis with no values selects nothing and cannot be projected along. Every `present_under` and `active_when.values` entry must name one of them.', notes: 'Two values is the common case and three is not unusual (a plan ladder). Order is not significant: the axis is categorical, not ordinal. Where the ordering does matter (an entitlement ladder in which each tier includes the one below), that is a classification question, and `classification_axis` with `axis_kind: \'ordinal\'` is the instrument for it.' },
+    default_value: { type: 'string', description: 'The value this axis is understood to sit at when nobody says otherwise. Must be a member of `values`. NOTHING APPLIES IT AUTOMATICALLY: an unqualified read returns the union, not this projection.', notes: 'The union is the honest answer to an unqualified question, because it is every configuration at once; silently substituting one of them would hide the others from a reader who did not know to ask. What the field does carry is the declaration convention for `surface_alternates_with_surface` (declare the edge from the surface present under the default) and a documented anchor for tools that later want to offer a starting configuration. It is a claim about the model, not about deployment: it says which value most of the graph was written against, not which configuration most customers are on.' },
     kind: { type: 'string', enum: ['feature_flag', 'plan_tier', 'permission_level', 'beta_program', 'other'], description: 'What kind of lever this is. Names the mechanism family.' },
   },
   // ConstraintProperties: Constraint: a named limitation or boundary on product creation.
@@ -704,7 +728,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   contact: {
     contact_role: { type: 'string', description: 'Job title or role within the account' },
     is_decision_maker: { type: 'boolean', description: 'Whether this person has purchasing authority' },
-    buying_role: { type: 'string', enum: ['champion', 'economic_buyer', 'technical_evaluator', 'end_user', 'detractor', 'influencer', 'procurement', 'legal', 'security'], description: 'Role this contact plays in the buying committee (the decision-making unit). The substrate of enterprise multi-threading and of qualification frameworks (MEDDICC/SPICED): a deal with no `champion` and no `economic_buyer` mapped is single-threaded and at risk. `is_decision_maker` becomes largely derivable (`buying_role = economic_buyer`) but is kept for back-compat. @example \'economic_buyer\'' },
+    buying_role: { type: 'string', enum: ['champion', 'economic_buyer', 'technical_evaluator', 'end_user', 'detractor', 'influencer', 'procurement', 'legal', 'security'], description: 'Role this contact plays in the buying committee, the decision-making unit. @example \'economic_buyer\'', notes: 'The substrate of enterprise multi-threading and of qualification frameworks such as MEDDICC and SPICED: a deal with no `champion` and no `economic_buyer` mapped is single-threaded and at risk, which is a fact the graph can answer rather than a judgement someone has to make. `is_decision_maker` becomes largely derivable from this (`buying_role = economic_buyer`) but is kept for back-compat.' },
   },
   // ContentCalendarProperties: Content calendar.
   content_calendar: {
@@ -824,6 +848,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     retention_period: { type: 'string', description: 'How long data is retained before deletion' },
     deletion_policy: { type: 'string', description: 'Policy governing data deletion' },
     third_party_sharing: { type: 'boolean', description: 'Whether data is shared with third parties' },
+    owner: { type: 'string', description: 'Owning person or team accountable for the contract. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
   },
   // DataDomainProperties: DataDomain. A coarse-grained grouping of related data assets (sources,
   data_domain: {
@@ -870,6 +895,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   data_product: {
     data_product_type: { type: 'string', enum: ['report', 'dataset', 'stream', 'api', 'ml_feature', 'other'], description: 'Classification of the data product ( Option B).' },
     sla_freshness: { type: 'string', description: 'Freshness SLA commitment (e.g. "< 1 hour")' },
+    owner: { type: 'string', description: 'Owning person or team. Sibling of `data_domain.steward`: use `owner` for the accountable party of a single data product, `steward` for a whole domain. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
   },
   // DataQualityRuleProperties: DataQualityRule entity.
   data_quality_rule: {
@@ -899,7 +925,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     deal_value: { type: 'number', description: 'Monetary value of the deal' },
     close_date: { type: 'string', description: 'Expected close date (ISO format)' },
     probability: { type: 'number', description: 'Likelihood of closing (0-100%)' },
-    deal_outcome: { type: 'string', enum: ['won', 'lost', 'no_decision'], description: 'Terminal result of the deal. An Event-axis outcome (the verdict on a one-time event), NOT a lifecycle phase, so it is `deal_outcome` and not `deal_status` per the status-convention Rule 3. Lifecycle (open/won/lost as phases) belongs on the base `status` slot; this records the win/loss verdict a closed deal carries and gives `deal_lost_to_competitor` / win-loss study derivations their anchor. @example \'won\'' },
+    deal_outcome: { type: 'string', enum: ['won', 'lost', 'no_decision'], description: 'Terminal result of the deal: the win or loss verdict a closed deal carries. @example \'won\'', notes: 'An Event-axis outcome (the verdict on a one-time event) and NOT a lifecycle phase, so it is `deal_outcome` rather than `deal_status`, per status-convention Rule 3. Lifecycle (open, won and lost as phases) belongs on the base `status` slot. This field is what gives `deal_lost_to_competitor` and win-loss study derivations their anchor.' },
     deal_type: { type: 'string', enum: ['new_business', 'expansion', 'renewal'], description: 'Motion this deal belongs to. Mirrors `PipelineSales.pipeline_type` at the deal grain; `renewal` is the value `subscription_renews_via_deal` points at. @example \'expansion\'' },
     next_step: { type: 'string', description: 'The single most-used CRM field: the next concrete action to move the deal. Free text on purpose (a coordination note, not a structured task). @example \'Send security questionnaire to procurement\'' },
     next_step_date: { type: 'string', description: 'When the `next_step` is due (ISO format).' },
@@ -914,6 +940,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       },
       required: ['value', 'label'],
     },
+    owner: { type: 'string', description: 'Accountable person or team carrying the deal. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
   },
   // DecisionProperties: Decision record. Strategic, product, engineering, or design.
   decision: {
@@ -1120,7 +1147,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // EpicProperties: A collection of related user stories that delivers a feature or capability.
   epic: {
-    estimate: { type: 'string', description: 'Rough size estimate (e.g. "3 sprints", "L", "13 points")' },
+    effort: { type: 'string', description: 'Effort estimate (e.g. "2h", "1d", "3 points"). Use a consistent unit within your team. Canonical name for the work-item size family (`epic`, `user_story`, `task`).' },
+    estimate: { type: 'string', description: 'Rough size estimate (e.g. "3 sprints", "L", "13 points"). @deprecated STAGED, release number assigned at release prep (docket Track "Docket wave 2"). Use `effort`, the family-uniform name already carried by `user_story` and `task`. `estimate` was epic\'s lone divergent spelling of the same concept and it caused real misreads (the app read `estimate` on `user_story`, where only `effort` is declared). Kept (not removed) for back-compat; removal is a later major. Writers: emit `effort`. Readers: prefer `effort`, fall back to `estimate`.' },
     priority: { type: 'string', enum: ['urgent', 'high', 'medium', 'low', 'none'], description: 'Task-level priority' },
     owner: { type: 'string', description: 'Responsible person or team. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
     start_date: { type: 'string', description: 'ISO date work begins' },
@@ -1137,7 +1165,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // EvalBenchmarkProperties: Evaluation benchmark.
   eval_benchmark: {
-    benchmark_type: { type: 'string', enum: ['accuracy', 'latency', 'cost', 'safety', 'custom'], description: 'Measured dimension' },
+    benchmark_type: { type: 'string', enum: ['accuracy', 'latency', 'cost', 'safety', 'precision_recall', 'task_success', 'coherence', 'custom'], description: 'Measured dimension.', notes: 'Widened in 0.31.0 with the three dimensions an eval suite actually reports and this set could not express: `precision_recall` (two numbers, not one accuracy figure, and the pair is the point, because a detector that fires on everything scores perfectly on recall alone), `task_success` (did the agent achieve the goal), and `coherence` (rubric-graded, for multi-step runs). THIS ENUM IS A DIMENSION AXIS, AND IT SHOULD STAY ONE. An eval suite\'s families are a SUBJECT axis (what is under test), and a dimension cannot separate subjects, which is why several families legitimately share `task_success`. The subject is expressed on the EDGE, not here: `eval_benchmark_measures_node` names what a benchmark measures by pointing at it. So "which benchmarks cover the importer" is a traversal, and this property stays a clean answer to a different question, "what dimension does this benchmark report". The commissioning brief hoped the enum would carry both; splitting them across the enum and the edge is the better answer, and it needs no third mechanism. Corollary worth stating, since it is load-bearing: do NOT add subject-shaped values here. `tool_use` or `documentation` would encode on this axis what the edge already carries, and the two would drift the first time a benchmark measured something its enum value did not admit.' },
     test_case_count: { type: 'number', description: 'Test cases in the suite', modifier: 'derived' },
     passing_threshold: { type: 'number', description: 'Minimum passing score' },
     last_run: { type: 'string', description: 'ISO date of the most recent run' },
@@ -1154,6 +1182,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     cost: { type: 'number', description: 'Total run cost' },
     error_rate: { type: 'number', description: 'Percentage of test cases that errored' },
     feedback_scores: { type: 'string', description: 'Feedback score summary (human or automated)' },
+    metric_scores: { type: 'object[]', description: 'Per-metric scores, one entry per measured metric.', notes: 'Added in 0.31.0 because `score` is a single aggregate and the forcing case needs two numbers: precision and recall, reported separately. An aggregate hides the only interesting failure mode, which is a detector that catches everything by firing on everything. `sample_size` is not optional decoration, and as of 0.31.0 the type says so: it is a REQUIRED member of `MetricScore`. A sampled run reports its sample size beside its score, always, so a comparison across runs can never quietly compare different sample sizes. A number without its denominator is not a smaller measurement, it is not a measurement, and a remark saying `always` over a field typed optional is a contract only the careful reader honours. The entry shape is the exported `MetricScore` interface rather than an anonymous literal, so a consumer can name the thing it is building. This is one of two `object[]` properties in the spec; the other, `composition.members`, already exports `CompositionMember`. The rejected alternative was two runs per benchmark, which needs no spec change and makes every question about a benchmark\'s quality a join, encoding a measurement artifact as graph structure.' },
   },
   // EventProperties: Event.
   event: {
@@ -1247,6 +1276,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // ExperimentRunProperties: Execution evidence for a structured test of a hypothesis (UCS pattern P6: event-occurrence).
   experiment_run: {
+    experiment_type: { type: 'string', enum: ['ab_test', 'growth', 'pricing'], description: 'What sort of experiment this run is: `ab_test` is a controlled split between variants, `growth` an acquisition or activation experiment, `pricing` a packaging or willingness-to-pay one. Distinct from `disposition`, which is the outcome axis.', notes: 'Three retired types (`ab_test`, `growth_experiment`, `pricing_experiment`) collapsed into `experiment_run` precisely along this axis, and the migration defaults stamp it so the distinction survives consolidation. Extensible: further kinds may be added in a minor release.' },
     actual_start_date: { type: 'string', description: 'ISO actual start date (may differ from the plan\'s `planned_start_date`)' },
     actual_end_date: { type: 'string', description: 'ISO actual end date' },
     actual_reach: { type: 'number', description: 'Observed reach: how many people the run actually touched' },
@@ -1403,6 +1433,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   framework_exercise: {
     framework_id: { type: 'string', description: 'Which framework this exercise runs: a framework id (e.g. \'moscow\', \'rice-scoring\', \'kano-model\'). Resolves against the framework catalog.' },
     inputs_snapshot: { type: 'object', description: 'Optional frozen copy of the framework\'s input spec at apply time, so a historical exercise still renders correctly if the framework definition later evolves (inputs added, removed, or rescaled).' },
+    input_weights: { type: 'object', description: 'Relative multiplier per framework input for this run, keyed by input id. @example const properties: FrameworkExerciseProperties = { framework_id: \'rice-scoring\', input_weights: { reach: 1, impact: 2, confidence: 1, effort: 1.5 }, }', notes: 'A weight belongs to the RUN, not to any entity it scores: one weight per input, shared by every scored entity, which is why it sits here and not on the `framework_exercise_includes_node` edge alongside the per-entity result. Named `input_weights` rather than a bare `weight` deliberately, and the collision is live rather than hypothetical: `getPropertyDefaultScale` keys on property NAME alone and ignores entity type, and `PROPERTY_SCALE_MAP` already maps `weight` to the `importance_5` ordinal. A bare `weight` here would silently resolve to a 1-5 assessment scale, which is the wrong type, range and meaning for a multiplier. The plural also matches the spec\'s own vocabulary: a framework declares *inputs*, not dimensions.' },
   },
   // FunnelProperties: Funnel entity.
   funnel: {
@@ -1420,6 +1451,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   glossary_term: {
     term_definition: { type: 'string', description: 'Plain-language definition of the term' },
     synonyms: { type: 'string[]', description: 'Alternative names or abbreviations for this term' },
+    owner: { type: 'string', description: 'Person or team accountable for keeping the definition current. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
   },
   // GrowthCampaignProperties: GrowthCampaign entity.
   growth_campaign: {
@@ -1488,7 +1520,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // HypothesisEvidenceProperties
   hypothesis_evidence: {
     evidence_type: { type: 'string', enum: ['experiment_run', 'observation', 'quote', 'metric_change', 'market_data', 'interview'], description: 'Kind of evidence. Drives renderer + filter UI. The provenance edge (`derived_from_*`) carries the actual source node reference per P14; this enum is typing/UI metadata.' },
-    direction: { type: 'string', enum: ['supports', 'refutes', 'neutral'], description: 'Direction relative to the parent claim. Canonical direction axis aligned to `Evidence.direction` so every direction-of-evidence property uses the same vocab. `supports` = paired with the `supports` edge. `refutes` = paired with the `refutes` edge. `neutral` = data insufficient or noisy. BREAKING in v0.4.0: legacy `\'confirms\'`, `\'disconfirms\'`, `\'inconclusive\'` no longer type-check. Migration: `confirms → supports`, `disconfirms → refutes`, `inconclusive → neutral`.' },
+    direction: { type: 'string', enum: ['supports', 'refutes', 'neutral'], description: 'Direction relative to the parent claim: `supports` and `refutes` pair with the edges of the same name, `neutral` means the data is insufficient or noisy. BREAKING in v0.4.0: `confirms`, `disconfirms` and `inconclusive` no longer type-check. Migration is one-to-one: confirms to supports, disconfirms to refutes, inconclusive to neutral.', notes: 'Aligned to `Evidence.direction` so every direction-of-evidence property in the spec shares one vocabulary.' },
     weight: {
       type: 'assessment', scale_id: 'importance_5', description: 'Strength of the evidence (UPGAssessment, scale `scale_5`).',
       properties: {
@@ -1554,6 +1586,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     novelty: { type: 'string', enum: ['known', 'surprising', 'contradictory'], description: 'Novelty against existing knowledge. `known` = confirms what we already believed. `surprising` = challenges or extends our understanding. `contradictory` = directly conflicts with a prior assumption.' },
     actionability: { type: 'string', enum: ['immediate', 'needs_validation', 'informational'], description: 'Current actionability. `immediate` = clear action, no further research needed. `needs_validation` = promising but requires more evidence. `informational` = important context, no direct action.' },
     source_method: { type: 'string', description: 'Producing research method. @example "usability_study", "interview_series", "survey"' },
+    source_domain: { type: 'string', description: 'Which discipline the insight came out of. The second provenance axis, symmetrical with `source_method`: that one is HOW the insight was produced, this one is WHICH PRACTICE produced it, and neither substitutes for the other. @example "ux", "support", "sales", "data_science"', notes: 'Declared in v0.26.0 so the retired `ux_insight` type\'s migration default (`source_domain: \'ux\'`) lands in a typed field rather than being lost.' },
     statement: { type: 'string', description: 'Insight statement in plain language. Write as an active, present-tense assertion. @example "Users consistently skip the tutorial because they trust their ability to explore independently."' },
     implications: { type: 'string', description: 'Product implications. The so-what.' },
   },
@@ -1575,8 +1608,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // InternalDocProperties: Internal document.
   internal_doc: {
-    doc_type: { type: 'string', enum: ['rfc', 'runbook', 'guide', 'spec', 'onboarding', 'other'], description: 'Classification of the document' },
-    url: { type: 'string', description: 'URL or path to the document' },
+    doc_type: { type: 'string', enum: ['rfc', 'runbook', 'guide', 'spec', 'onboarding', 'other'], description: 'Classification of the document. @deprecated use `document.document_type`' },
+    url: { type: 'string', description: 'URL or path to the document. @deprecated use `document.source_url`' },
   },
   // InterviewGuideProperties: Interview guide document.
   interview_guide: {
@@ -1912,7 +1945,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     range_max: { type: 'number', description: 'Maximum expected or ceiling value' },
     cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'Measurement cadence. Canonical `Cadence` since v0.4.0. `\'realtime\'` migrates to `\'continuous\'`; all other values 1:1.' },
     owner: { type: 'string', description: 'Person or team responsible for tracking this metric. Promote to a `node_owned_by_person` edge if ownership must be queryable.' },
-    metric_health: { type: 'string', enum: ['healthy', 'at_risk', 'unhealthy', 'unknown'], description: 'Universal health rollup. Orthogonal to lifecycle and `guardrail_status`. Applies to every metric regardless of `designation`. `healthy` = trending well against target / inside safe range. `at_risk` = drifting, approaching breach or target shortfall. `unhealthy` = missed target or breached; action needed. `unknown` = no current reading or not yet measured. For guardrails specifically, `guardrail_status` remains the breach-specific signal (`safe`/`warning`/`breached`).' },
+    metric_health: { type: 'string', enum: ['healthy', 'at_risk', 'unhealthy', 'unknown'], description: 'Universal health rollup, applying to every metric regardless of `designation`: `healthy` is inside range, `at_risk` is drifting toward a breach or shortfall, `unhealthy` has missed or breached, `unknown` has no current reading.', notes: 'Orthogonal to lifecycle and to `guardrail_status`. For guardrails specifically, `guardrail_status` remains the breach-specific signal (`safe` / `warning` / `breached`), so a guardrail carries both: one says how it is trending, the other says whether it has been crossed.' },
     guardrail_threshold_min: { type: 'number', description: 'Lower bound for guardrail safety (below this = breach)' },
     guardrail_threshold_max: { type: 'number', description: 'Upper bound for guardrail safety (above this = breach)' },
     guardrail_status: { type: 'string', enum: ['safe', 'warning', 'breached'], description: 'Current guardrail health state' },
@@ -1932,7 +1965,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // MilestoneProperties: Milestone.
   milestone: {
-    milestone_order: { type: 'number', description: 'Display order of this milestone within its parent project (0-indexed). The scalar ordering convention shared with `journey_step.step_order` and `journey_action.action_order` ( /). Orders the delivery milestones a project moves through, independent of `due_date`.' },
+    milestone_order: { type: 'number', description: 'Display order of this milestone within its parent (0-indexed). The scalar ordering convention shared with `journey_step.step_order` and `journey_action.action_order` ( /). Orders the delivery milestones a parent moves through, independent of `due_date`.', notes: 'The parent is whichever of the two milestone parents the graph actually uses: a `project` via `project_targets_milestone`, or a `product` directly via `product_targets_milestone` (Portfolio Phase 2, for milestones a product owns outright with no program or project above them). The order is scoped to that one parent, never global.' },
     due_date: { type: 'string', description: 'Target due date (ISO format)' },
     met_on_time: { type: 'boolean', description: 'Whether the milestone was met on time' },
   },
@@ -2150,8 +2183,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     motivation: { type: 'string', description: 'Primary motivation or driving need @example "Making confident, evidence-based decisions"' },
     tech_comfort: { type: 'string', enum: ['low', 'medium', 'high', 'expert', 'other'], description: 'Tech comfort. Closed set so personas across products compare on the same axis. Free-text colour belongs in `context` or `motivation`.' },
     domain_expertise: { type: 'string', description: 'Industry or domain knowledge this persona brings @example "10+ years SaaS experience", "New to healthcare IT"' },
-    audience_role: { type: 'string', enum: ['buyer', 'user', 'champion', 'influencer', 'partner'], description: 'Role in the buying / adoption decision (the decision-making-unit split): who signs (buyer) vs who uses (user) vs who advocates internally (champion) vs who shapes the choice (influencer) vs who delivers / implements (partner). A portfolio must separate the economic buyer from the practitioner user; they are distinct personas with distinct jobs. Closed set so roles compare across products. @example "buyer"' },
-    actor_kind: { type: 'string', enum: ['human', 'agent', 'system'], description: 'Who performs the work: a human archetype (default), an autonomous AI agent (e.g. Content Agent), or a non-agentic platform service. Absent = `human`, so existing personas need no migration. An `agent` persona is a first-class actor that participates in journeys via the same persona machinery and that humans delegate to via `persona_delegates_to_persona`. Human-coverage / segmentation metrics count `human` only; agent/system are opt-in. @example "agent"' },
+    audience_role: { type: 'string', enum: ['buyer', 'user', 'champion', 'influencer', 'partner'], description: 'Role in the buying or adoption decision: who signs (`buyer`), who uses (`user`), who advocates internally (`champion`), who shapes the choice (`influencer`), and who delivers it (`partner`). A closed set, so roles compare across products. @example "buyer"', notes: 'A portfolio must separate the economic buyer from the practitioner user: they are distinct personas with distinct jobs, and collapsing them is how a product ends up built for whoever was easiest to interview.' },
+    actor_kind: { type: 'string', enum: ['human', 'agent', 'system'], description: 'Who performs the work: a human archetype, an autonomous AI agent, or a non-agentic platform service. Absent means `human`, so existing personas need no migration. @example "agent"', notes: 'An `agent` persona is a first-class actor: it participates in journeys through the same persona machinery, and humans delegate to it via `persona_delegates_to_persona`. Human-coverage and segmentation metrics count `human` only, so agent and system personas are opt-in rather than silently inflating a coverage number.' },
   },
   // PipelineSalesProperties: Sales pipeline.
   pipeline_sales: {
@@ -2237,7 +2270,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     url: { type: 'string', description: 'Where the product lives. Marketing site, app store URL, etc.', modifier: 'volatile' },
     logo_url: { type: 'string', description: 'Logo or icon URL. Used to render product cards and lists.', modifier: 'volatile' },
     launched_at: { type: 'string', description: 'When the product became generally available (ISO 8601)' },
-    described_configuration: { type: 'string', description: 'The product configuration this graph describes, named in plain language. A product\'s composition often differs by feature flag, plan tier, permission level or beta programme: surfaces appear, disappear, or are replaced by different surfaces with different occupants. A graph that models one of those without saying which is qualified by a condition nobody wrote down, and every fact in it inherits that silence. NAMING, NOT CONFIGURING. This is a label for readers. Nothing reads it to gate, filter, or alter how a tool interprets the graph, and it makes no claim about which configuration most customers are on. @example "Enterprise plan, split-navigation flag on" @example "Default: free tier, all flags off"' },
+    described_configuration: { type: 'string', description: 'The product configuration this graph describes, named in plain language. A label for readers: nothing reads it to gate, filter, or alter how a tool interprets the graph. @example "Enterprise plan, split-navigation flag on"', notes: 'A product\'s composition often differs by feature flag, plan tier, permission level or beta programme: surfaces appear, disappear, or are replaced by different surfaces with different occupants. A graph that models one of those without saying which is qualified by a condition nobody wrote down, and every fact in it inherits that silence. It makes no claim about which configuration most customers are on. Where a product genuinely ships several and the differences matter, declare a `configuration_axis` instead and let each fact say which values it holds under.' },
   },
   // ProductAreaProperties: ProductArea entity.
   product_area: {
@@ -2290,6 +2323,9 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     session_type: { type: 'string', enum: ['exploratory', 'regression', 'smoke', 'uat'], description: 'Type of QA session' },
     duration_minutes: { type: 'number', description: 'Duration of the session in minutes' },
     bugs_found: { type: 'number', description: 'Number of bugs found during the session' },
+    environment: { type: 'string', enum: ['local', 'ci', 'staging', 'sandbox', 'production_mirror'], description: 'Environment the session was run against. Single-valued, unlike `TestPlanProperties.environments` (a plan spans several); the enum is the same one, mirroring `TestEnvironmentProperties.env_type`.' },
+    outcome_summary: { type: 'string', description: 'Plain-English outcome of the session: what it established, not how many bugs it counted (`bugs_found`). Named `outcome_summary`, matching `ExperimentRunProperties.outcome_summary`, because a bare `outcome` would collide with the `outcome` entity type.' },
+    executed_at: { type: 'string', description: 'ISO timestamp of when the session was run. Mirrors `TestResultProperties.executed_at`.' },
   },
   // QueueTopicProperties: Message queue or topic.
   queue_topic: {
@@ -2354,7 +2390,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // ReleaseStrategyProperties: Release strategy.
   release_strategy: {
-    strategy_type: { type: 'string', enum: ['blue_green', 'canary', 'rolling', 'recreate', 'feature_flag'], description: 'How a new version reaches production. `blue_green` = instant switch between two identical environments. `canary` = gradual percentage rollout. `rolling` = replace instances incrementally. `recreate` = take down old, bring up new. `feature_flag` = code ships, features gated. @example "canary" for gradual rollout, "blue_green" for instant switch with instant rollback' },
+    strategy_type: { type: 'string', enum: ['blue_green', 'canary', 'rolling', 'recreate', 'feature_flag'], description: 'How a new version reaches production. @example "canary" for gradual rollout, "blue_green" for instant switch with instant rollback', notes: '`blue_green` switches instantly between two identical environments. `canary` rolls out by percentage. `rolling` replaces instances incrementally. `recreate` takes the old down before bringing the new up. `feature_flag` ships the code with the features gated.' },
     canary_percentage: { type: 'number', description: 'Traffic routed to canary. Applies when `strategy_type === \'canary\'`. @example 5 (5% initial canary before full rollout)' },
     rollback_criteria: { type: 'string', description: 'Rollback triggers, automatic or manual. @example "Error rate > 1% over 5 minutes", "Latency p99 > 2x baseline"' },
     bake_time: { type: 'string', description: 'Soak time before promoting to full production. @example "30m", "2h", "24h"' },
@@ -2415,7 +2451,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // RiskProperties: Risk.
   risk: {
-    risk_type: { type: 'string', enum: ['technical', 'business', 'legal', 'security', 'operational'], description: 'Domain the risk belongs to' },
+    risk_type: { type: 'string', enum: ['technical', 'business', 'legal', 'security', 'operational', 'program'], description: 'Domain the risk belongs to. The single kind axis for `risk`: there is no second classification vocabulary. `program` added in v0.26.0 so the retired `risk_item` (Program Management) type has a home on the canonical `risk` after consolidation, rather than a parallel `risk_domain` field free to drift from this one.' },
     probability: {
       type: 'assessment', scale_id: 'confidence_5', description: 'How likely this risk is to materialise (1 = unlikely, 5 = near certain)',
       properties: {
@@ -2554,6 +2590,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     url: { type: 'string', description: 'Policy document URL' },
     policy_status: { type: 'string', enum: ['draft', 'active', 'under_review', 'retired'], description: 'Lifecycle status' },
     rule_strength: { type: 'string', enum: ['must', 'must_not', 'exception', 'warning', 'guideline'], description: 'Imperative force' },
+    owner: { type: 'string', description: 'Owning person or team accountable for the policy. Promote to a `node_owned_by_team` edge if ownership must be queryable.' },
   },
   // SecurityReviewProperties: Security review.
   security_review: {
@@ -2745,12 +2782,12 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     surface_kind: { type: 'string', enum: ['shell', 'tool', 'pane', 'region', 'slot', 'gutter', 'action_bar', 'overlay', 'ambient'], description: 'Structural kind. Determines what may legally nest inside this surface.' },
     persistence: { type: 'string', enum: ['always', 'conditional', 'on_demand', 'transient'], description: 'How reliably the surface is present.' },
     visibility_condition: { type: 'string', description: 'When the surface appears, in plain language. Pairs with `persistence: \'conditional\'`, which states *that* it is conditional; this states *what* the condition is. @example "A node is selected", "Only for workspace admins"' },
-    capacity: { type: 'number', description: 'How many occupants ONE INSTANCE of the surface holds at once, as a non-negative count. Count the instances themselves with `cardinality`. CAPACITY IS ALWAYS INTENT, NEVER OBSERVED BEHAVIOUR. It records the cap the design asserts, so a banner region declared `capacity: 1` keeps saying 1 even after someone finds it rendering four. Reality that has drifted from the declared intent is recorded as a trackable, assignable debt item on `surface_deviates_via_technical_debt_item`, not by quietly editing this number up to match the bug. Editing it to match would destroy the only record that a gap exists. ABSENT MEANS UNBOUNDED. UPG has no union-typed property primitive (`PropertyDefinition.type` is a single scalar kind), so the proposed `integer | unbounded` shape is expressed as an optional number whose absence carries the "no cap" reading, rather than a magic sentinel value that every consumer would have to special-case. `0` is a real cap meaning "nothing may occupy this surface" (a reserved place), not "unbounded". THREE STATES, AND THEY ARE ALL DIFFERENT. Absent = unbounded, no cap stated. `0` = a reserved place nothing may occupy. `null` = neither of those, and nothing this field defines; it is what you get by writing an explicit null rather than removing the key, and no consumer reads it as a cap. To return this property to ABSENT, remove the key with `update_node`\'s or `batch_update_nodes`\' `unset_properties`, since a property merge preserves anything you omit. UNBOUNDED IS NOT AN EXEMPTION FROM SCRUTINY. The contention detector reads an absent capacity as a threshold of 1, on the reasoning that a surface which states no limit has stated no answer either, so several occupants is exactly the unrecorded decision worth naming. Declaring a real capacity is therefore the way to quiet the check honestly, and the only way that also records something true.' },
+    capacity: { type: 'number', description: 'How many occupants ONE INSTANCE of the surface holds at once, as a non-negative count. Absent means unbounded, `0` means a reserved place nothing may occupy. Always the cap the design INTENDS, never what was observed rendering. Count the instances themselves with `cardinality`.', notes: 'Intent, not observation: a banner region declared `capacity: 1` keeps saying 1 even after someone finds it rendering four. Reality that has drifted from the declared intent belongs on `surface_deviates_via_technical_debt_item` as a trackable, assignable debt item. Editing this number up to match the bug would destroy the only record that a gap exists. Why absence rather than a sentinel: UPG has no union-typed property primitive, so `integer | unbounded` is expressed as an optional number whose absence carries the "no cap" reading, instead of a magic value every consumer would have to special-case. Three states, all different. ABSENT is unbounded, no cap stated. `0` is a reserved place. `null` is neither, and nothing this field defines: it is what an explicit null write leaves behind, and no consumer reads it as a cap. To return the property to absent, remove the key with `update_node`\'s or `batch_update_nodes`\' `unset_properties`, since a property merge preserves anything omitted. Unbounded is not an exemption from scrutiny. The contention detector reads an absent capacity as a threshold of 1, because a surface that states no limit has stated no answer either, so several occupants is exactly the unrecorded decision worth naming. Declaring a real capacity is the way to quiet the check honestly, and the only way that also records something true.' },
     cardinality: { type: 'string', enum: ['1', '0..1', '1..n', '0..n'], description: 'How many instances of this surface exist. `capacity` counts occupants within one instance; this counts the instances.' },
     instance_scope: { type: 'string', enum: ['global', 'per_parent'], description: 'What an instance is scoped to: one shared instance for the product, or one per containing surface. Decides whether "the product has this surface" is a true sentence or a per-parent one.' },
     composition_mode: { type: 'string', enum: ['exclusive', 'additive', 'chained'], description: 'How the occupants relate: one wins (`exclusive`), all coexist (`additive`), or each wraps the next (`chained`). Declaring `chained` exempts the surface from `contended-surface-without-arbitration`; leaving this unset does not.' },
-    arbitration_rule: { type: 'string', description: 'Who wins when more occupants want the surface than `capacity` allows, and why. ABSENCE IS MEANINGFUL: a null or empty `arbitration_rule` on a contested surface means nobody decided, which is exactly what the `contended-surface-without-arbitration` anti-pattern detects. Do not fill this in with a placeholder to silence the check. @example "Highest priority wins; ties break to the most recently updated."' },
-    arbitration_state: { type: 'string', enum: ['enforced_documented', 'enforced_undocumented', 'safe_by_coincidence', 'none'], description: 'Whether the arbitration answer is enforced, written down, both, or neither. Separates "enforced in code but never transcribed" (ten minutes of typing) from "never decided" (a design meeting) from "safe only because nothing has collided yet" (the dangerous one).' },
+    arbitration_rule: { type: 'string', description: 'Who wins when more occupants want the surface than `capacity` allows, and why. Absence is meaningful: on a contested surface it means nobody decided. @example "Highest priority wins; ties break to the most recently updated."', notes: 'An empty or absent rule on a contested surface is exactly what `contended-surface-without-arbitration` detects. Do not fill it in with a placeholder to silence the check: the check exists to find the unrecorded decision, and a placeholder hides it without settling anything. The field is overloaded across composition modes, which is worth knowing before writing one. On an `exclusive` surface it records DISPLACEMENT (who is not rendered). On an `additive` surface everyone fits, so what it records is ORDER. Only the displacement reading is what the contention detector reads.' },
+    arbitration_state: { type: 'string', enum: ['enforced_documented', 'enforced_undocumented', 'safe_by_coincidence', 'none', 'no_contention_by_design'], description: 'Whether the arbitration answer is enforced, written down, both, neither, or not owed at all. Leaving the field unset means unassessed, and always did.', notes: 'The separations are the whole point of the field, because absence alone conflates four situations with four different remediations: "enforced in code but never transcribed" is ten minutes of typing, "never decided" is a design meeting, "safe only because nothing has collided yet" is the dangerous one, and "nothing to decide, the occupants never compete" is a chained surface, which owes no arbitration rule at all.' },
     extensibility: { type: 'string', enum: ['closed', 'plugin_registerable', 'user_configurable'], description: 'Who may add occupants to the surface.' },
     mutates_content: { type: 'boolean', description: 'Whether occupying this surface can change the underlying content, as opposed to only selecting or revealing it. The selector-versus-mutator distinction: a gutter that toggles a value is a mutator, a gutter that jumps the cursor is not.' },
     dimensional_constraint: { type: 'string', description: 'The hard spatial budget the surface imposes on its occupants, in whatever unit the design system speaks. @example "292px wide", "25px per field", "two grid columns"' },
@@ -2910,7 +2947,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // TestSuiteProperties: Test suite.
   test_suite: {
-    suite_type: { type: 'string', enum: ['unit', 'integration', 'e2e', 'performance', 'security', 'accessibility'], description: 'Category of test suite' },
+    suite_type: { type: 'string', enum: ['unit', 'integration', 'e2e', 'performance', 'security', 'accessibility', 'visual'], description: 'Category of test suite. The single canonical verification-method vocabulary in the spec: do not mint a second one at criterion level.', notes: '`visual` covers visual-regression and screenshot-diff suites, whose evidence is a rendered-output comparison rather than an assertion over behaviour. Before it existed, producers mapped visual suites onto `integration` as the least-wrong stock value, which made them indistinguishable from genuine integration coverage.' },
     test_count: { type: 'number', description: 'Number of tests in the suite', modifier: 'derived' },
     pass_rate: { type: 'number', description: 'Percentage of tests passing (0-100)', modifier: 'snapshot' },
     last_run: { type: 'string', description: 'ISO date of last execution' },
@@ -2949,7 +2986,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // ThreatModelProperties: Threat model.
   threat_model: {
-    methodology: { type: 'string', enum: ['stride', 'dread', 'pasta', 'attack_tree', 'other'], description: 'Methodology. `stride` = Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation of Privilege (OWASP standard). `dread` = Damage, Reproducibility, Exploitability, Affected users, Discoverability (numeric scoring). `pasta` = Process for Attack Simulation and Threat Analysis (7-stage). `attack_tree` = hierarchical tree of attack paths. @example "stride" is the most widely used methodology for web applications' },
+    methodology: { type: 'string', enum: ['stride', 'dread', 'pasta', 'attack_tree', 'other'], description: 'Threat-modelling methodology: `stride`, `dread`, `pasta`, or `attack_tree`. @example "stride" is the most widely used methodology for web applications', notes: '`stride` is the OWASP standard (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege). `dread` is numeric scoring (Damage, Reproducibility, Exploitability, Affected users, Discoverability). `pasta` is the seven-stage Process for Attack Simulation and Threat Analysis. `attack_tree` is a hierarchical tree of attack paths.' },
     scope: { type: 'string', description: 'What system, feature, or data flow is being analysed. @example "user authentication", "payment processing", "admin API"' },
     last_reviewed: { type: 'string', description: 'ISO date last reviewed. Models become stale as systems evolve. @example "2026-03-01"' },
     participants: { type: 'string', description: 'Participants in the exercise. Promote individuals to `node_owned_by_person` edges if participation must be queryable. @example "Alice Chen (security lead), Bob Park (backend engineer), Carol Liu (architect)"' },
@@ -3001,6 +3038,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   },
   // UserFlowProperties: User flow.
   user_flow: {
+    flow_type: { type: 'string', description: 'What sort of flow this is. Free-form rather than a closed enum, because flow kinds are product-specific and the spec has no complete vocabulary for them. @example "onboarding", "checkout", "recovery", "upgrade"', notes: '`user_flow` otherwise carries only structure (`trigger`, `steps`, `success_state`, `failure_state`) and no classification. The retired `onboarding_flow` type collapsed into `user_flow` along this axis, and its migration default stamps the value so the distinction survives.' },
     flow_order: { type: 'number', description: 'Display order of this flow among sibling flows (0-indexed). The scalar ordering convention shared with `journey_step.step_order` and `journey_action.action_order` ( /). The free-text `steps` array below still captures the within-flow narrative; this scalar makes the flow itself a deterministically orderable sibling.' },
     trigger: { type: 'string', description: 'Initiating event' },
     steps: { type: 'string[]', description: 'Ordered steps' },
@@ -3061,7 +3099,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
     cve_id: { type: 'string', description: 'CVE identifier from the National Vulnerability Database. @example "CVE-2024-1234"' },
     cvss_score: { type: 'number', description: 'CVSS numeric score (0.0–10.0). Computed from the CVSS vector. Distinct from the categorical `severity`. @example 9.8 (critical), 6.5 (medium), 3.7 (low)' },
     severity: {
-      type: 'assessment', scale_id: 'severity_5', description: 'Categorical severity derived from CVSS. Impact severity (UPGAssessment on the `severity_5` scale). Score alone is insufficient for triage; severity drives filtering and prioritisation. Migrated from the inline `critical|high|medium|low|informational` enum ( Option C): map `critical` -> 5, `high` -> 4, `medium` -> 3, `low` -> 2, `informational` -> 1; carry the old word in `label`. @example value 5, label \'Critical\', scale_id \'severity_5\' (a remotely exploitable, no-auth vuln)',
+      type: 'assessment', scale_id: 'severity_5', description: 'Categorical severity derived from CVSS, as a UPGAssessment on the `severity_5` scale. Score alone is insufficient for triage: severity is what drives filtering and prioritisation. @example value 5, label \'Critical\', scale_id \'severity_5\' (a remotely exploitable, no-auth vuln)', notes: 'Migrated from the inline `critical|high|medium|low|informational` enum ( Option C): map `critical` to 5, `high` to 4, `medium` to 3, `low` to 2, `informational` to 1, carrying the old word in `label` so the original vocabulary survives the move.',
       properties: {
         value: { type: 'number', description: 'The numeric value, used for computation.' },
         label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
@@ -3133,12 +3171,14 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   workspace: {
     visibility: { type: 'string', enum: ['private', 'shared', 'public'], description: 'Who can see this workspace' },
     purpose: { type: 'string', description: 'Free-text description. Pairs with the closed-enum `workspace_purpose`.' },
-    workspace_purpose: { type: 'string', enum: ['discovery', 'planning', 'retrospective', 'design', 'research', 'strategy', 'general'], description: 'Closed-enum classifier. Drives template suggestions and surfaces in workspace browsers. `discovery` = persona/job/opportunity exploration. `planning` = roadmap and decision sessions. `retrospective` = reflection on shipped work. `design` = experience or UI exploration. `research` = organising study data and synthesis. `strategy` = high-level direction setting. `general` = catch-all.' },
+    workspace_purpose: { type: 'string', enum: ['discovery', 'planning', 'retrospective', 'design', 'research', 'strategy', 'general'], description: 'What the workspace is for. Drives template suggestions and surfaces in workspace browsers.', notes: '`discovery` is persona, job and opportunity exploration. `planning` covers roadmap and decision sessions. `retrospective` is reflection on shipped work. `design` is experience or UI exploration. `research` organises study data and synthesis. `strategy` is high-level direction setting. `general` is the catch-all.' },
     owner: { type: 'string', description: 'Workspace owner (handle or email). Display label; canonical owner is `team_owns_workspace` or `persona_owns_workspace`.' },
     member_count: { type: 'number', description: 'Snapshot count. `team_works_in_workspace` edges are the source of truth.', modifier: 'derived' },
     archived: { type: 'boolean', description: 'Archived. Archived workspaces remain queryable but hidden from default views.' },
     archived_at: { type: 'string', description: 'ISO timestamp archived. Pairs with `archived === true`.' },
     icon: { type: 'string', description: 'Display icon (emoji or icon name)' },
+    retention: { type: 'string', enum: ['transient', 'durable'], description: 'Retention intent. Absent means `transient`.', notes: 'A workspace is a free-form thinking space and is transient by default, so the spec makes both intents EXPRESSIBLE and takes no position on which reaches the file. Whether to write a transient canvas at all is a tool decision, and the recommended posture is not to: a scratch canvas nobody named has no business in a shared, git-tracked graph, where it lands in everyone\'s diff. Writing only `durable` workspaces is what keeps a canonical graph entity comfortable with a transient-by-default object.' },
+    canvas: { type: 'object', description: 'Opaque canvas furniture: the parts of a canvas with no graph referent. Preserved verbatim on round-trip and never interpreted. Tool extension keys are namespaced `<tool>:<key>` with a colon, and no consumer interprets a key it does not own.', notes: 'The cut here is UPG principle P14 applied literally. Anything that is a REFERENCE TO A GRAPH NODE is an edge, which is why placed entities ride `workspace_arranges_node` and not this bag: a node id held as a scalar inside a blob is a foreign key in disguise, and a deleted node would leave a stale reference nothing can detect. Anything that is pure UI chrome with no graph referent stays here, because minting `annotation` and `frame` entity types would add catalog surface that is meaningless to every consumer outside the tool that drew it. WHY THE COLON, and why the rule is in the summary rather than buried here. An underscore key is indistinguishable from an ordinary property name, so a migration that targets namespaced keys cannot match it and no validator can detect one that should have been namespaced. That undetectability is why enforcement lives in the type and the documentation instead of in a check: a check would report clean on a bag full of underscore keys, which is worse than no check. Two conventions were already coexisting when this was ruled (`entopo_views` in a live writer, `entopo:view_blocks` in the contract test certifying preservation), which is how a cheap rule becomes a migration. PRESERVATION IS NOT PERMISSION TO RENDER. Preserving every byte says nothing about meaning: a field-measured canvas carried `excluded: true` tombstones, and a consumer that preserved them faithfully while rendering every entry showed the user images they had deleted.' },
   },
 }
 

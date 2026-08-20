@@ -163,13 +163,23 @@ export interface FeatureProperties {
  *
  * @example
  * const properties: EpicProperties = {
- *   estimate: '3 person-weeks',
+ *   effort: '3 person-weeks',
  *   priority: 'high',
  *   owner: 'sam.patel@arkheiev.com',
  * }
  */
 export interface EpicProperties {
-  /** Rough size estimate (e.g. "3 sprints", "L", "13 points") */
+  /** Effort estimate (e.g. "2h", "1d", "3 points"). Use a consistent unit within your team. Canonical name for the work-item size family (`epic`, `user_story`, `task`). */
+  effort?: string
+  /**
+   * Rough size estimate (e.g. "3 sprints", "L", "13 points").
+   * @deprecated STAGED, release number assigned at release prep (docket Track "Docket wave 2").
+   * Use `effort`, the family-uniform name already carried by
+   * `user_story` and `task`. `estimate` was epic's lone divergent spelling of the same
+   * concept and it caused real misreads (the app read `estimate` on `user_story`, where
+   * only `effort` is declared). Kept (not removed) for back-compat; removal is a later
+   * major. Writers: emit `effort`. Readers: prefer `effort`, fall back to `estimate`.
+   */
   estimate?: string
   /** Task-level priority */
   priority?: Priority
@@ -252,8 +262,23 @@ export interface AcceptanceCriterionProperties {
   condition: string
   /** Test mode */
   test_type?: 'manual' | 'automated'
-  /** Current pass/fail */
-  pass_status?: 'untested' | 'pass' | 'fail'
+  /**
+   * Current verification state of this criterion. `untested` means never
+   * attempted; `blocked` means attempted but not verifiable for an
+   * environmental reason; `regressed` means previously passing, now failing.
+   *
+   * @remarks
+   * `blocked` is a distinct state from `untested` (a missing credential or an
+   * unreachable dependency is not the same as nobody having tried), which the
+   * earlier three-value enum conflated into a silent gap.
+   *
+   * `regressed` is a criterion-level state and is NOT derivable here, because
+   * `acceptance_criterion` stores current state only and keeps no result
+   * history. The history lives on the `test_case` to `test_result` series,
+   * where a single execution's outcome is `TestResultProperties.result_status`
+   * and can never itself be "regressed".
+   */
+  pass_status?: 'untested' | 'pass' | 'fail' | 'regressed' | 'blocked'
 }
 
 /** A shipped version or milestone of the product.
@@ -514,27 +539,30 @@ export type ConfigurationAxisKind =
 export interface ConfigurationAxisProperties {
   /**
    * The closed set of values this axis can take. Required: an axis with no
-   * values selects nothing and cannot be projected along.
+   * values selects nothing and cannot be projected along. Every `present_under`
+   * and `active_when.values` entry must name one of them.
    *
+   * @remarks
    * Two values is the common case and three is not unusual (a plan ladder).
-   * Order is not significant; the axis is categorical, not ordinal. Where the
-   * ordering does matter (an entitlement ladder in which each tier includes
-   * the one below), that is a classification question, and
-   * `classification_axis` with `axis_kind: 'ordinal'` is the instrument for it.
+   * Order is not significant: the axis is categorical, not ordinal. Where the
+   * ordering does matter (an entitlement ladder in which each tier includes the
+   * one below), that is a classification question, and `classification_axis`
+   * with `axis_kind: 'ordinal'` is the instrument for it.
    */
   values: string[]
   /**
    * The value this axis is understood to sit at when nobody says otherwise.
-   * Must be a member of `values`.
+   * Must be a member of `values`. NOTHING APPLIES IT AUTOMATICALLY: an
+   * unqualified read returns the union, not this projection.
    *
-   * NOTHING APPLIES IT AUTOMATICALLY. Omitting `configuration` on a read
-   * returns the UNION, not this projection, because the union is the honest
-   * answer to an unqualified question: it is every configuration at once, and
-   * silently substituting one of them would hide the others from a reader who
-   * did not know to ask. What the field does carry is the declaration
-   * convention for `surface_alternates_with_surface` (declare the edge from the
-   * surface present under the default) and a documented anchor for tools that
-   * later want to offer a starting configuration.
+   * @remarks
+   * The union is the honest answer to an unqualified question, because it is
+   * every configuration at once; silently substituting one of them would hide
+   * the others from a reader who did not know to ask. What the field does carry
+   * is the declaration convention for `surface_alternates_with_surface`
+   * (declare the edge from the surface present under the default) and a
+   * documented anchor for tools that later want to offer a starting
+   * configuration.
    *
    * It is a claim about the model, not about deployment: it says which value
    * most of the graph was written against, not which configuration most

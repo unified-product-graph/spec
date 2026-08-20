@@ -215,19 +215,21 @@ export interface CompetitiveAnalysisProperties {
    */
   framework_id?: string
   /**
-   * Empty cells in a 2-axis classification matrix that earn explicit commentary.
-   * Only the strategically interesting cells. Opportunity-kind cells are the most
-   * valuable; they identify unoccupied strategic space.
+   * Empty cells in a two-axis classification matrix that earn explicit
+   * commentary, and only the strategically interesting ones. Opportunity-kind
+   * cells are the most valuable: they identify unoccupied strategic space.
    *
-   * Each entry references two `classification_value` nodes by id (one from each
-   * `classification_axis` child of this `competitive_analysis`). `validate_graph`
-   * enforces that the refs resolve to `classification_value` nodes whose parents
-   * are distinct `classification_axis` instances.
+   * @remarks
+   * Each entry references two `classification_value` nodes by id, one from each
+   * `classification_axis` child of this `competitive_analysis`.
+   * `validate_graph` enforces that the refs resolve to `classification_value`
+   * nodes whose parents are distinct `classification_axis` instances, so a cell
+   * cannot name two values from the same axis.
    *
    * See `ClassificationValueProperties.commitments` for the inverse
    * "occupied cell" structural-definition shape.
    *
-   * @example
+   * A worked pair, one of each rationale kind:
    *   [
    *     { axis_a_value_ref: 'val-git-based', axis_b_value_ref: 'val-structured-text',
    *       rationale_kind: 'opportunity',
@@ -284,11 +286,14 @@ export interface CompetitorSignalProperties {
    */
   observed_at?: ISODateTime
   /**
-   * Kind of move. `feature_launch` = shipped a feature. `pricing_change` = a plan
-   * or tier change. `acquisition` / `partnership` / `market_entry` = strategic moves.
-   * `reclassification` = the competitor moved between classification cells on an
-   * axis (e.g. ai_integrated to ai_agentic); auto-emitted at the classify-write
-   * chokepoint and carries `axis` / `from_value` / `to_value` / `competitor`.
+   * Kind of move: a shipped `feature_launch`, a `pricing_change`, the strategic
+   * `acquisition` / `partnership` / `market_entry`, or a `reclassification`
+   * when the competitor moves between classification cells on an axis.
+   *
+   * @remarks
+   * `reclassification` is auto-emitted at the classify-write chokepoint rather
+   * than authored, and carries `axis`, `from_value`, `to_value` and
+   * `competitor` so the move is reconstructable without diffing two snapshots.
    */
   signal_type?: 'feature_launch' | 'pricing_change' | 'acquisition' | 'partnership' | 'market_entry' | 'reclassification'
   /** One-line factual summary of the move (what shipped, not marketing copy). */
@@ -463,14 +468,19 @@ export interface ClassificationAxisProperties {
    */
   axis_kind?: 'categorical' | 'ordinal' | 'continuous'
   /**
-   * How many values a subject may hold on this axis at once (UPG 0.11.3).
-   * `single` (default) = a subject sits at exactly one value; a re-classification
-   * to a new value SUPERSEDES the prior one (the classify writer retires the old
-   * same-axis edge and records the move in the reclassification history).
-   * `multi` = a subject may legitimately hold several values at once (e.g. an
-   * axis like "supported frameworks"); re-classifying ADDS a value and does not
-   * supersede. A separate axis from `axis_kind`: an axis can be `categorical`
-   * (unordered) yet `single`-select, or `categorical` yet `multi`-select.
+   * How many values a subject may hold on this axis at once. `single` (the
+   * default) means re-classifying SUPERSEDES the prior value; `multi` means it
+   * ADDS one.
+   *
+   * @remarks
+   * Under `single` the classify writer retires the old same-axis edge and
+   * records the move in the reclassification history, so the change is
+   * traceable rather than silent. `multi` suits an axis like "supported
+   * frameworks", where holding several values at once is the truth.
+   *
+   * A separate axis from `axis_kind`: an axis can be `categorical` (unordered)
+   * yet single-select, or `categorical` yet multi-select. The two answer
+   * different questions and neither implies the other.
    */
   cardinality?: 'single' | 'multi'
 }
@@ -508,13 +518,16 @@ export interface ClassificationValueProperties {
    */
   exemplars?: string[]
   /**
-   * The N (typically 2–4) load-bearing commitments that define this category.
-   * Each commitment is a structural axis; removing it changes the category.
+   * The load-bearing commitments that define this category, typically two to
+   * four. Each is a structural axis: removing it changes the category.
    *
-   * Pairs with `capabilities`: commitments are the *load-bearing definition*;
-   * capabilities are the *surface offering*.
+   * @remarks
+   * Pairs with `capabilities`, and the distinction matters when deciding where
+   * a bullet belongs: commitments are the load-bearing DEFINITION, capabilities
+   * are the surface OFFERING. A capability can be dropped without the category
+   * changing; a commitment cannot.
    *
-   * @example
+   * A worked set:
    *   [
    *     { name: 'Typed content graph', description: 'Schemas in code; references as edges; content is structured data.' },
    *     { name: 'Real-time backend', description: 'Live queries, CRDT collaboration, sub-second propagation.' },
@@ -523,11 +536,14 @@ export interface ClassificationValueProperties {
    */
   commitments?: Array<ClassificationCommitment>
   /**
-   * Structured capability bullets across the six canonical surfaces.
-   * Each surface appears at most once per `classification_value`.
+   * Structured capability bullets across the six canonical surfaces. Each
+   * surface appears at most once per `classification_value`.
    *
-   * Pairs with `commitments`: capabilities describe what the category *offers*;
-   * commitments describe what *defines* it.
+   * @remarks
+   * Pairs with `commitments`, and the distinction decides where a bullet
+   * belongs: capabilities describe what the category OFFERS, commitments
+   * describe what DEFINES it. Dropping a capability leaves the category intact;
+   * dropping a commitment does not.
    *
    * @example
    *   [

@@ -127,21 +127,69 @@ describe('surface properties (eight ratified, four added by field data)', () => 
     expect(schema.composition_mode.enum).toEqual(['exclusive', 'additive', 'chained'])
   })
 
-  it('arbitration_state separates the three remediations absence conflates', () => {
+  it('arbitration_state separates the remediations absence conflates', () => {
     // Absence of arbitration_rule alone cannot tell "enforced in code, never
     // transcribed" (ten minutes) from "never decided" (a meeting) from "safe
     // only because nothing has collided yet" (a guard in code).
+    //
+    // The fifth member closes a second overload that the first four left open:
+    // an unset arbitration_state has always meant "unassessed", and a chained
+    // surface with nothing to arbitrate had no way to say so except by using
+    // that same emptiness. Certainty and ignorance were indistinguishable.
+    // `no_contention_by_design` is a positive claim, so it separates them.
     expect(schema.arbitration_state.enum).toEqual([
       'enforced_documented', 'enforced_undocumented', 'safe_by_coincidence', 'none',
+      'no_contention_by_design',
     ])
   })
+
+  // The whole reason the fifth member was cheaper than exempting `chained` from
+  // the contention detector's value-keyed branch: that branch matches the
+  // LITERAL string 'none', so a new member cannot match it and no evaluator,
+  // collector or anti-pattern logic had to change. If this ever fails, the
+  // detector has grown a value-keyed exemption arm and the 0.31.0 reasoning
+  // needs re-reading before the enum is touched again.
+  it('the contention detector matches arbitration_state by literal value, so a new enum member is inert', () => {
+    const contention = UPG_ANTI_PATTERNS.find(
+      (p) => p.id === 'contended-surface-without-arbitration',
+    )
+    expect(contention).toBeDefined()
+    const valueFilters: string[] = []
+    const walk = (n: unknown): void => {
+      if (!n || typeof n !== 'object') return
+      const node = n as Record<string, unknown>
+      const check = node.check as Record<string, unknown> | undefined
+      const filter = check?.filter as Record<string, unknown> | undefined
+      if (check?.property === 'arbitration_state' || filter?.property === 'arbitration_state') {
+        const v = filter?.value
+        if (typeof v === 'string') valueFilters.push(v)
+      }
+      for (const child of (node.checks as unknown[]) ?? []) walk(child)
+    }
+    walk(contention!.structured_condition)
+    expect(valueFilters.sort()).toEqual(['none', 'safe_by_coincidence'])
+    expect(valueFilters).not.toContain('no_contention_by_design')
+  })
+
+  /**
+   * The whole documented meaning of a property, across both tiers.
+   *
+   * The two-tier convention (0.30.x) splits a property doc into the contract
+   * (`description`) and the longform (`notes`), and which tier a given sentence
+   * sits in is an editorial call that may change again. What must never change
+   * is that the semantics remain DOCUMENTED somewhere, so these tests assert
+   * against the union. A test pinned to one tier would fail on a re-split that
+   * lost nothing, and pass on a deletion that lost everything.
+   */
+  const documented = (prop: { description?: string; notes?: string }) =>
+    `${prop.description ?? ''} ${prop.notes ?? ''}`
 
   it('capacity is documented as INTENT, so drift is recorded as debt not by editing it', () => {
     // The whole point of surface_deviates_via_technical_debt_item: a capacity-1
     // banner found rendering four keeps saying 1. Editing the number up to match
     // the bug destroys the only record that a gap exists.
-    expect(schema.capacity.description).toContain('ALWAYS INTENT')
-    expect(schema.capacity.description).toContain('surface_deviates_via_technical_debt_item')
+    expect(documented(schema.capacity)).toMatch(/INTENDS|Intent, not observation/)
+    expect(documented(schema.capacity)).toContain('surface_deviates_via_technical_debt_item')
   })
 
   it('capacity is a plain number: absence carries the "unbounded" reading', () => {
@@ -152,12 +200,12 @@ describe('surface properties (eight ratified, four added by field data)', () => 
     // reaches for a string sentinel has to argue with this test.
     expect(schema.capacity.type).toBe('number')
     expect(schema.capacity.enum).toBeUndefined()
-    expect(schema.capacity.description).toContain('ABSENT MEANS UNBOUNDED')
+    expect(documented(schema.capacity)).toMatch(/[Aa]bsent means unbounded|ABSENT is unbounded/)
   })
 
   it('arbitration_rule is free text whose absence is documented as meaningful', () => {
     expect(schema.arbitration_rule.type).toBe('string')
-    expect(schema.arbitration_rule.description).toContain('ABSENCE IS MEANINGFUL')
+    expect(documented(schema.arbitration_rule)).toMatch(/[Aa]bsence is meaningful/)
   })
 
   it('mutates_content is the boolean selector/mutator discriminator', () => {

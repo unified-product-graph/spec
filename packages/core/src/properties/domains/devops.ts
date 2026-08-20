@@ -368,10 +368,14 @@ export interface CiPipelineProperties {
 export interface ReleaseStrategyProperties {
   /**
    * How a new version reaches production.
-   * `blue_green` = instant switch between two identical environments.
-   * `canary` = gradual percentage rollout. `rolling` = replace instances incrementally.
-   * `recreate` = take down old, bring up new. `feature_flag` = code ships, features gated.
+   *
    * @example "canary" for gradual rollout, "blue_green" for instant switch with instant rollback
+   *
+   * @remarks
+   * `blue_green` switches instantly between two identical environments.
+   * `canary` rolls out by percentage. `rolling` replaces instances
+   * incrementally. `recreate` takes the old down before bringing the new up.
+   * `feature_flag` ships the code with the features gated.
    */
   strategy_type?: 'blue_green' | 'canary' | 'rolling' | 'recreate' | 'feature_flag'
   /**

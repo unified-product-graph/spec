@@ -301,6 +301,20 @@ export interface WireframeProperties {
  */
 export interface UserFlowProperties {
   /**
+   * What sort of flow this is. Free-form rather than a closed enum, because
+   * flow kinds are product-specific and the spec has no complete vocabulary
+   * for them.
+   *
+   * @example "onboarding", "checkout", "recovery", "upgrade"
+   *
+   * @remarks
+   * `user_flow` otherwise carries only structure (`trigger`, `steps`,
+   * `success_state`, `failure_state`) and no classification. The retired
+   * `onboarding_flow` type collapsed into `user_flow` along this axis, and its
+   * migration default stamps the value so the distinction survives.
+   */
+  flow_type?: string
+  /**
    * Display order of this flow among sibling flows (0-indexed). The scalar
    * ordering convention shared with `journey_step.step_order` and
    * `journey_action.action_order` ( /). The free-text `steps`
@@ -483,18 +497,41 @@ export type SurfaceCompositionMode = 'exclusive' | 'additive' | 'chained'
  *   mutually exclusive conditions). The most dangerous state, because it looks
  *   settled from the outside and breaks the first time an occupant is added.
  * - `none` — nobody ever decided. Remediation is a design meeting.
+ * - `no_contention_by_design` — there is no arbitration question to answer,
+ *   because the occupants never compete. The exact opposite of
+ *   `safe_by_coincidence`: designed absence of the question rather than
+ *   accidental absence of a collision.
  *
  * THIS IS NOT AN ESCAPE HATCH. Declaring `enforced_documented` does not by
  * itself silence `contended-surface-without-arbitration`: the detector still
  * requires a non-empty `arbitration_rule`, so claiming the rule is documented
  * without documenting it changes nothing. `safe_by_coincidence` and `none`
  * make the check fire whatever else is recorded, because both are admissions.
+ * `no_contention_by_design` silences nothing that is not already silent: the
+ * contention branch is a separate check that exempts only on
+ * `composition_mode: 'chained'`, so a surface that claims this state while
+ * genuinely over capacity, ruleless and not chained is still caught there.
+ *
+ * WHY ABSENCE COULD NOT CARRY THIS. An unset `arbitration_state` already means
+ * "unassessed", and a surface whose occupants wrap rather than compete was
+ * previously forced to use that same emptiness to say something quite
+ * different. Certainty and ignorance became indistinguishable in one field.
+ * `no_contention_by_design` makes a positive design claim, which is what makes
+ * it declare-to-earn rather than an "I don't know". A generic `not_applicable`
+ * was considered and rejected for exactly this reason: it reads as
+ * "unassessed", collapses back into absence, and buys nothing.
+ *
+ * LEGALITY IS CONVENTION, NOT ENFORCEMENT. This value belongs on surfaces
+ * whose `composition_mode` is `chained`, and nothing checks that pairing. UPG
+ * has no cross-property conditional-enum mechanism, and a check must never
+ * fire on legal modelling. Enforce only if field drift appears.
  */
 export type SurfaceArbitrationState =
   | 'enforced_documented'
   | 'enforced_undocumented'
   | 'safe_by_coincidence'
   | 'none'
+  | 'no_contention_by_design'
 
 /** A place in the UI, its occupants, and the rule that arbitrates between them.
  *
@@ -549,37 +586,35 @@ export interface SurfaceProperties {
   visibility_condition?: string
   /**
    * How many occupants ONE INSTANCE of the surface holds at once, as a
-   * non-negative count. Count the instances themselves with `cardinality`.
+   * non-negative count. Absent means unbounded, `0` means a reserved place
+   * nothing may occupy. Always the cap the design INTENDS, never what was
+   * observed rendering. Count the instances themselves with `cardinality`.
    *
-   * CAPACITY IS ALWAYS INTENT, NEVER OBSERVED BEHAVIOUR. It records the cap the
-   * design asserts, so a banner region declared `capacity: 1` keeps saying 1
-   * even after someone finds it rendering four. Reality that has drifted from
-   * the declared intent is recorded as a trackable, assignable debt item on
-   * `surface_deviates_via_technical_debt_item`, not by quietly editing this
-   * number up to match the bug. Editing it to match would destroy the only
-   * record that a gap exists.
+   * @remarks
+   * Intent, not observation: a banner region declared `capacity: 1` keeps
+   * saying 1 even after someone finds it rendering four. Reality that has
+   * drifted from the declared intent belongs on
+   * `surface_deviates_via_technical_debt_item` as a trackable, assignable debt
+   * item. Editing this number up to match the bug would destroy the only record
+   * that a gap exists.
    *
-   * ABSENT MEANS UNBOUNDED. UPG has no union-typed property primitive
-   * (`PropertyDefinition.type` is a single scalar kind), so the proposed
-   * `integer | unbounded` shape is expressed as an optional number whose
-   * absence carries the "no cap" reading, rather than a magic sentinel value
-   * that every consumer would have to special-case. `0` is a real cap meaning
-   * "nothing may occupy this surface" (a reserved place), not "unbounded".
+   * Why absence rather than a sentinel: UPG has no union-typed property
+   * primitive, so `integer | unbounded` is expressed as an optional number
+   * whose absence carries the "no cap" reading, instead of a magic value every
+   * consumer would have to special-case.
    *
-   * THREE STATES, AND THEY ARE ALL DIFFERENT. Absent = unbounded, no cap
-   * stated. `0` = a reserved place nothing may occupy. `null` = neither of
-   * those, and nothing this field defines; it is what you get by writing an
-   * explicit null rather than removing the key, and no consumer reads it as a
-   * cap. To return this property to ABSENT, remove the key with
-   * `update_node`'s or `batch_update_nodes`' `unset_properties`, since a
-   * property merge preserves anything you omit.
+   * Three states, all different. ABSENT is unbounded, no cap stated. `0` is a
+   * reserved place. `null` is neither, and nothing this field defines: it is
+   * what an explicit null write leaves behind, and no consumer reads it as a
+   * cap. To return the property to absent, remove the key with `update_node`'s
+   * or `batch_update_nodes`' `unset_properties`, since a property merge
+   * preserves anything omitted.
    *
-   * UNBOUNDED IS NOT AN EXEMPTION FROM SCRUTINY. The contention detector reads
-   * an absent capacity as a threshold of 1, on the reasoning that a surface
-   * which states no limit has stated no answer either, so several occupants is
-   * exactly the unrecorded decision worth naming. Declaring a real capacity is
-   * therefore the way to quiet the check honestly, and the only way that also
-   * records something true.
+   * Unbounded is not an exemption from scrutiny. The contention detector reads
+   * an absent capacity as a threshold of 1, because a surface that states no
+   * limit has stated no answer either, so several occupants is exactly the
+   * unrecorded decision worth naming. Declaring a real capacity is the way to
+   * quiet the check honestly, and the only way that also records something true.
    */
   capacity?: number
   /**
@@ -602,20 +637,34 @@ export interface SurfaceProperties {
   composition_mode?: SurfaceCompositionMode
   /**
    * Who wins when more occupants want the surface than `capacity` allows, and
-   * why.
+   * why. Absence is meaningful: on a contested surface it means nobody decided.
    *
-   * ABSENCE IS MEANINGFUL: a null or empty `arbitration_rule` on a contested
-   * surface means nobody decided, which is exactly what the
-   * `contended-surface-without-arbitration` anti-pattern detects. Do not fill
-   * this in with a placeholder to silence the check.
    * @example "Highest priority wins; ties break to the most recently updated."
+   *
+   * @remarks
+   * An empty or absent rule on a contested surface is exactly what
+   * `contended-surface-without-arbitration` detects. Do not fill it in with a
+   * placeholder to silence the check: the check exists to find the unrecorded
+   * decision, and a placeholder hides it without settling anything.
+   *
+   * The field is overloaded across composition modes, which is worth knowing
+   * before writing one. On an `exclusive` surface it records DISPLACEMENT (who
+   * is not rendered). On an `additive` surface everyone fits, so what it
+   * records is ORDER. Only the displacement reading is what the contention
+   * detector reads.
    */
   arbitration_rule?: string
   /**
-   * Whether the arbitration answer is enforced, written down, both, or neither.
-   * Separates "enforced in code but never transcribed" (ten minutes of typing)
-   * from "never decided" (a design meeting) from "safe only because nothing has
-   * collided yet" (the dangerous one).
+   * Whether the arbitration answer is enforced, written down, both, neither, or
+   * not owed at all. Leaving the field unset means unassessed, and always did.
+   *
+   * @remarks
+   * The separations are the whole point of the field, because absence alone
+   * conflates four situations with four different remediations: "enforced in
+   * code but never transcribed" is ten minutes of typing, "never decided" is a
+   * design meeting, "safe only because nothing has collided yet" is the
+   * dangerous one, and "nothing to decide, the occupants never compete" is a
+   * chained surface, which owes no arbitration rule at all.
    */
   arbitration_state?: SurfaceArbitrationState
   /** Who may add occupants to the surface. */

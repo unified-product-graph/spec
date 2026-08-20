@@ -15,6 +15,7 @@ import { UPG_FRAMEWORKS } from './definitions/index.js'
 import { UPG_ENTITY_META } from '../registry/entity-meta.js'
 import { getPropertySchema } from '../properties/property-schema.js'
 import type { UPGFramework } from './types.js'
+import { relationalCoveredEntityTypes } from './relational-paths.js'
 
 // ── Issue kinds ─────────────────────────────────────────────────────────────
 
@@ -212,7 +213,19 @@ function auditFramework(fw: UPGFramework): FrameworkIssue[] {
   }
 
   // ── Issue 3: Slot ↔ data.entity_types consistency ────────────────────────
+  //
+  // A framework declares the entity types it touches either through `slots` or,
+  // for a join surface, through the `relational` block — the spine plus every
+  // type reachable along a declared path, INCLUDING intermediates. Both are
+  // legitimate declaration surfaces, so coverage is checked against their union.
+  // Without this, a framework that (correctly) drops `slots` for `relational`
+  // would silently lose the drift check rather than keep it, which is the
+  // "removed a control by converting" failure this lineage keeps finding.
   const slotEntityTypes = new Set((fw.slots ?? []).map((s) => s.entityTypeId))
+  const relationalEntityTypes = relationalCoveredEntityTypes(fw)
+  const declaredEntityTypes = new Set([...slotEntityTypes, ...relationalEntityTypes])
+  const hasDeclarationSurface = declaredEntityTypes.size > 0
+
   for (const slotType of slotEntityTypes) {
     if (!dataEntityTypes.has(slotType)) {
       issues.push({
@@ -223,13 +236,23 @@ function auditFramework(fw: UPGFramework): FrameworkIssue[] {
       })
     }
   }
+  for (const relType of relationalEntityTypes) {
+    if (!dataEntityTypes.has(relType)) {
+      issues.push({
+        kind: 'SLOT_DATA_DRIFT',
+        severity: 'blocker',
+        location: `relational (spine or path endpoint) = "${relType}"`,
+        detail: `The relational block reaches entity type "${relType}" but it is not declared in data.entity_types.`,
+      })
+    }
+  }
   for (const dataType of dataEntityTypes) {
-    if (!slotEntityTypes.has(dataType) && (fw.slots ?? []).length > 0) {
+    if (!declaredEntityTypes.has(dataType) && hasDeclarationSurface) {
       issues.push({
         kind: 'SLOT_DATA_DRIFT',
         severity: 'warning',
         location: `data.entity_types[*].type="${dataType}"`,
-        detail: `data.entity_types lists "${dataType}" but no slot uses it. Either add a slot for it or remove it from data.entity_types.`,
+        detail: `data.entity_types lists "${dataType}" but no slot or relational path uses it. Either use it or remove it from data.entity_types.`,
       })
     }
   }

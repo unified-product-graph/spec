@@ -211,6 +211,50 @@ export const CONFIGURATION_QUALIFIER_EDGE_PROPERTY_SCHEMA: PropertySchema = {
   },
 }
 
+/**
+ * Property schema carried by `workspace_arranges_node`: where a node sits on a
+ * canvas, and how its card is presented there.
+ *
+ * A PLACEMENT IS A FACT ABOUT THE RELATIONSHIP, not about either endpoint. The
+ * same persona can sit at different coordinates on five different canvases, and
+ * none of those coordinates is a property of the persona. This is the same
+ * principle `framework_exercise_includes_node` applies to per-entity results.
+ *
+ * `selected` IS DELIBERATELY ABSENT. Selection is ephemeral UI state, and
+ * persisting it means reloading a canvas restores someone's month-old
+ * selection and every click dirties the file. The spec does not bless it.
+ *
+ * AT MOST ONE ARRANGEMENT PER (WORKSPACE, NODE) PAIR: a card appears once on a
+ * canvas. The write amplification is real and named rather than hidden:
+ * dragging a card rewrites edge properties and so changes the body checksum,
+ * which is diff noise on a shared graph. It is bounded by the tool writing only
+ * the canvases a user explicitly keeps, and by viewport panning touching the
+ * opaque `canvas` bag rather than any edge.
+ *
+ * `x` and `y` are expected on every instance. Requiredness here is convention
+ * rather than enforcement: `PropertyDefinition.required` names required keys
+ * WITHIN a nested object, and the edge-property validator has no top-level
+ * required-key concept, so the contract is stated in each description.
+ */
+export const WORKSPACE_ARRANGEMENT_EDGE_PROPERTY_SCHEMA: PropertySchema = {
+  x: {
+    type: 'number',
+    description: 'Horizontal canvas coordinate of the card, in the canvas\'s own units. Expected on every arrangement: a placement without coordinates is not a placement.',
+  },
+  y: {
+    type: 'number',
+    description: 'Vertical canvas coordinate of the card, in the canvas\'s own units. Expected on every arrangement: a placement without coordinates is not a placement.',
+  },
+  expanded: {
+    type: 'boolean',
+    description: 'Whether the card is drawn expanded rather than collapsed. Presentation state that survives a reload, unlike selection.',
+  },
+  frame_id: {
+    type: 'string',
+    description: 'Id of the canvas frame this card sits inside. The frame itself is opaque furniture and lives in `workspace.properties.canvas.frames`, so this names a bag member rather than a graph node.',
+  },
+}
+
 // ─── Registry ─────────────────────────────────────────────────────────────────
 
 // `satisfies` preserves literal key types for downstream
@@ -1137,7 +1181,40 @@ export const UPG_EDGE_CATALOG = {
   // real edge, not just a string property — the domain's own anti-pattern is
   // "version prompts like code".
   prompt_version_supersedes_prompt_version: { forward_verb: 'supersedes', reverse_verb: 'superseded_by', classification: 'semantic', source_type: 'prompt_version', target_type: 'prompt_version' },
+  // The TYPED subject edge. Kept alongside the polymorphic `eval_benchmark_measures_node`
+  // added in 0.31.0, on the same footing as `constraint_constrains_feature` beside
+  // `node_constrains_node`: reach for THIS one when the subject is a feature, and for the
+  // wildcard only when it is not. Two ways to say the same thing about a feature is the
+  // cost of the pair, and it is paid deliberately rather than by accident.
   eval_benchmark_measures_feature: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'cross-domain', source_type: 'eval_benchmark', target_type: 'feature' },
+  /*
+   * 0.31.0 — the benchmark SUBJECT, polymorphic.
+   *
+   * An eval measures a tool, a document, a check, an importer, a feature. Those
+   * are unrelated types, so the subject relation is genuinely wildcard-shaped and
+   * follows the decision-to-anything family (`decision_influences_node`).
+   *
+   * THE WIDTH IS OVER-WIDE, AND THAT IS ON THE LABEL RATHER THAN LAUNDERED.
+   * The decision family's warrant is that a decision really is about anything. A
+   * benchmark is not: it measures a MEASURABLE thing, and this edge will happily
+   * claim a benchmark can measure a persona, which is meaningless. It ships as the
+   * honest deferral it is — the alternative was minting typed edges for subject
+   * types the spec does not yet have, which would answer "what is a tool in the
+   * graph" as a side effect of building an eval harness. That question is a stated
+   * non-goal, and deferring it is the point of choosing the wildcard.
+   *
+   * Registered in UPG_POLYMORPHIC_EDGE_KEYS; Audit 05 errors on any wildcard that
+   * is not.
+   */
+  eval_benchmark_measures_node: { forward_verb: 'measures', reverse_verb: 'measured_by', classification: 'semantic', source_type: 'eval_benchmark', target_type: 'node' },
+  /*
+   * 0.31.0 — the labeled corpus a benchmark draws its cases from.
+   *
+   * `ai_dataset` reused rather than a new `corpus` type minted (Q5, ratified): the
+   * existing type plus one join edge carries the need, and a corpus type would be
+   * minted only if that demonstrably failed. It has not.
+   */
+  eval_benchmark_draws_cases_from_ai_dataset: { forward_verb: 'draws_cases_from', reverse_verb: 'provides_cases_to', classification: 'semantic', source_type: 'eval_benchmark', target_type: 'ai_dataset' },
   ai_guardrail_enforces_security_policy: { forward_verb: 'enforces', reverse_verb: 'enforced_by', classification: 'cross-domain', source_type: 'ai_guardrail', target_type: 'security_policy' },
   model_comparison_informs_decision: { forward_verb: 'informs', reverse_verb: 'informed_by', classification: 'cross-domain', source_type: 'model_comparison', target_type: 'decision' },
   ai_cost_tracker_feeds_cost_structure: { forward_verb: 'feeds', reverse_verb: 'fed_by', classification: 'cross-domain', source_type: 'ai_cost_tracker', target_type: 'cost_structure' },
@@ -1176,6 +1253,23 @@ export const UPG_EDGE_CATALOG = {
   agent_hook_triggers_ci_pipeline: { forward_verb: 'triggers', reverse_verb: 'triggered_by', classification: 'cross-domain', source_type: 'agent_hook', target_type: 'ci_pipeline' },
   workflow_template_defines_agent_task:   { forward_verb: 'defines',           reverse_verb: 'defined_by',       classification: 'hierarchy',  source_type: 'workflow_template', target_type: 'agent_task' },
   agent_definition_spawns_agent_task:     { forward_verb: 'spawns',            reverse_verb: 'spawned_by',       classification: 'hierarchy',  source_type: 'agent_definition',  target_type: 'agent_task' },
+  // The delegation bridge (tasks-workflows-2026-08 §5). Before this, the whole
+  // automation domain could reach product work only at coarse grain —
+  // `workflow_run_implements_initiative` (initiative), `agent_skill_extends_feature`
+  // (feature), `agent_session_creates_decision` (decision),
+  // `workflow_artifact_references_deliverable` (deliverable) — and NOTHING reached
+  // `task`, the atomic unit of product work that `feature_decomposes_into_task` /
+  // `epic_decomposes_into_task` make the delivery hierarchy's leaf. So "this agent
+  // work item IS the execution of that product task" was inexpressible, and a
+  // human-vs-agent assignee could not be read off the graph.
+  // Cross-domain: agent_task lives in `automation`, task in product delivery.
+  // NOT hierarchy — the agent_task does not CONTAIN the task; both are
+  // independently-parented work items (`workflow_template_defines_agent_task` /
+  // `agent_definition_spawns_agent_task` own the agent side, feature/epic the
+  // product side), and the delegation is a lateral reference between them.
+  // Verb `executes` mirrors the domain's own vocabulary (`workflow_template`
+  // is `executed_as` a run); reverse reads "this task is executed_by that agent task".
+  agent_task_executes_task:               { forward_verb: 'executes',          reverse_verb: 'executed_by',      classification: 'cross-domain', source_type: 'agent_task',      target_type: 'task' },
 
   // ── Part 4: Scale Ring (Ring 4) ────────────────────────────────────────────
 
@@ -1542,6 +1636,25 @@ export const UPG_EDGE_CATALOG = {
   product_managed_via_program: { forward_verb: 'managed_via', reverse_verb: 'manages', classification: 'hierarchy', source_type: 'product', target_type: 'program' },
   program_contains_project: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'program', target_type: 'project' },
   project_targets_milestone: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'hierarchy', source_type: 'project', target_type: 'milestone' },
+  // Portfolio Phase 2 (ratified 2026-08-14): a milestone that a PRODUCT owns
+  // outright, with no program/project above it. `milestone` had exactly one
+  // inbound edge spec-wide (`project_targets_milestone`) and `project` was its
+  // only declared parent, so a portfolio-grain milestone — which names a
+  // product, not a project — was inexpressible. This is the 0.23.0 epic-twin
+  // precedent: an existing leaf type gains a second, SHALLOWER parent, and the
+  // name, verbs and classification are the deeper edge's, inherited unchanged
+  // rather than invented.
+  //
+  // The mediated path was checked and rejected, not overlooked. The relation IS
+  // reachable as product —managed_via→ program —contains→ project —targets→
+  // milestone, but at three hops (past the 1-2-hop threshold), and the hop count
+  // is not the real objection: mediation forces `program` and `project` nodes
+  // into existence that the source data does not have.
+  //
+  // NOT cross_product_eligible: a milestone belongs to the graph of the product
+  // that owns it. `UPG_VALID_CHILDREN.product` gains 'milestone' in step, which
+  // the hierarchy-orphan guard requires.
+  product_targets_milestone: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'hierarchy', source_type: 'product', target_type: 'milestone' },
   project_produces_deliverable: { forward_verb: 'produces', reverse_verb: 'produced_by', classification: 'hierarchy', source_type: 'project', target_type: 'deliverable' },
   program_tracked_via_risk_register: { forward_verb: 'tracked_via', reverse_verb: 'tracks', classification: 'hierarchy', source_type: 'program', target_type: 'risk_register' },
   risk_register_contains_risk: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'risk_register', target_type: 'risk' },
@@ -1697,6 +1810,50 @@ export const UPG_EDGE_CATALOG = {
   // node) has no schema mechanism yet — deliberately deferred, see the WS3
   // proposal doc, ripple map "surprises" #3.
   workspace_produced_node: { forward_verb: 'produced', reverse_verb: 'produced_in', classification: 'causal', source_type: 'workspace', target_type: 'node' },
+  // Canvas arrangement: which entities are ON a workspace, and where. This is
+  // the edge `WorkspaceProperties`' docstring promised for months without the
+  // catalog having it; the promise is now true.
+  //
+  // Polymorphic per the enum-vs-polymorphism ADR (2026-06-16), on all three
+  // arms: universality holds (any entity can be dragged onto a canvas, with no
+  // principled stopping point), constraint value is nil (nobody could defend
+  // "you may arrange features but not personas"), and there is NO STRUCTURAL
+  // ROLE. That third arm is load-bearing rather than decorative.
+  // `classification: 'cross-domain'` is therefore mandatory, not cosmetic: it
+  // keeps the edge out of `UPG_VALID_CHILDREN` and `resolveContainmentEdge`, so
+  // `get_tree` never walks it and a canvas placement can never masquerade as
+  // containment. An arranged node keeps its real containment parent. Same
+  // posture as `framework_exercise_includes_node`.
+  //
+  // The alternative was putting the whole canvas snapshot in one opaque node
+  // property, which is cheaper and loses. A node id inside a blob is a foreign
+  // key held as a scalar (the exact thing P14 forbids), the placed entities
+  // become invisible to `get_node` and `query`, and a deleted node leaves a
+  // stale reference that `repair_dangling_edges` cannot see. As an edge, that
+  // guard is inherited for free. Only the furniture with no graph referent
+  // stays opaque, in `workspace.properties.canvas`.
+  //
+  // NOT cross_product_eligible: deliberate scope limit mirroring the WS3
+  // anchors, not an oversight.
+  workspace_arranges_node: { forward_verb: 'arranges', reverse_verb: 'arranged_in', classification: 'cross-domain', source_type: 'workspace', target_type: 'node', carries_properties: true, property_schema: WORKSPACE_ARRANGEMENT_EDGE_PROPERTY_SCHEMA },
+  // What a published composition SHOWS. Passes the same three-arm ADR test the
+  // same way, and carries no properties: a focus is a bare reference.
+  //
+  // It earns its place by making a composition legible to a tool that cannot
+  // parse the publishing tool's URLs. "Which published views show this
+  // persona?" is a LEARN question the graph exists to answer, and the edge is
+  // what makes a composition's graph references repairable when a focused node
+  // is deleted. Adding it in a later release would be a second blast-radius
+  // event on the same track.
+  //
+  // POPULATION IS BEST-EFFORT and an empty focus set is VALID: a composition
+  // whose member hrefs the writing tool cannot resolve to node ids is still a
+  // well-formed composition. That keeps the spec complete without blocking on
+  // app work, and it is why no check fires on an unfocused composition.
+  //
+  // NOT cross_product_eligible: a portfolio-level composition spanning several
+  // product graphs is conceivable but unevidenced. Same YAGNI call as above.
+  composition_focuses_node: { forward_verb: 'focuses', reverse_verb: 'focused_in', classification: 'cross-domain', source_type: 'composition', target_type: 'node' },
 
   // ── P14 edges (replacing foreign-key properties) ─────────────────────────
   feature_addresses_job: { forward_verb: 'addresses', reverse_verb: 'addressed_by', classification: 'cross-domain', source_type: 'feature', target_type: 'job' },
@@ -2869,7 +3026,9 @@ export function isDeliberateOnlyEdge(type: string): boolean {
 /**
  * Canonical allow-list of edges that use the `'node'` wildcard endpoint.
  *
- * Eight semantic families are sanctioned:
+ * Ten semantic families are sanctioned. The count and the partition are
+ * asserted in `spec-integrity.test.ts`, so this list cannot silently fall out
+ * of step with the array below the way it did between 0.28.0 and 0.31.0:
  *
  * 1. **Universal semantic verbs**: any node can inform / constrain / inspire
  *    any other node. The meaning is deliberately abstract; consumers render
@@ -2893,6 +3052,17 @@ export function isDeliberateOnlyEdge(type: string): boolean {
  *    produce any entity type arranged in it (decision, feature, persona, ...).
  *    Widened from the single-target `workspace_produced_decision`; see
  *    `UPG_EDGE_MIGRATIONS` for the rename rule.
+ * 9. **Canvas arrangement and published-view focus**: any entity can be dragged
+ *    onto a canvas or shown in a published view, and neither placement carries
+ *    a structural role, so both collapse polymorphic rather than enumerating
+ *    the type universe twice. Both are `cross-domain`, so neither enters
+ *    `UPG_VALID_CHILDREN` and neither can be walked as containment.
+ * 10. **Benchmark subject** (0.31.0): an eval measures a tool, a document, a
+ *    check, an importer, a feature. Registered as OVER-WIDE by admission,
+ *    because a benchmark measures a measurable thing rather than literally any
+ *    node; the width is what it costs to avoid answering "what is a tool in the
+ *    graph" as a side effect of building an eval harness. Reach for the typed
+ *    `eval_benchmark_measures_feature` when the subject IS a feature.
  *
  * Adding a new polymorphic edge requires extending this array AND the
  * spec-integrity regression test, which forces a conscious decision and
@@ -2919,6 +3089,9 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   'framework_exercise_includes_node',
   // Universal classification (any node classified against a classification_value)
   'node_classified_as_classification_value',
+  // Benchmark subject (0.31.0): an eval measures a tool, a doc, a check, an
+  // importer, a feature. Over-wide by admission — see the definition's comment.
+  'eval_benchmark_measures_node',
   // Work-item issue links (0.20.0): endpoint-polymorphic over the work-item set
   // {feature, epic, user_story, task, bug}. The `work_item_` key names the
   // intended semantic domain; the endpoints are the `node` wildcard.
@@ -2928,6 +3101,11 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   // Workspace provenance (WS3, 2026-07-05): a workspace can produce any
   // entity type arranged in it. Widened from workspace_produced_decision.
   'workspace_produced_node',
+  // Canvas arrangement and published-view focus: any entity can be dragged
+  // onto a canvas or shown in a published view, and neither carries a
+  // structural role, so both collapse polymorphic rather than enumerating.
+  'workspace_arranges_node',
+  'composition_focuses_node',
 ] as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)

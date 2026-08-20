@@ -1051,6 +1051,256 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     }
   },
   {
+    "id": "lean-canvas",
+    "name": "Lean Canvas",
+    "version": "1.0.0",
+    "description": "Startup-focused adaptation of the BMC. Replaces partners/resources with problem/solution/unfair advantage.",
+    "category": "business_model",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Ash Maurya",
+      "description": "Adapted from BMC for startups. Published in Running Lean (O'Reilly). Replaces partners/resources with problem/solution.",
+      "url": "https://leanstack.com/lean-canvas",
+      "year": 2012,
+      "license": "published_methodology"
+    },
+    "tags": [
+      "business_model",
+      "matrix"
+    ],
+    "slots": [
+      {
+        "label": "Problem",
+        "entityTypeId": "need",
+        "description": "Top 3 problems your customers face"
+      },
+      {
+        "label": "Solution",
+        "entityTypeId": "solution",
+        "description": "Top 3 features addressing each problem"
+      },
+      {
+        "label": "Key Metrics",
+        "entityTypeId": "metric",
+        "description": "Key numbers that tell you how your business is doing"
+      },
+      {
+        "label": "Unique Value Prop",
+        "entityTypeId": "value_proposition",
+        "description": "Single, clear, compelling message"
+      },
+      {
+        "label": "Unfair Advantage",
+        "entityTypeId": "capability",
+        "description": "Something that cannot be easily copied"
+      },
+      {
+        "label": "Channels",
+        "entityTypeId": "acquisition_channel",
+        "description": "Path to customers"
+      },
+      {
+        "label": "Customer Segments",
+        "entityTypeId": "persona",
+        "description": "Target customers"
+      },
+      {
+        "label": "Existing Alternatives",
+        "entityTypeId": "competitor",
+        "description": "What do customers use today?"
+      },
+      {
+        "label": "Early Adopters",
+        "entityTypeId": "behavioral_segment",
+        "description": "Your first target customers"
+      },
+      {
+        "label": "Cost Structure",
+        "entityTypeId": "cost_structure",
+        "description": "Customer acquisition costs, hosting, etc."
+      },
+      {
+        "label": "Revenue Streams",
+        "entityTypeId": "revenue_stream",
+        "description": "Revenue model, lifetime value, margins"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "need",
+          "role": "bucket"
+        },
+        {
+          "type": "solution",
+          "role": "bucket"
+        },
+        {
+          "type": "value_proposition",
+          "role": "bucket"
+        },
+        {
+          "type": "competitor",
+          "role": "bucket"
+        },
+        {
+          "type": "persona",
+          "role": "bucket"
+        },
+        {
+          "type": "behavioral_segment",
+          "role": "bucket"
+        },
+        {
+          "type": "metric",
+          "role": "bucket"
+        },
+        {
+          "type": "acquisition_channel",
+          "role": "bucket"
+        },
+        {
+          "type": "cost_structure",
+          "role": "bucket"
+        },
+        {
+          "type": "revenue_stream",
+          "role": "bucket"
+        },
+        {
+          "type": "capability",
+          "role": "item"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "matrix"
+    },
+    "presentation": {
+      "layout": {
+        "type": "matrix",
+        "rows": 3,
+        "cols": 4
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Capture an entire business model hypothesis on a single page so founders can test assumptions rapidly without writing a full business plan.",
+      "core_question": "What are the riskiest assumptions in our business model, and how can we test them quickly?",
+      "when_to_use": [
+        "You are designing or redesigning how the business creates and captures value",
+        "You need to communicate the business model to stakeholders or investors",
+        "You want to identify risks and assumptions in your business model"
+      ],
+      "when_not_to_use": [
+        "The business model is mature and well-understood by all stakeholders",
+        "You are focused on tactical execution rather than model design"
+      ]
+    }
+  },
+  {
+    "id": "competitive-landscape",
+    "approach_ids": [
+      "inspect"
+    ],
+    "name": "Competitive Landscape",
+    "version": "1.0.0",
+    "description": "Survey the whole competitive environment on one surface: who competes, what they ship, where the market is moving, and how you are positioned within it.",
+    "category": "competitive",
+    "origin": {
+      "type": "custom",
+      "attribution": "The Product Creator",
+      "description": "Original to the Unified Product Graph. Where competitor-profile studies one rival in depth, the landscape holds the market-level view: the competitor set, their features, the trends acting on all of them, and your own positioning read against the whole. Assembled from four entity types the catalog already models rather than adapted from a published methodology.",
+      "license": "open_attribution"
+    },
+    "tags": [
+      "competitive",
+      "matrix"
+    ],
+    "slots": [
+      {
+        "label": "Competitors",
+        "entityTypeId": "competitor",
+        "description": "The rivals in the market you are surveying"
+      },
+      {
+        "label": "Competitor Features",
+        "entityTypeId": "competitor_feature",
+        "description": "What those competitors actually ship"
+      },
+      {
+        "label": "Market Trends",
+        "entityTypeId": "market_trend",
+        "description": "Forces acting on the whole market, not on one rival"
+      },
+      {
+        "label": "Positioning",
+        "entityTypeId": "positioning",
+        "description": "Where you stand relative to the field"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "competitor",
+          "role": "item"
+        },
+        {
+          "type": "competitor_feature",
+          "role": "item"
+        },
+        {
+          "type": "market_trend",
+          "role": "item"
+        },
+        {
+          "type": "positioning",
+          "role": "item"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "matrix"
+    },
+    "presentation": {
+      "layout": {
+        "type": "matrix",
+        "rows": 2,
+        "cols": 2
+      },
+      "colour_by": "type",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Hold the market-level competitive picture in one place: the field of rivals, what they ship, the trends moving the whole category, and your own position read against all three.",
+      "core_question": "What does the field look like from above, and where do we sit in it?",
+      "when_to_use": [
+        "You need the shape of a whole market before choosing which rival to study in depth",
+        "Trends are moving the category and you need them beside the competitor set, not in a separate document",
+        "A positioning statement needs the competitive evidence sitting next to it"
+      ],
+      "when_not_to_use": [
+        "You already know which single rival matters and want depth on them: use competitor-profile",
+        "You are comparing capabilities feature-by-feature against named rivals: use competitive-matrix",
+        "You need to place rivals positionally on two scored axes: use positioning-map"
+      ]
+    }
+  },
+  {
     "id": "porter-five-forces",
     "approach_ids": [
       "inspect"
@@ -1339,6 +1589,108 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "when_not_to_use": [
         "You are in pure execution mode with a clear strategy already set",
         "The team is too early-stage to commit to strategic constraints"
+      ]
+    }
+  },
+  {
+    "id": "product-vision-board",
+    "approach_ids": [
+      "plan"
+    ],
+    "name": "Product Vision Board",
+    "version": "1.0.0",
+    "description": "Roman Pichler's one-page vision canvas. A vision at the top narrows through target group, needs, product and business goals, so the reason for building and the thing being built stay on the same page.",
+    "category": "strategy",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "Roman Pichler",
+      "description": "Created by Roman Pichler as a one-page tool for capturing and sharing a product vision, and published in \"Strategize\" (2016). The board deliberately keeps the vision, the people it serves, their needs, the product and the business goals in a single vertical read, so a change to any one is visible against the other four.",
+      "license": "published_methodology"
+    },
+    "tags": [
+      "strategy",
+      "matrix"
+    ],
+    "slots": [
+      {
+        "label": "Vision",
+        "entityTypeId": "vision",
+        "description": "The long-term change the product exists to bring about"
+      },
+      {
+        "label": "Target Group",
+        "entityTypeId": "persona",
+        "description": "The customers and users the vision is for"
+      },
+      {
+        "label": "Needs",
+        "entityTypeId": "need",
+        "description": "The problem the product solves or the benefit it provides for that group"
+      },
+      {
+        "label": "Product",
+        "entityTypeId": "solution",
+        "description": "What the product is, and what makes it stand out"
+      },
+      {
+        "label": "Business Goals",
+        "entityTypeId": "outcome",
+        "description": "How the product benefits the company that builds it"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "vision",
+          "role": "item"
+        },
+        {
+          "type": "persona",
+          "role": "item"
+        },
+        {
+          "type": "need",
+          "role": "item"
+        },
+        {
+          "type": "solution",
+          "role": "item"
+        },
+        {
+          "type": "outcome",
+          "role": "item"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "matrix"
+    },
+    "presentation": {
+      "layout": {
+        "type": "matrix",
+        "rows": 5,
+        "cols": 1
+      },
+      "colour_by": "type",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Capture a product vision on one page together with the group it serves, their needs, the product itself and the business goals it advances.",
+      "core_question": "What change are we trying to bring about, for whom, and how does building it pay off?",
+      "when_to_use": [
+        "A new product or a major new direction needs a shared vision before any roadmap exists",
+        "The team can describe what it is building but not why anyone should want it",
+        "Vision, target group and business goals are living in three different documents and drifting apart"
+      ],
+      "when_not_to_use": [
+        "The vision is settled and the open question is sequencing: use goal-oriented-roadmap",
+        "You need the causal chain from vision down to daily work: use strategic-cascade",
+        "The question is which business model captures the value: use business-model-canvas"
       ]
     }
   },
@@ -1927,25 +2279,95 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Must-haves",
         "role": "must_have",
         "entityTypeId": "feature",
-        "description": "Expected features: absence causes dissatisfaction"
+        "description": "Expected features: absence causes dissatisfaction",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "functional_response",
+            "op": "in",
+            "value": [
+              "i_expect_it",
+              "i_am_neutral",
+              "i_can_tolerate_it"
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "dysfunctional_response",
+            "op": "eq",
+            "value": "i_dislike_it"
+          }
+        ]
       },
       {
         "label": "Performance",
         "role": "performance",
         "entityTypeId": "feature",
-        "description": "More is better: linear satisfaction increase"
+        "description": "More is better: linear satisfaction increase",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "functional_response",
+            "op": "eq",
+            "value": "i_like_it"
+          },
+          {
+            "scope": "framework",
+            "property": "dysfunctional_response",
+            "op": "eq",
+            "value": "i_dislike_it"
+          }
+        ]
       },
       {
         "label": "Delighters",
         "role": "delighter",
         "entityTypeId": "feature",
-        "description": "Unexpected features: presence creates delight"
+        "description": "Unexpected features: presence creates delight",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "functional_response",
+            "op": "eq",
+            "value": "i_like_it"
+          },
+          {
+            "scope": "framework",
+            "property": "dysfunctional_response",
+            "op": "in",
+            "value": [
+              "i_expect_it",
+              "i_am_neutral",
+              "i_can_tolerate_it"
+            ]
+          }
+        ]
       },
       {
         "label": "Indifferent",
         "role": "indifferent",
         "entityTypeId": "feature",
-        "description": "Features users don't care about either way"
+        "description": "Features users don't care about either way",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "functional_response",
+            "op": "in",
+            "value": [
+              "i_am_neutral",
+              "i_can_tolerate_it"
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "dysfunctional_response",
+            "op": "in",
+            "value": [
+              "i_am_neutral",
+              "i_can_tolerate_it"
+            ]
+          }
+        ]
       }
     ],
     "data": {
@@ -2353,6 +2775,175 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     }
   },
   {
+    "id": "experiment-tracker",
+    "name": "Experiment Tracker",
+    "version": "1.0.0",
+    "description": "Track experiments from design through execution to results. Velocity-focused.",
+    "category": "validation",
+    "origin": {
+      "type": "practitioner",
+      "description": "Common in growth and product teams running continuous experiments.",
+      "license": "cc_by"
+    },
+    "tags": [
+      "validation",
+      "table"
+    ],
+    "relational": {
+      "spine": "experiment_run",
+      "columns": [
+        {
+          "kind": "field",
+          "id": "experiment",
+          "label": "Experiment",
+          "property": "title",
+          "sortable": true
+        },
+        {
+          "kind": "projection",
+          "id": "hypothesis",
+          "label": "Hypothesis",
+          "path": [
+            {
+              "edge": "experiment_plan_ran_as_experiment_run",
+              "direction": "reverse"
+            },
+            {
+              "edge": "hypothesis_requires_experiment_plan",
+              "direction": "reverse"
+            }
+          ],
+          "fields": [
+            "title"
+          ],
+          "sortable": true
+        },
+        {
+          "kind": "projection",
+          "id": "success_metric",
+          "label": "Success Metric",
+          "path": [
+            {
+              "edge": "experiment_run_measures_metric",
+              "direction": "forward"
+            }
+          ],
+          "fields": [
+            "title",
+            "current_value",
+            "target_value"
+          ]
+        },
+        {
+          "kind": "field",
+          "id": "stage",
+          "label": "Stage",
+          "property": "status"
+        },
+        {
+          "kind": "field",
+          "id": "verdict",
+          "label": "Verdict",
+          "property": "disposition"
+        },
+        {
+          "kind": "projection",
+          "id": "result",
+          "label": "Result",
+          "path": [
+            {
+              "edge": "experiment_run_produces_learning",
+              "direction": "forward"
+            }
+          ],
+          "fields": [
+            "title",
+            "result_direction"
+          ]
+        },
+        {
+          "kind": "projection",
+          "id": "evidence",
+          "label": "Evidence",
+          "path": [
+            {
+              "edge": "experiment_run_yields_evidence",
+              "direction": "forward"
+            }
+          ],
+          "fields": [
+            "title"
+          ]
+        }
+      ],
+      "sort": {
+        "column": "experiment",
+        "direction": "asc"
+      }
+    },
+    "data": {
+      "entity_types": [
+        {
+          "type": "experiment_run",
+          "role": "item"
+        },
+        {
+          "type": "experiment_plan",
+          "role": "item"
+        },
+        {
+          "type": "hypothesis",
+          "role": "item"
+        },
+        {
+          "type": "metric",
+          "role": "item"
+        },
+        {
+          "type": "learning",
+          "role": "item"
+        },
+        {
+          "type": "evidence",
+          "role": "item"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "table"
+    },
+    "presentation": {
+      "layout": {
+        "type": "table",
+        "columns": []
+      },
+      "sort_by": {
+        "property": "title",
+        "direction": "asc"
+      },
+      "colour_by": "type",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Track all running and completed experiments in one place: hypothesis, method, status, result, learnings. The team builds a cumulative record of validated knowledge.",
+      "core_question": "What experiments are running, what have we learned from completed experiments, and are we applying those learnings to new hypotheses?",
+      "when_to_use": [
+        "You have hypotheses about user needs or solutions that need testing",
+        "You want to reduce risk before committing engineering resources",
+        "The team is debating assumptions that can be tested empirically"
+      ],
+      "when_not_to_use": [
+        "The solution is already validated through real usage data",
+        "Speed of shipping matters more than certainty about assumptions"
+      ]
+    }
+  },
+  {
     "id": "hypothesis-board",
     "approach_ids": [
       "reflect"
@@ -2675,6 +3266,117 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "when_not_to_use": [
         "The technical solution is straightforward and well-understood",
         "You are building a throwaway prototype where architecture does not matter"
+      ]
+    }
+  },
+  {
+    "id": "threat-model-canvas",
+    "approach_ids": [
+      "inspect"
+    ],
+    "name": "Threat Model Canvas",
+    "version": "1.0.0",
+    "description": "One surface for a product's security posture: the threat models in play, the threats and vulnerabilities they name, and the controls, policies and reviews answering them.",
+    "category": "security",
+    "origin": {
+      "type": "custom",
+      "attribution": "The Product Creator",
+      "description": "Original to the Unified Product Graph. Deliberately NOT a STRIDE record: STRIDE is a taxonomy of six threat categories (spoofing, tampering, repudiation, information disclosure, denial of service, elevation of privilege), whereas this canvas lays out the security lifecycle: models, then threats, then vulnerabilities, then the controls, policies and reviews that answer them. A STRIDE record would be a different framework with six slots of one type, and is not this one. Assembled from six entity types the catalog already models.",
+      "license": "open_attribution"
+    },
+    "tags": [
+      "security",
+      "matrix"
+    ],
+    "slots": [
+      {
+        "label": "Threat Models",
+        "entityTypeId": "threat_model",
+        "description": "The modelling exercises themselves: scope, system, assumptions"
+      },
+      {
+        "label": "Threats",
+        "entityTypeId": "threat",
+        "description": "What an adversary could attempt against the system"
+      },
+      {
+        "label": "Vulnerabilities",
+        "entityTypeId": "vulnerability",
+        "description": "Weaknesses that make a threat realisable"
+      },
+      {
+        "label": "Controls",
+        "entityTypeId": "security_control",
+        "description": "Technical and procedural measures that reduce risk"
+      },
+      {
+        "label": "Policies",
+        "entityTypeId": "security_policy",
+        "description": "The standing rules the controls implement"
+      },
+      {
+        "label": "Reviews",
+        "entityTypeId": "security_review",
+        "description": "Assessments that check the posture actually holds"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "threat_model",
+          "role": "item"
+        },
+        {
+          "type": "threat",
+          "role": "item"
+        },
+        {
+          "type": "vulnerability",
+          "role": "item"
+        },
+        {
+          "type": "security_control",
+          "role": "item"
+        },
+        {
+          "type": "security_policy",
+          "role": "item"
+        },
+        {
+          "type": "security_review",
+          "role": "item"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "matrix"
+    },
+    "presentation": {
+      "layout": {
+        "type": "matrix",
+        "rows": 2,
+        "cols": 3
+      },
+      "colour_by": "type",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Hold a product's whole security posture on one surface, so a named threat and the control that answers it are read together rather than tracked in separate systems.",
+      "core_question": "What could go wrong, what makes it possible, and what have we actually put in place against it?",
+      "when_to_use": [
+        "A threat modelling session needs somewhere to land that is not a document nobody reopens",
+        "Controls and policies exist but nobody can point to the threats they answer",
+        "An audit or review asks you to show posture, not just a list of findings"
+      ],
+      "when_not_to_use": [
+        "You want STRIDE's six threat categories specifically. This canvas is a lifecycle, not that taxonomy",
+        "You are triaging a live incident rather than modelling posture",
+        "The work is scoring and ranking risks against each other rather than laying out what exists"
       ]
     }
   },
@@ -3549,6 +4251,114 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "education": {
       "purpose": "Design the product itself as the primary growth driver (free tier, self-serve onboarding, in-product virality) to reduce dependence on sales-led acquisition.",
       "core_question": "Can our product acquire, activate, and expand users without human intervention, and where in the loop do we still need sales?",
+      "when_to_use": [
+        "You are launching a new product, feature, or entering a new market",
+        "You need to coordinate cross-functional launch activities",
+        "You want to define target customers, channels, and messaging"
+      ],
+      "when_not_to_use": [
+        "The product is mature with established distribution channels",
+        "You are iterating on an existing product for existing customers"
+      ]
+    }
+  },
+  {
+    "id": "gtm-playbook",
+    "approach_ids": [
+      "plan"
+    ],
+    "name": "GTM Playbook",
+    "version": "1.0.0",
+    "description": "End-to-end go-to-market plan. Covers market analysis, ICP definition, positioning, messaging, channel strategy, launch plan, and success metrics in a sequential flow.",
+    "category": "go_to_market",
+    "origin": {
+      "type": "practitioner",
+      "description": "Synthesised from go-to-market practice across product marketing, sales, and customer success. The playbook format coordinates all GTM functions into a single executable plan.",
+      "license": "cc_by"
+    },
+    "tags": [
+      "go_to_market",
+      "flow"
+    ],
+    "slots": [
+      {
+        "label": "Market Analysis",
+        "entityTypeId": "gtm_strategy",
+        "description": "Market sizing and competitive landscape"
+      },
+      {
+        "label": "Ideal Customer Profile",
+        "entityTypeId": "ideal_customer_profile",
+        "description": "Ideal customer profile"
+      },
+      {
+        "label": "Positioning",
+        "entityTypeId": "positioning",
+        "description": "How you position against alternatives"
+      },
+      {
+        "label": "Messaging",
+        "entityTypeId": "messaging",
+        "description": "Key messages by audience"
+      },
+      {
+        "label": "Launch",
+        "entityTypeId": "launch",
+        "description": "Launch activities and timeline"
+      },
+      {
+        "label": "Sales Motion",
+        "entityTypeId": "sales_motion",
+        "description": "How you will sell"
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "gtm_strategy",
+          "role": "item"
+        },
+        {
+          "type": "ideal_customer_profile",
+          "role": "item"
+        },
+        {
+          "type": "positioning",
+          "role": "item"
+        },
+        {
+          "type": "messaging",
+          "role": "item"
+        },
+        {
+          "type": "launch",
+          "role": "item"
+        },
+        {
+          "type": "sales_motion",
+          "role": "item"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "flow"
+    },
+    "presentation": {
+      "layout": {
+        "type": "flow",
+        "direction": "LR"
+      },
+      "colour_by": "status",
+      "card_fields": [
+        "title",
+        "description",
+        "status"
+      ]
+    },
+    "education": {
+      "purpose": "Orchestrate every go-to-market activity (messaging, channels, pricing, enablement, launch timeline) into a single executable plan.",
+      "core_question": "Do all go-to-market functions (product, marketing, sales, CS) have a shared plan for how we'll bring this to market?",
       "when_to_use": [
         "You are launching a new product, feature, or entering a new market",
         "You need to coordinate cross-functional launch activities",
@@ -5759,6 +6569,173 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "when_not_to_use": [
         "The solution is well-understood and validated",
         "You are in a delivery phase with clear requirements"
+      ]
+    }
+  },
+  {
+    "id": "assumption-map",
+    "approach_ids": [
+      "reflect"
+    ],
+    "name": "Assumption Map",
+    "version": "1.0.0",
+    "description": "Plot assumptions on axes of uncertainty vs risk. Most risky + most uncertain = test first.",
+    "category": "validation",
+    "origin": {
+      "type": "practitioner",
+      "attribution": "David Bland",
+      "description": "Published in Testing Business Ideas (Wiley). Prioritises which assumptions to validate first.",
+      "url": "https://www.strategyzer.com/books/testing-business-ideas",
+      "year": 2019,
+      "license": "published_methodology"
+    },
+    "tags": [
+      "validation",
+      "quadrant"
+    ],
+    "slots": [
+      {
+        "label": "Test First",
+        "entityTypeId": "assumption",
+        "role": "test_first",
+        "description": "High risk, low confidence: validate immediately",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "risk_level",
+            "op": "band",
+            "value": [
+              4,
+              6
+            ]
+          },
+          {
+            "scope": "entity",
+            "property": "confidence",
+            "op": "band",
+            "value": [
+              1,
+              4
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Research",
+        "entityTypeId": "assumption",
+        "role": "research",
+        "description": "Low risk, low confidence: learn more",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "risk_level",
+            "op": "band",
+            "value": [
+              1,
+              4
+            ]
+          },
+          {
+            "scope": "entity",
+            "property": "confidence",
+            "op": "band",
+            "value": [
+              1,
+              4
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Monitor",
+        "entityTypeId": "assumption",
+        "role": "monitor",
+        "description": "High risk but well understood: watch closely",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "risk_level",
+            "op": "band",
+            "value": [
+              4,
+              6
+            ]
+          },
+          {
+            "scope": "entity",
+            "property": "confidence",
+            "op": "band",
+            "value": [
+              4,
+              6
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Accept",
+        "entityTypeId": "assumption",
+        "role": "accept",
+        "description": "Low risk, high confidence: safe to proceed",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "risk_level",
+            "op": "band",
+            "value": [
+              1,
+              4
+            ]
+          },
+          {
+            "scope": "entity",
+            "property": "confidence",
+            "op": "band",
+            "value": [
+              4,
+              6
+            ]
+          }
+        ]
+      }
+    ],
+    "data": {
+      "entity_types": [
+        {
+          "type": "assumption",
+          "role": "item"
+        }
+      ],
+      "required_properties": {}
+    },
+    "structure": {
+      "pattern": "quadrant"
+    },
+    "presentation": {
+      "layout": {
+        "type": "quadrant",
+        "x_axis": "confidence",
+        "y_axis": "risk_level",
+        "x_label": "Confidence",
+        "y_label": "Risk"
+      },
+      "colour_by": "group",
+      "card_fields": [
+        "title",
+        "description"
+      ]
+    },
+    "education": {
+      "purpose": "Plot assumptions on a risk/evidence matrix so teams test the most dangerous unknowns first instead of building on unvalidated beliefs.",
+      "core_question": "Which assumptions carry the most risk and the least evidence? Where do we run experiments first?",
+      "when_to_use": [
+        "You have hypotheses about user needs or solutions that need testing",
+        "You want to reduce risk before committing engineering resources",
+        "The team is debating assumptions that can be tested empirically"
+      ],
+      "when_not_to_use": [
+        "The solution is already validated through real usage data",
+        "Speed of shipping matters more than certainty about assumptions"
       ]
     }
   }
