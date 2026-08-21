@@ -157,3 +157,88 @@ export interface UPGBaseNode {
   /** Type-specific properties */
   properties?: Record<string, unknown>
 }
+
+// ─── Base-node fields as runtime data ─────────────────────────────────────────
+
+/**
+ * Compile-time lock between `UPGBaseNode` and its runtime field list.
+ *
+ * `Record<keyof UPGBaseNode, true>` is exhaustive in BOTH directions: omit a
+ * field and TypeScript reports the property as missing; add one that is not on
+ * the interface and it reports an excess property. So a field cannot be added
+ * to `UPGBaseNode` without this object failing to compile until it is listed
+ * here too, and the runtime list below can never quietly disagree with the type.
+ *
+ * WHY THIS EXISTS. A TypeScript interface is erased at runtime, so every
+ * consumer that needs to ask "is this key a base field?" previously kept its own
+ * hand-maintained copy, each carrying a comment asking the next editor to keep
+ * it in sync. Three such copies existed and 0.32.0 updated none of them: `key`,
+ * `archived`, and `archived_at` shipped on the interface while
+ * `UPGFileStore.updateNode` silently dropped all three from any patch and two
+ * drift detectors reported a node holding them as carrying "non-spec top-level
+ * fields". Derivation replaces the request to remember with a build failure.
+ *
+ * The value is `true` throughout and carries no meaning; only the KEYS matter.
+ */
+const BASE_NODE_FIELD_PRESENCE: Record<keyof UPGBaseNode, true> = {
+  id: true,
+  type: true,
+  title: true,
+  slug: true,
+  aliases: true,
+  key: true,
+  description: true,
+  tags: true,
+  status: true,
+  archived: true,
+  archived_at: true,
+  source_id: true,
+  source_type: true,
+  mapping_confidence: true,
+  external_tool: true,
+  external_ref: true,
+  external_id: true,
+  properties: true,
+}
+
+/**
+ * Every top-level field declared by `UPGBaseNode`, as runtime data.
+ *
+ * This is the SINGLE SOURCE for "what is a base-node field". Consumers that
+ * classify top-level keys (drift detectors, patch mergers, serialisers) must
+ * derive from this rather than enumerate their own list.
+ *
+ * Order follows the interface declaration order and is not significant; callers
+ * that need a canonical serialisation order use `NODE_KEY_ORDER` in
+ * `format/canonical.ts`, which is deliberately a SUPERSET (it also orders
+ * tolerated non-base keys such as `lifecycle_status` and `sort_order`).
+ */
+export const UPG_BASE_NODE_FIELDS: readonly (keyof UPGBaseNode)[] = Object.freeze(
+  Object.keys(BASE_NODE_FIELD_PRESENCE) as (keyof UPGBaseNode)[],
+)
+
+/** `UPG_BASE_NODE_FIELDS` as a lookup set, for membership tests. */
+export const UPG_BASE_NODE_FIELD_SET: ReadonlySet<string> = new Set<string>(UPG_BASE_NODE_FIELDS)
+
+/**
+ * Base-node fields that `id` aside are NOT freely mergeable by a generic
+ * shallow patch, because each needs its own handling:
+ *
+ *   - `id`         identity; changing it would orphan every edge.
+ *   - `type`       narrowed to `UPGEntityType`, and a type change carries a
+ *                  property migration, so it routes through a migration path.
+ *   - `slug`       a change rotates the old value into `aliases` (see
+ *                  `rotateSlug`), so it is never a plain assignment.
+ *   - `aliases`    replaced outright when patched directly, which must happen
+ *                  AFTER the slug rotation that would otherwise append to it.
+ *   - `properties` deep-merged rather than replaced.
+ *
+ * Exported so a merger can state the exclusions once and derive the rest.
+ */
+export const UPG_BASE_NODE_SPECIAL_MERGE_FIELDS: ReadonlySet<string> = new Set<string>([
+  'id',
+  'type',
+  'slug',
+  'aliases',
+  'properties',
+])

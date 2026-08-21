@@ -7,6 +7,26 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.32.2] - 2026-08-21
+
+Patch. No schema change: no entity, edge, property, enum, or lifecycle added or removed. The 0.32.0 base fields become reachable through the write path that was supposed to carry them.
+
+### Fixed
+- **`UPGFileStore.updateNode` round-trips every `UPGBaseNode` field.** It merged a hand-maintained list of seven names and returned the unchanged node as a SUCCESS for anything outside it, so the three fields 0.32.0 added to the shape (`key`, `archived`, `archived_at`) were accepted and discarded. A caller could not tell a lost write from a landed one; the key-minting contention loop in the local graph-service adapter hit exactly this and spent its whole retry budget re-minting a key that could never move. The mergeable set is now DERIVED from the shape, so a field added to `UPGBaseNode` round-trips with no further edit.
+- **An undeclared top-level field is now REFUSED, not dropped.** `updateNode` throws the new `UnknownNodeFieldError` naming the offending keys, and refuses atomically so the valid half of a patch cannot land beside a silently discarded half. Changing `id` throws `ImmutableNodeFieldError`; restating the current `id` stays legal, so spreading a whole node into a patch keeps working. Type-level callers cannot reach either path, since `Partial<UPGBaseNode>` rejects an undeclared key at compile time; the guards fire on runtime-shaped input such as a parsed argument bag.
+- **Drift detection no longer reports a minted key as non-spec.** The canonical top-level field sets behind `top_level_drift` (the load-time counter in `@unified-product-graph/sdk` and the per-node breakdown in `validate_graph`) were two more hand-maintained copies of the same list, and 0.32.0 updated neither, so every node carrying `key`, `archived`, or `archived_at` was counted as holding non-spec top-level fields. Both derive from the shape now.
+
+### Added
+- **`UPG_BASE_NODE_FIELDS`, `UPG_BASE_NODE_FIELD_SET`, `UPG_BASE_NODE_SPECIAL_MERGE_FIELDS`** on `@unified-product-graph/core`: the `UPGBaseNode` key set as runtime data, and the subset a generic shallow merge must not touch. A TypeScript interface is erased at runtime, which is why four consumers each kept their own copy behind a comment asking the next editor to remember. The list is locked to the interface by a `Record<keyof UPGBaseNode, true>` that is exhaustive in both directions, so adding a field to the shape without extending the list is now a COMPILE error rather than a silent divergence discovered three releases later.
+- `UnknownNodeFieldError` and `ImmutableNodeFieldError` are exported from `@unified-product-graph/sdk`.
+
+### Notes
+- Truth unchanged: **324 entities · 1082 edges · 69 cross-edges · 25 anti-patterns · 98 tools · 334 phases**. Zero new tools, zero new checks.
+- Release process: `scripts/upg-release.sh` gains a step that regenerates the five `apps/entopo` spec mirrors from the freshly built train and then re-runs their `--check` forms. Those mirrors sit outside the release train's build filters, so no release ever ran their generators or their gates, and they have gone stale three times; 0.32.1 shipped with the snapshot still reading 0.32.0. The failure resists inspection because the drift test reads a checkout's `dist/`, and against a stale `dist` the comparison is stale-against-stale and reports green.
+- The MCP `update_node` and `batch_update_nodes` tools still do not accept `key`, `archived`, or `archived_at` as arguments, so those fields remain unreachable from the agent surface. Widening a tool's argument schema is additive surface rather than a fix and is deliberately NOT in this patch.
+
+---
+
 ## [0.32.1] - 2026-08-21
 
 Patch. No schema change: no entity, edge, property, enum, or lifecycle added or removed.
