@@ -7,6 +7,20 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.32.1] - 2026-08-21
+
+Patch. No schema change: no entity, edge, property, enum, or lifecycle added or removed.
+
+### Fixed
+- `capture` and `composition` now carry authored one-line descriptions in the published catalog data. The 0.32.0 site rendered `capture` as "A capture entity": a generator fallback, not a description. The generator now refuses to emit a fallback and fails the build naming the undescribed type.
+- `@unified-product-graph/adapters` exports `mapLinearPriority` and `normalizeLinearStatus` from the barrel, and `./adapters/*` is in the package `exports` map, matching every other adapter's normalisers.
+- Documentation: the `planning_cycle` active-cycle and roll-forward rules are stated in `PlanningCycleProperties`; the two different sets the word "work item" names (the scheduling family and the WORK_ITEM lifecycle set) are spelled out in the lifecycle template; `classification_axis` no longer claims to be hosted only by a competitive analysis; the `workspace.canvas` namespaced-key rule carries one dated statement; `specification` states plainly that no typed conformance edge from product or feature exists yet; the `bug.labels` deprecation names both replacement halves.
+
+### Added
+- Release gate `check:editorial`: a release is red until every entity type has an authored description, a published editorial doc with guidance and body, a review stamp at or above the release version for every new or shape-changed type, and no edge name cited in doc text that the catalog does not define. Ships with labeled fixtures; the live train refuses `--skip-editorial`.
+
+---
+
 ## [0.32.0] - 2026-08-21
 
 **A graph can now hold a real issue tracker's corpus without losing anything, and a query-driven view can say what it is a view OF.** Nine items in one design cycle: the two shapes the D-track held for "the next minor" (F1's query declaration, Q4b's artifact record) plus the six asks from a measured 1,032-issue Linear-parity audit. Additive throughout; three migrations registered, every one with a live population of zero.

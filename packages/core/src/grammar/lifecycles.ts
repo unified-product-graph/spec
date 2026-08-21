@@ -2769,6 +2769,31 @@ const APPROVAL_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
  * `initial_phase` DELIBERATELY STAYS `todo`. Moving it to `backlog` would change
  * what every existing graph's next node means, which is not an additive change
  * however additive the diff looks.
+ *
+ * TWO DIFFERENT SETS ARE BOTH CALLED "WORK ITEM", AND THEY ARE NOT THE SAME SET.
+ * They overlap in exactly two members, so reasoning from one to the other is
+ * wrong most of the time:
+ *
+ *   THIS LIFECYCLE (10 types): `task`, `epic`, `deliverable`, `milestone`,
+ *   `success_milestone`, `invoice`, `lead`, `agent_task`, `agent_skill`,
+ *   `agent_hook`. These are the types whose states are the phases below.
+ *
+ *   THE SCHEDULING FAMILY (5 types), the semantic domain named by the
+ *   `work_item` token in `planning_cycle_schedules_work_item`: `feature`,
+ *   `epic`, `user_story`, `task`, `bug`. These are the types a cadence
+ *   schedules.
+ *
+ *   THE OVERLAP IS `epic` AND `task`, AND NOTHING ELSE. `bug` runs INCIDENT
+ *   (`open`, `triaged`, `in_progress`, `resolved`, `closed`, `wont_fix`) and has
+ *   no `backlog` phase at all; `feature` has its own lifecycle; `user_story` is
+ *   deliberately lifecycle-free. In the other direction, `milestone`, `invoice`
+ *   and `lead` run these phases but are not schedulable work.
+ *
+ * The conflation is not hypothetical. An editorial pass wrote that an untriaged
+ * defect "belongs in `backlog` rather than `todo`", which is false for `bug` in
+ * both halves, and the 0.32.0 changelog puts the `backlog` bullet six lines from
+ * the `planning_cycle_schedules_work_item` bullet with both saying "work item".
+ * Anyone reading either one alone will reach for the wrong set.
  */
 const WORK_ITEM_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   template_id: 'WORK_ITEM',

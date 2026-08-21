@@ -548,6 +548,36 @@ export interface ChangelogProperties {
  * cooldown). Concretely dated (`starts_on` / `ends_on`), which is the deliberate
  * contrast with the freeform `strategic_theme.time_horizon` label a theme carries.
  *
+ * @remarks
+ * THE ACTIVE CYCLE IS THE ONE WHOSE STATUS IS `active`. There is no `is_active`
+ * property and there will not be one: the lifecycle already holds that fact, and
+ * a boolean beside it would be a second source of truth for one thing, which is
+ * a pair that drifts rather than a pair that agrees.
+ *
+ * INVARIANT, documented and deliberately UNENFORCED: at most one `active` cycle
+ * per parent per `cadence_kind`. No check ships for it. The near-miss is real
+ * rather than hypothetical, which is the reason: a portfolio legitimately runs
+ * two products' iterations concurrently, so the rule holds per parent and a
+ * checker would need a graded corpus to tell a violation from that arrangement.
+ * Under the labeled-fixture doctrine a check without such a corpus is one nobody
+ * can defend, so the rule lives here, where an implementer meets it, instead of
+ * in a validator that would be wrong about real graphs.
+ *
+ * ROLLING A CYCLE FORWARD: set cycle N to `closed`, and RE-POINT the unfinished
+ * work's `planning_cycle_schedules_work_item` edges at N+1. A rolled item ends
+ * with ONE edge, not two. The edge means IS SCHEDULED IN, present tense, so a
+ * second edge would assert the item is in both cycles at once.
+ *
+ * The rejected alternative was keeping both edges plus a `rolled_from` edge
+ * property. It builds the deferred scheduling-provenance layer through a side
+ * door, and the corpus shows what it would actually record: six issues
+ * auto-rolled across five cycles with zero completions, which is five edges per
+ * issue documenting that nothing happened.
+ *
+ * Whether the HISTORY of past scheduling is retained is deliberately still open,
+ * deferred alongside the same question for canvas keys rather than answered
+ * twice in two places with two different answers.
+ *
  * @example
  * const properties: PlanningCycleProperties = {
  *   cadence_kind: 'iteration',

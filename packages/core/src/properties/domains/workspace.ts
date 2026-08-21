@@ -97,8 +97,8 @@ export interface WorkspaceProperties {
   /**
    * Opaque canvas furniture: the parts of a canvas with no graph referent.
    * Preserved verbatim on round-trip and never interpreted. Tool extension keys
-   * are namespaced `<tool>:<key>` with a colon, and no consumer interprets a key
-   * it does not own.
+   * are namespaced `<tool>:<key>` with a colon (the rule since 0.31.0), and no
+   * consumer interprets a key it does not own.
    *
    * @remarks
    * The cut here is UPG principle P14 applied literally. Anything that is a
@@ -188,7 +188,9 @@ export interface WorkspaceCanvas {
    * type that forces every conforming consumer to work around it is describing
    * the wrong thing, so the type now says what the doc always did.
    *
-   * THE RULE FOR THESE KEYS (0.31.0):
+   * THE RULE FOR THESE KEYS (0.31.0; the one-release read tolerance for the old
+   * underscore form was retired at 0.32.0, which is a different fact about a
+   * different release and is why the two dates are both correct):
    *  - Syntax is `<tool>:<key>`, with a COLON. An underscore key is indistinguishable
    *    from an ordinary property name, so it cannot be reliably matched, which is
    *    exactly what makes a future migration miss half of what it targets.

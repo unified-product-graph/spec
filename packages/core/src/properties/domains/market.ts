@@ -438,7 +438,10 @@ export interface EmptyCell {
 
 /** ClassificationAxis: a dimension along which subjects are classified.
  *
- * Top-level taxonomy axis hosted by a `competitive_analysis`. Common shapes:
+ * A top-level taxonomy axis, hosted by either a `competitive_analysis` (via
+ * `competitive_analysis_dimensioned_by_classification_axis`) or a `product` (via
+ * `product_dimensioned_by_classification_axis`, added at 0.32.0 so a product can
+ * carry its own label taxonomy without inventing a `tag` entity). Common shapes:
  * "CMS Architecture", "Editing Paradigm", "Database × Workload Type",
  * "IDE × Language Ecosystem".
  *

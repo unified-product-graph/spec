@@ -15,6 +15,29 @@
  * to. The genus type; whether it is also a ratified `standard` is carried by
  * `governance`, not the type.
  *
+ * @remarks
+ * CONFORMANCE HAS NO TYPED EDGE TODAY, and this paragraph exists because the
+ * sentence above reads as though it does. "Products implement, expose, or
+ * conform to" names three relationships, and the catalog carries none of them:
+ * everything pointing at `specification` comes from `primitive`,
+ * `operating_lifecycle`, another `specification`, or `organization`. Nothing
+ * comes from `product` or `feature`.
+ *
+ * The cost was measured rather than predicted. A published entity doc, written
+ * by someone reading this very summary, cited
+ * `product_implements_specification`, `product_exposes_specification` and
+ * `feature_conforms_to_specification`. All three are plausible, all three follow
+ * this sentence's own verbs, and none of them has ever existed. The reader did
+ * nothing wrong; the type promised a relationship and the catalog did not
+ * deliver one.
+ *
+ * So, stated plainly until the gap is closed: the central question this type
+ * invites, WHICH PRODUCTS CONFORM TO THIS SPECIFICATION, is not expressible in
+ * typed form. A claim can ride the universal `node_constrains_node`, which is
+ * honest but unqueryable as conformance. Minting a real edge is a MINOR, filed
+ * for 0.33.0 rather than smuggled into a patch, and when it lands this remark
+ * comes out.
+ *
  * @example
  * const properties: SpecificationProperties = {
  *   kind: 'language',

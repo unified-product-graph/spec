@@ -642,7 +642,7 @@ export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
     { kind: 'drop_props', type: 'task', drop_props: ['labels'],
       reason: '0.32.0: TaskProperties.labels duplicated base-node `tags` and had no consumers. Freeform labels live in `tags`; grouped labels are classification_axis + node_classified_as_classification_value.' },
     { kind: 'drop_props', type: 'bug', drop_props: ['labels'],
-      reason: '0.32.0: BugProperties.labels duplicated base-node `tags` and had no consumers. Same resolution as task.' },
+      reason: '0.32.0: BugProperties.labels duplicated base-node `tags` and had no consumers. Freeform labels live in `tags`; grouped labels are classification_axis + node_classified_as_classification_value.' },
   ],
   // ── v0.21.0: D.1 — collapse residual *_status shadows into status ────
   //
