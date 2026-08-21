@@ -442,6 +442,24 @@ export const UPG_EDGE_CATALOG = {
   // the catalog's singular-source/target grammar (polymorphic targets
   // would be a separate catalog-mechanic change).
   competitive_analysis_dimensioned_by_classification_axis: { forward_verb: 'dimensioned_by', reverse_verb: 'dimensions', classification: 'hierarchy', source_type: 'competitive_analysis', target_type: 'classification_axis' },
+  // A product's own classification axes (0.32.0). Before this the only parent a
+  // classification_axis could have was a competitive_analysis, so a taxonomy the
+  // product uses on its OWN entities — the grouped-label case, one named group
+  // over a set of values — had to hang off a competitive analysis it has nothing
+  // to do with, or float parentless.
+  //
+  // Hierarchy, so the axis has a home in get_tree, on the same honest verb the
+  // competitive_analysis edge already uses; and it earns its
+  // UPG_VALID_CHILDREN.product pair the same way product_defines_configuration_axis
+  // did at 0.30.0 — axes are few per product, and visibility of a mechanism
+  // matters more than the tree cost.
+  //
+  // This is what makes one level of label grouping expressible with NO new label
+  // surface: the group is the axis, the labels are its values, and carrying one
+  // is node_classified_as_classification_value, all of it stable since 0.4.0.
+  // Ungrouped freeform labels stay in `tags`. The line between them: if the
+  // group has a name a person would filter by, it is an axis; otherwise a tag.
+  product_dimensioned_by_classification_axis: { forward_verb: 'dimensioned_by', reverse_verb: 'dimensions', classification: 'hierarchy', source_type: 'product', target_type: 'classification_axis' },
   classification_axis_includes_classification_value: { forward_verb: 'includes', reverse_verb: 'value_of', classification: 'hierarchy', source_type: 'classification_axis', target_type: 'classification_value' },
   // 0.10.2: also dual-registered as a cross-edge (UPG_CROSS_EDGE_TYPES) so a
   // competitor can be classified directly against a `registry/{classification_value}`
@@ -688,10 +706,20 @@ export const UPG_EDGE_CATALOG = {
   // iterations; a cycle contains its cooldown), mirroring team_contains_team.
   planning_cycle_contains_planning_cycle: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'planning_cycle', target_type: 'planning_cycle' },
   // E3: scheduling work into a cycle is a deliberate authoring act, not a
-  // containment nesting — user_story keeps its feature/epic parent and is merely
-  // referenced by the cycle. deliberate_only so the generic-inference chokepoints
-  // never auto-materialise it.
-  planning_cycle_schedules_user_story: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'semantic', source_type: 'planning_cycle', target_type: 'user_story', deliberate_only: true },
+  // containment nesting — the work item keeps its feature/epic parent and is
+  // merely referenced by the cycle. deliberate_only so the generic-inference
+  // chokepoints never auto-materialise it.
+  //
+  // WIDENED AT 0.32.0, renamed from planning_cycle_schedules_user_story. The
+  // story-only endpoint could not hold a real tracker import: the adapters
+  // default an unrecognised issue to `task`, so the type a cycle most needed to
+  // schedule was the one type it could not reach. Endpoint-polymorphic over the
+  // work-item set {feature, epic, user_story, task, bug} by the same
+  // construction as work_item_blocks_work_item in the same 0.20.0 batch — the
+  // `work_item` token names the intended semantic domain, the endpoint is the
+  // `node` wildcard. Three typed edges were the alternative and would have
+  // re-opened a decision this vocabulary already took for the same entity set.
+  planning_cycle_schedules_work_item: { forward_verb: 'schedules', reverse_verb: 'scheduled_in', classification: 'semantic', source_type: 'planning_cycle', target_type: 'node', deliberate_only: true },
   // E2: the OKR cycle-scoping anchor. objective -> planning_cycle. planning_cycle
   // is portfolio_shared, so this passes the cross-scope gate and ships as
   // PROVISIONAL (allowed cross-product with a write-time warning, self-maintaining,
@@ -1854,6 +1882,16 @@ export const UPG_EDGE_CATALOG = {
   // NOT cross_product_eligible: a portfolio-level composition spanning several
   // product graphs is conceivable but unevidenced. Same YAGNI call as above.
   composition_focuses_node: { forward_verb: 'focuses', reverse_verb: 'focused_in', classification: 'cross-domain', source_type: 'composition', target_type: 'node' },
+  // What a capture is a picture OF (0.32.0). Polymorphic because anything in the
+  // graph can be rendered — a surface, a screen, a report, a canvas — and being
+  // captured carries no structural role, so the endpoint collapses to the
+  // wildcard rather than enumerating a list that would never finish.
+  //
+  // This edge is also where the preservation-is-not-permission rule lands for
+  // renditions: a consumer renders the captures the GRAPH says exist, never the
+  // ones some tool's opaque bag still remembers. A capture that was deleted is a
+  // node that was deleted, and the spec needs no second deletion vocabulary.
+  capture_renders_node: { forward_verb: 'renders', reverse_verb: 'rendered_by', classification: 'cross-domain', source_type: 'capture', target_type: 'node' },
 
   // ── P14 edges (replacing foreign-key properties) ─────────────────────────
   feature_addresses_job: { forward_verb: 'addresses', reverse_verb: 'addressed_by', classification: 'cross-domain', source_type: 'feature', target_type: 'job' },
@@ -1977,6 +2015,23 @@ export const UPG_EDGE_CATALOG = {
   node_owned_by_stakeholder: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'stakeholder' },
   node_owned_by_department: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'department', cross_product_eligible: true },
   node_owned_by_person: { forward_verb: 'owned_by', reverse_verb: 'owns', classification: 'cross-domain', source_type: 'node', target_type: 'person' },
+  // ── Cross-domain: Assignment (0.32.0) ───────────────────────────────────────
+  // Assignment is NOT ownership, and 0.12.0 ruled otherwise. That ruling routed
+  // task.assignee and bug.assignee into node_owned_by_person, and it is
+  // superseded here rather than quietly widened, because the two differ in a way
+  // the field measures.
+  //
+  // ASSIGNMENT HAS A TIME INTERVAL AND OWNERSHIP DOES NOT. A shipped ops plane
+  // models assignment as a claim carrying claimed-at, released-at and a partial
+  // unique index enforcing one live claim; nothing in the spec gives ownership
+  // that shape. And a real 184-item board ran with 157 items (85%) unassigned
+  // while every one of them was owned in the ordinary sense. One edge meaning
+  // both cannot express "owned by the team, assigned to nobody", which is the
+  // modal state of a working board.
+  //
+  // Not cross_product_eligible, matching node_owned_by_person: an assignee is a
+  // person in this graph's own roster.
+  node_assigned_to_person: { forward_verb: 'assigned_to', reverse_verb: 'assigned', classification: 'cross-domain', source_type: 'node', target_type: 'person' },
 
   // ── Cross-domain: Architecture (DDD) ─────────────────────────────────────────
   // Service, domain_event, domain_entity, aggregate, read_model, api_contract,
@@ -3063,6 +3118,19 @@ export function isDeliberateOnlyEdge(type: string): boolean {
  *    node; the width is what it costs to avoid answering "what is a tool in the
  *    graph" as a side effect of building an eval harness. Reach for the typed
  *    `eval_benchmark_measures_feature` when the subject IS a feature.
+ * 11. **Universal assignment** (0.32.0): any node can be assigned to a person,
+ *    and assignment is deliberately NOT the ownership family above. Ownership is
+ *    durable accountability; assignment is who is working on it now, with an
+ *    interval and an exclusivity ownership does not have. A board that runs 85%
+ *    unassigned while everything is owned cannot say so with one edge.
+ * 12. **Capture subject** (0.32.0): anything in the graph can be rendered into a
+ *    dated, hashed file. Being captured carries no structural role, so the
+ *    endpoint collapses rather than enumerating a list that would never finish.
+ * 13. **Cadence scheduling** (0.32.0): a planning_cycle schedules work across the
+ *    same bounded {feature, epic, user_story, task, bug} family as family 7,
+ *    and for the same reason. Widened from `planning_cycle_schedules_user_story`,
+ *    whose story-only endpoint could not hold the `task` a tracker import
+ *    actually produces; see `UPG_EDGE_MIGRATIONS` for the rename rule.
  *
  * Adding a new polymorphic edge requires extending this array AND the
  * spec-integrity regression test, which forces a conscious decision and
@@ -3106,6 +3174,17 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   // structural role, so both collapse polymorphic rather than enumerating.
   'workspace_arranges_node',
   'composition_focuses_node',
+  // Universal assignment (0.32.0): who is working on this, as distinct from who
+  // owns it. Wildcard source for the same reason node_owned_by_person has one.
+  'node_assigned_to_person',
+  // Capture subject (0.32.0): anything in the graph can be rendered, and being
+  // rendered carries no structural role.
+  'capture_renders_node',
+  // Cadence scheduling (0.32.0, widened from planning_cycle_schedules_user_story):
+  // endpoint-polymorphic over the work-item set {feature, epic, user_story, task,
+  // bug}. The `work_item` key token names the intended semantic domain; the
+  // endpoint is the `node` wildcard.
+  'planning_cycle_schedules_work_item',
 ] as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)

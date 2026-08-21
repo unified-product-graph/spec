@@ -1014,7 +1014,7 @@ export const UPG_REGIONS: readonly UPGRegion[] = [
       "roadmap_item_references_feature",
       "feature_request_voted_on_by_feedback_vote",
       "planning_cycle_contains_planning_cycle",
-      "planning_cycle_schedules_user_story",
+      "planning_cycle_schedules_work_item",
     ],
     boundary_edges: [
       {

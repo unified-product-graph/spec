@@ -101,9 +101,17 @@ describe('edge duplicate gate — (source,target,classification) collisions are 
     // near-synonym / inverse edges retired). Reducing this further (via a future
     // dedup) is expected and welcome — lower it then. It must not silently
     // increase.
+    //
+    // 27 → 28 at 0.32.0, and the one new collision IS the design rather than a
+    // slip: node→person/cross-domain now holds both `node_owned_by_person`
+    // (owned_by) and `node_assigned_to_person` (assigned_to). Same endpoints,
+    // deliberately distinct verbs — assignment has an interval and an
+    // exclusivity that ownership does not, and collapsing them back into one
+    // edge is what this release exists to undo. Verified as the ONLY new
+    // collision: the other three edges added at 0.32.0 introduce none.
     expect(
       collisionGroups,
       'a new (source,target,classification) collision was introduced; if intentional (distinct verbs), update this baseline.',
-    ).toBeLessThanOrEqual(27)
+    ).toBeLessThanOrEqual(28)
   })
 })

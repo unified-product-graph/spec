@@ -4,6 +4,8 @@
  */
 
 import type { ISODateTime } from '../primitives.js'
+import type { UPGEntityType } from '../../catalog/entity-catalog.js'
+import type { StatusCategory } from '../../grammar/lifecycles.js'
 
 /** Workspace: a spatial thinking space for arranging entities.
  *
@@ -13,7 +15,8 @@ import type { ISODateTime } from '../primitives.js'
  * unit): a workspace is the *space* a team thinks in.
  *
  * Per UPG principle P14, structural relationships are edges:
- *   parent product: `product_contains_workspace`
+ *   parent anchor: `product_thinks_in_workspace` (or its `organization_` /
+ *     `product_area_` siblings, one per altitude)
  *   members: `team_works_in_workspace` / `persona_collaborates_in_workspace`
  *     (the `member_count` and `owner` properties are display-time aggregates;
  *     canonical membership is the edge set)
@@ -61,9 +64,20 @@ export interface WorkspaceProperties {
   owner?: string
   /** Snapshot count. `team_works_in_workspace` edges are the source of truth. */
   member_count?: number
-  /** Archived. Archived workspaces remain queryable but hidden from default views. */
+  /**
+   * Archived. Archived workspaces remain queryable but hidden from default views.
+   * @deprecated since 0.32.0. Use `UPGBaseNode.archived`, which generalises this
+   * pair to every entity type. Field data showed the archived/status split is not
+   * a workspace peculiarity: a tracker held 559 archived-completed items beside 18
+   * live-completed ones, and one status field has nowhere to put the difference.
+   * `UPG_PROPERTY_MIGRATIONS['0.32.0']` lifts this value to the top level.
+   */
   archived?: boolean
-  /** ISO timestamp archived. Pairs with `archived === true`. */
+  /**
+   * ISO timestamp archived. Pairs with `archived === true`.
+   * @deprecated since 0.32.0. Use `UPGBaseNode.archived_at`. Lifted by
+   * `UPG_PROPERTY_MIGRATIONS['0.32.0']`.
+   */
   archived_at?: ISODateTime
   /** Display icon (emoji or icon name) */
   icon?: string
@@ -245,6 +259,107 @@ export interface WorkspaceCanvas {
  *   published_by: 'sam.patel@arkheiev.com',
  * }
  */
+/** One predicate over a type-specific property.
+ *
+ * @example
+ * const p: UPGViewPredicate = { property: 'priority', in: ['urgent', 'high'] }
+ */
+export interface UPGViewPredicate {
+  /** Property name, resolved against the node's `properties` bag. */
+  property: string
+  /** Admitted values. A node matches when its value is one of these. */
+  in?: string[]
+  /** Match on presence rather than value. `true` admits nodes that carry the
+   *  property at all; `false` admits those that do not. */
+  present?: boolean
+}
+
+/** A declarative, portable selection over the graph.
+ *
+ * Selection ONLY. What a surface should look like once the nodes are chosen is
+ * {@link UPGViewPresentation}, and a consumer may ignore all of it.
+ *
+ * @remarks
+ * WHY THIS IS IN THE SPEC AND NOT IN A NAMESPACED BAG KEY. The 0.31.0 rule says
+ * no consumer interprets a key it does not own. A driving query living in
+ * `sometool:gallery_query` would therefore be readable by exactly one tool, so
+ * the layer it drives could be rendered by exactly one tool. A query-driven
+ * layer whose query nothing else can read is a feature, not a format — and
+ * "views are queries" would stop being a property of the standard and become a
+ * property of one application.
+ *
+ * P14 AND THE ONE PLACE THIS DESIGN TOUCHES THE LINE. A predicate over types,
+ * phases, buckets and tag strings holds no node references, so it is a
+ * predicate rather than a foreign key. `from_focus` keeps it that way for
+ * relative selections: the anchor set is the `composition_focuses_node` EDGE,
+ * and the query only says how to walk from it — which is how "everything under
+ * this epic" is expressed without a node id in a scalar. `classified_as` is the
+ * exception and is admitted knowingly: it holds `classification_value` ids,
+ * because the alternative is matching a taxonomy by title, which is the thing
+ * P14 exists to stop. Those ids are resolvable references that
+ * `repair_dangling_edges` does not cover, and a consumer meeting one that no
+ * longer resolves should drop the clause rather than the view.
+ *
+ * @example
+ * const q: UPGViewQuery = {
+ *   types: ['task', 'bug'],
+ *   status_category: ['unstarted', 'started'],
+ *   properties: [{ property: 'priority', in: ['urgent', 'high'] }],
+ * }
+ */
+export interface UPGViewQuery {
+  /** Entity types admitted. Omitted means every type. */
+  types?: UPGEntityType[]
+  /** Canonical phase ids admitted (e.g. `['todo', 'in_progress']`). */
+  status?: string[]
+  /** Six-bucket categories admitted. The portable form when the phase ids
+   *  differ per type but the reading is the same. */
+  status_category?: StatusCategory[]
+  /** Freeform tags. `match` governs all-of versus any-of. */
+  tags?: string[]
+  /** Ids of `classification_value` nodes admitted: the grouped-label clause. */
+  classified_as?: string[]
+  /** Predicates over type-specific properties. */
+  properties?: UPGViewPredicate[]
+  /** Whether archived nodes are admitted. Absent means false, which is the
+   *  documented default read for `UPGBaseNode.archived`. */
+  include_archived?: boolean
+  /** How the clauses combine. Absent means `all`. */
+  match?: 'all' | 'any'
+  /** Walk from the composition's focused nodes, for a selection that is
+   *  relative rather than absolute. The anchor is the
+   *  `composition_focuses_node` edge set, never an id held here. */
+  from_focus?: {
+    /** Canonical edge types to traverse. */
+    edge_types: string[]
+    /** Which way to walk them. */
+    direction: 'out' | 'in' | 'both'
+    /** Hops. Absent means 1. */
+    depth?: number
+  }
+}
+
+/** Advisory rendering intent. A consumer MAY ignore every field here.
+ *
+ * @remarks
+ * Kept separate from {@link UPGViewQuery} so that "views are queries" stays
+ * literally true. A selection is a fact about the graph and travels; a lane
+ * arrangement is a preference of the tool that drew it and does not. Splitting
+ * them means a consumer that cannot honour the presentation still renders the
+ * right nodes, which is the failure mode worth designing for.
+ *
+ * @example
+ * const p: UPGViewPresentation = { group_by: 'status_category', layout: 'board' }
+ */
+export interface UPGViewPresentation {
+  /** Property name, base field, or `status_category`, to group lanes by. */
+  group_by?: string
+  /** Sort keys in precedence order. */
+  sort?: Array<{ key: string; direction: 'asc' | 'desc' }>
+  /** Requested layout family. Advisory. */
+  layout?: 'board' | 'table' | 'list' | 'cards' | 'timeline' | 'gallery'
+}
+
 export interface CompositionMember {
   /** Stable id of the block within this composition. */
   id: string
@@ -262,6 +377,22 @@ export interface CompositionMember {
   height: number
   /** Whether the block is drawn collapsed. */
   collapsed?: boolean
+  /**
+   * True when this member arrived by running the composition's `member_query`
+   * rather than by a person placing it.
+   *
+   * @remarks
+   * MEMBERSHIP IS DERIVED, POSITION IS AUTHORED, and both are serialised because
+   * both are real. A field pilot measured the shape: blocks were auto-admitted
+   * by a query, then dragged into an order somebody chose.
+   *
+   * DERIVED MEMBERS ARE NOT AUTHORED CONTENT. Any signature meant to answer "did
+   * a person change this" must exclude them. The measured failure is precise: a
+   * content baseline captured at creation, before the query first ran, moved the
+   * moment the query admitted its first block — so a viewer who only glanced at
+   * a gallery would have written to it.
+   */
+  derived?: boolean
 }
 
 export interface CompositionProperties {
@@ -284,6 +415,102 @@ export interface CompositionProperties {
   published_at: ISODateTime
   /** Publisher handle or email. Display scalar, same posture as `WorkspaceProperties.owner`. */
   published_by?: string
+  /**
+   * When present, membership is DERIVED: members are produced by running this
+   * query rather than authored by placement.
+   *
+   * @remarks
+   * This is the portable statement of what the composition shows.
+   * `CompositionMember.href` remains the publishing tool's own resolved route
+   * and stays opaque to everyone else; a member may carry both, and then the
+   * href is a fast path while the query is the meaning. A consumer that cannot
+   * parse the href can still render the layer, which is the whole reason the
+   * declaration is here rather than in a tool-namespaced bag key.
+   *
+   * A composition with no `member_query` is authored, which is what every
+   * composition written before 0.32.0 is.
+   */
+  member_query?: UPGViewQuery
+  /**
+   * Advisory rendering intent for the composition as a whole. A consumer may
+   * ignore it entirely and still be conformant.
+   */
+  presentation?: UPGViewPresentation
+}
+
+/** Capture: a dated, hashed rendition of something already in the graph.
+ *
+ * A screenshot of a surface, a PDF of a report, an export of a canvas. The
+ * subject is a graph node and stays one; a capture says "here is what that
+ * looked like, at this moment, and here is how to tell whether it still does."
+ * Lifecycle-free (a capture is a fact, not a workflow) and containment-free
+ * (it anchors to what it RENDERS via `capture_renders_node`, the same posture
+ * as `composition` and `framework_exercise`).
+ *
+ * @remarks
+ * WHY IT IS NOT CALLED `artifact`. The word is already spent twice over:
+ * `workflow_artifact` is an output produced BY a workflow run, and shipped
+ * tools commonly have an "artifacts" store of generated documents holding
+ * inline content. A third meaning of one word is how a vocabulary stops being
+ * one, so this type is named for what it does.
+ *
+ * WHY NOT EXTEND `document`. Three ways apart, which is a split by the spec's
+ * own dual-shape gate: `document` carries the PUBLISHING lifecycle and a
+ * capture has no lifecycle; `document` has neither a content hash nor a capture
+ * moment; and `document_describes_*` is a family of typed edges about subject
+ * matter, not a rendition relation.
+ *
+ * WHY NOT EXTEND `workflow_artifact`. Its only structural parent is
+ * `workflow_run`, so every captured file would need a workflow run invented to
+ * hold it — dead schema created to satisfy a hierarchy.
+ *
+ * WHY THE HASH IS THE SIGNAL. Regenerating a capture must change what viewers
+ * see without moving anything they arranged. Modification time lies on a
+ * byte-identical re-run and size misses a same-size repaint, so a content hash
+ * is the only value that means THIS RENDITION IS DIFFERENT.
+ *
+ * WHERE THE BYTES LIVE IS A TOOL DECISION. `capture_uri` is a URI on the same
+ * footing as `UPGBaseNode.external_ref`: `https://` for hosted, `file://` or a
+ * relative path for local. The spec takes no position on a sibling directory
+ * beside the `.upg` file. The earlier no-sidecar ruling governed the `.upg`
+ * FILE BODY and reading it wider than it was made would be inventing a decision
+ * nobody took.
+ *
+ * @example
+ * const properties: CaptureProperties = {
+ *   capture_uri: './captures/checkout-panel.png',
+ *   content_hash: '9f2b7c1a4e6d8035bb1c2f9a7e4d6058c3b1a9f27e4d60583c1b9a2f7e4d6058',
+ *   captured_at: '2026-08-20T21:14:00Z',
+ *   media_type: 'image/png',
+ *   fidelity: 'exact',
+ *   capture_status: 'captured',
+ * }
+ */
+export interface CaptureProperties {
+  /** Where the bytes are. `https://` for hosted, `file://` or a relative path
+   *  for local. Required: a capture with no location renders nothing. */
+  capture_uri: string
+  /** Content hash of the bytes. The regeneration signal; see the type's
+   *  `@remarks` for why mtime and size are not. */
+  content_hash?: string
+  /** Hash algorithm. Absent means `sha256`. */
+  hash_algorithm?: 'sha256' | 'sha1' | 'md5'
+  /** ISO timestamp the capture was taken. */
+  captured_at?: ISODateTime
+  /** IANA media type of the bytes. @example "image/png" */
+  media_type?: string
+  /** How faithfully this rendition represents its subject. `approximate` covers
+   *  a capture taken in a stand-in state or at the wrong viewport. */
+  fidelity?: 'exact' | 'approximate' | 'not_applicable'
+  /**
+   * Whether the capture succeeded.
+   *
+   * @remarks
+   * A `blocked` capture is a real record rather than a missing one: it says the
+   * subject exists and could not be rendered, which is what stops the next run
+   * rediscovering the same obstacle. `skipped` is the deliberate exclusion.
+   */
+  capture_status?: 'captured' | 'blocked' | 'skipped'
 }
 
 /** Framework exercise: one run of a framework over a set of entities.

@@ -7,6 +7,7 @@
  */
 
 import type { HealthStatus, ISODate, Priority, UPGAssessment } from '../primitives.js'
+import type { StatusCategory } from '../../grammar/lifecycles.js'
 
 // ---------------------------------------------------------------------------
 // STRATEGY METRICS (live alongside product spec)
@@ -155,8 +156,25 @@ export interface FeatureProperties {
   health?: HealthStatus
   /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
   workflow_state?: string
-  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
-  workflow_state_category?: string
+  /**
+   * Canonical bucket the raw `workflow_state` maps onto for reasoning: a source
+   * "In Review" and a source "QA" may both map to a verification phase.
+   * Optional companion to `workflow_state`; canonical `status` remains the sole
+   * reasoning axis.
+   *
+   * @remarks
+   * It exists so a graph can reason over an imported custom workflow WITHOUT
+   * promoting the source's raw label to `status`. The raw label keeps its own
+   * field and stays verbatim; this one says what that label means in the
+   * six-bucket vocabulary every major tracker converges on.
+   *
+   * NARROWED FROM `string` AT 0.32.0. The field exists to carry exactly the
+   * {@link StatusCategory} vocabulary, and typing it as an open string meant
+   * nothing enforced the one thing it was for; an importer could write any word
+   * here and no consumer would know it had. A graph carrying a free string now
+   * fails to type-check rather than failing to be understood.
+   */
+  workflow_state_category?: StatusCategory
 }
 
 /** A collection of related user stories that delivers a feature or capability.
@@ -191,8 +209,25 @@ export interface EpicProperties {
   target_date?: ISODate
   /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
   workflow_state?: string
-  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
-  workflow_state_category?: string
+  /**
+   * Canonical bucket the raw `workflow_state` maps onto for reasoning: a source
+   * "In Review" and a source "QA" may both map to a verification phase.
+   * Optional companion to `workflow_state`; canonical `status` remains the sole
+   * reasoning axis.
+   *
+   * @remarks
+   * It exists so a graph can reason over an imported custom workflow WITHOUT
+   * promoting the source's raw label to `status`. The raw label keeps its own
+   * field and stays verbatim; this one says what that label means in the
+   * six-bucket vocabulary every major tracker converges on.
+   *
+   * NARROWED FROM `string` AT 0.32.0. The field exists to carry exactly the
+   * {@link StatusCategory} vocabulary, and typing it as an open string meant
+   * nothing enforced the one thing it was for; an importer could write any word
+   * here and no consumer would know it had. A graph carrying a free string now
+   * fails to type-check rather than failing to be understood.
+   */
+  workflow_state_category?: StatusCategory
 }
 
 
@@ -233,8 +268,25 @@ export interface UserStoryProperties {
   due_date?: ISODate
   /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
   workflow_state?: string
-  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
-  workflow_state_category?: string
+  /**
+   * Canonical bucket the raw `workflow_state` maps onto for reasoning: a source
+   * "In Review" and a source "QA" may both map to a verification phase.
+   * Optional companion to `workflow_state`; canonical `status` remains the sole
+   * reasoning axis.
+   *
+   * @remarks
+   * It exists so a graph can reason over an imported custom workflow WITHOUT
+   * promoting the source's raw label to `status`. The raw label keeps its own
+   * field and stays verbatim; this one says what that label means in the
+   * six-bucket vocabulary every major tracker converges on.
+   *
+   * NARROWED FROM `string` AT 0.32.0. The field exists to carry exactly the
+   * {@link StatusCategory} vocabulary, and typing it as an open string meant
+   * nothing enforced the one thing it was for; an importer could write any word
+   * here and no consumer would know it had. A graph carrying a free string now
+   * fails to type-check rather than failing to be understood.
+   */
+  workflow_state_category?: StatusCategory
 }
 
 /**
@@ -318,13 +370,38 @@ export interface TaskProperties {
   priority?: Priority
   /** ISO date due. Typically bounded by the containing story's due date. */
   due_date?: ISODate
-  /** Free-form classification tags. Applied uniformly across work item types. */
+  /**
+   * Free-form classification tags.
+   * @deprecated since 0.32.0. Use base-node `tags` for ungrouped labels, and
+   * `classification_axis` + `classification_value` +
+   * `node_classified_as_classification_value` when the labels belong to a named
+   * group. This field duplicated `tags` and had no consumers; three parallel
+   * label surfaces (base `tags`, per-type `tags`, per-type `labels`) were two
+   * too many. `UPG_PROPERTY_MIGRATIONS['0.32.0']` drops it.
+   */
   labels?: string[]
   // `estimate` (story_task collapse relic, duplicated `effort`) removed in 0.14.0.
   /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
   workflow_state?: string
-  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
-  workflow_state_category?: string
+  /**
+   * Canonical bucket the raw `workflow_state` maps onto for reasoning: a source
+   * "In Review" and a source "QA" may both map to a verification phase.
+   * Optional companion to `workflow_state`; canonical `status` remains the sole
+   * reasoning axis.
+   *
+   * @remarks
+   * It exists so a graph can reason over an imported custom workflow WITHOUT
+   * promoting the source's raw label to `status`. The raw label keeps its own
+   * field and stays verbatim; this one says what that label means in the
+   * six-bucket vocabulary every major tracker converges on.
+   *
+   * NARROWED FROM `string` AT 0.32.0. The field exists to carry exactly the
+   * {@link StatusCategory} vocabulary, and typing it as an open string meant
+   * nothing enforced the one thing it was for; an importer could write any word
+   * here and no consumer would know it had. A graph carrying a free string now
+   * fails to type-check rather than failing to be understood.
+   */
+  workflow_state_category?: StatusCategory
 }
 
 /** Bug report.
@@ -354,12 +431,37 @@ export interface BugProperties {
   assignee?: string
   /** ISO date due. Often tied to a release gate or SLA. */
   due_date?: ISODate
-  /** Free-form classification tags. Applied uniformly across work item types. */
+  /**
+   * Free-form classification tags.
+   * @deprecated since 0.32.0. Use base-node `tags` for ungrouped labels, and
+   * `classification_axis` + `classification_value` +
+   * `node_classified_as_classification_value` when the labels belong to a named
+   * group. This field duplicated `tags` and had no consumers; three parallel
+   * label surfaces (base `tags`, per-type `tags`, per-type `labels`) were two
+   * too many. `UPG_PROPERTY_MIGRATIONS['0.32.0']` drops it.
+   */
   labels?: string[]
   /** The source tool's raw custom workflow state, verbatim and opaque (e.g. "In Review", "QA", "Needs Triage"). Non-canonical and never reasoned over: it exists to round-trip an import losslessly. Map it onto a canonical bucket with `workflow_state_category`; canonical `status` stays the sole reasoning axis. */
   workflow_state?: string
-  /** Canonical bucket the raw `workflow_state` maps onto for reasoning (a source "In Review" and "QA" might both map to a verification phase). Optional companion to `workflow_state`: it lets a graph reason over an imported custom workflow without promoting the raw label to `status`. */
-  workflow_state_category?: string
+  /**
+   * Canonical bucket the raw `workflow_state` maps onto for reasoning: a source
+   * "In Review" and a source "QA" may both map to a verification phase.
+   * Optional companion to `workflow_state`; canonical `status` remains the sole
+   * reasoning axis.
+   *
+   * @remarks
+   * It exists so a graph can reason over an imported custom workflow WITHOUT
+   * promoting the source's raw label to `status`. The raw label keeps its own
+   * field and stays verbatim; this one says what that label means in the
+   * six-bucket vocabulary every major tracker converges on.
+   *
+   * NARROWED FROM `string` AT 0.32.0. The field exists to carry exactly the
+   * {@link StatusCategory} vocabulary, and typing it as an open string meant
+   * nothing enforced the one thing it was for; an importer could write any word
+   * here and no consumer would know it had. A graph carrying a free string now
+   * fails to type-check rather than failing to be understood.
+   */
+  workflow_state_category?: StatusCategory
 }
 
 /** Product roadmap.

@@ -59,11 +59,33 @@ describe('lifecycle status_category invariants', () => {
     const task = getLifecycleForType('task')!
     const byId = Object.fromEntries(task.phases.map((p) => [p.id, p.status_category]))
     expect(byId).toEqual({
+      // 0.32.0: `backlog` added. Before it, the template reached four of the six
+      // buckets, and the cost was measured rather than theoretical — a source
+      // "Backlog" state had no phase to land on, the importer omits what it
+      // cannot map, and ~195 of a 1,032-issue corpus arrived with no status.
+      backlog: 'backlog',
       todo: 'unstarted',
       in_progress: 'started',
       in_review: 'started',
       done: 'completed',
       cancelled: 'cancelled',
     })
+  })
+
+  it('WORK_ITEM reaches five of six buckets, and the missing one is deliberate', () => {
+    // `triage` is absent BY DESIGN and this test is where that decision is
+    // recorded, so removing the gap looks like a decision rather than a tidy-up.
+    // Triage is practised on the defect/discovery families (INCIDENT gives `bug`
+    // real open/triaged phases); a task nobody has accepted is a task in
+    // `backlog`. Revisit on a field graph with a populated triage state.
+    const task = getLifecycleForType('task')!
+    const buckets = new Set(task.phases.map((p) => p.status_category))
+    expect([...buckets].sort()).toEqual(['backlog', 'cancelled', 'completed', 'started', 'unstarted'])
+    expect(buckets.has('triage')).toBe(false)
+
+    // And the initial phase deliberately did NOT move to `backlog`: that would
+    // change what every existing graph's next node means, which is not an
+    // additive change however additive the diff looks.
+    expect(task.initial_phase).toBe('todo')
   })
 })

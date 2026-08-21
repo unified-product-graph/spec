@@ -243,7 +243,8 @@ function sortEdges<T extends { source: string; target: string; type: string; id:
 // ─── Per-object canonical key order (ADR A.1) ────────────────────────────────
 
 const NODE_KEY_ORDER = [
-  'id', 'type', 'title', 'slug', 'aliases', 'description', 'tags', 'status',
+  'id', 'type', 'title', 'slug', 'aliases', 'key', 'description', 'tags', 'status',
+  'archived', 'archived_at',
   'lifecycle_status', 'source_id', 'source_type', 'mapping_confidence',
   'external_tool', 'external_ref', 'external_id', 'sort_order', 'properties',
 ]

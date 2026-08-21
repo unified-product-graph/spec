@@ -130,9 +130,13 @@ describe('Structured_condition well-formedness', () => {
       walkCondition(ap.structured_condition, (leaf) => {
         const l = leaf as { type: string; entity_type?: string; source_type?: string; target_type?: string }
         for (const k of ['entity_type', 'source_type', 'target_type'] as const) {
-          if (l[k] !== undefined) {
-            expect(VALID_ENTITY_TYPES.has(l[k]!), `${ap.id} ${k}=${l[k]}`).toBe(true)
-          }
+          if (l[k] === undefined) continue
+          // The wildcard endpoint is legal on source_type/target_type ONLY, and
+          // only because a polymorphic edge's declared endpoint IS the wildcard
+          // (0.32.0). It is never a legal `entity_type`: 'node' is not a type
+          // you can count instances of.
+          if (l[k] === 'node' && k !== 'entity_type') continue
+          expect(VALID_ENTITY_TYPES.has(l[k]!), `${ap.id} ${k}=${l[k]}`).toBe(true)
         }
       })
     }

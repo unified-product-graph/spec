@@ -27,6 +27,7 @@ import { UPG_ACTIVE_TYPES, UPG_ENTITY_META_BY_NAME, isPortfolioSharedType } from
 import { getDomainIdForType } from '../registry/domains.js'
 import { UPG_VALID_CHILDREN } from '../grammar/hierarchy.js'
 import { UPG_LIFECYCLES } from '../grammar/lifecycles.js'
+import { UPG_EDGE_MIGRATIONS } from '../grammar/migrations.js'
 import { ENTITY_EMOJI } from '../presentation/entity-emoji.js'
 import { UPG_PROPERTY_SCHEMA } from '../properties/property-schema.js'
 import { resolveContainmentEdge } from '../index.js'
@@ -135,26 +136,48 @@ describe('E2 — objective_scoped_to_planning_cycle (provisional cross-scope)', 
 
 // ─── E3: scheduling work into a cycle ────────────────────────────────────────
 
-describe('E3 — planning_cycle_schedules_user_story (deliberate-only)', () => {
-  it('is a semantic, deliberate-only planning_cycle -> user_story edge', () => {
-    const def = UPG_EDGE_CATALOG.planning_cycle_schedules_user_story
+describe('E3 — planning_cycle_schedules_work_item (deliberate-only, 0.32.0)', () => {
+  it('is a semantic, deliberate-only planning_cycle -> node edge', () => {
+    const def = UPG_EDGE_CATALOG.planning_cycle_schedules_work_item
     expect(def).toBeDefined()
     expect(def.source_type).toBe('planning_cycle')
-    expect(def.target_type).toBe('user_story')
+    // Endpoint-polymorphic over {feature, epic, user_story, task, bug}. The
+    // `work_item` token in the key names the semantic domain; the endpoint is
+    // the wildcard, exactly as work_item_blocks_work_item does.
+    expect(def.target_type).toBe('node')
     expect(def.classification).toBe('semantic')
     expect(def.forward_verb).toBe('schedules')
     expect(def.reverse_verb).toBe('scheduled_in')
     expect(def.deliberate_only).toBe(true)
-    expect(isDeliberateOnlyEdge('planning_cycle_schedules_user_story')).toBe(true)
+    expect(isDeliberateOnlyEdge('planning_cycle_schedules_work_item')).toBe(true)
+  })
+
+  it('the story-only predecessor is gone, with a registered rename', () => {
+    // The widening is a RENAME, not an addition: leaving both would give a
+    // graph two ways to say one thing, and the narrower one would keep being
+    // chosen by anything that pattern-matched on the type name.
+    expect(
+      (UPG_EDGE_CATALOG as Record<string, unknown>).planning_cycle_schedules_user_story,
+    ).toBeUndefined()
+    const rules = UPG_EDGE_MIGRATIONS['0.32.0'] ?? []
+    const rename = rules.find(
+      (r) => r.kind === 'rename' && r.from === 'planning_cycle_schedules_user_story',
+    )
+    expect(rename, 'the rename must be registered or existing graphs silently keep a dead edge type').toBeDefined()
+    expect((rename as { to: string }).to).toBe('planning_cycle_schedules_work_item')
+  })
+
+  it('is registered polymorphic, which is what makes the wildcard endpoint legal', () => {
+    expect(isPolymorphicEdge('planning_cycle_schedules_work_item')).toBe(true)
+    expect(isRegisteredPolymorphicEdge('planning_cycle_schedules_work_item')).toBe(true)
   })
 
   it('is not curated: deliberate_only and cross-scope are orthogonal', () => {
     // deliberate_only governs INFERENCE (auto-nest skips it); cross-scope governs
     // cross-product authoring. planning_cycle is portfolio_shared, so the source
-    // endpoint passes the gate and the edge is provisional (allowed cross-product
-    // with a warning) even though it is never curated and never auto-inferred.
-    expect(isCrossProductEligible('planning_cycle_schedules_user_story')).toBe(false)
-    expect(crossProductScope('planning_cycle_schedules_user_story')).toBe('provisional')
+    // endpoint passes the gate even though the edge is never curated and never
+    // auto-inferred.
+    expect(isCrossProductEligible('planning_cycle_schedules_work_item')).toBe(false)
   })
 })
 

@@ -83,6 +83,7 @@ export const ENTITY_EMOJI: Record<string, string> = {
   competitor_signal: "📡",
   compliance_framework: "🏟️",
   compliance_requirement: "⛲",
+  capture: "📸",
   composition: "🖼️",
   constraint: "🔒",
   contact: "📇",

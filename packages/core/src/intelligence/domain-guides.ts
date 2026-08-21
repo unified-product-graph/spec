@@ -301,9 +301,9 @@ const PRODUCT_SPEC_GUIDE: UPGDomainUsageGuide = {
     },
     {
       name: 'Planning Cadence',
-      description: 'The cadence axis. Create a planning_cycle (a sprint, iteration, quarter, or PI), nest finer cycles inside a coarse one, schedule the stories that flow through it, and scope the objectives the cycle serves. Scheduling and scoping are deliberate links, not containment: a story keeps its feature/epic parent.',
-      entity_types: ['planning_cycle', 'user_story', 'objective'],
-      edge_chain: ['planning_cycle_contains_planning_cycle', 'planning_cycle_schedules_user_story', 'objective_scoped_to_planning_cycle'],
+      description: 'The cadence axis. Create a planning_cycle (a sprint, iteration, quarter, or PI), nest finer cycles inside a coarse one, schedule the work that flows through it (a task, story, epic, feature or bug), and scope the objectives the cycle serves. Scheduling and scoping are deliberate links, not containment: the scheduled item keeps its feature/epic parent.',
+      entity_types: ['planning_cycle', 'task', 'user_story', 'objective'],
+      edge_chain: ['planning_cycle_contains_planning_cycle', 'planning_cycle_schedules_work_item', 'objective_scoped_to_planning_cycle'],
     },
   ],
   required_bridges: [
@@ -1038,7 +1038,7 @@ const PORTFOLIO_GUIDE: UPGDomainUsageGuide = {
 const WORKSPACE_GUIDE: UPGDomainUsageGuide = {
   domain_id: 'workspace',
   anchor_entity: 'workspace',
-  creation_sequence: ['workspace', 'framework_exercise', 'composition'],
+  creation_sequence: ['workspace', 'framework_exercise', 'composition', 'capture'],
   patterns: [
     {
       name: 'Canvas to published view',

@@ -41,6 +41,11 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
     // the product renders. Few per product, and top-level because an axis is a
     // product-wide fact rather than a child of any one feature or surface.
     'configuration_axis',
+    // Classification (0.32.0): the product's own taxonomies — the grouped-label
+    // case, one named group over a set of values. Same reasoning as the
+    // configuration axis above, and until now the only parent a
+    // classification_axis could have was a competitive_analysis.
+    'classification_axis',
     // Engineering
     'bounded_context', 'code_repository', 'integration_pattern', 'external_api', 'data_flow',
     // Growth
@@ -262,7 +267,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // contains iterations; a cycle contains its cooldown) via
   // planning_cycle_contains_planning_cycle. It does NOT contain user_story as a
   // child: scheduling work into a cycle is the semantic, deliberate-only
-  // planning_cycle_schedules_user_story edge, so a story keeps its feature/epic
+  // planning_cycle_schedules_work_item edge, so the item keeps its feature/epic
   // containment parent and is merely referenced by the cycle.
   planning_cycle: ['planning_cycle'],
 
@@ -602,6 +607,11 @@ export const UPG_CONTAINMENT_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   // type to two edges rather than three: no provenance edge is minted (that is
   // `workspace_produced_node`, reused) and no parent edge is needed.
   'composition',
+  // A capture has no structural parent for the same reason: it anchors to what
+  // it RENDERS, via `capture_renders_node`. Giving it a product parent would
+  // claim a capture is part of the product rather than a picture of one, and
+  // would mint a containment edge whose only job is to satisfy the hierarchy.
+  'capture',
 ])
 
 /**

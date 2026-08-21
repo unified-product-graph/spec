@@ -622,6 +622,28 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  '0.32.0': [
+    // C3 — archive becomes a base-node axis. WorkspaceProperties.archived /
+    // archived_at shipped the orthogonal-archive idea for exactly one type;
+    // field data showed it is general (a tracker held 559 archived-completed
+    // items beside 18 live-completed ones), so the pair moves to UPGBaseNode
+    // and the workspace properties are @deprecated. Lift, not drop: the value
+    // is real and its new home means the same thing.
+    { kind: 'lift_property_to_top_level', type: 'workspace', from_property: 'archived', to: 'archived',
+      reason: '0.32.0: archive generalised from WorkspaceProperties to UPGBaseNode.archived. Same fact, wider home; the workspace property is @deprecated.' },
+    { kind: 'lift_property_to_top_level', type: 'workspace', from_property: 'archived_at', to: 'archived_at',
+      reason: '0.32.0: pairs with the archived lift above. UPGBaseNode.archived_at is the canonical home.' },
+    // C4 — the duplicate label surfaces. TaskProperties.labels and
+    // BugProperties.labels were declared "applied uniformly across work item
+    // types" and duplicated base-node `tags` with no consumer anywhere. Three
+    // label surfaces (base tags, per-type tags, per-type labels) is two too
+    // many; grouped labels are classification_axis + classification_value, and
+    // ungrouped ones are `tags`.
+    { kind: 'drop_props', type: 'task', drop_props: ['labels'],
+      reason: '0.32.0: TaskProperties.labels duplicated base-node `tags` and had no consumers. Freeform labels live in `tags`; grouped labels are classification_axis + node_classified_as_classification_value.' },
+    { kind: 'drop_props', type: 'bug', drop_props: ['labels'],
+      reason: '0.32.0: BugProperties.labels duplicated base-node `tags` and had no consumers. Same resolution as task.' },
+  ],
   // ── v0.21.0: D.1 — collapse residual *_status shadows into status ────
   //
   // Six `*_status` enum properties that re-encode their entity's own lifecycle
@@ -1876,6 +1898,30 @@ export interface UPGScalarToEdgeMigration {
  * `UPG_SPLIT_MIGRATIONS`: the key is the version that introduces the rule.
  */
 export const UPG_SCALAR_TO_EDGE_MIGRATIONS: Record<string, UPGScalarToEdgeMigration[]> = {
+  '0.32.0': [
+    // C2 — assignment gets its own edge, superseding the 0.12.0 rules that
+    // routed task/bug `assignee` into node_owned_by_person.
+    //
+    // WHY THIS IS A REVERSAL AND NOT A GAP-FILL. 0.12.0 ruled that an assignee
+    // is an owner. Assignment has a time interval and an exclusivity that
+    // ownership does not, and a real board ran 85% unassigned while every item
+    // was owned — a state one edge cannot express.
+    //
+    // WHY EXISTING EDGES ARE NOT REWRITTEN. A node_owned_by_person edge on a
+    // task is indistinguishable by inspection from a genuine ownership edge, so
+    // a blanket rename would silently reclassify real facts. Measured population
+    // across every graph in the originating workspace was ~zero, which makes the
+    // cost of leaving them nil and the cost of guessing a wrong fact.
+    //
+    // user_story is included here and was MISSING from 0.12.0 entirely, though
+    // it has carried `assignee` since 0.20.0.
+    { from_type: 'task', scalar_property: 'assignee', target_type: 'person', edge_type: 'node_assigned_to_person', drop_scalar: false,
+      reason: 'P14 actor: the assignee is a first-class person ("every task assigned to this person"). Assignment is not ownership: it has an interval and an exclusivity that ownership lacks, so it links node_assigned_to_person, superseding the 0.12.0 node_owned_by_person rule. Display string kept.' },
+    { from_type: 'bug', scalar_property: 'assignee', target_type: 'person', edge_type: 'node_assigned_to_person', drop_scalar: false,
+      reason: 'P14 actor: same as task. Supersedes the 0.12.0 node_owned_by_person rule. Display string kept.' },
+    { from_type: 'user_story', scalar_property: 'assignee', target_type: 'person', edge_type: 'node_assigned_to_person', drop_scalar: false,
+      reason: 'P14 actor: user_story has carried `assignee` since 0.20.0 and had no promotion rule at all; an asymmetry with task and bug that this closes. Display string kept.' },
+  ],
   '0.12.0': [
     // ── Bucket A1 — orphan scalars (no edge existed): add edge + migrate + drop ──
     {
@@ -2006,10 +2052,12 @@ export const UPG_SCALAR_TO_EDGE_MIGRATIONS: Record<string, UPGScalarToEdgeMigrat
       reason: 'P14 actor: the epic owner is a first-class person; link node_owned_by_person. Display string kept.' },
     { from_type: 'release', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
       reason: 'P14 actor: the release owner is a first-class person; link node_owned_by_person. Display string kept.' },
-    { from_type: 'task', scalar_property: 'assignee', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
-      reason: 'P14 actor: the assignee is a first-class person ("every task assigned to this person"); link node_owned_by_person. Display string kept.' },
-    { from_type: 'bug', scalar_property: 'assignee', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
-      reason: 'P14 actor: the assignee is a first-class person; link node_owned_by_person. Display string kept.' },
+    // NOTE (0.32.0): the task/bug `assignee` rules that lived here are SUPERSEDED
+    // by the '0.32.0' block below, which routes them to node_assigned_to_person.
+    // They are removed rather than left to double-run: two rules over one scalar
+    // would mint the person once and link it twice, under two verbs that now mean
+    // different things. Graphs promoted before 0.32.0 keep the ownership edges
+    // they were given — see the 0.32.0 block for why those are not rewritten.
     { from_type: 'roadmap', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
       reason: 'P14 actor: the roadmap owner is a first-class person; link node_owned_by_person. Display string kept.' },
     { from_type: 'journey_step', scalar_property: 'owner', target_type: 'person', edge_type: 'node_owned_by_person', drop_scalar: false,
@@ -2118,6 +2166,14 @@ export type UPGEdgeMigration =
  * Key is the version that INTRODUCES the migration (target version).
  */
 export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
+  '0.32.0': [
+    // C5 — the cadence scheduling edge widens from user_story to the work-item
+    // set. No requires_target_type: the destination's target_type is the `node`
+    // wildcard, and endpoint guards are checked against the catalog's declared
+    // type rather than the concrete instance (same reasoning as the 0.22.0
+    // workspace_produced_node rename below). Gate only on the unwidened source.
+    { kind: 'rename', from: 'planning_cycle_schedules_user_story', to: 'planning_cycle_schedules_work_item', requires_source_type: 'planning_cycle', reason: '0.32.0: a cycle could only schedule a user_story, while tracker imports produce `task` by default; the type a cadence most needed to hold was the one it could not reach. Widened to the polymorphic work-item endpoint; no flip, source unchanged. Measured live population of the old type at release: zero (no .upg in the repo or the dogfood graph carried it), so this rename is a vocabulary change, not a data migration.' },
+  ],
   // (target version TBD at release ceremony — pencilled at 0.22.0, the next
   // breaking slot after 0.21.0 per the docket; adjust the key if Wave 4
   // claims it first.) WS3 commit-provenance collapse (2026-07-05, ratified):

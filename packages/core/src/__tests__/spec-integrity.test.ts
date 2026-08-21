@@ -372,7 +372,12 @@ describe('Edge pair uniqueness', () => {
  // 0.27.0 (feedback 20f0e46f) added surface→surface {contains (hierarchy, the
  // nesting spine), supersedes (semantic, a replacement place)} — same pattern as
  // screen→screen, distinct relationship + classification. → 36.
- expect(multiPairs.length).toMatchInlineSnapshot(`37`)
+ // 0.32.0 added node→person {owned_by (durable accountability), assigned_to
+ // (who is working on it now, with an interval and an exclusivity ownership
+ // lacks)} — same endpoints, distinct verbs, and the distinction is the point:
+ // a board that runs 85% unassigned while everything is owned cannot say so
+ // with one edge. → 38.
+ expect(multiPairs.length).toMatchInlineSnapshot(`38`)
  })
 })
 
@@ -537,7 +542,9 @@ describe('Polymorphic edge allow-list', () => {
  expect(divergent, `Edges where derived polymorphism disagrees with allow-list:\n${divergent.join('\n')}`).toEqual([])
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (21 entries, 10 families)', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (24 entries, 13 families)', () => {
+ // 21 -> 24 in 0.32.0, and three new families (11-13): universal assignment,
+ // capture subject, and cadence scheduling. See the JSDoc list on the array.
  // 20 -> 21 in 0.31.0, and a 10th family: `eval_benchmark_measures_node`, the
  // benchmark SUBJECT. Registered deliberately as an OVER-WIDE edge: a benchmark
  // measures a measurable thing, not literally any node. The width is the price
@@ -552,10 +559,10 @@ describe('Polymorphic edge allow-list', () => {
  expect(
  UPG_POLYMORPHIC_EDGE_KEYS.length,
  'UPG_POLYMORPHIC_EDGE_KEYS count changed — update this assertion AND see CONTRIBUTING.md edge-add checklist',
- ).toBe(21)
+ ).toBe(24)
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly ten named families', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly thirteen named families', () => {
  // The JSDoc above the array enumerates the sanctioned families in prose, and
  // prose has nothing checking it: the list still read "Eight semantic families"
  // after the ninth and tenth had shipped. This partition is the check. A new
@@ -583,12 +590,19 @@ describe('Polymorphic edge allow-list', () => {
  'workspace provenance': ['workspace_produced_node'],
  'canvas arrangement and published-view focus': ['workspace_arranges_node', 'composition_focuses_node'],
  'benchmark subject': ['eval_benchmark_measures_node'],
+ // 0.32.0. Assignment is its OWN family and deliberately not a member of
+ // 'universal ownership': keeping them apart in this partition is the same
+ // ruling the edge itself makes, so a future author who merges them here is
+ // making that decision visibly rather than by tidying a list.
+ 'universal assignment': ['node_assigned_to_person'],
+ 'capture subject': ['capture_renders_node'],
+ 'cadence scheduling': ['planning_cycle_schedules_work_item'],
  }
 
  expect(
  Object.keys(FAMILIES),
  'family count changed: update the numbered list in the UPG_POLYMORPHIC_EDGE_KEYS JSDoc to match',
- ).toHaveLength(10)
+ ).toHaveLength(13)
 
  const assigned = Object.values(FAMILIES).flat()
  expect(new Set(assigned).size, 'a polymorphic key is claimed by two families').toBe(assigned.length)

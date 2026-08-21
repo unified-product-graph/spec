@@ -593,6 +593,9 @@ export const UPG_ENTITY_META: readonly EntityTypeMeta[] = [
   { name: 'workspace', type_id: 'ent_328', maturity: 'proposed', since: '0.2.0' },
   { name: 'framework_exercise', type_id: 'ent_350', maturity: 'proposed', since: '0.8.4' },
   { name: 'composition', type_id: 'ent_361', maturity: 'proposed', since: '0.31.0' },
+  // A dated, hashed rendition of a node that is already in the graph. Enters
+  // `proposed` per the maturity rubric (precedent: composition 0.31.0).
+  { name: 'capture', type_id: 'ent_362', maturity: 'proposed', since: '0.32.0' },
 ] as const
 
 /**

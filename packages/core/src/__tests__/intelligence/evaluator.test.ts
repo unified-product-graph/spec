@@ -215,13 +215,72 @@ describe('Per-pattern fire / clear', () => {
     i.countsByType = { planning_cycle: 1 }
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'planning-cycle-without-scheduled-work')).toBe(true)
   })
-  it('planning-cycle-without-scheduled-work clears when the cycle schedules a user_story', () => {
+  // ── Labeled set for the 0.32.0 retarget ────────────────────────────────────
+  // The check moved from planning_cycle_schedules_user_story (concrete target)
+  // to planning_cycle_schedules_work_item (wildcard target). Under the standing
+  // doctrine a CHANGED check owes a labeled set, not just the case its author
+  // imagined, and the cases below are chosen for what the retarget could get
+  // wrong rather than for coverage.
+  //
+  // NOTE ON THE KEYS: these inputs are hand-built, so they must mirror exactly
+  // what the collector writes. For a polymorphic edge the collector records
+  // BOTH the concrete key and the wildcard key; the check reads the wildcard
+  // one. A test that wrote only the concrete key would pass for the wrong
+  // reason and hide the very bug the wildcard indexing exists to prevent.
+  it('clears when the cycle schedules a TASK — the case the retarget exists for', () => {
     const i = emptyInputs()
-    i.countsByType = { planning_cycle: 1 }
+    i.countsByType = { planning_cycle: 1, task: 3 }
     i.edgePresence = {
-      [relKey('planning_cycle', 'planning_cycle_schedules_user_story', 'user_story')]: true,
+      [relKey('planning_cycle', 'planning_cycle_schedules_work_item', 'task')]: true,
+      [relKey('planning_cycle', 'planning_cycle_schedules_work_item', 'node')]: true,
     }
     expect(fired(firedIds(evaluateAntiPatterns(i)), 'planning-cycle-without-scheduled-work')).toBe(false)
+  })
+
+  it('still clears when the cycle schedules a user_story — the pre-0.32.0 case', () => {
+    const i = emptyInputs()
+    i.countsByType = { planning_cycle: 1, user_story: 1 }
+    i.edgePresence = {
+      [relKey('planning_cycle', 'planning_cycle_schedules_work_item', 'user_story')]: true,
+      [relKey('planning_cycle', 'planning_cycle_schedules_work_item', 'node')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'planning-cycle-without-scheduled-work')).toBe(false)
+  })
+
+  // NEAR-MISS. A coarse `period` cycle (a quarter, a PI) that schedules nothing
+  // DIRECTLY and only contains finer cycles is correct modelling, not an empty
+  // cadence box — the work hangs off its children. This is the graph the
+  // detector is most likely to misjudge, and it is the reason the second
+  // not_exists clause on nesting exists at all.
+  it('NEAR-MISS: does not fire on a coarse period cycle that only nests sub-cycles', () => {
+    const i = emptyInputs()
+    i.countsByType = { planning_cycle: 4 }
+    i.edgePresence = {
+      [relKey('planning_cycle', 'planning_cycle_contains_planning_cycle', 'planning_cycle')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'planning-cycle-without-scheduled-work')).toBe(false)
+  })
+
+  // NEAR-MISS. A graph with work items and no cadence layer at all is not a
+  // cadence failure: the pattern is about EMPTY cycles, so no cycle means no
+  // finding. Guards the first clause against being dropped as redundant.
+  it('NEAR-MISS: does not fire when the graph has work items but no cycles', () => {
+    const i = emptyInputs()
+    i.countsByType = { task: 12, user_story: 4 }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'planning-cycle-without-scheduled-work')).toBe(false)
+  })
+
+  // The regression that motivated the wildcard indexing: a cycle that schedules
+  // real work, recorded ONLY under the concrete key. Before the collector wrote
+  // both keys this is what every graph looked like to the check, and the
+  // detector reported a full cycle as empty.
+  it('REGRESSION: a concrete-only key means the collector is stale, and the check says so by firing', () => {
+    const i = emptyInputs()
+    i.countsByType = { planning_cycle: 1, task: 3 }
+    i.edgePresence = {
+      [relKey('planning_cycle', 'planning_cycle_schedules_work_item', 'task')]: true,
+    }
+    expect(fired(firedIds(evaluateAntiPatterns(i)), 'planning-cycle-without-scheduled-work')).toBe(true)
   })
 
   // 8. competitors-missing-past-validation (medium, benchmark — needs stage).

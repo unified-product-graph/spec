@@ -55,6 +55,20 @@ export interface ProductProperties {
    * under.
    */
   described_configuration?: string
+  /**
+   * Prefix for keys minted onto this product's nodes (e.g. `"LTN"`, giving
+   * `LTN-1`, `LTN-2`, …). A product with no prefix mints no keys.
+   *
+   * @remarks
+   * Pairs with `UPGBaseNode.key`, which holds the minted value. The prefix sits
+   * on the product because the key's uniqueness scope is the product, across
+   * entity types; the namespace a tracker calls a "team". Only the prefix is
+   * serialised: the next number is `max(existing) + 1`, derived from the graph,
+   * because a counter is a fact about a store rather than about the product.
+   *
+   * @example "LTN"
+   */
+  key_prefix?: string
 }
 
 // ---------------------------------------------------------------------------

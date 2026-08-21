@@ -15,6 +15,7 @@
  */
 
 import type { UPGEntityType } from '../catalog/entity-catalog.js'
+import type { UPGWildcardEndpoint } from '../catalog/edge-catalog.js'
 import type { UPGEdgeType } from '../shapes/edges.js'
 
 // ─── Check Types ────────────────────────────────────────────────────────────
@@ -75,8 +76,24 @@ export interface RelationshipCheck {
   source_type: UPGEntityType
   /** Edge type to check */
   edge_type: UPGEdgeType
-  /** Target entity type */
-  target_type: UPGEntityType
+  /**
+   * Target entity type, or the wildcard `'node'` for a polymorphic edge.
+   *
+   * @remarks
+   * THE WILDCARD IS NOT COSMETIC. The presence index a check reads is keyed by
+   * the CONCRETE endpoint types of each edge instance, so a check declaring a
+   * concrete target only sees edges that landed on that type. For a polymorphic
+   * edge the concrete target could be any type in the semantic set, and a check
+   * naming one of them would miss the rest — while a check naming `'node'`
+   * against a concretely-keyed index would match nothing at all, which for a
+   * `not_exists` comparison means firing on every graph including correct ones.
+   *
+   * The collector therefore records BOTH keys for a polymorphic edge: the
+   * concrete `source|edge|target` and the wildcard `source|edge|node`. Declare
+   * `'node'` here when, and only when, the edge is registered in
+   * `UPG_POLYMORPHIC_EDGE_KEYS`.
+   */
+  target_type: UPGEntityType | UPGWildcardEndpoint
   /** Comparison */
   comparison: 'exists' | 'not_exists' | 'count_gt' | 'count_lt'
   /** Threshold for count comparisons */

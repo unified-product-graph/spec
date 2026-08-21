@@ -2742,7 +2742,8 @@ const APPROVAL_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
 }
 
 /**
- * Work item: todo → in_progress → in_review → done, with a `cancelled` off-ramp.
+ * Work item: backlog → todo → in_progress → in_review → done, with a
+ * `cancelled` off-ramp.
  *
  * `cancelled` (0.25.1 feedback 25db13af): work items get cancelled or closed as
  * duplicate/won't-do in source tools constantly, and `workflow_state_category`
@@ -2750,13 +2751,32 @@ const APPROVAL_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
  * closed/wont_fix terminals the support-flow lifecycles already have. Reachable
  * from every non-terminal phase; `cancelled → todo` is the reopen path (a
  * late-state move per the `terminal_phases` contract, not forward progression).
+ *
+ * `backlog` (0.32.0): before this the template reached four of the six
+ * {@link StatusCategory} buckets — `triage` and `backlog` were both unreachable
+ * — and the consequence was measurable rather than theoretical. Importing a
+ * 1,032-issue tracker, a source "Backlog" state normalised to a phase this
+ * template does not have, and the importer omits what it cannot map rather than
+ * approximating it, so roughly 195 issues arrived carrying NO status. The
+ * largest single group of work on a real board had nowhere to land.
+ *
+ * NO `triage` PHASE, deliberately. The `triage` bucket stays reachable through
+ * INCIDENT (`open`, `triaged`) and DISCOVERY, which is where triage is actually
+ * practised. A task nobody has accepted is a task in `backlog`; adding a triage
+ * phase for a state the evidence does not show in use would be minting dead
+ * schema. Revisit on a field graph with a populated triage state.
+ *
+ * `initial_phase` DELIBERATELY STAYS `todo`. Moving it to `backlog` would change
+ * what every existing graph's next node means, which is not an additive change
+ * however additive the diff looks.
  */
 const WORK_ITEM_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
   template_id: 'WORK_ITEM',
   initial_phase: 'todo',
   terminal_phases: ['done', 'cancelled'],
   phases: [
-    { id: 'todo', status_category: 'unstarted', label: 'To Do', description: 'Identified but not yet started.', transitions_to: ['in_progress', 'cancelled'] },
+    { id: 'backlog', status_category: 'backlog', label: 'Backlog', description: 'Accepted or set aside deliberately: real work, not scheduled. Distinct from `todo`, which is committed and merely not started.', transitions_to: ['todo', 'in_progress', 'cancelled'] },
+    { id: 'todo', status_category: 'unstarted', label: 'To Do', description: 'Identified but not yet started.', transitions_to: ['in_progress', 'backlog', 'cancelled'] },
     { id: 'in_progress', status_category: 'started', label: 'In Progress', description: 'Actively being worked on.', transitions_to: ['in_review', 'todo', 'cancelled'] },
     { id: 'in_review', status_category: 'started', label: 'In Review', description: 'Work completed, awaiting review or acceptance.', transitions_to: ['done', 'in_progress', 'cancelled'] },
     { id: 'done', status_category: 'completed', label: 'Done', description: 'Completed and accepted.', transitions_to: [] },
@@ -3529,6 +3549,11 @@ export const UPG_LIFECYCLE_FREE_TYPES: ReadonlySet<string> = new Set<string>([
   //    from experiment_runs (which have lifecycles); hypothesis_evidence was
   //    lifecycle-free here but is deprecated at v0.4.0 ──────────────────────────────────────
   'evidence', 'learning',
+
+  // ── Workspace (1 of 4): a capture is a fact about a moment, not a workflow.
+  //    It is taken, and from then on it either still matches its subject or it
+  //    does not — which is what `content_hash` answers, not a phase. ─────────
+  'capture',
 ])
 
 /**

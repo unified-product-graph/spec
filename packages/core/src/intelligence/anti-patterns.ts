@@ -383,7 +383,7 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     id: 'planning-cycle-without-scheduled-work',
     name: 'Planning cycle with no scheduled work',
     description:
-      'A planning_cycle exists but neither schedules any user_story nor contains a finer sub-cycle. An empty cadence box is a date range with nothing flowing through it: a sprint or iteration nobody planned work into, or a coarse period that was never broken down.',
+      'A planning_cycle exists but neither schedules any work item nor contains a finer sub-cycle. An empty cadence box is a date range with nothing flowing through it: a sprint or iteration nobody planned work into, or a coarse period that was never broken down.',
     structured_condition: {
       operator: 'and',
       checks: [
@@ -392,8 +392,8 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
           check: {
             type: 'relationship',
             source_type: 'planning_cycle',
-            edge_type: 'planning_cycle_schedules_user_story',
-            target_type: 'user_story',
+            edge_type: 'planning_cycle_schedules_work_item',
+            target_type: 'node',
             comparison: 'not_exists',
           },
         },
@@ -411,10 +411,16 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     why_it_matters:
       'A cadence layer only earns its keep when work is planned through it. An interval with no scheduled stories and no nested cycles adds ceremony without telling anyone what the period is for.',
     remediation:
-      'Schedule the stories the cycle will carry via `planning_cycle_schedules_user_story`, or break a coarse period into finer cycles via `planning_cycle_contains_planning_cycle`. If neither applies, the interval is not yet a real cadence box.',
+      'Schedule the work the cycle will carry via `planning_cycle_schedules_work_item`, or break a coarse period into finer cycles via `planning_cycle_contains_planning_cycle`. If neither applies, the interval is not yet a real cadence box.',
     stages: ['build', 'beta', 'launch', 'growth', 'mature'],
     severity: 'low',
     since: '0.20.0',
+    // RETARGETED at 0.32.0 from planning_cycle_schedules_user_story. Left
+    // unchanged it would have become a false-positive generator the moment
+    // cycles could hold tasks: a cycle full of scheduled tasks and no stories
+    // would have reported as empty. Labeled fixtures cover the near-miss this
+    // is most likely to get wrong — a coarse `period` cycle that legitimately
+    // holds only sub-cycles and schedules nothing directly.
   },
 
   // ── Market intelligence layer ───────────────────────────────────────────
