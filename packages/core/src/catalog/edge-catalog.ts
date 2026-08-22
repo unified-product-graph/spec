@@ -369,6 +369,19 @@ export const UPG_EDGE_CATALOG = {
   product_contains_research_study: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'product', target_type: 'research_study' },
   research_study_enrolls_participant: { forward_verb: 'enrolls', reverse_verb: 'enrolled_in', classification: 'hierarchy', source_type: 'research_study', target_type: 'participant' },
   research_study_captures_observation: { forward_verb: 'captures', reverse_verb: 'captured_in', classification: 'hierarchy', source_type: 'research_study', target_type: 'observation' },
+  // (0.35.0) Provenance for a verbatim quote: which study produced it. The
+  // quote card wanted an outbound `quote_from_research_study`; canon answers it
+  // study-first, matching the whole `research_study_*` family (enrolls ·
+  // captures · clusters_into · produces · investigates · follows · collects),
+  // so the quote renders it INBOUND on its connections rail. The `captures`
+  // verb is deliberately reused from the observation twin above: the F3
+  // duplicate gate is on the (source, target) pair, which is new, and a study
+  // captures raw material by one verb regardless of which raw shape it is.
+  // Companion: `UPG_VALID_CHILDREN.research_study` gains 'quote'. A quote may
+  // now hang from observation (raw-capture parent), insight (synthesis parent)
+  // or research_study (provenance parent) — multi-parent grammar is explicitly
+  // sanctioned, and per-INSTANCE parentage stays single via `parent_id`.
+  research_study_captures_quote: { forward_verb: 'captures', reverse_verb: 'captured_in', classification: 'hierarchy', source_type: 'research_study', target_type: 'quote' },
   research_study_clusters_into_affinity_cluster: { forward_verb: 'clusters_into', reverse_verb: 'clustered_from', classification: 'hierarchy', source_type: 'research_study', target_type: 'affinity_cluster' },
   research_study_produces_insight: { forward_verb: 'produces', reverse_verb: 'produced_by', classification: 'hierarchy', source_type: 'research_study', target_type: 'insight' },
   research_study_investigates_research_question: { forward_verb: 'investigates', reverse_verb: 'investigated_by', classification: 'hierarchy', source_type: 'research_study', target_type: 'research_question' },
@@ -658,6 +671,22 @@ export const UPG_EDGE_CATALOG = {
   // the work into `task`; v0.7.0/ re-canonicalised the statement
   // story_statement → user_story; see UPG_EDGE_MIGRATIONS['0.7.0'].)
   epic_specified_by_user_story: { forward_verb: 'specified_by', reverse_verb: 'specifies', classification: 'hierarchy', source_type: 'epic', target_type: 'user_story' },
+  // (0.35.0) The feature-level rung of the same ladder. `epic` is OPTIONAL in
+  // UPG — `feature_decomposed_into_epic` is not mandatory — so a feature that
+  // skips the epic level had no way to reach the stories that specify it, and
+  // `user_story` had exactly one declared parent. Verb pair is cloned verbatim
+  // from the epic rung above so the two rungs read identically; it is NOT
+  // `groups`, which would invent a second verb for one relationship.
+  //
+  // This is also the reason `feature_contains_acceptance_criterion` is NOT
+  // here: with this rung the path is feature → user_story → acceptance_
+  // criterion, and a direct containment edge would be the "X_contains_Y verb
+  // that duplicates the parent link" ARCHITECTURE.md forbids.
+  //
+  // Companion: `UPG_VALID_CHILDREN.feature` gains 'user_story'. Per-instance
+  // parentage stays single (`parent_id`), so the dual declared parent is a
+  // grammar widening, not a dual-parent instance.
+  feature_specified_by_user_story: { forward_verb: 'specified_by', reverse_verb: 'specifies', classification: 'hierarchy', source_type: 'feature', target_type: 'user_story' },
   user_story_verified_by_acceptance_criterion: { forward_verb: 'verified_by', reverse_verb: 'verifies', classification: 'hierarchy', source_type: 'user_story', target_type: 'acceptance_criterion' },
   task_implements_user_story: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'cross-domain', source_type: 'task', target_type: 'user_story' },
   feature_affected_by_bug: { forward_verb: 'affected_by', reverse_verb: 'affects', classification: 'hierarchy', source_type: 'feature', target_type: 'bug' },
@@ -1783,6 +1812,16 @@ export const UPG_EDGE_CATALOG = {
   team_decides_decision: { forward_verb: 'decides', reverse_verb: 'decided_by', classification: 'hierarchy', source_type: 'team', target_type: 'decision' },
   decision_references_decision: { forward_verb: 'references', reverse_verb: 'referenced_by', classification: 'cross-domain', source_type: 'decision', target_type: 'decision' },
   stakeholder_maps_to_persona: { forward_verb: 'maps_to', reverse_verb: 'mapped_by', classification: 'cross-domain', source_type: 'stakeholder', target_type: 'persona' },
+  // (0.35.0) The stakeholder-map relation: who cares about which outcome.
+  // Deliberately a verb-only edge and NOT a `kind: 'scale'` property on a
+  // generic `stakeholder_relates_to_node` — UPG edges are payload-free outside
+  // the gated `carries_properties` set, and the MAGNITUDE of the stake is
+  // already `influence` / `interest` on the stakeholder itself. The reverse
+  // reading is what makes the pair right: "outcome matters_to stakeholder".
+  // Sits beside `persona_pursues_outcome` (the persona twin) and
+  // `product_influenced_by_stakeholder`. Retires the manifest's denormalised
+  // `stake_in` string: the subtitle renders the target outcome's title.
+  stakeholder_invested_in_outcome: { forward_verb: 'invested_in', reverse_verb: 'matters_to', classification: 'cross-domain', source_type: 'stakeholder', target_type: 'outcome' },
   team_okr_aligns_with_objective: { forward_verb: 'aligns_with', reverse_verb: 'aligned_by', classification: 'cross-domain', source_type: 'team_okr', target_type: 'objective' },
   team_okr_aligns_with_key_result: { forward_verb: 'aligns_with', reverse_verb: 'aligned_by', classification: 'cross-domain', source_type: 'team_okr', target_type: 'key_result' },
   ceremony_involves_team: { forward_verb: 'involves', reverse_verb: 'involved_in', classification: 'cross-domain', source_type: 'ceremony', target_type: 'team' },
@@ -1863,6 +1902,27 @@ export const UPG_EDGE_CATALOG = {
   compliance_requirement_constrains_feature: { forward_verb: 'constrains', reverse_verb: 'constrained_by', classification: 'cross-domain', source_type: 'compliance_requirement', target_type: 'feature' },
   compliance_requirement_constrains_decision: { forward_verb: 'constrains', reverse_verb: 'constrained_by', classification: 'cross-domain', source_type: 'compliance_requirement', target_type: 'decision' },
   risk_manifests_as_technical_debt_item: { forward_verb: 'manifests_as', reverse_verb: 'manifested_by', classification: 'cross-domain', source_type: 'risk', target_type: 'technical_debt_item' },
+  // ── Risk exposure (0.35.0) ──────────────────────────────────────────────────
+  // Typed source, wildcard target: the 16th registered polymorphic family, and
+  // structurally the "decision-to-anything" construction with `risk` in the
+  // source slot. Both are `cross-domain`, so neither enters UPG_VALID_CHILDREN
+  // and neither can be walked as containment.
+  //
+  // Why wildcard rather than typed-per-target: what a risk puts at stake is
+  // genuinely unbounded (outcome, key_result, release, service, contract,
+  // launch, metric, feature), and so is what mitigates it (decision, feature,
+  // experiment, security_control, compliance_requirement). Enumerating either
+  // side balloons the catalogue across two open sets while the endpoint carries
+  // no structural role — the exact condition ARCHITECTURE.md admits polymorphism
+  // for. The typed `security_control_mitigates_threat` stays as the
+  // security-domain edge; `risk_mitigated_by_node` is the product generalisation.
+  //
+  // These two replace three manifest fields that were properties pretending to
+  // be relations: `scope_entities` (an entity-reference list) is
+  // risk_threatens_node, and `mitigation_actions` (a top-list of action
+  // strings) is risk_mitigated_by_node. The prose `mitigation?: string` stays.
+  risk_threatens_node: { forward_verb: 'threatens', reverse_verb: 'threatened_by', classification: 'cross-domain', source_type: 'risk', target_type: 'node' },
+  risk_mitigated_by_node: { forward_verb: 'mitigated_by', reverse_verb: 'mitigates', classification: 'cross-domain', source_type: 'risk', target_type: 'node' },
   data_contract_governs_data_source: { forward_verb: 'governs', reverse_verb: 'governed_by', classification: 'cross-domain', source_type: 'data_contract', target_type: 'data_source' },
   compliance_framework_requires_security_control: { forward_verb: 'requires', reverse_verb: 'required_by', classification: 'cross-domain', source_type: 'compliance_framework', target_type: 'security_control' },
   security_audit_validates_compliance_framework: { forward_verb: 'validates', reverse_verb: 'validated_by', classification: 'cross-domain', source_type: 'security_audit', target_type: 'compliance_framework' },
@@ -3250,7 +3310,7 @@ export function isDeliberateOnlyEdge(type: string): boolean {
 /**
  * Canonical allow-list of edges that use the `'node'` wildcard endpoint.
  *
- * Fourteen semantic families are sanctioned. The count and the partition are
+ * Sixteen semantic families are sanctioned. The count and the partition are
  * asserted in `spec-integrity.test.ts`, so this list cannot silently fall out
  * of step with the array below the way it did between 0.28.0 and 0.31.0:
  *
@@ -3314,6 +3374,14 @@ export function isDeliberateOnlyEdge(type: string): boolean {
  *    anything renderable can be embedded. Deliberately NOT merged with the
  *    nine-member `document_describes_*` family, which says the document is ABOUT
  *    a thing rather than that it renders it.
+ * 16. **Risk exposure** (0.35.0): what a risk puts at stake, and what mitigates
+ *    it. Deliberately mirrors family 2 ("decision-to-anything") with `risk` in
+ *    the source slot, for the same reason: both target sets are open (outcome,
+ *    key_result, release, service, contract, launch on one side; decision,
+ *    feature, experiment, security_control on the other) and neither endpoint
+ *    carries a structural role. Both `cross-domain`, so the containment tree is
+ *    untouched. The typed `security_control_mitigates_threat` is NOT absorbed:
+ *    it stays the security-domain edge, and this is the product generalisation.
  *
  * Adding a new polymorphic edge requires extending this array AND naming the
  * family it joins in `UPG_POLYMORPHIC_EDGE_FAMILIES` below, which the
@@ -3378,6 +3446,11 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   // value at a position in its prose. Open by nature rather than by an
   // enumeration nobody wanted to write out.
   'document_transcludes_node',
+  // Risk exposure (0.35.0): what a risk threatens, and what mitigates it.
+  // Typed source, wildcard target — the decision-to-anything construction with
+  // `risk` in the source slot. Both cross-domain, so containment is untouched.
+  'risk_threatens_node',
+  'risk_mitigated_by_node',
 ] as const
 
 /**
@@ -3442,6 +3515,13 @@ export const UPG_POLYMORPHIC_EDGE_FAMILIES: Readonly<Record<string, readonly _UP
   // enumerated edges saying a document is ABOUT a thing. Transclusion says it
   // RENDERS the thing, and the difference is the whole reason the edge exists.
   'document transclusion': ['document_transcludes_node'],
+  // 0.35.0. Its own family and deliberately NOT merged into
+  // 'decision-to-anything', which it mirrors structurally. The two say different
+  // things: a decision INFLUENCES what it touches, a risk ENDANGERS what it
+  // threatens, and a partition that merged them on shape alone would assert
+  // those are one relation. Two members because exposure has two directions,
+  // and collapsing them would lose which way an edge points.
+  'risk exposure': ['risk_threatens_node', 'risk_mitigated_by_node'],
 } as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)

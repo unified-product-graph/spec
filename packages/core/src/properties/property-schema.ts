@@ -2465,8 +2465,18 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   // RiskProperties: Risk.
   risk: {
     risk_type: { type: 'string', enum: ['technical', 'business', 'legal', 'security', 'operational', 'program'], description: 'Domain the risk belongs to. The single kind axis for `risk`: there is no second classification vocabulary. `program` added in v0.26.0 so the retired `risk_item` (Program Management) type has a home on the canonical `risk` after consolidation, rather than a parallel `risk_domain` field free to drift from this one.' },
+    likelihood: {
+      type: 'assessment', scale_id: 'likelihood_5', description: 'How likely this risk is to materialise. Rated on `likelihood_5` (Rare → Almost certain).', notes: 'Canonical name since 0.35.0, superseding `probability` below. Three reasons, in order of weight. (1) `probability` was one name for two incompatible types (`UPGAssessment` here, a bare `number` on `forecast.probability`), and `PROPERTY_SCALE_MAP` is keyed by name alone, so a sales percentage and a risk judgment resolved to the same ladder. (2) `likelihood` is already the spec\'s own word: the RISK_ITEM lifecycle prose says "Likelihood and impact have been evaluated", and `threat.likelihood` has been a `UPGAssessment` all along: one name, one type, one ladder. (3) ISO 31000 says likelihood. The ladder moved with the name: `likelihood_5` is new in 0.35.0 because no probability ladder existed and `confidence_5` is epistemic. It says how sure the assessor is, not how likely the event is.',
+      properties: {
+        value: { type: 'number', description: 'The numeric value, used for computation.' },
+        label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
+        scale_id: { type: 'string', description: 'Which assessment scale this was rated on (optional).' },
+        normalized: { type: 'number', description: 'Normalized 0-1 value for cross-tool comparison (optional).' },
+      },
+      required: ['value', 'label'],
+    },
     probability: {
-      type: 'assessment', scale_id: 'confidence_5', description: 'How likely this risk is to materialise (1 = unlikely, 5 = near certain)',
+      type: 'assessment', scale_id: 'likelihood_5', description: 'How likely this risk is to materialise (1 = unlikely, 5 = near certain). @deprecated since="0.35.0" removeIn="1.0.0". Use `likelihood`, which is the spec\'s own word for this in the risk lifecycle and on `threat`. Both names resolve to the same `likelihood_5` ladder for the length of the deprecation window (`PROPERTY_SCALE_MAP_BY_ENTITY.risk.probability`, Captain-ratified 2026-08-22): a deprecated field that renders on a DIFFERENT ladder from its replacement would make one stored 4 read "Confident" under the old name and "Likely" under the new one, which is the data changing meaning at the rename, which is the exact thing staging exists to prevent. `forecast.probability` is untouched and stays on `confidence_5`. STAGED, not renamed. The field is KEPT and still read: 0.35.0 changes what writers emit and what readers prefer, and changes NO stored bytes. A graph written before 0.35.0 carries `probability` and no `likelihood`, and reads correctly, which is the whole point of staging it. Writers: emit `likelihood`. Readers: prefer `likelihood`, fall back to `probability`. The fallback is a CONTRACT on consumers, not executable spec machinery, exactly as it is for `epic.estimate` → `effort`. `removeIn="1.0.0"` is a deadline, not a wish: at 1.0.0 this field is dropped by a `drop_props` rule in `UPG_PROPERTY_MIGRATIONS`, the same two-step the `removeIn="0.5.0"` properties followed (declared at 0.4.0, dropped by the 0.5.0 rules). Until then there is deliberately no executable rule: see the `\'0.35.0\'` block in `grammar/migrations.ts`.',
       properties: {
         value: { type: 'number', description: 'The numeric value, used for computation.' },
         label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
@@ -2476,7 +2486,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       required: ['value', 'label'],
     },
     impact: {
-      type: 'assessment', scale_id: 'impact_5', description: 'Severity of consequences if the risk materialises (1 = negligible, 5 = catastrophic)',
+      type: 'assessment', scale_id: 'severity_5', description: 'Severity of consequences if the risk materialises. Rated on `severity_5` (Mild inconvenience → Blocker), NOT the benefit-framed `impact_5`.', notes: 'The ladder is set by `PROPERTY_SCALE_MAP_BY_ENTITY.risk.impact` (0.35.0), the per-entity override layer. `impact` legitimately means magnitude of BENEFIT on discovery and market entities, where high is good; on a risk it means severity of harm, where high is bad. Sharing `impact_5` rendered a catastrophic risk green.',
       properties: {
         value: { type: 'number', description: 'The numeric value, used for computation.' },
         label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },
@@ -2485,7 +2495,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       },
       required: ['value', 'label'],
     },
-    mitigation: { type: 'string', description: 'Planned or implemented mitigation strategy' },
+    mitigation: { type: 'string', description: 'Planned or implemented mitigation strategy, as prose.', notes: 'Prose only. A structured list of mitigating ACTIONS is a set of edges: `risk_mitigated_by_node` (0.35.0), pointing at the decisions, features and experiments that actually do the mitigating; a string array of them is unqueryable by construction. Likewise, what the risk puts at stake is `risk_threatens_node`, not a scope-list property.' },
   },
   // RiskRegisterProperties: Risk register.
   risk_register: {
@@ -2728,6 +2738,8 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
       },
       required: ['value', 'label'],
     },
+    engagement_posture: { type: 'string', enum: ['champion', 'supporter', 'neutral', 'skeptic', 'blocker'], description: 'Which way this stakeholder leans: actively for, actively against, or neither. The third axis of the stakeholder model (0.35.0), beside the power/interest grid `influence` and `interest` describe.', notes: '`influence` and `interest` are magnitudes and carry no direction: a high-influence, high-interest stakeholder can be the strongest champion or the one who kills it, and the grid renders them identically. This closed enum is what makes "who blocks this?" a query rather than a reading exercise. Pairs with `UPG_ENUM_SCALES.EngagementPosture`. Posture is about the person\'s stance; it is NOT delivery health, which belongs to work items, and NOT the relationship\'s operational state.' },
+    engagement_cadence: { type: 'string', enum: ['continuous', 'hourly', 'daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'on_demand', 'other'], description: 'How often this stakeholder is engaged. Uses the shared `Cadence` scale.', notes: 'Typed as `Cadence` rather than free text on purpose: v0.4.0 introduced that enum precisely to retire strings like `"2x/week"`, and a cadence that cannot be compared across stakeholders cannot answer "who have we not spoken to this quarter?". WHERE you meet them (the channel) is an app-level concern and is deliberately not modelled here.' },
   },
   // StatusReportProperties: Status report.
   status_report: {
@@ -2974,7 +2986,7 @@ export const UPG_PROPERTY_SCHEMA: Record<string, PropertySchema> = {
   threat: {
     category: { type: 'string', description: 'Attack or threat scenario. @example "injection", "misconfiguration", "social engineering", "supply chain"' },
     likelihood: {
-      type: 'assessment', scale_id: 'confidence_5', description: 'Likelihood (1 = theoretical, 5 = actively exploited). @example value 5 for a known, exploitable, commonly targeted pattern',
+      type: 'assessment', scale_id: 'likelihood_5', description: 'Likelihood (1 = theoretical, 5 = actively exploited). @example value 5 for a known, exploitable, commonly targeted pattern',
       properties: {
         value: { type: 'number', description: 'The numeric value, used for computation.' },
         label: { type: 'string', description: 'The qualitative label (what the assessor meant).' },

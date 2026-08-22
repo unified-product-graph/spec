@@ -622,6 +622,62 @@ export type UPGPropertyMigration =
  * the key is the version that introduces the migration.
  */
 export const UPG_PROPERTY_MIGRATIONS: Record<string, UPGPropertyMigration[]> = {
+  // ── v0.35.0: risk.probability → risk.likelihood, STAGED ─────────────────────
+  //
+  // Deliberately EMPTY, and the emptiness is the design rather than an omission.
+  // The rename is staged: `RiskProperties.probability` is kept, marked
+  // `@deprecated since="0.35.0" removeIn="1.0.0"`, and still read. 0.35.0 changes
+  // what writers emit (`likelihood`) and what readers prefer; it changes no
+  // stored bytes, so there is nothing for a load-time rule to do. A graph
+  // written before 0.35.0 carries `probability` and no `likelihood` and reads
+  // correctly — which is what staging BUYS, and a rule here would spend it.
+  //
+  // Three reasons there is no executable rule, in order of weight:
+  //
+  //  1. A staged deprecation that rewrites data is not staged. The point of the
+  //     `epic.estimate` → `effort` pattern this follows is that both names live
+  //     through the window and the consumer chooses; migrating the key on load
+  //     would end the window on the first read and break any reader still
+  //     asking for the old name.
+  //  2. The executable step belongs at the REMOVAL version, not here. That is
+  //     the two-step the `removeIn="0.5.0"` properties followed: declared
+  //     deprecated with a deadline at 0.4.0, dropped by `drop_props` rules in
+  //     the '0.5.0' block below. `probability` is scheduled for the same
+  //     treatment at 1.0.0.
+  //  3. No kind fits, and inventing one would be the larger change. Checked
+  //     against the APPLIER, not just the type union:
+  //       - `drop_props` deletes, which is the 1.0.0 step, not this one.
+  //       - `lift_property_to_top_level` targets `UPGBaseNode`, and `likelihood`
+  //         is a property, not a top-level field.
+  //       - `rename_top_level` renames a top-level field, same mismatch.
+  //       - `remap_property_value` is the near miss and still misses twice: it
+  //         `break`s unless `typeof oldValue === 'string'` (these values are
+  //         `UPGAssessment` objects, or bare numbers in older graphs), and its
+  //         `to_property` split OVERWRITES the source with `reset_value`, which
+  //         is precisely the staging this release is buying.
+  //       - `reshape_value_to_assessment` wraps a bare number on a named scale;
+  //         it does not move a key.
+  //     The edge-side `kind: 'rename'` (UPG_EDGE_MIGRATIONS, e.g. 0.8.0's
+  //     `theme_groups_feature` -> `roadmap_theme_groups_feature`) renames an
+  //     EDGE TYPE across instances and has no property-key analogue. Adding one
+  //     is new spec surface: a ratified decision, not a side effect of one
+  //     property rename.
+  //
+  // The scale moves ride along and need no rule either. `PROPERTY_SCALE_MAP`
+  // resolves `likelihood` to `likelihood_5` (which carries `threat.likelihood`
+  // off `confidence_5` in the same line, since the map is keyed by name) and
+  // `PROPERTY_SCALE_MAP_BY_ENTITY` resolves `risk.impact` to `severity_5`. Both
+  // resolve at READ time, and an assessment only overrides them by PINNING a
+  // `scale_id` on the stored value. Measured across all 36 `.upg` files in the
+  // repo: zero assessments pin a `scale_id` on `likelihood`, `probability` or
+  // `impact`, so there is nothing stamped to re-stamp. One that does pin a
+  // `scale_id` keeps it, by the existing contract.
+  //
+  // What lands at 1.0.0, written down now so it is not rediscovered:
+  //   { kind: 'drop_props', type: 'risk', drop_props: ['probability'],
+  //     reason: '1.0.0: risk.probability was @deprecated since 0.35.0 with
+  //              removeIn="1.0.0"; superseded by `likelihood` on likelihood_5.' }
+  '0.35.0': [],
   '0.32.0': [
     // C3 — archive becomes a base-node axis. WorkspaceProperties.archived /
     // archived_at shipped the orthogonal-archive idea for exactly one type;

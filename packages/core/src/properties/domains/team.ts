@@ -232,6 +232,12 @@ export interface PersonProperties {
   time_zone?: string
 }
 
+/**
+ * Which way a stakeholder leans. Pairs with `UPG_ENUM_SCALES.EngagementPosture`
+ * for per-value labels and descriptions.
+ */
+export type EngagementPosture = 'champion' | 'supporter' | 'neutral' | 'skeptic' | 'blocker'
+
 /** Stakeholder entity.
  *
  * @example
@@ -239,6 +245,8 @@ export interface PersonProperties {
  *   stakeholder_type: 'internal',
  *   influence: 4,
  *   interest: 4,
+ *   engagement_posture: 'skeptic',
+ *   engagement_cadence: 'monthly',
  * }
  */
 export interface StakeholderProperties {
@@ -248,6 +256,30 @@ export interface StakeholderProperties {
   influence?: UPGAssessment
   /** How much interest this stakeholder has in the outcome (1 = passive, 5 = deeply invested) */
   interest?: UPGAssessment
+  /**
+   * Which way this stakeholder leans: actively for, actively against, or
+   * neither. The third axis of the stakeholder model (0.35.0), beside the
+   * power/interest grid `influence` and `interest` describe.
+   * @remarks
+   * `influence` and `interest` are magnitudes and carry no direction: a
+   * high-influence, high-interest stakeholder can be the strongest champion or
+   * the one who kills it, and the grid renders them identically. This closed
+   * enum is what makes "who blocks this?" a query rather than a reading
+   * exercise. Pairs with `UPG_ENUM_SCALES.EngagementPosture`. Posture is about
+   * the person's stance; it is NOT delivery health, which belongs to work
+   * items, and NOT the relationship's operational state.
+   */
+  engagement_posture?: EngagementPosture
+  /**
+   * How often this stakeholder is engaged. Uses the shared `Cadence` scale.
+   * @remarks
+   * Typed as `Cadence` rather than free text on purpose: v0.4.0 introduced that
+   * enum precisely to retire strings like `"2x/week"`, and a cadence that
+   * cannot be compared across stakeholders cannot answer "who have we not
+   * spoken to this quarter?". WHERE you meet them (the channel) is an
+   * app-level concern and is deliberately not modelled here.
+   */
+  engagement_cadence?: Cadence
 }
 
 /** TeamOkr entity.

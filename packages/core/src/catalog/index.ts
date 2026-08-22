@@ -6,3 +6,4 @@
 export * from './entity-catalog.js'
 export * from './edge-catalog.js'
 export * from './legacy-product-stages.js'
+export * from './entity-descriptions.js'

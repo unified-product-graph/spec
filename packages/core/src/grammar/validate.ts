@@ -113,12 +113,27 @@ export function validateUPGDocument(doc: unknown): UPGValidationResult {
 
   const d = doc as Record<string, unknown>
 
-  // Required top-level fields
+  // Required top-level fields.
+  //
+  // PATHS NAME THE FIELD AS IT IS ON DISK, not as it is after normalisation
+  // (corrected 0.34.1). `normalizeDocument` lifts the `$upg` envelope into a
+  // flat in-memory shape before this runs, and these two errors used to report
+  // that flat shape: `$.upg_version` and `$.exported_at`. No `.upg` file in
+  // existence carries either name, so a reader who searched their file for
+  // `upg_version` found nothing, searched the docs and found nothing, and
+  // concluded the format was undocumented. An error message is read by someone
+  // holding the FILE.
   if (!d.upg_version || typeof d.upg_version !== 'string') {
-    errors.push({ path: '$.upg_version', message: 'upg_version is required and must be a string' })
+    errors.push({
+      path: '$upg.spec_version',
+      message: 'spec_version is required and must be a string',
+    })
   }
   if (!d.exported_at || typeof d.exported_at !== 'string') {
-    errors.push({ path: '$.exported_at', message: 'exported_at is required and must be an ISO 8601 string' })
+    errors.push({
+      path: '$upg.provenance.exported_at',
+      message: 'provenance.exported_at is required and must be an ISO 8601 string',
+    })
   }
   if (!d.source || typeof d.source !== 'object') {
     errors.push({ path: '$.source', message: 'source is required and must be an object' })

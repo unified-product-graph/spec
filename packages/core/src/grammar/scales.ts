@@ -240,6 +240,39 @@ export const UPG_SCALES: Record<string, UPGScaleDefinition> = {
     friendly_aliases: { low: 2, medium: 3, high: 4 },
   },
 
+  // ── Likelihood ─────────────────────────────────────────────────────────────
+
+  /**
+   * (0.35.0) How likely a future event is to occur.
+   *
+   * Added because the nine pre-existing ladders had no probability ladder, and
+   * `likelihood` was resolving to `confidence_5` — which is EPISTEMIC. Confidence
+   * says how sure you are of a judgment ("Guessing → Data-backed"); likelihood
+   * says how probable the event is. A risk you are certain about and a risk that
+   * is certain to happen are different facts, and one ladder cannot hold both.
+   *
+   * Vocabulary is ISO 31000's, which is also what `risk.likelihood`,
+   * `threat.likelihood` and the Notion fixtures already say in prose.
+   *
+   * Polarity is `low-is-good` (rendered by the design system's direction map,
+   * which is where numeric-scale polarity lives): 5 on this ladder is bad news.
+   */
+  likelihood_5: {
+    id: 'likelihood_5',
+    label: 'Likelihood (5-point)',
+    description: 'How likely this event is to occur',
+    min: 1,
+    max: 5,
+    steps: 5,
+    points: [
+      { value: 1, label: 'Rare',           description: 'Would be surprising; no known precedent' },
+      { value: 2, label: 'Unlikely',       description: 'Could happen, but not expected' },
+      { value: 3, label: 'Possible',       description: 'Might happen; roughly even odds' },
+      { value: 4, label: 'Likely',         description: 'Expected to happen absent intervention' },
+      { value: 5, label: 'Almost certain', description: 'Expected to happen; plan for it' },
+    ],
+  },
+
   // ── Effort ─────────────────────────────────────────────────────────────────
 
   effort_5: {
@@ -341,9 +374,15 @@ export const PROPERTY_SCALE_MAP: Record<string, string> = {
   // ── Confidence ───────────────────────────────────────────────────────────
   confidence:       'confidence_5',  // discovery, validation, sales, product-spec
   current_confidence: 'confidence_5', // validation/hypothesis ( Option B)
-  likelihood:       'confidence_5',  // market/risk ( Option B)
   probability:      'confidence_5',  // sales/forecast ( Option B)
   qualification_score: 'confidence_5', // sales/deal — how confident the qualification is (0.24.0)
+
+  // ── Likelihood ───────────────────────────────────────────────────────────
+  // (0.35.0) Moved off confidence_5. `likelihood` is how probable the event is,
+  // not how well-evidenced the judgment is; the two were sharing one ladder
+  // because no probability ladder existed. Carries market/risk (`risk`,
+  // `market_trend`) and `security.threat.likelihood` in one line.
+  likelihood:       'likelihood_5',  // compliance/risk, security/threat, market
 
   // ── Effort ───────────────────────────────────────────────────────────────
   effort:           'effort_5',      // discovery
@@ -368,6 +407,57 @@ export const PROPERTY_SCALE_MAP: Record<string, string> = {
 }
 
 /**
+ * Per-ENTITY scale overrides (0.35.0). Beats `PROPERTY_SCALE_MAP` for the one
+ * entity named, and only that entity.
+ *
+ * This activates the per-entity disambiguation `getPropertyDefaultScale` has
+ * reserved since v0.4.0. It exists for a narrow, real class: a property name
+ * that means one thing on most entities and its opposite on one.
+ *
+ * `risk.impact` is that case. `impact_5` is benefit-framed ("Minimal →
+ * Transformative") and reads high-is-good, which on discovery and market
+ * entities is correct — a high-impact opportunity is good news. On a `risk`,
+ * the same word means severity of consequences, and a catastrophic risk was
+ * rendering GREEN. `severity_5` ("Mild inconvenience → Blocker") is the
+ * risk-shaped ladder and reads low-is-good, so the traffic-light story arrives
+ * from the existing polarity map with no bespoke bucketing.
+ *
+ * `risk.probability` is the second entry, and it is the same instrument used
+ * for the opposite purpose (Captain-ratified 2026-08-22). `probability` is
+ * DEPRECATED on `risk` in favour of `likelihood`, and the name-level map holds
+ * it at `confidence_5` for `forecast.probability`, which is a bare sales
+ * percentage and genuinely belongs there. Leaving `risk.probability` on that
+ * name-level entry meant the deprecated field and its replacement rendered on
+ * DIFFERENT ladders for the whole deprecation window: the same stored 4 reading
+ * "Confident" through the old name and "Likely" through the new one, on one
+ * card, from one graph. A staged deprecation exists so a reader can migrate
+ * WITHOUT their data changing meaning, and a ladder swap at the rename is
+ * exactly that meaning changing. So the override pins the legacy spelling to
+ * `likelihood_5` — the ladder the field always should have had — and the two
+ * names agree until 1.0.0 drops the old one.
+ *
+ * Note what this does NOT do: `forecast.probability` is untouched and still
+ * resolves to `confidence_5` through the name-level map. Being able to correct
+ * ONE entity without disturbing the other is the entire reason this layer
+ * exists, and this is the first time it has been used for that rather than for
+ * a polarity fix.
+ *
+ * Keep this layer SMALL. A name that needs an override on three entities is a
+ * name that should be split, not overridden; renaming `risk.probability` to
+ * `likelihood` in the same release is that lesson applied. The two entries here
+ * are both `risk`, both from one audit, and both close when 1.0.0 lands.
+ */
+export const PROPERTY_SCALE_MAP_BY_ENTITY: Record<string, Record<string, string>> = {
+  risk: {
+    // Severity of consequences, not magnitude of benefit. See above.
+    impact: 'severity_5',
+    // The DEPRECATED spelling of `likelihood`, held on the same ladder as its
+    // replacement for the length of the deprecation window. See above.
+    probability: 'likelihood_5',
+  },
+}
+
+/**
  * The default scale ID for properties not listed in `PROPERTY_SCALE_MAP`.
  * A generic 1–5 ordinal. Tools that display `UPGAssessment` values without
  * a known scale should fall back to this rather than no scale at all.
@@ -377,15 +467,16 @@ const DEFAULT_SCALE_ID = 'scale_5'
 /**
  * Return the default scale ID for a given entity-type / property-name pair.
  *
- * Resolution order:
- * 1. Check `PROPERTY_SCALE_MAP` for a property-level override.
- * 2. Fall back to `'scale_5'` (generic 1–5 ordinal) for all other properties.
+ * Resolution order (0.35.0 — the entity layer is new; the other two are not):
+ * 1. `PROPERTY_SCALE_MAP_BY_ENTITY[entityType][propertyName]` — a per-entity
+ *    override, for a name that means something different on one entity.
+ * 2. `PROPERTY_SCALE_MAP[propertyName]` — the property-level default.
+ * 3. `'scale_5'` (generic 1–5 ordinal).
  *
- * The `entityType` parameter is accepted for API stability; future versions
- * may add per-entity overrides, but the initial implementation ignores it.
+ * Adding layer 1 is non-breaking: every pair with no entity override resolves
+ * exactly as before.
  *
- * @param entityType  - The UPG entity type string (e.g. `'problem_statement'`).
- *                      Currently unused; reserved for future per-entity overrides.
+ * @param entityType   - The UPG entity type string (e.g. `'problem_statement'`).
  * @param propertyName - The property name on that entity (e.g. `'severity'`).
  * @returns A scale ID string (always a key of `UPG_SCALES` or `'scale_5'`).
  *
@@ -393,14 +484,23 @@ const DEFAULT_SCALE_ID = 'scale_5'
  * getPropertyDefaultScale('problem_statement', 'reach')     // → 'reach_5'
  * getPropertyDefaultScale('problem_statement', 'frequency') // → 'frequency_5'
  * getPropertyDefaultScale('problem_statement', 'severity')  // → 'severity_5'
- * getPropertyDefaultScale('risk', 'risk_level')             // → 'scale_5'
+ * getPropertyDefaultScale('risk', 'risk_level')             // → 'severity_5'
+ * getPropertyDefaultScale('risk', 'likelihood')             // → 'likelihood_5'
+ * getPropertyDefaultScale('risk', 'impact')                 // → 'severity_5' (entity override)
+ * getPropertyDefaultScale('risk', 'probability')            // → 'likelihood_5' (entity override; deprecated name, same ladder as `likelihood`)
+ * getPropertyDefaultScale('forecast', 'probability')        // → 'confidence_5' (unchanged)
+ * getPropertyDefaultScale('opportunity', 'impact')          // → 'impact_5'   (unchanged)
  * getPropertyDefaultScale('anything', 'unknown_property')   // → 'scale_5'
  */
 export function getPropertyDefaultScale(
-  _entityType: string,
+  entityType: string,
   propertyName: string,
 ): string {
-  return PROPERTY_SCALE_MAP[propertyName] ?? DEFAULT_SCALE_ID
+  return (
+    PROPERTY_SCALE_MAP_BY_ENTITY[entityType]?.[propertyName] ??
+    PROPERTY_SCALE_MAP[propertyName] ??
+    DEFAULT_SCALE_ID
+  )
 }
 
 /**
@@ -410,6 +510,13 @@ export function getPropertyDefaultScale(
  *
  * Returns an empty array for scales no property defaults to (e.g. the generic
  * `'scale_5'` fallback, which is never an explicit entry).
+ *
+ * Scope: the NAME-level map only. Per-entity overrides
+ * (`PROPERTY_SCALE_MAP_BY_ENTITY`, 0.35.0) are deliberately not folded in,
+ * because a bare property name cannot express "impact, but only on risk" and a
+ * documentation surface that listed `impact` under both ladders would be
+ * telling the reader less than it does now. Read that map directly when the
+ * question is per-entity.
  *
  * @example
  * getPropertiesForScale('effort_5') // → ['effort', 'effort_estimate', 'effort_to_fix']

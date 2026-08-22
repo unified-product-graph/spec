@@ -378,7 +378,11 @@ describe('Edge pair uniqueness', () => {
  // lacks)} — same endpoints, distinct verbs, and the distinction is the point:
  // a board that runs 85% unassigned while everything is owned cannot say so
  // with one edge. → 38.
- expect(multiPairs.length).toMatchInlineSnapshot(`38`)
+ // 0.35.0 added risk→node {threatens (what the risk endangers), mitigated_by
+ // (what reduces it)} — one wildcard-target pair holding both halves of the
+ // new "risk exposure" family. Distinct verbs, distinct relationships; the
+ // duplicate and near-synonym gates both pass. → 39.
+ expect(multiPairs.length).toMatchInlineSnapshot(`39`)
  })
 })
 
@@ -543,7 +547,17 @@ describe('Polymorphic edge allow-list', () => {
  expect(divergent, `Edges where derived polymorphism disagrees with allow-list:\n${divergent.join('\n')}`).toEqual([])
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (25 entries, 14 families)', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (28 entries, 16 families)', () => {
+ // 26 -> 28 in 0.35.0, and a 16th family: risk exposure
+ // (`risk_threatens_node`, `risk_mitigated_by_node`). Typed source, wildcard
+ // target: the family-2 "decision-to-anything" construction with `risk` in the
+ // source slot. What a risk puts at stake and what mitigates it are both open
+ // sets, and neither endpoint carries a structural role. Both cross-domain, so
+ // containment is untouched. Captain-ratified 2026-08-22 (E.7 item 3) as the
+ // conscious family bump this assertion exists to force.
+ //
+ // (The title said "25 entries, 14 families" while the assertions below read 26
+ // and 15: prose drift from the 0.34.0 transclusion add, corrected here.)
  // 24 -> 25 in 0.33.0, and a 14th family: project membership, via
  // `project_delivers_work_item` (widened from `project_delivers_epic`).
  // 21 -> 24 in 0.32.0, and three new families (11-13): universal assignment,
@@ -562,10 +576,10 @@ describe('Polymorphic edge allow-list', () => {
  expect(
  UPG_POLYMORPHIC_EDGE_KEYS.length,
  'UPG_POLYMORPHIC_EDGE_KEYS count changed — update this assertion AND see CONTRIBUTING.md edge-add checklist',
- ).toBe(26)
+ ).toBe(28)
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly fifteen named families', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly sixteen named families', () => {
  // The JSDoc above the array enumerates the sanctioned families in prose, and
  // prose has nothing checking it: the list still read "Eight semantic families"
  // after the ninth and tenth had shipped. This partition is the check. A new
@@ -593,7 +607,7 @@ describe('Polymorphic edge allow-list', () => {
  expect(
  Object.keys(FAMILIES),
  'family count changed: update the numbered list in the UPG_POLYMORPHIC_EDGE_KEYS JSDoc to match',
- ).toHaveLength(15)
+ ).toHaveLength(16)
 
  const assigned = Object.values(FAMILIES).flat()
  expect(new Set(assigned).size, 'a polymorphic key is claimed by two families').toBe(assigned.length)

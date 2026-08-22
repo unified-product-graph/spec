@@ -143,6 +143,31 @@ export const UPG_ENUM_SCALES: Record<string, UPGEnumScaleDefinition> = {
     ],
   },
 
+  // ── EngagementPosture ────────────────────────────────────────────────
+
+  /**
+   * (0.35.0) The third axis of stakeholder canon, beside the power/interest
+   * grid `influence` / `interest` carry. Those two say how much weight a
+   * stakeholder has and how much they care; neither says which WAY they lean,
+   * and "who blocks this?" is the question a stakeholder map is drawn to answer.
+   *
+   * `tone_direction: 'high-is-good'` reading champion → blocker: the first
+   * value is the desirable end, matching HealthStatus's convention.
+   */
+  EngagementPosture: {
+    id: 'EngagementPosture',
+    label: 'Engagement posture',
+    description: 'Which way a stakeholder leans on the thing at hand: actively for it, against it, or neither.',
+    tone_direction: 'high-is-good',
+    values: [
+      { value: 'champion',  label: 'Champion',  description: 'Actively advocates for it and spends their own capital doing so.' },
+      { value: 'supporter', label: 'Supporter', description: 'In favour and will say so when asked, but does not drive it.' },
+      { value: 'neutral',   label: 'Neutral',   description: 'No position taken; neither helps nor hinders.' },
+      { value: 'skeptic',   label: 'Skeptic',   description: 'Unconvinced and voices objections, but is not blocking.' },
+      { value: 'blocker',   label: 'Blocker',   description: 'Actively opposes, and holds enough leverage to stop it.' },
+    ],
+  },
+
   // ── ProxyConfidence ─────────────────────────────────────────────────
 
   ProxyConfidence: {

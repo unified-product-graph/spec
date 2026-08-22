@@ -201,9 +201,14 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   classification_axis: ['classification_value'],
 
   // ── UX Research hierarchy ───────────────────────────────────────────────────
+  // (0.35.0) 'quote' added: a study is the provenance parent of the verbatim
+  // quotes it captured, pairing with `research_study_captures_quote`. A quote
+  // now has three declared parents — observation (raw capture), insight
+  // (synthesis) and research_study (provenance) — which is multi-parent
+  // GRAMMAR; per-instance parentage stays single via `parent_id`.
   research_study: [
     'participant', 'observation', 'affinity_cluster', 'research_question',
-    'interview_guide', 'insight', 'survey_response',
+    'interview_guide', 'insight', 'survey_response', 'quote',
   ],
   observation: ['quote'],
   // F6: affinity_cluster owns the observations it groups, in addition
@@ -255,7 +260,12 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // story_task collapsed into canonical task. feature now owns
   // task directly; story-derived tasks implement user_story via
   // task_implements_user_story edge.
-  feature: ['epic', 'bug', 'task'],
+  // (0.35.0) 'user_story' added, pairing with `feature_specified_by_user_story`.
+  // The epic rung is optional in UPG, so a feature that skips it could not
+  // reach the stories that specify it and `user_story` had a single declared
+  // parent. Same widening shape as the 0.23.0 epic twins: an existing leaf type
+  // gains a second, SHALLOWER parent, verbs inherited from the deeper edge.
+  feature: ['epic', 'bug', 'task', 'user_story'],
   feature_area: ['feature', 'feature_area'],
   // epic owns user_story (the templated promise) and, mirroring feature, may
   // also directly contain bug/task — heterogeneous imported tickets that belong

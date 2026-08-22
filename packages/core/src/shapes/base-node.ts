@@ -146,18 +146,42 @@ export interface UPGBaseNode {
    * Key uniqueness is scoped to the product across entity types; a prefix names a
    * team within that scope, not a separate number line.
    *
-   * PARTLY ENFORCED (updated 0.34.0). The WITHIN-product uniqueness and
-   * immutability invariants are stated here and no check fires on them. What DID
-   * get a detector is the portfolio-wide case below: `duplicate-key-across-products`
-   * ships as a `scope: 'portfolio'` anti-pattern in 0.34.0, with the labeled corpus
-   * that gated it. See the next paragraph, whose "no check enforces it" no longer
-   * holds.
+   * ENFORCED WITHIN THE PRODUCT (0.34.1). A create naming a key another node in
+   * this product already holds is REFUSED, across entity types, with a typed
+   * `DuplicateNodeKeyError`. Immutability was already enforced on the update
+   * path from 0.33.0, through the typed field and through `properties` both.
+   *
+   * THE REFUSAL IS AN ERROR AND NOT A SILENT NO-KEY, and the distinction is the
+   * one the minting rules draw two paragraphs down. A portfolio-shared team's
+   * prefix mints nothing in a second product, and there the refusal IS no-key
+   * and never an exception — because nobody asked for that key; it was inferred.
+   * A duplicate arrives the other way round: the caller NAMED it. Returning
+   * success for a node whose citation was quietly dropped is the failure mode
+   * the 0.32.2 field guards exist to end.
+   *
+   * ENFORCED ON CREATE, NOT ON OPEN. A graph minted before the check existed may
+   * hold a collision, and a store that refuses to load it leaves its owner no
+   * way to repair it. The index is therefore built first-wins at load and the
+   * invariant is held at the only moment it can still be honoured.
+   *
+   * THE PRECEDING TWO PARAGRAPHS SHIPPED AS AN OVERCLAIM AND ARE CORRECTED HERE.
+   * 0.33.0 wrote "uniqueness is enforced per product (the store index is
+   * `(product_id, key)`)" as settled fact, and 0.34.0 restated the within-product
+   * case as stated-but-unchecked without reconciling the two. Neither was
+   * describing anything that ran: no index existed and no check fired, on any
+   * release through 0.34.0. It was measured on the only keyed graph in the
+   * estate — 1,032 keys, and a second node claiming one of them was accepted
+   * without a warning. This matters more than a wrong sentence usually would,
+   * because the portfolio detector below names the per-product invariant as its
+   * premise: a portfolio check that assumes each product is internally clean was
+   * resting on nothing. 0.34.1 makes the sentence true rather than deleting it.
    *
    * PORTFOLIO-WIDE UNIQUENESS IS DEFINED AND UNENFORCED (0.33.0). Within a
    * portfolio, one `(prefix, number)` pair should identify one node. Uniqueness
-   * is enforced per product (the store index is `(product_id, key)`), so two
-   * products minting under one prefix produce the same citation for two different
-   * things. This is measured rather than feared: a fixture reproduces the
+   * is enforced per product (the store index is `(product_id, key)`, and from
+   * 0.34.1 that index exists), so two products minting under one prefix produce
+   * the same citation for two different things. This is measured rather than
+   * feared: a fixture reproduces the
    * collision through the ordinary create path, including the quiet case where
    * nobody declares a prefix and it is inferred from existing keys. No PER-PRODUCT
    * check can ever see it, because each product reports its own key as valid —
@@ -318,12 +342,25 @@ export interface UPGBaseNode {
    *
    * ONE UNDECLARED EXTENSION IS KNOWN, MEASURED AND DELIBERATELY LEFT UNDECLARED.
    * A tracker import carries raw ordered state-transition history for every issue
-   * (1,032 issues, 2,862 transitions in the measured corpus) under a namespaced
+   * (1,032 issues, 2,862 transitions in the measured corpus) under a vendor-owned
    * key. It has no declared shape because nothing reads it: declaring a shape for
    * records nobody queries is dead schema, and it would freeze one vendor's
    * transition model into the format before a second source has been seen. The
    * pull-forward condition is the first reader. Silence and a decision look
    * identical six months later, so this is written down as a decision.
+   *
+   * THAT KEY IS NOT ACTUALLY NAMESPACED, AND THE PARAGRAPH ABOVE USED TO CLAIM IT
+   * WAS (corrected 0.34.1). The rule two paragraphs up mandates `<tool>:<key>`
+   * with a COLON. The import writes `linear_state_history`, with an underscore —
+   * the precise shape the rule was written to forbid, cited here as the example
+   * of compliance. It went unnoticed because nothing could see it: no drift class
+   * examined undeclared bag keys until `undeclared_property_drift` shipped in
+   * 0.34.1, which measured 5,779 such keys across eight `linear_*` shapes on the
+   * one imported graph in the estate.
+   *
+   * Recorded rather than migrated, because renaming a key on 1,032 nodes is a
+   * migration with its own cycle and this paragraph is where its author will be
+   * standing. What changes here is the claim, not the data.
    */
   properties?: Record<string, unknown>
 }

@@ -109,9 +109,19 @@ describe('edge duplicate gate — (source,target,classification) collisions are 
     // exclusivity that ownership does not, and collapsing them back into one
     // edge is what this release exists to undo. Verified as the ONLY new
     // collision: the other three edges added at 0.32.0 introduce none.
+    //
+    // 28 → 29 at 0.35.0, and again the one new collision IS the design:
+    // risk→node/cross-domain now holds both `risk_threatens_node` (threatens)
+    // and `risk_mitigated_by_node` (mitigated_by), the two halves of the new
+    // "risk exposure" polymorphic family. Same endpoints because both are
+    // wildcard-target by construction; opposite directions of the same
+    // exposure question, so collapsing them would lose which way an edge
+    // points. Verified as the ONLY new collision: the other three edges added
+    // at 0.35.0 (research_study→quote, feature→user_story,
+    // stakeholder→outcome) introduce none.
     expect(
       collisionGroups,
       'a new (source,target,classification) collision was introduced; if intentional (distinct verbs), update this baseline.',
-    ).toBeLessThanOrEqual(28)
+    ).toBeLessThanOrEqual(29)
   })
 })
