@@ -542,7 +542,9 @@ describe('Polymorphic edge allow-list', () => {
  expect(divergent, `Edges where derived polymorphism disagrees with allow-list:\n${divergent.join('\n')}`).toEqual([])
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (24 entries, 13 families)', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS has a stable shape (25 entries, 14 families)', () => {
+ // 24 -> 25 in 0.33.0, and a 14th family: project membership, via
+ // `project_delivers_work_item` (widened from `project_delivers_epic`).
  // 21 -> 24 in 0.32.0, and three new families (11-13): universal assignment,
  // capture subject, and cadence scheduling. See the JSDoc list on the array.
  // 20 -> 21 in 0.31.0, and a 10th family: `eval_benchmark_measures_node`, the
@@ -559,10 +561,10 @@ describe('Polymorphic edge allow-list', () => {
  expect(
  UPG_POLYMORPHIC_EDGE_KEYS.length,
  'UPG_POLYMORPHIC_EDGE_KEYS count changed — update this assertion AND see CONTRIBUTING.md edge-add checklist',
- ).toBe(24)
+ ).toBe(25)
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly thirteen named families', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly fourteen named families', () => {
  // The JSDoc above the array enumerates the sanctioned families in prose, and
  // prose has nothing checking it: the list still read "Eight semantic families"
  // after the ninth and tenth had shipped. This partition is the check. A new
@@ -597,12 +599,17 @@ describe('Polymorphic edge allow-list', () => {
  'universal assignment': ['node_assigned_to_person'],
  'capture subject': ['capture_renders_node'],
  'cadence scheduling': ['planning_cycle_schedules_work_item'],
+ // 0.33.0. Project membership is its own family and deliberately not a member
+ // of 'cadence scheduling', even though both range over the same work-item set:
+ // a cycle SCHEDULES work in time and a project REFERENCES the work it delivers,
+ // and merging them here would quietly assert those are one relation.
+ 'project membership': ['project_delivers_work_item'],
  }
 
  expect(
  Object.keys(FAMILIES),
  'family count changed: update the numbered list in the UPG_POLYMORPHIC_EDGE_KEYS JSDoc to match',
- ).toHaveLength(13)
+ ).toHaveLength(14)
 
  const assigned = Object.values(FAMILIES).flat()
  expect(new Set(assigned).size, 'a polymorphic key is claimed by two families').toBe(assigned.length)

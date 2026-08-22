@@ -15,6 +15,24 @@ import type { ISODateTime } from '../properties/primitives.js'
  *  - `manual`: mapping was set explicitly by a human */
 export type UPGMappingConfidence = 'high' | 'medium' | 'low' | 'manual'
 
+/** One external link beyond the canonical artifact.
+ *
+ * Generalises the `ServiceProperties.links` shape, which was the only
+ * list-of-links declaration in the spec before 0.33.0, up to the base node so
+ * that any node can hold more than one outward pointer.
+ */
+export interface UPGExternalLink {
+  /** URI. Same posture as `UPGBaseNode.external_ref`: https:// for cloud tools,
+   *  file:// or a relative path for local files. */
+  url: string
+  /** Human label for the link. */
+  label?: string
+  /** What kind of thing is on the other end, e.g. "pull_request", "design",
+   *  "runbook". A free string with a documented convention rather than an enum:
+   *  the set is open by nature and a closed one would be wrong within a release. */
+  kind?: string
+}
+
 // ─── Base node ────────────────────────────────────────────────────────────────
 
 /** The structural base shared by every node in a product graph.
@@ -93,16 +111,48 @@ export interface UPGBaseNode {
    * external tool to mint it. A graph that outlives its source tool needs a key
    * of its own.
    *
-   * MINTING. The prefix is `product.key_prefix`; a product with no prefix mints
-   * no keys. The next number is `max(existing) + 1`, derived from the graph — no
+   * MINTING. The next number is `max(existing) + 1`, derived from the graph. No
    * counter is serialised, because a counter is store state rather than a fact
    * about the thing (the same cut that keeps `composition.rev`, which is a fact,
    * and excludes a concurrency token, which is not).
    *
-   * NOT ENFORCED IN 0.32.0. The uniqueness and immutability invariants are
-   * stated here and no check fires on them. A duplicate-key detector needs a
-   * labeled corpus including the near-miss — two products in one workspace
-   * legitimately sharing a prefix — and that corpus does not exist yet.
+   * WHICH PREFIX (0.33.0, normative). A create names its prefix explicitly, or it
+   * is chosen from the prefixes declared by the product's teams
+   * (`team.key_prefix`). `product.key_prefix` applies only when no team declares
+   * one, and is `@deprecated` for that reason. Key uniqueness is scoped to the
+   * product across entity types; a prefix names a team within that scope, not a
+   * separate number line. A product where nothing declares a prefix mints no keys.
+   *
+   * NOT ENFORCED. The uniqueness and immutability invariants are stated here and
+   * no check fires on them. A duplicate-key detector needs a labeled corpus
+   * including the near-miss, two products in one workspace legitimately sharing a
+   * prefix, and that corpus does not exist yet.
+   *
+   * PORTFOLIO-WIDE UNIQUENESS IS DEFINED AND UNENFORCED (0.33.0). Within a
+   * portfolio, one `(prefix, number)` pair should identify one node. Uniqueness
+   * is enforced per product (the store index is `(product_id, key)`), so two
+   * products minting under one prefix produce the same citation for two different
+   * things. This is measured rather than feared: a fixture reproduces the
+   * collision through the ordinary create path, including the quiet case where
+   * nobody declares a prefix and it is inferred from existing keys. No check
+   * enforces it, and no per-product check ever can, because each product reports
+   * its own key as valid.
+   *
+   * MINTING IS PRODUCT-SCOPED (normative, 0.33.0). The `(product_id, key)` index
+   * is the enforced invariant and the scope of a key sequence is the product.
+   * `team` is `portfolio_shared`, so one team can be referenced from two
+   * products; minting does not travel with it. A portfolio-shared team's prefix
+   * is NOT a minting candidate in a second product, refusal is NO-KEY and never
+   * an exception, and the rule applies on the MINT path including a prefix that
+   * was INFERRED from existing keys rather than requested by any caller.
+   * Portfolio-shared team minting is deferred until a supra-product uniqueness
+   * design exists. See `team.key_prefix` for the rule in full.
+   *
+   * WHERE THE BEHAVIOUR LIVES, because this is a contract and not an
+   * implementation. Nothing in this package mints a key. Deriving the next number
+   * requires reading every keyed node in the product, and that read must page
+   * explicitly, so the minter is the graph service and the agent surface accepts
+   * a caller-supplied key on create without ever deriving one.
    *
    * @example "LTN-311"
    */
@@ -154,7 +204,72 @@ export interface UPGBaseNode {
   external_ref?: string
   /** Identifier in the external tool's system (for sync / round-trip) */
   external_id?: string
-  /** Type-specific properties */
+  /**
+   * Additional external links. `external_ref` names THE canonical artifact and
+   * stays the single answer to "where does this live"; this list holds
+   * everything else that points outward. A node may carry this with no
+   * `external_ref` when no single link is canonical.
+   *
+   * @remarks
+   * WHY A LIST AND NOT AN ENTITY. A measured tracker import produced 703
+   * attachments across 1,032 issues: 524 fitted on `external_ref` and 162
+   * overflowed into a vendor-namespaced property bag key with nowhere declared to
+   * go. A link has no lifecycle, no owner, no description and no independent
+   * identity, so minting a `link` type for it would pay roughly fourteen
+   * registration points for a scalar fact about a node.
+   *
+   * WHY NOT `external_refs`. That name is one character from `external_ref` and
+   * means the opposite thing (all the others, versus the canonical one). Two
+   * fields whose names differ by a plural and whose semantics differ by
+   * canonicality is a misreading waiting to happen in every consumer.
+   *
+   * @example
+   * [{ url: 'https://github.com/acme/api/pull/812', label: 'PR 812', kind: 'pull_request' }]
+   */
+  external_links?: UPGExternalLink[]
+  /**
+   * When the node was created. Store metadata lifted into the spec at 0.33.0 so
+   * that a declared view query can express a window over it.
+   *
+   * @volatile
+   * @remarks
+   * TAGGED `@volatile` DELIBERATELY. These two timestamps are maintained by
+   * whatever store holds the graph rather than authored, so they are not design
+   * knowledge and a reader must not treat them as stable facts about the thing.
+   * They are declared anyway because `UPGViewClause` can open a `date` window and
+   * two of the six date dimensions a real board filters on are these; leaving them
+   * undeclared would ship a query language that cannot say what the surface most
+   * often says, which is the failure the clause list exists to fix.
+   */
+  created_at?: ISODateTime
+  /**
+   * When the node was last modified. Store metadata, same posture as
+   * `created_at`.
+   *
+   * @volatile
+   */
+  updated_at?: ISODateTime
+  /**
+   * Type-specific properties.
+   *
+   * @remarks
+   * NAMESPACED EXTENSION KEYS (the 0.31.0 rule, extended to this bag at 0.33.0).
+   * A key that a tool owns and the spec does not declare is written
+   * `<tool>:<key>`, with a colon. An underscore key such as
+   * `linear_state_history` is indistinguishable from a misspelled spec property:
+   * no migration can target it and no validator can tell it apart from a typo,
+   * and that undetectability is the whole reason the rule exists. The rule was
+   * written for `WorkspaceCanvas` and applies here for the same reason.
+   *
+   * ONE UNDECLARED EXTENSION IS KNOWN, MEASURED AND DELIBERATELY LEFT UNDECLARED.
+   * A tracker import carries raw ordered state-transition history for every issue
+   * (1,032 issues, 2,862 transitions in the measured corpus) under a namespaced
+   * key. It has no declared shape because nothing reads it: declaring a shape for
+   * records nobody queries is dead schema, and it would freeze one vendor's
+   * transition model into the format before a second source has been seen. The
+   * pull-forward condition is the first reader. Silence and a decision look
+   * identical six months later, so this is written down as a decision.
+   */
   properties?: Record<string, unknown>
 }
 
@@ -198,6 +313,9 @@ const BASE_NODE_FIELD_PRESENCE: Record<keyof UPGBaseNode, true> = {
   external_tool: true,
   external_ref: true,
   external_id: true,
+  external_links: true,
+  created_at: true,
+  updated_at: true,
   properties: true,
 }
 

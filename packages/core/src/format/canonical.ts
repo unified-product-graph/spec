@@ -242,11 +242,26 @@ function sortEdges<T extends { source: string; target: string; type: string; id:
 
 // ─── Per-object canonical key order (ADR A.1) ────────────────────────────────
 
-const NODE_KEY_ORDER = [
+/**
+ * Canonical serialisation order for a node's top-level keys.
+ *
+ * Deliberately a SUPERSET of `UPG_BASE_NODE_FIELDS`: it also orders tolerated
+ * non-base keys (`lifecycle_status`, `sort_order`) so that a graph carrying one
+ * still serialises deterministically. `base-node-fields.test.ts` asserts the
+ * subset relation in the other direction, which is the one that can regress: a
+ * base field declared and never added here would silently drop out of canonical
+ * ordering. Never assert equality, which would fail on the two tolerated keys
+ * and push the next author to delete them.
+ *
+ * Exported at 0.33.0 so that assertion can be written; consumers that need to
+ * classify base fields use `UPG_BASE_NODE_FIELDS`, not this.
+ */
+export const NODE_KEY_ORDER = [
   'id', 'type', 'title', 'slug', 'aliases', 'key', 'description', 'tags', 'status',
   'archived', 'archived_at',
   'lifecycle_status', 'source_id', 'source_type', 'mapping_confidence',
-  'external_tool', 'external_ref', 'external_id', 'sort_order', 'properties',
+  'external_tool', 'external_ref', 'external_id', 'external_links',
+  'created_at', 'updated_at', 'sort_order', 'properties',
 ]
 const EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'mapping_confidence', 'properties']
 const CROSS_EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'source_product_id', 'target_product_id', 'mapping_confidence', 'alias', 'relevance', 'audience_role']

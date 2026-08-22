@@ -20,7 +20,7 @@ import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import ts from 'typescript'
 
-import { UPG_BASE_NODE_FIELDS, UPG_BASE_NODE_FIELD_SET, UPG_BASE_NODE_SPECIAL_MERGE_FIELDS } from '../index.js'
+import { UPG_BASE_NODE_FIELDS, UPG_BASE_NODE_FIELD_SET, UPG_BASE_NODE_SPECIAL_MERGE_FIELDS, NODE_KEY_ORDER } from '../index.js'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 const SHAPE_SRC = path.resolve(HERE, '../shapes/base-node.ts')
@@ -69,6 +69,21 @@ describe('UPG_BASE_NODE_FIELDS is derived from the UPGBaseNode shape', () => {
     for (const field of UPG_BASE_NODE_FIELDS) {
       expect(UPG_BASE_NODE_FIELD_SET.has(field)).toBe(true)
     }
+  })
+
+  it('every base field appears in NODE_KEY_ORDER (subset, never equality)', () => {
+    // The direction that can regress: a field declared on UPGBaseNode and never
+    // added to the canonical order would silently drop out of serialisation
+    // ordering, with nothing failing. 0.33.0 adds three such fields, so the risk
+    // is live rather than theoretical.
+    //
+    // SUBSET, NOT EQUALITY, and deliberately so. NODE_KEY_ORDER also orders
+    // tolerated non-base keys (`lifecycle_status`, `sort_order`); an equality
+    // assertion would fail on those two and push the next author to delete them,
+    // which is the opposite of what the canonical serialiser needs.
+    const ordered = new Set(NODE_KEY_ORDER)
+    const missing = UPG_BASE_NODE_FIELDS.filter((f) => !ordered.has(f))
+    expect(missing, `base fields absent from NODE_KEY_ORDER: ${missing.join(', ')}`).toEqual([])
   })
 
   it('lists only real base fields as special-merge exclusions', () => {

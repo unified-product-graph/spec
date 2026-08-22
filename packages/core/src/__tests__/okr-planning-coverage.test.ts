@@ -268,6 +268,9 @@ describe('deliberate_only flag + derived set', () => {
       'objective_defers_capability',
       'objective_defers_feature',
       'planning_cycle_schedules_work_item',
+      // 0.33.0: project membership is an authored act for the same reason cadence
+      // scheduling is. Nothing should derive a project from co-occurrence.
+      'project_delivers_work_item',
       'work_item_blocks_work_item',
       'work_item_duplicates_work_item',
       'work_item_relates_to_work_item',

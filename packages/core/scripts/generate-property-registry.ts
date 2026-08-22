@@ -490,7 +490,50 @@ function parseFile(filePath: string): ParsedInterface[] {
       const description = getJsDocDescription(node, { includeTags: false, firstLineOnly: true })
 
       const properties: ParsedProperty[] = []
-      for (const member of node.members) {
+      // RESOLVE `extends` (0.33.0). `UPG_PROPERTY_SCHEMA` is a FLAT per-type map,
+      // so an inherited member is invisible to it unless it is resolved here.
+      // 0.33.0 lifted `member_query` and `presentation` onto a shared
+      // `UPGQueryDrivenLayer` that `composition` and `workspace` both extend, and
+      // without this the lift silently DELETED both fields from composition's
+      // runtime entry: a shipped 0.32.0 field, removed from the mirror by a
+      // refactor the type system considered a no-op.
+      //
+      // Same-file lookup only, which is all any current case needs, and a missing
+      // base is a hard error rather than a silent skip: a quietly empty base is
+      // exactly the failure this block exists to end.
+      const inheritedMembers: ts.TypeElement[] = []
+      for (const heritage of node.heritageClauses ?? []) {
+        if (heritage.token !== ts.SyntaxKind.ExtendsKeyword) continue
+        for (const expr of heritage.types) {
+          if (!ts.isIdentifier(expr.expression)) continue
+          const baseName = expr.expression.text
+          let base: ts.InterfaceDeclaration | undefined
+          const findBase = (n: ts.Node): void => {
+            if (ts.isInterfaceDeclaration(n) && n.name.text === baseName) base = n
+            ts.forEachChild(n, findBase)
+          }
+          ts.forEachChild(sf!, findBase)
+          if (!base) {
+            throw new Error(
+              `${interfaceName} extends ${baseName}, which was not found in ${filePath}. ` +
+                `The property registry resolves heritage within one file; move the base ` +
+                `interface into this file or declare the members directly.`,
+            )
+          }
+          inheritedMembers.push(...base.members)
+        }
+      }
+      // Inherited first, so a redeclaration in the extending interface wins on
+      // the de-duplication below, matching how TypeScript narrows an override.
+      const seenMemberNames = new Set<string>()
+      const allMembers = [...inheritedMembers, ...node.members].reverse().filter((m) => {
+        if (!ts.isPropertySignature(m) || !m.name || !ts.isIdentifier(m.name)) return true
+        if (seenMemberNames.has(m.name.text)) return false
+        seenMemberNames.add(m.name.text)
+        return true
+      }).reverse()
+
+      for (const member of allMembers) {
         if (!ts.isPropertySignature(member)) continue
         if (!member.name || !ts.isIdentifier(member.name)) continue
         if (!member.type) continue

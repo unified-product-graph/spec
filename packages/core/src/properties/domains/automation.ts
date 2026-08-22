@@ -196,7 +196,6 @@ export interface ApprovalRecordProperties {
  * }
  */
 export interface AgentSkillProperties {
-  /** Display name of the skill */
   /** Event or command that activates this skill */
   skill_trigger?: string
   /** Human-readable description of what the skill does */
@@ -219,7 +218,10 @@ export interface AgentHookProperties {
   hook_event?: string
   /** Action performed when the hook fires */
   hook_action?: string
-  /** Operational status of the hook */
+  /**
+   * Operational status of the hook.
+   * @deprecated since 0.33.0, removeIn 1.0.0. Use the base `status` field. `agent_hook` moved from the WORK_ITEM lifecycle to OPERATIONAL at 0.33.0, whose phases carry this axis directly: `active` maps to `active` and `disabled` maps to `paused`. A `*_status` property beside the base `status` is the shadow that Pattern D collapsed fourteen times at 0.15.0, and a type that models its own status in a property is a type whose lifecycle did not fit. `error` maps to `paused`: OPERATIONAL has no failure phase, and runtime health is store or telemetry state rather than a fact about the thing, which is the same cut that keeps `composition.rev` and excludes a concurrency token. Put the failure detail in `description` or a diagnostic property.
+   */
   hook_status?: 'active' | 'disabled' | 'error'
   /** Number of times this hook has fired */
   execution_count?: number

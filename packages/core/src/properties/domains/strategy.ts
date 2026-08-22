@@ -57,14 +57,23 @@ export interface ProductProperties {
   described_configuration?: string
   /**
    * Prefix for keys minted onto this product's nodes (e.g. `"LTN"`, giving
-   * `LTN-1`, `LTN-2`, …). A product with no prefix mints no keys.
+   * `LTN-1`, `LTN-2`, ...). Retained as the single-team unasked default.
+   * @deprecated since 0.33.0, removeIn 1.0.0. Use `team.key_prefix`. This field's own summary called the prefix "the namespace a tracker calls a team", and a single string cannot express a product with two of them: a two-team product has never been expressible, which is a defect rather than an unused feature. Ignored whenever any team in the product declares a prefix. Deprecated rather than removed because removal would strand every graph that has a product prefix and no `team` nodes.
    *
    * @remarks
-   * Pairs with `UPGBaseNode.key`, which holds the minted value. The prefix sits
-   * on the product because the key's uniqueness scope is the product, across
-   * entity types; the namespace a tracker calls a "team". Only the prefix is
-   * serialised: the next number is `max(existing) + 1`, derived from the graph,
-   * because a counter is a fact about a store rather than about the product.
+   * Pairs with `UPGBaseNode.key`, which holds the minted value and states the
+   * resolution order normatively. Only the prefix is serialised: the next number
+   * is `max(existing) + 1`, derived from the graph, because a counter is a fact
+   * about a store rather than about the product.
+   *
+   * WHY THIS IS NOT A DEFAULT WITH `team.key_prefix` AS AN OVERRIDE. A default
+   * and an override describe one fact at two scopes. These describe different
+   * facts, and this one is correct only when the product has exactly one team,
+   * which is an accident of arity rather than a scope. Keeping it live as a
+   * fallback would also reintroduce the defect: a prefix that still resolves wins
+   * on ladder order, so a legacy-prefixed product with two teams would offer no
+   * choice at all and mint everything under the legacy prefix silently, with
+   * migration order deciding the behaviour per graph.
    *
    * @example "LTN"
    */
@@ -132,7 +141,7 @@ export interface StrategicThemeProperties {
   owner?: string
   /**
    * Bounded period this theme is active (a theme is time-bound, within a pillar).
-   * @deprecated since 0.20.0. Promote the period to a `planning_cycle` node and link it with the `strategic_theme_scoped_to_planning_cycle` edge, which points at a shared, dated, nestable interval instead of a drifting per-theme string. Kept (not removed) for back-compat; removal is a later major. `strategic_pillar.time_horizon` stays as-is (a durable pillar horizon is genuinely open-ended, not a dated cycle).
+   * @deprecated since 0.20.0, removeIn 1.0.0. Promote the period to a `planning_cycle` node and link it with the `strategic_theme_scoped_to_planning_cycle` edge, which points at a shared, dated, nestable interval instead of a drifting per-theme string. Kept (not removed) for back-compat. The removal version is stated at 0.33.0 because an undated deprecation is how this field survived twelve minors; the promotion is documented rather than automated and no `drop_props` migration ships. `strategic_pillar.time_horizon` stays as-is (a durable pillar horizon is genuinely open-ended, not a dated cycle).
    * @example "Q1 2026", "FY26"
    */
   time_horizon?: string

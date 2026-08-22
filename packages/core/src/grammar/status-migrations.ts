@@ -43,6 +43,42 @@ import { getLifecycleForType } from './lifecycles.js'
  */
 export const UPG_STATUS_MIGRATIONS: Partial<Record<UPGEntityType, Record<string, string>>> = {
   // ── Engineering / Operations ─────────────────────────────────────────────
+  // ── Agent automation: WORK_ITEM -> OPERATIONAL (0.33.0) ──────────────────
+  // agent_skill and agent_hook carried WORK_ITEM until 0.33.0, so every graph
+  // written before it holds WORK_ITEM phase ids against an OPERATIONAL
+  // lifecycle. Measured population at release: 4 nodes, all `todo`. The other
+  // five entries cover the phases those graphs could legally have reached.
+  //
+  // in_review maps to `active` rather than to a review phase because OPERATIONAL
+  // has none: a hook awaiting review is still a hook that is running or about to.
+  // cancelled maps to `sunset` rather than `completed`: OPERATIONAL has no
+  // cancelled bucket and a discontinued trigger is wound down, not finished.
+  agent_skill: {
+    todo: 'planning',
+    backlog: 'planning',
+    in_progress: 'active',
+    in_review: 'active',
+    done: 'completed',
+    cancelled: 'sunset',
+  },
+  agent_hook: {
+    todo: 'planning',
+    backlog: 'planning',
+    in_progress: 'active',
+    in_review: 'active',
+    done: 'completed',
+    cancelled: 'sunset',
+    // The AgentHookProperties.hook_status vocabulary, @deprecated at 0.33.0 as a
+    // *_status shadow of the base `status`. `error` maps to `paused` and NOT to a
+    // failure phase: OPERATIONAL has none, and runtime health is store or
+    // telemetry state rather than a fact about the thing. That is the same cut
+    // that kept composition.rev, which is a fact, and excluded a concurrency
+    // token, which is not. The failure detail belongs in `description` or a
+    // diagnostic property.
+    disabled: 'paused',
+    error: 'paused',
+  },
+
   service: {
     // Lifecycle: [development, staging, production, deprecated]
     // Authoring habit from before lifecycle adoption: every long-lived

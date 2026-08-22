@@ -3,7 +3,7 @@
  * https://unifiedproductgraph.org/spec | MIT
  */
 
-import type { ISODateTime } from '../primitives.js'
+import type { ISODate, ISODateTime } from '../primitives.js'
 import type { UPGEntityType } from '../../catalog/entity-catalog.js'
 import type { StatusCategory } from '../../grammar/lifecycles.js'
 
@@ -43,7 +43,7 @@ import type { StatusCategory } from '../../grammar/lifecycles.js'
  *   icon: 'compass',
  * }
  */
-export interface WorkspaceProperties {
+export interface WorkspaceProperties extends UPGQueryDrivenLayer {
   /** Who can see this workspace */
   visibility?: 'private' | 'shared' | 'public'
   /** Free-text description. Pairs with the closed-enum `workspace_purpose`. */
@@ -276,6 +276,141 @@ export interface UPGViewPredicate {
   present?: boolean
 }
 
+/** The axis a clause selects on. */
+export type UPGViewDimension =
+  | 'type' | 'status' | 'status_category' | 'tag' | 'classification'
+  | 'property' | 'date' | 'edge'
+
+/** A relative or absolute time window, DECLARED rather than resolved.
+ *
+ * @remarks
+ * A window is evaluated at READ time in the reader's session, never frozen at
+ * save. A saved view that says "this quarter" must mean this quarter to whoever
+ * opens it, which an absolute range captured at save cannot do.
+ *
+ * THE CALENDAR AND THE CADENCE ARE NAMED SEPARATELY AND DELIBERATELY. `calendar`
+ * is the wall clock. A team's own cadence is NOT a window at all: it resolves
+ * through the ACTIVE-CYCLE DESIGNATION, which is an edge clause with
+ * `target_status: ['active']`, not a date bracket. Field data settles why: of 19
+ * cycles in a real tracker every one is dateless and exactly one carries status
+ * `active`, so a date-bracketed reading of "current cycle" resolves to nothing on
+ * the only graph that has real cycle data. Conflating them makes the filter lie.
+ *
+ * @example
+ * const w: UPGTimeWindow = { kind: 'calendar', anchor: 'current', unit: 'quarter' }
+ */
+export type UPGTimeWindow =
+  | {
+      kind: 'calendar'
+      anchor: 'current' | 'previous' | 'next'
+      unit: 'week' | 'month' | 'quarter' | 'year'
+    }
+  | {
+      kind: 'rolling'
+      anchor: 'last_n' | 'next_n'
+      unit: 'day' | 'week' | 'month' | 'quarter'
+      count: number
+    }
+  | { kind: 'absolute'; from?: ISODate; to?: ISODate }
+
+/** A condition on a node's edges: the gap 0.32.0 opened by shipping assignment
+ *  and cadence AS EDGES alongside a query that could not mention one.
+ *
+ * @remarks
+ * `UPGViewQuery.from_focus` does not cover this. It walks from the composition's
+ * focused set, so it can say "everything under this epic" and cannot say
+ * "assigned to anyone" or "in the active cycle".
+ *
+ * TWO AXES NAME A MOVING TARGET WITHOUT HOLDING AN ID, and they are deliberately
+ * parallel. On the CADENCE axis it is `target_status`: the active cycle is the
+ * one whose status is `active` (the invariant stated on
+ * `PlanningCycleProperties`), so an edge clause over
+ * `planning_cycle_schedules_work_item` with `target_status: ['active']` selects
+ * the current cycle portably. On the PERSON axis it is `target_designation`:
+ * `'viewer'` selects whoever is reading, resolved in the reader's session.
+ *
+ * `target_ids` is the exception and is admitted knowingly, on the same terms as
+ * `UPGViewQuery.classified_as`.
+ *
+ * @example
+ * const cycle: UPGViewEdgeClause = {
+ *   edge_type: 'planning_cycle_schedules_work_item',
+ *   direction: 'in',
+ *   target_status: ['active'],
+ * }
+ *
+ * @example
+ * const mine: UPGViewEdgeClause = {
+ *   edge_type: 'node_assigned_to_person',
+ *   direction: 'out',
+ *   target_designation: 'viewer',
+ * }
+ */
+export interface UPGViewEdgeClause {
+  /** Canonical edge type. */
+  edge_type: string
+  /** Which way to walk it from the candidate node. */
+  direction: 'out' | 'in' | 'both'
+  /** Admitted endpoint ids. Omitted means any edge of this type satisfies it. */
+  target_ids?: string[]
+  /** Admitted endpoint phase ids. The designation form on the cadence axis. */
+  target_status?: string[]
+  /**
+   * Selects the endpoint by ROLE rather than by identity. `'viewer'` is whoever
+   * is reading the view, resolved in the reader's session at READ time.
+   *
+   * @remarks
+   * WHY THIS IS NOT AN ID, and it is the whole point of the field. A saved view
+   * that means "assigned to me" cannot store an id, because the id it stores is
+   * one particular person and the view is then permanently about a colleague. A
+   * shipped surface reached for the sentinel `'@me'` inside `target_ids`, which
+   * round-trips and whose MEANING does not travel: a consumer that has not
+   * agreed to that sentinel reads it as a node id and resolves nothing. A
+   * sentinel in an id field is a private protocol wearing a public shape.
+   *
+   * THE PARALLEL IS DELIBERATE. This is the person axis' answer to the same
+   * question `target_status: ['active']` answers on the cadence axis: name the
+   * moving target by what it IS to the reader, not by which row it happens to be
+   * today. Both resolve at read time, both are portable, and neither holds a
+   * foreign key in a scalar.
+   *
+   * DESIGNATION, NOT SERIALISATION. A tool may serialise this however it likes
+   * at its own boundary, `'@me'` included; the spec stores the designation. A
+   * closed union rather than a free string, because an open one is how the
+   * sentinel arose in the first place.
+   */
+  target_designation?: 'viewer'
+}
+
+/** One clause of a selection: the faithful form.
+ *
+ * It can express negation, declared time windows and edge conditions, none of
+ * which the named fields on {@link UPGViewQuery} can hold.
+ *
+ * @remarks
+ * A named-field shape cannot carry per-clause negation without a `not_*` twin
+ * for every field, which is combinatorial and grows with every dimension added,
+ * and which still could not express "not (A and B)" as distinct from "(not A)
+ * and (not B)". A uniform clause list carries it with one flag.
+ *
+ * @example
+ * const c: UPGViewClause = { dimension: 'tag', values: ['spike'], negate: true }
+ */
+export interface UPGViewClause {
+  /** The axis this clause selects on. */
+  dimension: UPGViewDimension
+  /** Property name when `dimension` is `property`; the date field when `date`. */
+  field?: string
+  /** Admitted values. */
+  values?: string[]
+  /** Present exactly when `dimension` is `date`. */
+  window?: UPGTimeWindow
+  /** Present exactly when `dimension` is `edge`. */
+  edge?: UPGViewEdgeClause
+  /** Negates this clause and only this clause. */
+  negate?: boolean
+}
+
 /** A declarative, portable selection over the graph.
  *
  * Selection ONLY. What a surface should look like once the nodes are chosen is
@@ -336,9 +471,54 @@ export interface UPGViewQuery {
     edge_types: string[]
     /** Which way to walk them. */
     direction: 'out' | 'in' | 'both'
-    /** Hops. Absent means 1. */
-    depth?: number
+    /**
+     * Hops. Absent means 1. `'unbounded'` walks the relation transitively until
+     * it stops producing new nodes.
+     *
+     * @remarks
+     * WHY A NAMED ARM RATHER THAN A LARGE NUMBER. A relative selection over a
+     * tree ("everything under this epic") is transitive by nature and has no
+     * correct finite depth: the right answer is a property of the data, not of
+     * the query. A surface that wants transitivity and has only a number picks a
+     * big one, and a shipped one picked 64. That is a sentinel, it is
+     * indistinguishable from a caller who genuinely meant 64, and it silently
+     * truncates the first graph deeper than the guess.
+     *
+     * A consumer that cannot walk transitively should refuse the clause rather
+     * than substitute a depth of its own choosing, which would quietly return a
+     * different answer to the question asked.
+     */
+    depth?: number | 'unbounded'
   }
+  /**
+   * The faithful representation of the selection: every clause, including the
+   * negations, declared windows and edge conditions the named fields above
+   * cannot hold.
+   *
+   * @remarks
+   * PRECEDENCE. A reader that finds `clauses` uses it and IGNORES the named
+   * fields. A reader that finds only named fields lifts them into clauses. A
+   * writer emitting both keeps the named fields positive-only, because they have
+   * nowhere to put a negation.
+   *
+   * THE NAMED FIELDS ARE NOT DEPRECATED. They are the readable form of the common
+   * case and most selections never need a clause. This is one canonical form plus
+   * a positive-only shorthand with a stated precedence rule, which is the shape a
+   * field application arrived at independently for the same reason.
+   *
+   * A `date` clause over `created_at` or `updated_at` reads store metadata, which
+   * is declared on `UPGBaseNode` and tagged `@volatile`. Such a window is
+   * portable but the values it reads are maintained by the store rather than
+   * authored.
+   *
+   * @example
+   * [
+   *   { dimension: 'type', values: ['task', 'bug'] },
+   *   { dimension: 'tag', values: ['spike'], negate: true },
+   *   { dimension: 'edge', edge: { edge_type: 'node_assigned_to_person', direction: 'out' } },
+   * ]
+   */
+  clauses?: UPGViewClause[]
 }
 
 /** Advisory rendering intent. A consumer MAY ignore every field here.
@@ -359,7 +539,66 @@ export interface UPGViewPresentation {
   /** Sort keys in precedence order. */
   sort?: Array<{ key: string; direction: 'asc' | 'desc' }>
   /** Requested layout family. Advisory. */
-  layout?: 'board' | 'table' | 'list' | 'cards' | 'timeline' | 'gallery'
+  layout?: 'board' | 'table' | 'list' | 'cards' | 'timeline' | 'gallery' | 'tree'
+  /**
+   * Edge types to nest by, outermost first, when `layout` is `'tree'`. Advisory,
+   * like everything else here.
+   *
+   * @remarks
+   * `group_by` partitions a flat set on a value and cannot express nesting,
+   * because a tree's levels are EDGES rather than property values. Naming the
+   * edge types keeps the nesting portable: a consumer that does not know a
+   * layout family can still read which relation the author meant to nest on.
+   *
+   * A consumer may ignore this entirely, render flat, and remain conformant.
+   */
+  nest_by?: string[]
+}
+
+/** A layer whose membership is produced by a query rather than by placement.
+ *
+ * Extended by both `CompositionProperties` and `WorkspaceProperties` (0.33.0).
+ *
+ * @remarks
+ * WHY BOTH HALVES CARRY IT. `composition` is the durable published print and
+ * `workspace` is the transient canvas it is published from. A layer is
+ * query-driven while it is being worked on, not only after it is published, so
+ * declaring the query only on the published half makes the fact something
+ * invented at publish time rather than something recorded.
+ *
+ * WHY ONE INTERFACE RATHER THAN TWO DECLARATIONS. The alternative is two copies
+ * of the same JSDoc that must stay identical, which is how a shipped type summary
+ * came to cite an edge that does not exist. Note that the lift is not free at the
+ * runtime layer: `UPG_PROPERTY_SCHEMA` is a flat per-type map, so `workspace`
+ * gets its own entries there regardless. What is shared is the definition.
+ */
+export interface UPGQueryDrivenLayer {
+  /**
+   * When present, membership is DERIVED: members are produced by running this
+   * query rather than authored by placement.
+   *
+   * @remarks
+   * This is the portable statement of what the layer shows. On a composition,
+   * `CompositionMember.href` remains the publishing tool's own resolved route
+   * and stays opaque to everyone else; a member may carry both, and then the
+   * href is a fast path while the query is the meaning. A consumer that cannot
+   * parse the href can still render the layer, which is the whole reason the
+   * declaration is here rather than in a tool-namespaced bag key.
+   *
+   * A layer with no `member_query` is authored, which is what every composition
+   * written before 0.32.0 is.
+   *
+   * DECLARED ON BOTH HALVES OF THE PAIR since 0.33.0. A layer is query-driven
+   * while it is being worked on, not only once it is published, so declaring the
+   * query only on the durable composition would make it a fact invented at
+   * publish time rather than one recorded.
+   */
+  member_query?: UPGViewQuery
+  /**
+   * Advisory rendering intent for the layer as a whole. A consumer may ignore it
+   * entirely and still be conformant.
+   */
+  presentation?: UPGViewPresentation
 }
 
 export interface CompositionMember {
@@ -397,7 +636,7 @@ export interface CompositionMember {
   derived?: boolean
 }
 
-export interface CompositionProperties {
+export interface CompositionProperties extends UPGQueryDrivenLayer {
   /**
    * The frozen member arrangement, captured at publish. Layout and pointers
    * only, never resolved content.
@@ -417,27 +656,9 @@ export interface CompositionProperties {
   published_at: ISODateTime
   /** Publisher handle or email. Display scalar, same posture as `WorkspaceProperties.owner`. */
   published_by?: string
-  /**
-   * When present, membership is DERIVED: members are produced by running this
-   * query rather than authored by placement.
-   *
-   * @remarks
-   * This is the portable statement of what the composition shows.
-   * `CompositionMember.href` remains the publishing tool's own resolved route
-   * and stays opaque to everyone else; a member may carry both, and then the
-   * href is a fast path while the query is the meaning. A consumer that cannot
-   * parse the href can still render the layer, which is the whole reason the
-   * declaration is here rather than in a tool-namespaced bag key.
-   *
-   * A composition with no `member_query` is authored, which is what every
-   * composition written before 0.32.0 is.
-   */
-  member_query?: UPGViewQuery
-  /**
-   * Advisory rendering intent for the composition as a whole. A consumer may
-   * ignore it entirely and still be conformant.
-   */
-  presentation?: UPGViewPresentation
+  // member_query and presentation are inherited from UPGQueryDrivenLayer, which
+  // composition and workspace both extend since 0.33.0. Declaring them here as
+  // well would be two copies of one JSDoc block that must stay identical.
 }
 
 /** Capture: a dated, hashed rendition of something already in the graph.

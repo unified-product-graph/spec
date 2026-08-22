@@ -27,6 +27,59 @@ export interface TeamProperties {
   size?: number
   /** Team's mission statement */
   mission?: string
+  /**
+   * Prefix this team mints node keys with (e.g. `"ENTP"`, giving ``,
+   * ``, ...).
+   *
+   * @remarks
+   * SUPERSEDES `product.key_prefix` FOR THIS PRODUCT. The moment any team
+   * declares a prefix, the product-level prefix stops being consulted and the
+   * declared team prefixes become the candidate set a create surface offers. A
+   * product-level prefix that still resolved would win on order alone, and a
+   * multi-team product would then silently mint everything under it, which is the
+   * defect this field exists to end.
+   *
+   * A DECLARED PREFIX IS A CANDIDATE BEFORE IT IS OBSERVED. Candidates derived
+   * only from keys that already exist cannot see a team's first create, which is
+   * the one that most needs asking about.
+   *
+   * UNIQUENESS IS PRODUCT-SCOPED, AND A TEAM PREFIX DOES NOT WIDEN IT. The key
+   * sequence runs per product across entity types, so two teams in one product
+   * share one number line and never collide with each other. A team prefix names
+   * a team WITHIN that scope; it does not create a sequence that spans products.
+   *
+   * MINTING IS PRODUCT-SCOPED (normative, 0.33.0). `team` is `portfolio_shared`,
+   * so one team node can be referenced from two products. Minting is not
+   * portfolio-scoped with it. The rule, and it is a requirement rather than a
+   * recommendation:
+   *
+   * 1. A portfolio-shared team's prefix is NOT a minting candidate in a second
+   *    product. The first product a team mints under is the only product that
+   *    prefix mints in.
+   * 2. Refusal is NO-KEY. The node is created without a key. Refusal MUST NOT be
+   *    an exception: a keyless create is a legal outcome everywhere else in the
+   *    ladder, and throwing here would break creates that succeed today on every
+   *    surface. Throwing stays reserved for a broken invariant, not for policy.
+   * 3. The rule applies on the MINT path, not the picker path, and it covers the
+   *    INFERRED case. A prefix that was never requested by anyone, and was
+   *    derived from keys that already exist in the second product, is refused on
+   *    the same terms as one a caller named. A guard that only inspects an
+   *    explicitly requested prefix misses the quiet path, and the quiet path is
+   *    the one a fixture reproduces.
+   *
+   * WHY THE SCOPE STOPS AT THE PRODUCT. Key uniqueness is enforced by a
+   * `(product_id, key)` index, which permits the same key under two product ids
+   * by construction. A prefix that minted in two products would therefore run two
+   * independent sequences under one name and hand two different nodes the same
+   * citation, with nothing objecting. Portfolio-shared team minting is DEFERRED
+   * until a supra-product uniqueness design exists, rather than approximated.
+   *
+   * This rule states the CONTRACT. The behaviour belongs to whatever mints keys,
+   * which is not this package: see `UPGBaseNode.key`.
+   *
+   * @example "ENTP"
+   */
+  key_prefix?: string
 }
 
 /** Role entity.
@@ -166,7 +219,38 @@ export interface DependencyProperties {
   workaround_available?: boolean
 }
 
-/** Department entity.
+/** Department entity. A department is the single org tier above a team.
+ * Division, org unit and business unit are alternative LABELS for this type, not
+ * separate types.
+ *
+ * @remarks
+ * THE LABEL RULING, STATED HERE BECAUSE ONE LINE IN A LABEL ARRAY WAS TOO QUIET.
+ * `division`, `org unit` and `business unit` have been `alt_labels` on this type
+ * since 0.1.0 and the ruling is right: a synonym is not a tier. It was also
+ * findable only from the labels file, and a pre-scan for org modelling duly
+ * reported `division` and `org_unit` as entity types. Two phantom types reached a
+ * commissioning brief before a census caught them.
+ *
+ * THE BOUNDARY AGAINST `organization`, because one phrase reaching two types is
+ * the confusion this ruling exists to end. "Business unit" names a structural
+ * tier INSIDE a company and belongs here. Its alt_labels on `organization` are
+ * org, company, enterprise and organisation, deliberately not this one.
+ *
+ * THE TEST IS INCORPORATION, AND THE NODE IS THE OPERATING COMPANY. A separately
+ * incorporated operating company is an `organization`; a division inside one
+ * company is a `department`. Do not read the incorporation test as "one node per
+ * legal entity", which is a different and wrong rule: an `organization` is the
+ * operating company as people experience it, and one organisation can span
+ * several legal entities wherever structure follows tax or jurisdiction rather
+ * than how the work is run. `legal_entity` is `organization`'s own declared
+ * neighbour for exactly that reason. The test picks the boundary; it does not
+ * pick the noun.
+ *
+ * DEPARTMENTS ARE FLAT, AND THAT IS THE CONSTRAINT THE RULING RAISES.
+ * `team_contains_team` exists and `department_contains_department` does not, so a
+ * three-level org chart is expressed as nested TEAMS under one department. That
+ * is a deliberate constraint rather than a gap, and it is what makes a separate
+ * division tier unnecessary rather than merely undesirable.
  *
  * @example
  * const properties: DepartmentProperties = {

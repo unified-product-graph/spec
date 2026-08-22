@@ -2774,9 +2774,11 @@ const APPROVAL_TEMPLATE: Omit<UPGLifecycle, 'entity_type'> = {
  * They overlap in exactly two members, so reasoning from one to the other is
  * wrong most of the time:
  *
- *   THIS LIFECYCLE (10 types): `task`, `epic`, `deliverable`, `milestone`,
- *   `success_milestone`, `invoice`, `lead`, `agent_task`, `agent_skill`,
- *   `agent_hook`. These are the types whose states are the phases below.
+ *   THIS LIFECYCLE (8 types): `task`, `epic`, `deliverable`, `milestone`,
+ *   `success_milestone`, `invoice`, `lead`, `agent_task`. These are the types
+ *   whose states are the phases below. `agent_skill` and `agent_hook` left this
+ *   set at 0.33.0 for OPERATIONAL: a durable capability and an event trigger are
+ *   not reviewed and accepted, they are run, paused and retired.
  *
  *   THE SCHEDULING FAMILY (5 types), the semantic domain named by the
  *   `work_item` token in `planning_cycle_schedules_work_item`: `feature`,
@@ -3048,6 +3050,22 @@ const TEMPLATE_LIFECYCLES: UPGLifecycle[] = [
   fromTemplate('nps_campaign', OPERATIONAL_TEMPLATE),
   fromTemplate('monitor', OPERATIONAL_TEMPLATE),
   fromTemplate('alert_rule', OPERATIONAL_TEMPLATE),
+  // 0.33.0: agent_skill and agent_hook move here from WORK_ITEM. A durable
+  // capability and an event trigger were both reaching `in_review` and `done`,
+  // which is the wrong shape rather than a missing one: neither is work that gets
+  // reviewed and accepted, and zero of the ten field instances across the corpus
+  // had ever left the initial phase. Their nearest siblings are the two lines
+  // directly above, and `monitor` and `alert_rule` are the same kind of thing:
+  // something that runs continuously, can be paused, and is eventually retired.
+  //
+  // NOT lifecycle-free. The `user_story` precedent for lifecycle-freedom is the
+  // Statement/Implementation split, where the paired `task` carries the
+  // lifecycle. There is no paired entity here, so lifecycle-freedom would leave
+  // `agent_skill` unable to say it is disabled and would entrench
+  // `AgentHookProperties.hook_status` (now @deprecated) as the permanent status
+  // axis, which is the *_status shadow Pattern D collapsed fourteen times.
+  fromTemplate('agent_skill', OPERATIONAL_TEMPLATE),
+  fromTemplate('agent_hook', OPERATIONAL_TEMPLATE),
   fromTemplate('on_call_rotation', OPERATIONAL_TEMPLATE),
   fromTemplate('security_audit', OPERATIONAL_TEMPLATE),
   fromTemplate('penetration_test', OPERATIONAL_TEMPLATE),
@@ -3079,8 +3097,8 @@ const TEMPLATE_LIFECYCLES: UPGLifecycle[] = [
 
   // ── Phase C: WORK_ITEM (todo / in_progress / in_review / done) ──────────────
   fromTemplate('agent_task', WORK_ITEM_TEMPLATE),
-  fromTemplate('agent_skill', WORK_ITEM_TEMPLATE),
-  fromTemplate('agent_hook', WORK_ITEM_TEMPLATE),
+  // agent_skill and agent_hook moved WORK_ITEM -> OPERATIONAL at 0.33.0; see the
+  // OPERATIONAL block below. agent_task stays: a task IS a work item.
   // (0.21.0): task (exact match) + epic (todo→in_progress→done ⊆ WORK_ITEM,
   // in_review becomes available — non-breaking widening) folded off hand-authored.
   fromTemplate('task', WORK_ITEM_TEMPLATE),

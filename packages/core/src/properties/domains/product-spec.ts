@@ -58,7 +58,11 @@ export interface OutcomeProperties {
  * }
  */
 export interface ObjectiveProperties {
-  /** Planning timeframe (e.g. "Q1 2026", "H1 2026") */
+  /**
+   * Planning timeframe (e.g. "Q1 2026", "H1 2026").
+   * @deprecated since 0.33.0, removeIn 1.0.0. Promote the period to a `planning_cycle` node and link it with the `objective_scoped_to_planning_cycle` edge, which has existed since 0.20.0 and points at a shared, dated, nestable interval instead of a drifting per-objective string. Until promoted, the value is a display label and nothing schedules on it. The promotion is documented rather than automated and no `drop_props` migration ships: which cycle a free-text string means, and whether one exists yet, is a judgement, and dropping the string before the cycle exists destroys the only record of the intent.
+   * @example "Q1 2026", "H1 2026"
+   */
   timeframe?: string
   /** Overall progress (0–100) */
   progress?: number
@@ -577,6 +581,30 @@ export interface ChangelogProperties {
  * Whether the HISTORY of past scheduling is retained is deliberately still open,
  * deferred alongside the same question for canvas keys rather than answered
  * twice in two places with two different answers.
+ *
+ * PLANNING ENTITIES RELATE TO TIME THROUGH AN EDGE, NOT A FREE-TEXT FIELD
+ * (0.33.0, ruled). A free-text period on a planning entity is a display label
+ * that nothing can schedule on, join across, or nest; the edge to a
+ * `planning_cycle` is the queryable form and both edges the ruling needs already
+ * exist (`objective_scoped_to_planning_cycle` and
+ * `strategic_theme_scoped_to_planning_cycle`, both shipped 0.20.0). Accordingly
+ * `objective.timeframe` and `strategic_theme.time_horizon` are `@deprecated` with
+ * `removeIn` 1.0.0.
+ *
+ * THE CLASS HAS A BOUNDARY, AND IT IS A TEST RATHER THAN A SLOGAN. The class is
+ * the entities that can be SCHEDULED IN a planning cycle: the ones that have, or
+ * could have, a `*_scoped_to_planning_cycle` or `planning_cycle_schedules_*`
+ * edge. That is `objective` and `strategic_theme`, and nothing else in the
+ * census. NAMED EXEMPTIONS, because a broader reading would wrongly capture all
+ * five: `strategic_pillar.time_horizon` (a durable pillar horizon is genuinely
+ * open-ended, not a dated cycle, and its own JSDoc already says so),
+ * `vision.timeframe` (a vision is not scheduled in a cycle),
+ * `roadmap.timeframe` (a roadmap is a plan OF cycles, not a thing inside one),
+ * `roadmap_item.quarter` (pairs with real `start_date` and `target_date`
+ * ISODates), `journey_phase.timeframe` (not a planning entity at all), and
+ * `market_trend.timeframe` (a forecast window for something the org does not
+ * schedule, which is the clearest case of all: nothing can be scoped to a cycle
+ * that the org does not control).
  *
  * @example
  * const properties: PlanningCycleProperties = {

@@ -16,27 +16,29 @@
  * `governance`, not the type.
  *
  * @remarks
- * CONFORMANCE HAS NO TYPED EDGE TODAY, and this paragraph exists because the
- * sentence above reads as though it does. "Products implement, expose, or
- * conform to" names three relationships, and the catalog carries none of them:
- * everything pointing at `specification` comes from `primitive`,
- * `operating_lifecycle`, another `specification`, or `organization`. Nothing
- * comes from `product` or `feature`.
+ * THE THREE RELATIONSHIPS ARE REAL, AND THEY ARE PORTFOLIO CROSS-EDGES RATHER
+ * THAN CATALOG EDGES. This paragraph replaces one that said the opposite. The
+ * verbs in the summary above resolve to `product_implements_specification`,
+ * `product_exposes_specification` and `feature_conforms_to_specification`, all
+ * three of which have existed since 0.9.12 in `UPG_CROSS_ONLY_EDGE_TYPES`. They
+ * are portfolio-native by design: a governed specification is a registry
+ * canonical, so a product links to it at `registry/{node_id}`, the same shape as
+ * `instance_of`. Nothing in the within-graph edge catalog points from `product`
+ * or `feature` at `specification`, and that is deliberate rather than missing.
  *
- * The cost was measured rather than predicted. A published entity doc, written
- * by someone reading this very summary, cited
- * `product_implements_specification`, `product_exposes_specification` and
- * `feature_conforms_to_specification`. All three are plausible, all three follow
- * this sentence's own verbs, and none of them has ever existed. The reader did
- * nothing wrong; the type promised a relationship and the catalog did not
- * deliver one.
+ * WHY THIS CORRECTION MATTERS TO ANYONE READING A DOC THAT CITES THEM. An
+ * editorial sweep flagged those three names in a published entity doc as
+ * fabricated, on the strength of a catalog-only search. They are not fabricated.
+ * A citation check that reads only the edge catalog will report every legitimate
+ * cross-only edge as a phantom, which is a false positive with the same shape as
+ * a real one. Check both registries before calling a name invented.
  *
- * So, stated plainly until the gap is closed: the central question this type
- * invites, WHICH PRODUCTS CONFORM TO THIS SPECIFICATION, is not expressible in
- * typed form. A claim can ride the universal `node_constrains_node`, which is
- * honest but unqueryable as conformance. Minting a real edge is a MINOR, filed
- * for 0.33.0 rather than smuggled into a patch, and when it lands this remark
- * comes out.
+ * THE GAP THAT DOES REMAIN, stated rather than closed. A `specification` node
+ * held inside a SINGLE product graph, with no portfolio around it, has no
+ * conformance edge available, because the cross-only tier needs a registry
+ * target. A claim can ride the universal `node_constrains_node`, which is honest
+ * and unqueryable as conformance. Closing that case is banked, with its condition
+ * the first single-product graph that models a specification it conforms to.
  *
  * @example
  * const properties: SpecificationProperties = {

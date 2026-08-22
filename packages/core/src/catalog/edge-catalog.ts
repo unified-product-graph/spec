@@ -1646,6 +1646,53 @@ export const UPG_EDGE_CATALOG = {
   // contained by product / department / team. Hierarchy edges for person
   // are deliberately omitted; adding them only to satisfy a hierarchy
   // audit would invert the orthogonality the type was introduced to express.
+  // ── Org membership and reporting (0.33.0) ───────────────────────────────────
+  // Both edges are `semantic` REFERENCE edges and neither is a reversal of
+  // the containment-free stance recorded immediately above. That note forecloses
+  // HIERARCHY edges added ONLY to satisfy a hierarchy audit; these are neither.
+  // UPG_CONTAINMENT_FREE_TYPES, UPG_VALID_CHILDREN, get_tree and G2b are all
+  // untouched, and node_assigned_to_person was minted cross-domain onto `person`
+  // at 0.32.0 on the same reading.
+  //
+  // DIRECTION IS LOAD-BEARING, not a preference. get_tree reads SOURCE as parent
+  // (see the team_contains_team note above), so a team -> person edge would sit
+  // one classification change away from putting people in the org tree. Sourcing
+  // on `person` makes the containment reading unavailable rather than merely
+  // unchosen. `team_includes_person` classified hierarchy is the shape to refuse.
+  //
+  // CLASSIFICATION IS `semantic` AND NOT `cross-domain`, which the 0.33.0 design
+  // recommended before the guardrail was consulted. `person` and `team` both live
+  // in the team_org domain, so a `cross-domain` label would contradict itself: the
+  // edge crosses no domain boundary, and T1.7 forbids NEW same-domain cross-domain
+  // edges precisely so that debt stops growing. Nothing the design argument
+  // depends on moves: `semantic` enters neither UPG_VALID_CHILDREN nor get_tree,
+  // and G2b is not engaged.
+  // Membership is UNQUALIFIED: no role property on the edge. `role` is already an
+  // entity type with team_staffed_with_role, so a role string here would be a
+  // second role model beside a node type. The consequence is stated rather than
+  // hidden: the graph can say a team has a slot and that a person is on the team,
+  // and not that the person fills the slot. `person_holds_role` is banked, with
+  // its condition the first field graph carrying both where the join is asked for.
+  //
+  // Neither is cross_product_eligible: `person` is not portfolio_shared, so the
+  // 0.18.0 both-endpoints gate rejects the flag regardless of any team-scoping
+  // ruling.
+  person_member_of_team: { forward_verb: 'member_of', reverse_verb: 'has_member', classification: 'semantic', source_type: 'person', target_type: 'team' },
+  // Cited three times in spec source since 0.17.2 and existing zero times: the
+  // team_contains_team note above, the team-nesting domain guide, and an
+  // anti_patterns entry that instructs users to model a cross-department
+  // reporting line with this edge. An anti-pattern guide is instructional by
+  // construction, so that third site was telling users to use an edge the catalog
+  // would refuse. Minting makes all three true and needs no prose edit.
+  //
+  // semantic, not hierarchy, and the temptation is real: a reporting line IS a
+  // hierarchy in ordinary English, which is exactly why classifying it that way
+  // would put `person` into containment and become the reversal the sibling edge
+  // above is shaped to avoid. The org chart is a reference structure over
+  // containment-free people. Same classification as the membership edge above, so
+  // the person / team / department triangle is decided once rather than three
+  // times.
+  person_reports_to_person: { forward_verb: 'reports_to', reverse_verb: 'has_report', classification: 'semantic', source_type: 'person', target_type: 'person' },
   team_staffed_with_role: { forward_verb: 'staffed_with', reverse_verb: 'staffed_in', classification: 'hierarchy', source_type: 'team', target_type: 'role' },
   team_targets_team_okr: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'hierarchy', source_type: 'team', target_type: 'team_okr' },
   team_reflects_in_retrospective: { forward_verb: 'reflects_in', reverse_verb: 'reflects', classification: 'hierarchy', source_type: 'team', target_type: 'retrospective' },
@@ -1691,7 +1738,31 @@ export const UPG_EDGE_CATALOG = {
   program_reported_via_status_report: { forward_verb: 'reported_via', reverse_verb: 'reports', classification: 'hierarchy', source_type: 'program', target_type: 'status_report' },
   program_contains_epic: { forward_verb: 'contains', reverse_verb: 'contained_in', classification: 'cross-domain', source_type: 'program', target_type: 'epic' },
   project_implements_initiative: { forward_verb: 'implements', reverse_verb: 'implemented_by', classification: 'cross-domain', source_type: 'project', target_type: 'initiative' },
-  project_delivers_epic: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'cross-domain', source_type: 'project', target_type: 'epic' },
+  // WIDENED AT 0.33.0, renamed from project_delivers_epic. The epic-only
+  // endpoint could not hold a real tracker import: a Linear dry-run carried 651
+  // project memberships as `properties.linear_project_id` and emitted zero
+  // edges, because the default issue type an adapter produces is `task` and the
+  // only project edge could not reach it. Endpoint-polymorphic over the
+  // work-item set {feature, epic, user_story, task, bug} by the same
+  // construction as planning_cycle_schedules_work_item: the `work_item` token
+  // names the intended semantic domain, the endpoint is the `node` wildcard.
+  //
+  // NOT a `contains` verb, and UPG_VALID_CHILDREN.project is deliberately
+  // untouched. `contains` is this catalog's containment verb and every edge
+  // using it is classification: 'hierarchy', which under G2b obliges a matching
+  // UPG_VALID_CHILDREN pair. That map is Record<parent, child[]> of concrete
+  // type names, so a polymorphic endpoint can never discharge the obligation
+  // its own verb would create. A work item is CONTAINED once (by its epic or
+  // feature) and REFERENCED many times; the parent axis is containment and the
+  // project axis is a reference. Giving project a second containment claim over
+  // the same task is the two-trees problem.
+  //
+  // classification moves cross-domain -> semantic with the widening: pinned to
+  // project -> epic it was a cross-domain pair, and once the endpoint is the
+  // wildcard it is a reference relation between a planning container and
+  // arbitrary work. deliberate_only because project membership is authored,
+  // never inferred from co-occurrence.
+  project_delivers_work_item: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'semantic', source_type: 'project', target_type: 'node', deliberate_only: true },
   milestone_gates_release: { forward_verb: 'gates', reverse_verb: 'gated_by', classification: 'cross-domain', source_type: 'milestone', target_type: 'release' },
   milestone_triggers_release: { forward_verb: 'triggers', reverse_verb: 'triggered_by', classification: 'cross-domain', source_type: 'milestone', target_type: 'release' },
   deliverable_ships_feature: { forward_verb: 'ships', reverse_verb: 'shipped_by', classification: 'cross-domain', source_type: 'deliverable', target_type: 'feature' },
@@ -2832,6 +2903,24 @@ export const UPG_EDGE_CATALOG = {
   // so the lifecycle is governed rather than a standalone root (0.12.1 refinement).
   operating_lifecycle_defined_by_specification: { forward_verb: 'defined_by', reverse_verb: 'defines', classification: 'semantic', source_type: 'operating_lifecycle', target_type: 'specification' },
   operating_lifecycle_contains_operating_stage: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'operating_lifecycle', target_type: 'operating_stage' },
+  // Conformance (0.33.0, RE-OPENED). 0.33.0 planned to mint
+  // product_conforms_to_specification and feature_conforms_to_specification here.
+  // It does not, and the reason is a fact the design missed: the product-to-
+  // foundation links are NOT absent, they live one tier up. See
+  // UPG_CROSS_ONLY_EDGE_TYPES in shapes/document.ts, which has carried
+  // `product_implements_specification`, `product_exposes_specification` and
+  // `feature_conforms_to_specification` as portfolio-native cross-product edges
+  // since 0.9.12, exactly as the section comment above says. The tiers are
+  // disjoint by construction, so minting the same key here is a hard collision,
+  // and minting only the product half would split one question across two tiers
+  // under two near-synonymous names.
+  //
+  // What survives is the real gap, stated here rather than closed: a
+  // `specification` node held INSIDE a single product graph, with no portfolio,
+  // has no conformance edge, because the cross-only tier needs a registry target.
+  // Whether that case is closed by widening the tier or by a catalog edge under a
+  // non-colliding key is a design question and is banked, with its condition the
+  // first single-product graph that models a specification it conforms to.
   // Stewardship: a registry specification is governed by a (registry-hostable) organization (0.9.13).
   specification_governed_by_organization: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'semantic', source_type: 'specification', target_type: 'organization' },
   // Operating-lifecycle cross-edges (0.11.6): a product's journey phase realises a canonical
@@ -3081,7 +3170,7 @@ export function isDeliberateOnlyEdge(type: string): boolean {
 /**
  * Canonical allow-list of edges that use the `'node'` wildcard endpoint.
  *
- * Ten semantic families are sanctioned. The count and the partition are
+ * Fourteen semantic families are sanctioned. The count and the partition are
  * asserted in `spec-integrity.test.ts`, so this list cannot silently fall out
  * of step with the array below the way it did between 0.28.0 and 0.31.0:
  *
@@ -3131,6 +3220,14 @@ export function isDeliberateOnlyEdge(type: string): boolean {
  *    and for the same reason. Widened from `planning_cycle_schedules_user_story`,
  *    whose story-only endpoint could not hold the `task` a tracker import
  *    actually produces; see `UPG_EDGE_MIGRATIONS` for the rename rule.
+ * 14. **Project membership** (0.33.0): a project delivers work across the same
+ *    bounded {feature, epic, user_story, task, bug} family as families 7 and 13.
+ *    Widened from `project_delivers_epic`, whose epic-only endpoint left 651
+ *    measured project memberships stranded on a vendor property because the
+ *    type a tracker import actually produces is `task`. The verb stays
+ *    `delivers` and NOT `contains`, because a containment verb would oblige a
+ *    `UPG_VALID_CHILDREN` pair that a wildcard endpoint can never supply; the
+ *    parent axis is containment and the project axis is a reference.
  *
  * Adding a new polymorphic edge requires extending this array AND the
  * spec-integrity regression test, which forces a conscious decision and
@@ -3185,6 +3282,10 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   // bug}. The `work_item` key token names the intended semantic domain; the
   // endpoint is the `node` wildcard.
   'planning_cycle_schedules_work_item',
+  // Project membership (0.33.0, widened from project_delivers_epic):
+  // endpoint-polymorphic over the work-item set {feature, epic, user_story, task,
+  // bug}. Same construction and same reasoning as the cadence edge above.
+  'project_delivers_work_item',
 ] as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)

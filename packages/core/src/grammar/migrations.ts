@@ -2166,6 +2166,16 @@ export type UPGEdgeMigration =
  * Key is the version that INTRODUCES the migration (target version).
  */
 export const UPG_EDGE_MIGRATIONS: Record<string, UPGEdgeMigration[]> = {
+  '0.33.0': [
+    // G1 — the project membership edge widens from epic to the work-item set.
+    // Same construction as the 0.32.0 cadence rename directly below, and for the
+    // same measured reason: the adapters default an unrecognised issue to `task`,
+    // so the type a project most needed to deliver was the one type it could not
+    // reach. No requires_target_type, because the destination's target_type is
+    // the `node` wildcard and endpoint guards check the catalog's declared type
+    // rather than the concrete instance. Gate only on the unwidened source.
+    { kind: 'rename', from: 'project_delivers_epic', to: 'project_delivers_work_item', requires_source_type: 'project', reason: '0.33.0: a project could only deliver an epic, while a Linear dry-run carried 651 project memberships as properties.linear_project_id and emitted zero edges. Widened to the polymorphic work-item endpoint; no flip, source unchanged. Measured live population of the old type at release: one, in the CI saturation fixture, so this rename is a vocabulary change rather than a data migration.' },
+  ],
   '0.32.0': [
     // C5 — the cadence scheduling edge widens from user_story to the work-item
     // set. No requires_target_type: the destination's target_type is the `node`
