@@ -7,6 +7,17 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.33.1] - 2026-08-22
+
+Patch, docs only. No schema change: no entity, edge, property, enum, lifecycle or tool added, removed or altered. One normative contradiction, published in 0.33.0, is resolved.
+
+### Fixed
+- **`UPGBaseNode.key`'s `@remarks` no longer contradicts itself.** The `WHICH PREFIX` paragraph ended *"A product where nothing declares a prefix mints no keys"*, which deletes the inferred rung. Two paragraphs later, in the SAME block, the portfolio-uniqueness note names *"the quiet case where nobody declares a prefix and it is inferred from existing keys"*, and the product-scoped minting rule applies itself *"on the MINT path including a prefix that was INFERRED from existing keys rather than requested by any caller"*. `team.key_prefix` rule 3 presupposes the same rung: a refusal described as covering the inferred case is meaningless if inference never mints. The field settles which sentence is true — the only keyed graph in the estate carries 1,032 keys minted by inference in a product that declares no prefix at all, and under the deleted rung that graph could not exist. The paragraph now states the ladder as built, in four rungs: a create names its prefix explicitly; otherwise the prefixes declared by the product's teams are the candidates; otherwise the prefixes observed on the product's existing keys are; a product with none of the three mints no keys. `team.key_prefix` is untouched and was already correct.
+
+### Notes
+- **Truth is unmoved: 324 entities · 1084 edges · 69 cross-edges · 25 anti-patterns · 98 tools · 25 polymorphic keys in 14 families.** Prose only, so nothing moves a count, a migration, a fixture or an editorial fingerprint. That last one is worth stating rather than assuming: `check:editorial` excludes prose by design, so the most consequential text change a release can make is invisible to the gate that exists to catch documentation going stale.
+- **What this patch deliberately does NOT change.** `team.key_prefix`'s suppression paragraph makes a declared team prefix replace the candidate set outright. Applied to an OBSERVED prefix that no team has claimed, that instruction is a live hazard: in a graph carrying two observed prefixes and no declaration, one team declaring one of them collapses the candidate set to that one and every later create mints under it silently, including work belonging to the other. Narrowing it is a change to what implementations must do rather than a correction to what they were told, so it is not smuggled into a patch. Interim guidance for anyone minting today: declare every prefix a product uses, or declare none.
+
 ## [0.33.0] - 2026-08-22
 
 Minor, additive. Zero new entity types, zero new tools, zero new checks. The through-line: 0.32.0 gave the graph the right shapes and left three of them unreachable, and most of this release is reach rather than shape.

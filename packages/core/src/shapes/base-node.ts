@@ -116,12 +116,17 @@ export interface UPGBaseNode {
    * about the thing (the same cut that keeps `composition.rev`, which is a fact,
    * and excludes a concurrency token, which is not).
    *
-   * WHICH PREFIX (0.33.0, normative). A create names its prefix explicitly, or it
-   * is chosen from the prefixes declared by the product's teams
-   * (`team.key_prefix`). `product.key_prefix` applies only when no team declares
-   * one, and is `@deprecated` for that reason. Key uniqueness is scoped to the
-   * product across entity types; a prefix names a team within that scope, not a
-   * separate number line. A product where nothing declares a prefix mints no keys.
+   * WHICH PREFIX (0.33.0 normative, ladder restated in 0.33.1). Four rungs, tried
+   * in order. (1) A create NAMES its prefix explicitly. (2) Otherwise the
+   * prefixes DECLARED by the product's teams (`team.key_prefix`) are the
+   * candidates; `product.key_prefix` applies only when no team declares one, and
+   * is `@deprecated` for that reason. (3) Otherwise the prefixes OBSERVED on the
+   * product's existing keys are the candidates. That rung is the quiet case a
+   * graph reaches when its keys were imported rather than declared, and it is a
+   * real mint path: the two paragraphs below both name an INFERRED prefix, and
+   * `team.key_prefix` rule 3 presupposes it. (4) A product with none of the three
+   * mints no keys. Key uniqueness is scoped to the product across entity types; a
+   * prefix names a team within that scope, not a separate number line.
    *
    * NOT ENFORCED. The uniqueness and immutability invariants are stated here and
    * no check fires on them. A duplicate-key detector needs a labeled corpus
