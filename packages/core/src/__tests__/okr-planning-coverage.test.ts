@@ -264,6 +264,10 @@ describe('deliberate_only flag + derived set', () => {
     // 0.20.0 added the planning-cadence deliberate-only set: scheduling work into
     // a cycle and the three polymorphic work-item issue links are authored acts.
     expect([...UPG_DELIBERATE_ONLY_EDGE_TYPES].sort()).toEqual([
+      // 0.34.0: a transclusion anchor is typed by a person, so the edge is an
+      // authored fact. The markdown emitter writes it from the ANCHOR and no
+      // generic pair-resolution path may ever produce one.
+      'document_transcludes_node',
       'insight_informs_opportunity',
       'objective_defers_capability',
       'objective_defers_feature',

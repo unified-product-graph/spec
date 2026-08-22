@@ -10,6 +10,7 @@
 import { UPG_DOMAINS, getTypes } from './registry/domains.js'
 import { UPG_ENTITY_META } from './registry/entity-meta.js'
 import { UPG_EDGE_CATALOG } from './catalog/edge-catalog.js'
+import { UPG_LIFECYCLES } from './grammar/lifecycles.js'
 import type { UPGEdgeType } from './shapes/edges.js'
 
 export * from './catalog/index.js'
@@ -31,7 +32,7 @@ export * from './format/index.js'
  * it stamps the `upg_version` field of every `.upg` file written by the SDK.
  * The `check:version-lockstep` gate enforces this at release time.
  */
-export const UPG_VERSION = '0.33.1' as const
+export const UPG_VERSION = '0.34.0' as const
 
 /**
  * The `.upg` JSON document format version. Written to the `upg_version` field.
@@ -279,3 +280,44 @@ export const UPG_EDGE_COUNT = UPG_EDGE_TYPES.length
  * gap is the deprecated-alias set.
  */
 export const UPG_META_COUNT = UPG_ENTITY_META.length
+
+/**
+ * How much lifecycle vocabulary the spec defines: the number of DISTINCT
+ * (template, phase) pairs across `UPG_LIFECYCLES`.
+ *
+ * @remarks
+ * WHAT IT COUNTS, and the definition IS the decision. A lifecycle is either
+ * generated from a reusable template (`template_id` set) or hand-authored for one
+ * entity type. Two entity types sharing the `OPERATIONAL` template have not
+ * defined its phases twice, so the pair is keyed on the TEMPLATE where there is
+ * one and on the ENTITY TYPE where there is not.
+ *
+ * WHY NOT THE OTHER TWO CANDIDATES, both of which were live when this was wired:
+ *
+ *   869 — every phase row across all 193 lifecycles. The literal size of the
+ *   grammar, and it double-counts a template reused by nine entity types. The
+ *   number appears in prose as a claim about how much vocabulary the spec HAS,
+ *   which is not what 869 measures.
+ *
+ *   334 — carried in planning documents since 0.32.0 and never computed by
+ *   anything. It does not reproduce under either real computation. It was
+ *   transcribed forward, which is exactly the failure `check:count-drift` exists
+ *   to end, and it is recorded here so nobody restores it.
+ *
+ * WIRED INTO `check:count-drift` AT 0.34.0. The condition was declared met in the
+ * 0.33.0 CHANGELOG and deferred on the ground that adding a check would change
+ * the shape of a release ratified as adding none. That ground is gone. Until now
+ * this was the one figure in the truth line that no check asserted, which is why
+ * it is also the one that drifted.
+ *
+ * Derived, never a literal: the count and any docket or CHANGELOG row quoting it
+ * come from this computation, so two numbers cannot be derived twice.
+ */
+export const UPG_PHASE_COUNT = (() => {
+  const pairs = new Set<string>()
+  for (const lifecycle of UPG_LIFECYCLES) {
+    const owner = lifecycle.template_id ? `T:${lifecycle.template_id}` : `E:${lifecycle.entity_type}`
+    for (const phase of lifecycle.phases) pairs.add(`${owner}::${phase.id}`)
+  }
+  return pairs.size
+})()

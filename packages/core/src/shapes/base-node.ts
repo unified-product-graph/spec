@@ -116,22 +116,42 @@ export interface UPGBaseNode {
    * about the thing (the same cut that keeps `composition.rev`, which is a fact,
    * and excludes a concurrency token, which is not).
    *
-   * WHICH PREFIX (0.33.0 normative, ladder restated in 0.33.1). Four rungs, tried
-   * in order. (1) A create NAMES its prefix explicitly. (2) Otherwise the
-   * prefixes DECLARED by the product's teams (`team.key_prefix`) are the
-   * candidates; `product.key_prefix` applies only when no team declares one, and
-   * is `@deprecated` for that reason. (3) Otherwise the prefixes OBSERVED on the
-   * product's existing keys are the candidates. That rung is the quiet case a
-   * graph reaches when its keys were imported rather than declared, and it is a
-   * real mint path: the two paragraphs below both name an INFERRED prefix, and
-   * `team.key_prefix` rule 3 presupposes it. (4) A product with none of the three
-   * mints no keys. Key uniqueness is scoped to the product across entity types; a
-   * prefix names a team within that scope, not a separate number line.
+   * WHICH PREFIX (normative; ladder stated as built in 0.33.1, candidate set
+   * narrowed in 0.34.0). Three rungs, tried in order.
    *
-   * NOT ENFORCED. The uniqueness and immutability invariants are stated here and
-   * no check fires on them. A duplicate-key detector needs a labeled corpus
-   * including the near-miss, two products in one workspace legitimately sharing a
-   * prefix, and that corpus does not exist yet.
+   *   1. A create NAMES its prefix explicitly.
+   *   2. Otherwise the CANDIDATE SET is consulted. It is the UNION of the prefixes
+   *      DECLARED by the product's teams (`team.key_prefix`) and the prefixes
+   *      OBSERVED on the product's existing keys. One candidate resolves; more
+   *      than one, and the create surface asks. `product.key_prefix` is consulted
+   *      only when no team declares one, and is `@deprecated` for that reason.
+   *   3. A product with an empty candidate set and no explicit prefix mints no
+   *      keys.
+   *
+   * THE OBSERVED RUNG IS A REAL MINT PATH, and 0.33.0 published two sentences that
+   * disagreed about whether it existed. This paragraph used to end "A product where
+   * nothing declares a prefix mints no keys", which deletes it; the two paragraphs
+   * below both name a prefix INFERRED from existing keys, and `team.key_prefix`
+   * rule 3 presupposes it by construction. The field settles it: the only keyed
+   * graph in the estate carries 1,032 keys minted by inference in a product that
+   * declares no prefix at all, and under the deleted rung that graph could not
+   * exist. Corrected in the 0.33.1 patch and restated here.
+   *
+   * A DECLARATION ADDS A CANDIDATE; IT DOES NOT REMOVE ONE (0.34.0). Declaring a
+   * team prefix suppresses `product.key_prefix` and nothing else. It never
+   * suppresses an OBSERVED prefix, which is evidence of a namespace already in
+   * use. The full argument, the measurement behind it and the reason it ships as a
+   * change rather than as a patch are on `team.key_prefix`.
+   *
+   * Key uniqueness is scoped to the product across entity types; a prefix names a
+   * team within that scope, not a separate number line.
+   *
+   * PARTLY ENFORCED (updated 0.34.0). The WITHIN-product uniqueness and
+   * immutability invariants are stated here and no check fires on them. What DID
+   * get a detector is the portfolio-wide case below: `duplicate-key-across-products`
+   * ships as a `scope: 'portfolio'` anti-pattern in 0.34.0, with the labeled corpus
+   * that gated it. See the next paragraph, whose "no check enforces it" no longer
+   * holds.
    *
    * PORTFOLIO-WIDE UNIQUENESS IS DEFINED AND UNENFORCED (0.33.0). Within a
    * portfolio, one `(prefix, number)` pair should identify one node. Uniqueness
@@ -139,9 +159,14 @@ export interface UPGBaseNode {
    * products minting under one prefix produce the same citation for two different
    * things. This is measured rather than feared: a fixture reproduces the
    * collision through the ordinary create path, including the quiet case where
-   * nobody declares a prefix and it is inferred from existing keys. No check
-   * enforces it, and no per-product check ever can, because each product reports
-   * its own key as valid.
+   * nobody declares a prefix and it is inferred from existing keys. No PER-PRODUCT
+   * check can ever see it, because each product reports its own key as valid —
+   * which is why the detector that ships in 0.34.0 is a PORTFOLIO-scope
+   * anti-pattern (`duplicate-key-across-products`) rather than a graph validation.
+   * It is ENFORCED from the day it ships; what was staged is the corpus, and the
+   * distinction matters because there is no defined-then-enforced mechanic and
+   * inventing one would have been worse than either real option. A detector that is
+   * registered but declines to fire is a detector nobody can reason about.
    *
    * MINTING IS PRODUCT-SCOPED (normative, 0.33.0). The `(product_id, key)` index
    * is the enforced invariant and the scope of a key sequence is the product.
@@ -151,7 +176,13 @@ export interface UPGBaseNode {
    * an exception, and the rule applies on the MINT path including a prefix that
    * was INFERRED from existing keys rather than requested by any caller.
    * Portfolio-shared team minting is deferred until a supra-product uniqueness
-   * design exists. See `team.key_prefix` for the rule in full.
+   * design exists. See `team.key_prefix` for the rule in full, including the three
+   * mechanics 0.34.0 made normative that this rule needs and 0.33.0 left open: HOW
+   * a minter decides which product a prefix belongs to (evidence, not a stored
+   * marker), what happens when nothing can decide (NEITHER mints, no invented
+   * tiebreak), and what "in scope" means (engine-defined, with a floor at every
+   * product the engine can enumerate for this caller and a ceiling at every product
+   * the caller could not otherwise read).
    *
    * WHERE THE BEHAVIOUR LIVES, because this is a contract and not an
    * implementation. Nothing in this package mints a key. Deriving the next number
@@ -227,6 +258,25 @@ export interface UPGBaseNode {
    * means the opposite thing (all the others, versus the canonical one). Two
    * fields whose names differ by a plural and whose semantics differ by
    * canonicality is a misreading waiting to happen in every consumer.
+   *
+   * MIGRATION NOTE, CORRECTED 0.34.0 ON TWO FIGURES. Both were carried forward
+   * from the 0.33.0 pass and both were wrong, and the second would have broken
+   * this field's own contract on its first real population.
+   *
+   *   THE RESIDUE IS 179, NOT 162. Seventeen further attachments sat in a second
+   *   vendor bag key and were equally homeless. They were never counted because
+   *   the census read one key.
+   *
+   *   THE CANONICAL URL MUST BE SUBTRACTED BEFORE THE COPY. 524 of the 528 nodes
+   *   holding a parked bag DUPLICATE their own `external_ref` inside it. A
+   *   straight copy of the bag into this list would therefore put the canonical
+   *   artifact into the NON-canonical list on 99% of the field's first real
+   *   population, breaking the exact invariant this field was minted to
+   *   establish. A migration reads the bag, removes the entry matching
+   *   `external_ref`, and copies what remains.
+   *
+   * The correction is recorded here rather than in a plan because this is where a
+   * migration author will be standing when they need it.
    *
    * @example
    * [{ url: 'https://github.com/acme/api/pull/812', label: 'PR 812', kind: 'pull_request' }]

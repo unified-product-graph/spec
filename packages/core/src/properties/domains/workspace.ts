@@ -393,16 +393,43 @@ export interface UPGViewEdgeClause {
  * and which still could not express "not (A and B)" as distinct from "(not A)
  * and (not B)". A uniform clause list carries it with one flag.
  *
+ * A DISCRIMINATED UNION ON `dimension` SINCE 0.34.0, and the reason is that the
+ * two tiers disagreed about types. `values` was `string[]` while the shorthand
+ * `UPGViewQuery.types` is `UPGEntityType[]`, so the FAITHFUL tier admitted a
+ * value the SHORTHAND tier could not describe, and a round-trip through the
+ * shorthand could silently narrow what the clause list said. The shipped example
+ * `{ dimension: 'type', values: ['task', 'bug'] }` puts both halves on one line.
+ * The field evidence is a cast at exactly that boundary in the first consumer,
+ * carrying the comment "the clause list is the authority" — a cast is the tell
+ * that the author knew the tiers disagreed and had to assert past it.
+ *
+ * THIS IS A COMPILE-TIME BREAK AND CALLING IT ADDITIVE WOULD BE DISHONEST. The
+ * WIRE FORMAT does not change at all: the JSON is identical, so there is no
+ * migration, no fixture and no canonical-format entry. What changes is that a
+ * TypeScript consumer writing a plain `string[]` on a `type` clause stops
+ * compiling. Two measured facts make that acceptable: the field shipped ONE
+ * release ago, and the only known consumer already casts at this exact boundary,
+ * so the break lands where someone has already written down why the tiers
+ * disagree. A stated break with one known site is better than a silent narrowing
+ * with none, which is what shipping nothing preserves.
+ *
+ * THE ROUND-TRIP NARROWING RULE (normative, and it holds regardless of the
+ * union, because a union constrains AUTHORS and not JSON arriving from a file).
+ * The clause list is AUTHORITATIVE. The named shorthand fields on
+ * {@link UPGViewQuery} are a positive-only PROJECTION of it. A consumer that
+ * rewrites clauses into shorthand and back MUST NOT narrow the admitted set, and
+ * MUST REFUSE rather than narrow when it cannot represent a clause. Silently
+ * dropping what it cannot express is the one behaviour this rule forbids.
+ *
  * @example
  * const c: UPGViewClause = { dimension: 'tag', values: ['spike'], negate: true }
+ *
+ * @example
+ * const t: UPGViewClause = { dimension: 'type', values: ['task', 'bug'] }
  */
-export interface UPGViewClause {
-  /** The axis this clause selects on. */
-  dimension: UPGViewDimension
+interface UPGViewClauseBase {
   /** Property name when `dimension` is `property`; the date field when `date`. */
   field?: string
-  /** Admitted values. */
-  values?: string[]
   /** Present exactly when `dimension` is `date`. */
   window?: UPGTimeWindow
   /** Present exactly when `dimension` is `edge`. */
@@ -410,6 +437,22 @@ export interface UPGViewClause {
   /** Negates this clause and only this clause. */
   negate?: boolean
 }
+
+/** A clause on the `type` axis. `values` are entity types, not free strings. */
+export interface UPGViewTypeClause extends UPGViewClauseBase {
+  dimension: 'type'
+  /** Admitted entity types. */
+  values?: UPGEntityType[]
+}
+
+/** A clause on any axis other than `type`, whose admitted values are strings. */
+export interface UPGViewGenericClause extends UPGViewClauseBase {
+  dimension: Exclude<UPGViewDimension, 'type'>
+  /** Admitted values. */
+  values?: string[]
+}
+
+export type UPGViewClause = UPGViewTypeClause | UPGViewGenericClause
 
 /** A declarative, portable selection over the graph.
  *
@@ -553,6 +596,45 @@ export interface UPGViewPresentation {
    * A consumer may ignore this entirely, render flat, and remain conformant.
    */
   nest_by?: string[]
+  /**
+   * What to do with a selected member the nest relation does not reach.
+   * Absent means `'root'`.
+   *
+   * @remarks
+   * THE ASYMMETRY THIS CLOSES. 0.33.0's `nest_by` made NESTING portable and left
+   * the FAILURE of nesting unportable. A member the scope selected that the nest
+   * relation cannot reach may be drawn as an additional root or silently omitted,
+   * both conformant, and the spec could not say which the author meant.
+   *
+   * ABSENT MEANS `'root'`, deliberately, and this is the whole safety argument. A
+   * consumer that ignores this field must never silently DROP a node the scope
+   * admitted. Measured on a real imported tracker graph of 1,118 nodes and 3,685
+   * edges: one tree selects 218 members and renders ONE card under `hide`; three
+   * more go 185 to 1, and one goes 11 to 1. Under absent-means-hide a conformant
+   * consumer renders a blank tree over 218 matching nodes with no way to tell the
+   * author anything is missing. Under absent-means-root, "everything the scope
+   * admits is visible somewhere" becomes a checkable invariant, and the majority
+   * (51 of 57 registry trees prefer hiding) pays for hiding EXPLICITLY — which is
+   * the right way round for a default that decides whether data disappears.
+   *
+   * The orphans ARE the dataset rather than an edge case, and the cause is
+   * structural: tracker-imported work wires through cycle and project relations,
+   * which are reference-axis edges, never nesting, so the containment edges these
+   * trees traverse do not reach it.
+   *
+   * WHY THIS IS SPEC AND NOT APPLICATION CHASSIS, which the filing author first
+   * concluded and measurement overturned. Running the two dispositions changes
+   * WHICH NODES APPEAR, not where pixels go. Presentation is advisory precisely
+   * because a consumer may ignore it and stay conformant, and a field that
+   * decides membership visibility cannot be ignored safely. Selection-class facts
+   * belong in the spec; that is the line, and the measurement is what located it.
+   *
+   * PRESENTATION STAYS ADVISORY OVERALL. This field does not break that: a
+   * consumer may ignore it and remain conformant, because the default it then
+   * applies is the safe one. That property is exactly what the absent-means-root
+   * cut buys.
+   */
+  orphan_disposition?: 'root' | 'hide'
 }
 
 /** A layer whose membership is produced by a query rather than by placement.
@@ -575,7 +657,10 @@ export interface UPGViewPresentation {
 export interface UPGQueryDrivenLayer {
   /**
    * When present, membership is DERIVED: members are produced by running this
-   * query rather than authored by placement.
+   * query rather than authored by placement. The clause list is authoritative and
+   * the named fields are a positive-only projection of it; since 0.34.0 a clause
+   * is a discriminated union on `dimension`, so the `type` axis carries entity
+   * types rather than free strings.
    *
    * @remarks
    * This is the portable statement of what the layer shows. On a composition,
@@ -595,8 +680,18 @@ export interface UPGQueryDrivenLayer {
    */
   member_query?: UPGViewQuery
   /**
-   * Advisory rendering intent for the layer as a whole. A consumer may ignore it
-   * entirely and still be conformant.
+   * Advisory rendering intent for the layer as a whole: `group_by`, `sort`,
+   * `layout`, `nest_by`, and `orphan_disposition` (0.34.0, absent means
+   * `'root'`). A consumer may ignore it entirely and still be conformant,
+   * because every default it then applies is the safe one.
+   *
+   * @remarks
+   * THE DESCRIPTION LISTS THE FIELDS ON PURPOSE. This property is `object` in the
+   * runtime property registry, so an agent reading `get_entity_schema` gets an
+   * opaque blob and this sentence. For an object-typed property the description IS
+   * the declared shape, which is why `check:editorial` hashes it (E.4, 0.34.0) and
+   * why a field added to `UPGViewPresentation` without a word here would be
+   * invisible to every gate and every agent at once.
    */
   presentation?: UPGViewPresentation
 }

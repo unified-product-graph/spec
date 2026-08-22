@@ -806,6 +806,52 @@ export const UPG_ANTI_PATTERNS: readonly UPGCuratedAntiPattern[] = [
     source: { kind: 'fundamental' },
   },
 
+  // ── Citable-key collision (0.34.0): portfolio-scoped, and the FIRST detector
+  // to ship with a labeled corpus behind it (packages/upg-evals/corpora/
+  // intelligence/duplicate-key-across-products/).
+  //
+  // WHY IT CANNOT BE A SINGLE-GRAPH CHECK. Key uniqueness is enforced by a
+  // `(product_id, key)` index, so each product reports its own key as valid. The
+  // collision is only visible from above, which is why this is `scope: 'portfolio'`
+  // and carries no structured_condition: the detector reads across products, and
+  // IntelligenceCondition composes aggregate counts within one graph.
+  //
+  // MECHANICALLY DECIDABLE, which is unusual in this file and is why it can ship
+  // enforced: one `(prefix, number)` pair appearing in two products of one
+  // portfolio, with no judgement about intent. Every other portfolio entry here
+  // approximates a per-node rule; this one is exact.
+  //
+  // ENFORCED FROM DAY ONE. What was staged is the CORPUS, not the enforcement.
+  // The tempting shape was a check that ships "defined" and becomes "enforced"
+  // later, and there is no such mechanic: a registered detector that declines to
+  // fire is worse than either real option, and nothing in the spec could hang it.
+  // The detector has little to fire on until a second keyed product exists, and
+  // that is a property of the estate rather than of the check.
+  //
+  // THE NEAR-MISSES ARE CONSTRUCTED, and the corpus says so in its own README
+  // rather than in a plan nobody opens. Three classes: two products sharing a
+  // prefix over DISJOINT number ranges (latent, not yet colliding); a
+  // DELIBERATELY shared prefix across a product family wanting one citation
+  // namespace; and a product holding IMPORTED keys minted elsewhere. Until a real
+  // collision is sampled, the recall figure is a claim about the author's
+  // imagination. The corpus carries a dated obligation to re-grade precision and
+  // recall on the first sampled collision.
+  {
+    id: 'duplicate-key-across-products',
+    since: '0.34.0',
+    scope: 'portfolio',
+    name: 'One citable key, two products',
+    description:
+      'The same (prefix, number) pair identifies a node in two or more products of one portfolio. Keys are minted per product and uniqueness is enforced by a (product_id, key) index, so two products minting under one prefix run two independent sequences under one name. Each product reports its own key as valid and only the portfolio can see that the citation is ambiguous.',
+    why_it_matters:
+      'A key exists to be cited. When one citation resolves to two different things, every reference made with it becomes ambiguous after the fact, including references already written down outside the graph where nothing can be corrected. The damage is retroactive and grows with adoption: the longer both sequences run, the more citations a reconciliation has to rewrite.',
+    remediation:
+      'Decide which product owns the prefix and declare it there with team.key_prefix, so ownership is explicit rather than inferred. Migrate the other product by rewriting its existing keys, which is deliberate and visibly costly, never by editing a declaration under a live sequence. If both products want one namespace, record that decision so it does not read as drift.',
+    stages: ['build', 'beta', 'launch', 'growth', 'mature'],
+    severity: 'high',
+    source: { kind: 'fundamental' },
+  },
+
   // ── surface (0.27.0): the place, its guest list, and its arbitration rule ──
   // Three patterns, calibrated so the contention one leads and the two coverage
   // companions sit a tier below it. Like every entry in this file, each detector

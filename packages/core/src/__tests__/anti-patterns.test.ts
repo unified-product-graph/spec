@@ -61,9 +61,9 @@ function walkCondition(cond: IntelligenceCondition | undefined, fn: (leaf: objec
 // ─── Per-rule integrity ──────────────────────────────────────────────────────
 
 describe('UPG_ANTI_PATTERNS shape', () => {
-  it('contains 13–25 entries (ticket scope + F5 enforcement + 0.9.13 foundations + 0.17.0 operating + 0.20.0 planning cadence + 0.27.0 surface)', () => {
+  it('contains 13–26 entries (ticket scope + F5 enforcement + 0.9.13 foundations + 0.17.0 operating + 0.20.0 planning cadence + 0.27.0 surface + 0.34.0 citable-key collision)', () => {
     expect(UPG_ANTI_PATTERNS.length).toBeGreaterThanOrEqual(13)
-    expect(UPG_ANTI_PATTERNS.length).toBeLessThanOrEqual(25)
+    expect(UPG_ANTI_PATTERNS.length).toBeLessThanOrEqual(26)
   })
 
   it('scope is graph (default) or portfolio, and the two carry conditions consistently', () => {

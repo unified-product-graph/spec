@@ -1601,6 +1601,51 @@ export const UPG_EDGE_CATALOG = {
   // evidence co-reside), so NOT cross_product_eligible.
   document_contains_quote: { forward_verb: 'contains', reverse_verb: 'contained_in', classification: 'semantic', source_type: 'document', target_type: 'quote' },
   document_contains_observation: { forward_verb: 'contains', reverse_verb: 'contained_in', classification: 'semantic', source_type: 'document', target_type: 'observation' },
+  /**
+   * A document EMBEDS this node's live value at a position in its prose.
+   *
+   * @remarks
+   * NOT `describes`. `document_describes_persona` says the document is ABOUT the
+   * persona. Transclusion says the document RENDERS that node where the prose
+   * sits, so the value a reader sees is the node's current value rather than a
+   * copy taken when the sentence was written. A PRD that transcludes a metric is
+   * not "about" the metric, and collapsing the two would lose the only property
+   * transclusion is bought for: current by construction. The nine-member
+   * `document_describes_*` family is untouched and keeps its meaning.
+   *
+   * POLYMORPHIC because the target set is genuinely open. Anything renderable can
+   * be embedded, and the nine enumerated describe-targets are none of `metric`,
+   * `research_study`, `specification` or `architecture_decision`, which is what
+   * 65% of measured documents carrying zero outbound edges were reaching for.
+   *
+   * THE ANCHOR BINDING (normative). `@unified-product-graph/markdown` already
+   * parses an inline reference form and records the source line of every
+   * occurrence: `[[type:id]]`, `[[type:id|label]]`, `[[type:id|k:v|...]]`,
+   * `[[+type:id]]` for creation, and `[[type:id@product]]` across products. The
+   * grammar is published as Appendix F of the specification paper. The rule that
+   * was missing, and is stated here: an anchor appearing in the body of a
+   * `document` IS a transclusion anchor, and a conformant parser WRITES this edge
+   * beside it. Anchor and edge are one fact recorded twice, so they must be
+   * written together or they drift.
+   *
+   * NO POSITION PROPERTY, deliberately. The obvious `anchor_line` is the most
+   * volatile value a text document has: every insertion above moves every anchor
+   * below, so a stored line number is wrong after the next paragraph and nothing
+   * reports the drift. The anchor IS the position, and it lives in the prose
+   * where ordinary editing moves it for free. What the law asks is that the edge
+   * be written BESIDE the anchor, which is a write-time discipline rather than a
+   * stored field.
+   *
+   * `deliberate_only`, and the 0.33.0 trap is why that is safe here. Flagging a
+   * widened edge `deliberate_only` silently switched five adapters off in the
+   * last release, two of them under a green suite. The rule that came out of it:
+   * an adapter reading an explicit field the SOURCE stores carries an authored
+   * fact rather than an inferred one and must emit deliberate-only edges
+   * EXPLICITLY. A `[[type:id]]` anchor is as explicit as a source gets, because a
+   * person typed it, so the markdown emitter keys on the ANCHOR and never on the
+   * `node` wildcard. No generic pair-resolution path may ever produce one.
+   */
+  document_transcludes_node: { forward_verb: 'transcludes', reverse_verb: 'transcluded_in', classification: 'semantic', source_type: 'document', target_type: 'node', deliberate_only: true },
 
   // 5.3 Customer Education & Training Domain
   product_educates_via_education_program: { forward_verb: 'educates_via', reverse_verb: 'educates', classification: 'hierarchy', source_type: 'product', target_type: 'education_program' },
@@ -1669,10 +1714,10 @@ export const UPG_EDGE_CATALOG = {
   // and G2b is not engaged.
   // Membership is UNQUALIFIED: no role property on the edge. `role` is already an
   // entity type with team_staffed_with_role, so a role string here would be a
-  // second role model beside a node type. The consequence is stated rather than
-  // hidden: the graph can say a team has a slot and that a person is on the team,
-  // and not that the person fills the slot. `person_holds_role` is banked, with
-  // its condition the first field graph carrying both where the join is asked for.
+  // second role model beside a node type. The consequence that used to follow is
+  // now closed rather than accepted: the graph can say a team has a slot, that a
+  // person is on the team, AND that the person fills the slot, the last through
+  // `person_holds_role` (0.34.0) rather than through a qualifier here.
   //
   // Neither is cross_product_eligible: `person` is not portfolio_shared, so the
   // 0.18.0 both-endpoints gate rejects the flag regardless of any team-scoping
@@ -1693,6 +1738,41 @@ export const UPG_EDGE_CATALOG = {
   // the person / team / department triangle is decided once rather than three
   // times.
   person_reports_to_person: { forward_verb: 'reports_to', reverse_verb: 'has_report', classification: 'semantic', source_type: 'person', target_type: 'person' },
+  // MINTED 0.34.0 on a grammar-versus-catalog inconsistency readable entirely
+  // inside this package, NOT on the field condition the 0.33.0 bank named. That
+  // condition is still unmet and saying so is the honest framing: both org edges
+  // exist in exactly one graph and it is the saturation fixture, whose person set
+  // contains teams mistyped as people. What replaced it is stronger on its own
+  // terms because it is checkable and adoption-independent:
+  //
+  //   `role`'s lifecycle terminates at `filled` and `vacant`, and `filled` is
+  //   described "Role is staffed." `team_staffed_with_role` runs team -> slot.
+  //   `person_member_of_team` runs person -> team. NOTHING connected a person to
+  //   a role. So a graph could legally mark a role `filled` and no edge in the
+  //   catalog could say by whom.
+  //
+  // A terminal lifecycle phase that no edge can substantiate is dead schema, and
+  // it is worse than a phantom edge name: a phantom is inert, while `filled` is a
+  // value graphs will actually carry. Same class as the anti-pattern entry that
+  // instructed users toward an edge the catalog refused, which is what minted
+  // `person_reports_to_person` one release ago.
+  //
+  // `semantic`, not `cross-domain`. `person`, `role` and `team` are one domain
+  // (domains.ts, team_org), and T1.7 forbids new same-domain cross-domain edges.
+  // This is the third member of that triangle and it is decided on exactly the
+  // ground the other two were decided on mid-build at 0.33.0.
+  //
+  // Direction is person -> role, matching both 0.33.0 person edges, so the
+  // containment reading stays UNAVAILABLE rather than merely unchosen and
+  // UPG_VALID_CHILDREN is untouched. `role_filled_by_person` would source the
+  // edge on the slot, which reads as the slot owning the person.
+  //
+  // Unqualified, for the reason the membership edge above gives: `role` is a type,
+  // not a string, so a qualifier here would be a second role model.
+  //
+  // Not cross_product_eligible: `person` is not portfolio_shared, so the 0.18.0
+  // both-endpoints gate rejects the flag regardless.
+  person_holds_role: { forward_verb: 'holds', reverse_verb: 'held_by', classification: 'semantic', source_type: 'person', target_type: 'role' },
   team_staffed_with_role: { forward_verb: 'staffed_with', reverse_verb: 'staffed_in', classification: 'hierarchy', source_type: 'team', target_type: 'role' },
   team_targets_team_okr: { forward_verb: 'targets', reverse_verb: 'targeted_by', classification: 'hierarchy', source_type: 'team', target_type: 'team_okr' },
   team_reflects_in_retrospective: { forward_verb: 'reflects_in', reverse_verb: 'reflects', classification: 'hierarchy', source_type: 'team', target_type: 'retrospective' },
@@ -3228,10 +3308,18 @@ export function isDeliberateOnlyEdge(type: string): boolean {
  *    `delivers` and NOT `contains`, because a containment verb would oblige a
  *    `UPG_VALID_CHILDREN` pair that a wildcard endpoint can never supply; the
  *    parent axis is containment and the project axis is a reference.
+ * 15. **Document transclusion** (0.34.0): a document embeds a node's live value
+ *    at a position in its prose. The only family whose target set is open by
+ *    NATURE rather than by a bounded enumeration nobody wanted to write out:
+ *    anything renderable can be embedded. Deliberately NOT merged with the
+ *    nine-member `document_describes_*` family, which says the document is ABOUT
+ *    a thing rather than that it renders it.
  *
- * Adding a new polymorphic edge requires extending this array AND the
- * spec-integrity regression test, which forces a conscious decision and
- * keeps consumers (MCP, Entopo, audit tools) able to enumerate the full set.
+ * Adding a new polymorphic edge requires extending this array AND naming the
+ * family it joins in `UPG_POLYMORPHIC_EDGE_FAMILIES` below, which the
+ * spec-integrity regression test asserts against. That forces a conscious
+ * decision and keeps consumers (MCP, Entopo, audit tools, the editorial gate)
+ * able to enumerate the full set and attribute a wildcard edge to real types.
  */
 export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   // Universal semantic verbs
@@ -3286,7 +3374,75 @@ export const UPG_POLYMORPHIC_EDGE_KEYS: readonly _UPGEdgeTypeLocal[] = [
   // endpoint-polymorphic over the work-item set {feature, epic, user_story, task,
   // bug}. Same construction and same reasoning as the cadence edge above.
   'project_delivers_work_item',
+  // Document transclusion (0.34.0): a document embeds any renderable node's live
+  // value at a position in its prose. Open by nature rather than by an
+  // enumeration nobody wanted to write out.
+  'document_transcludes_node',
 ] as const
+
+/**
+ * The partition of `UPG_POLYMORPHIC_EDGE_KEYS` into named families.
+ *
+ * @remarks
+ * WHY THIS IS AN EXPORT AND NOT A TEST LITERAL. It lived inside
+ * `spec-integrity.test.ts` until 0.34.0, which made it unreachable by every
+ * consumer that needs it, and there is now a real one: `check:editorial` matches
+ * `source_type === type` and `target_type === type` LITERALLY when it derives an
+ * entity's attached-edge set, so an edge whose endpoint is the `node` wildcard is
+ * attributed to nobody. `project_delivers_work_item` moved zero fingerprints on
+ * `task`, `bug`, `user_story` or `feature`. A gate cannot fix that without a map
+ * from a wildcard key to the types the family actually ranges over, and duplicating
+ * the map in the gate would recreate the drift the test was written to catch.
+ *
+ * THE MEMBER LIST IS THE KEYS, NOT THE TYPES. A family names which polymorphic
+ * KEYS belong together. What a consumer does with that — which concrete entity
+ * types to attribute a wildcard edge to — is its own decision, made against the
+ * catalog. This export does not pretend to answer it.
+ *
+ * The prose list in the JSDoc above drifted once already: it still read "Eight
+ * semantic families" after the ninth and tenth had shipped. `spec-integrity`
+ * asserts this object against `UPG_POLYMORPHIC_EDGE_KEYS` in both directions, so
+ * a new key fails until its author names the family it joins.
+ */
+export const UPG_POLYMORPHIC_EDGE_FAMILIES: Readonly<Record<string, readonly _UPGEdgeTypeLocal[]>> = {
+  'universal semantic verbs': ['node_informs_node', 'node_constrains_node', 'node_inspires_node'],
+  'decision-to-anything': ['decision_influences_node', 'decision_constrained_by_node', 'decision_produces_node'],
+  'universal ownership': [
+    'node_owned_by_team',
+    'node_owned_by_role',
+    'node_owned_by_stakeholder',
+    'node_owned_by_department',
+    'node_owned_by_person',
+  ],
+  'universal architecture references': ['node_belongs_to_bounded_context'],
+  'framework exercises': ['framework_exercise_includes_node'],
+  'universal classification': ['node_classified_as_classification_value'],
+  'work-item issue links': [
+    'work_item_blocks_work_item',
+    'work_item_relates_to_work_item',
+    'work_item_duplicates_work_item',
+  ],
+  'workspace provenance': ['workspace_produced_node'],
+  'canvas arrangement and published-view focus': ['workspace_arranges_node', 'composition_focuses_node'],
+  'benchmark subject': ['eval_benchmark_measures_node'],
+  // 0.32.0. Assignment is its OWN family and deliberately not a member of
+  // 'universal ownership': keeping them apart in this partition is the same
+  // ruling the edge itself makes, so a future author who merges them here is
+  // making that decision visibly rather than by tidying a list.
+  'universal assignment': ['node_assigned_to_person'],
+  'capture subject': ['capture_renders_node'],
+  'cadence scheduling': ['planning_cycle_schedules_work_item'],
+  // 0.33.0. Project membership is its own family and deliberately not a member
+  // of 'cadence scheduling', even though both range over the same work-item set:
+  // a cycle SCHEDULES work in time and a project REFERENCES the work it delivers,
+  // and merging them here would quietly assert those are one relation.
+  'project membership': ['project_delivers_work_item'],
+  // 0.34.0. Its own family and deliberately not merged with the nine-member
+  // `document_describes_*` set, which is not polymorphic at all: those are
+  // enumerated edges saying a document is ABOUT a thing. Transclusion says it
+  // RENDERS the thing, and the difference is the whole reason the edge exists.
+  'document transclusion': ['document_transcludes_node'],
+} as const
 
 const _POLY_KEY_SET = new Set<string>(UPG_POLYMORPHIC_EDGE_KEYS)
 

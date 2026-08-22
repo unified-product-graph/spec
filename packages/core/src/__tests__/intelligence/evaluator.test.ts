@@ -54,11 +54,18 @@ describe('Evaluator sanity', () => {
   it('every graph-scoped anti-pattern has a per-pattern test below', () => {
     // If the catalog grows past this count, this test fails. The author
     // should add matching fire/clear fixtures here. Stable count guard.
-    // 13 original + 2 F5 enforcement + 2 operating-function (0.17.0) + 4
-    // portfolio-scoped (3 foundations 0.9.13 + the 0.17.0 org-link, evaluated by
-    // portfolio_validate not here) + 1 planning-cadence (0.20.0) + 3 surface
-    // (0.27.0) = 25.
-    expect(UPG_ANTI_PATTERNS.length).toBe(25)
+    // 13 original + 2 F5 enforcement + 2 operating-function (0.17.0) + 5
+    // portfolio-scoped (3 foundations 0.9.13 + the 0.17.0 org-link + the 0.34.0
+    // citable-key collision, all evaluated by portfolio_validate and not here) +
+    // 1 planning-cadence (0.20.0) + 3 surface (0.27.0) = 26.
+    //
+    // Note which number moved and which did not. The TOTAL is 26; the
+    // graph-scoped count is still 21, because 0.34.0's addition is portfolio
+    // -scoped. That is the assertion doing its job rather than being updated
+    // twice: a graph-scoped addition would have to bring fire/clear fixtures with
+    // it into this file, and a portfolio-scoped one is evaluated somewhere else
+    // entirely and correctly owes this file nothing.
+    expect(UPG_ANTI_PATTERNS.length).toBe(26)
     expect(UPG_ANTI_PATTERNS.filter((p) => (p.scope ?? 'graph') !== 'portfolio').length).toBe(21)
   })
 

@@ -263,8 +263,47 @@ export const NODE_KEY_ORDER = [
   'external_tool', 'external_ref', 'external_id', 'external_links',
   'created_at', 'updated_at', 'sort_order', 'properties',
 ]
-const EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'mapping_confidence', 'properties']
-const CROSS_EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'source_product_id', 'target_product_id', 'mapping_confidence', 'alias', 'relevance', 'audience_role']
+/**
+ * Canonical key order for a within-graph edge.
+ *
+ * @remarks
+ * EXPORTED AT 0.34.0 so the subset assertion can be written, exactly as
+ * `NODE_KEY_ORDER` was exported at 0.33.0 and for the same reason. K1 of the
+ * 0.33.0 bundle fixed this class for nodes and left both edge twins as
+ * hand-maintained, unexported, unasserted consts — and the very next release
+ * added a field to `UPGEdge`, which is the regression the node-side assertion
+ * exists to prevent. `canonical-format.test.ts` asserts every declared `UPGEdge`
+ * key appears here. A SUBSET, never equality, for the reason the node comment
+ * gives: an equality check would fail on tolerated keys and push the next author
+ * to delete them.
+ */
+export const EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'mapping_confidence', 'provenance', 'properties']
+/**
+ * Canonical key order for a portfolio cross-product edge. The third instance of
+ * the class `NODE_KEY_ORDER` fixed at 0.33.0, exported at 0.34.0 with the same
+ * subset assertion.
+ *
+ * @remarks
+ * NO `provenance` ENTRY, deliberately. 0.34.0 added `provenance?` to `UPGEdge`
+ * and NOT to `UPGCrossEdge`, so an entry here would order a key that cannot be
+ * written. The assertion is the point of touching this const at all: it is the
+ * direction that can regress, and the next field added to `UPGCrossEdge` now
+ * cannot go unordered.
+ *
+ * `properties` WAS MISSING UNTIL 0.34.0, and the new assertion found it on its
+ * first run. It has been declared on `UPGCrossEdge` since 0.10.0 (the parity
+ * assessment a `feature_rivals_competitor_feature` cross-edge carries), and it
+ * fell through to the sorted-tail pass instead: deterministic, so nothing was
+ * corrupt, but positioned alphabetically among unlisted keys rather than in the
+ * slot the shape implies. That is precisely the regression the node twin got a
+ * guard for at 0.33.0, sitting unnoticed in the edge twin for eleven minors.
+ *
+ * Measured before changing it, because a canonical-order edit rewrites bytes:
+ * across all 61 cross-edges in the estate, ZERO carry `properties`. So no file
+ * re-serialises differently and the fix is free today, which it would not have
+ * been after the first parity assessment landed.
+ */
+export const CROSS_EDGE_KEY_ORDER = ['id', 'source', 'target', 'type', 'source_product_id', 'target_product_id', 'mapping_confidence', 'properties', 'alias', 'relevance', 'audience_role']
 const PRODUCT_KEY_ORDER = ['id', 'title', 'description', 'stage', 'properties']
 
 function canonicalNode(node: UPGBaseNode): Record<string, unknown> {
@@ -286,6 +325,13 @@ function canonicalEdge(edge: UPGEdge): Record<string, unknown> {
 function canonicalCrossEdge(edge: UPGCrossEdge): Record<string, unknown> {
   return orderedObject(edge as unknown as Record<string, unknown>, CROSS_EDGE_KEY_ORDER, {
     forceKeys: ['id', 'source', 'target', 'type'],
+    // `properties` is an OPEN bag and must be canonicalised like every other one
+    // (node, edge, product all pass it). Without this, two writers emitting the
+    // same parity assessment with their keys in a different order produce
+    // different bytes, which breaks contract 3 of this format: input key order
+    // does not change the output. Free to fix today and measured as such: zero
+    // of the 61 cross-edges in the estate carry properties.
+    openKeys: ['properties'],
   })
 }
 

@@ -20,8 +20,12 @@ import {
   computeBodyChecksum,
   normalizeDocument,
   UPG_CANONICAL_FORMAT_VERSION,
+  EDGE_KEY_ORDER,
+  CROSS_EDGE_KEY_ORDER,
 } from '../format/canonical.js'
 import type { UPGDocument, UPGPortfolioDocument } from '../shapes/document.js'
+import type { UPGEdge } from '../shapes/edges.js'
+import type { UPGCrossEdge } from '../shapes/document.js'
 
 const singleDoc = (): UPGDocument => ({
   upg_version: '0.7.3',
@@ -341,5 +345,108 @@ describe('canonical serialisation — root product reconciles from its node', ()
     expect(parsed.$upg.product.title).toBe('Root Only')
     expect(parsed.$upg.product.stage).toBe('beta')
     expect(parsed.product.description).toBe('Just the root.')
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Key-order coverage (0.34.0). The third and fourth instances of the class
+// NODE_KEY_ORDER got a guard for at 0.33.0: a hand-maintained ordering const
+// beside a shape that grows.
+//
+// 0.33.0 fixed the node twin and left both edge twins unexported and unasserted,
+// and the VERY NEXT release added a field to UPGEdge. That is not a coincidence
+// worth ignoring: an ordering list that nothing checks falls behind its shape at
+// the first opportunity, silently, because a missing entry does not throw. It
+// drops the key out of canonical ordering and the file still parses.
+//
+// Both assertions are SUBSET, never equality, for the reason the node comment
+// gives: these lists also order keys that are not declared on the interface, and
+// an equality check would fail on those and push the next author to delete them.
+// The direction that can regress is declared-but-unordered, and that is the only
+// direction asserted here.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('canonical key order covers the edge shapes', () => {
+  // Declared keys, listed rather than derived: an interface is erased at runtime,
+  // so there is no UPG_EDGE_FIELDS to read the way UPG_BASE_NODE_FIELDS exists
+  // for nodes. A type-level exhaustiveness check makes the list unmaintainable by
+  // accident: adding a field to UPGEdge without adding it here stops COMPILING,
+  // and then the runtime assertion below decides whether the order list moved too.
+  const EDGE_FIELDS: ReadonlyArray<keyof UPGEdge> = [
+    'id',
+    'source',
+    'target',
+    'type',
+    'mapping_confidence',
+    'provenance',
+    'properties',
+  ]
+  const CROSS_EDGE_FIELDS: ReadonlyArray<keyof UPGCrossEdge> = [
+    'id',
+    'source',
+    'target',
+    'type',
+    'source_product_id',
+    'target_product_id',
+    'mapping_confidence',
+    'properties',
+    'alias',
+    'relevance',
+    'audience_role',
+  ]
+
+  it('every declared UPGEdge field appears in EDGE_KEY_ORDER (subset, never equality)', () => {
+    const ordered = new Set<string>(EDGE_KEY_ORDER)
+    const missing = EDGE_FIELDS.filter((f) => !ordered.has(f))
+    expect(missing, `UPGEdge fields absent from EDGE_KEY_ORDER: ${missing.join(', ')}`).toEqual([])
+  })
+
+  it('every declared UPGCrossEdge field appears in CROSS_EDGE_KEY_ORDER (subset, never equality)', () => {
+    const ordered = new Set<string>(CROSS_EDGE_KEY_ORDER)
+    const missing = CROSS_EDGE_FIELDS.filter((f) => !ordered.has(f))
+    expect(
+      missing,
+      `UPGCrossEdge fields absent from CROSS_EDGE_KEY_ORDER: ${missing.join(', ')}`,
+    ).toEqual([])
+  })
+
+  it('orders `provenance` on edges but NOT on cross-edges, matching the shapes', () => {
+    // 0.34.0 added provenance? to UPGEdge and deliberately NOT to UPGCrossEdge.
+    // An entry in the cross-edge list would order a key that cannot be written,
+    // which is the mirror-image defect of the one the two assertions above catch:
+    // a list that has run AHEAD of its shape rather than behind it.
+    expect(EDGE_KEY_ORDER).toContain('provenance')
+    expect(CROSS_EDGE_KEY_ORDER).not.toContain('provenance')
+  })
+
+  it('serialises a provenance block on an edge', () => {
+    const doc: UPGDocument = {
+      upg_version: '0.4.0',
+      product: { id: 'p_lumenpath', title: 'Lumenpath', stage: 'build' },
+      nodes: [
+        { id: 'n_a', type: 'feature', title: 'Nightly digest' },
+        { id: 'n_b', type: 'task', title: 'Wire the digest scheduler' },
+      ],
+      edges: [
+        {
+          id: 'e_1',
+          source: 'n_a',
+          target: 'n_b',
+          type: 'feature_broken_into_task',
+          provenance: { tool: 'upg-adapters', from: 'properties.project_id', at: '2026-08-22T09:00:00Z' },
+        },
+      ],
+    } as unknown as UPGDocument
+
+    const out = serializeCanonical(doc)
+    const round = parseUpg(out) as unknown as { edges: UPGEdge[] }
+    expect(round.edges[0].provenance).toEqual({
+      tool: 'upg-adapters',
+      from: 'properties.project_id',
+      at: '2026-08-22T09:00:00Z',
+    })
+    // Idempotent with the new key present, which is the property the ordering
+    // list exists to protect.
+    expect(serializeCanonical(parseUpg(out) as unknown as UPGDocument)).toBe(out)
   })
 })

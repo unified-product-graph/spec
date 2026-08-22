@@ -17,6 +17,7 @@ import type { UPGEntityType } from '../catalog/entity-catalog.js'
 import {
  UPG_EDGE_CATALOG,
  UPG_POLYMORPHIC_EDGE_KEYS,
+ UPG_POLYMORPHIC_EDGE_FAMILIES,
  UPG_WILDCARD_ENDPOINT,
  isPolymorphicEdge,
  isRegisteredPolymorphicEdge,
@@ -561,55 +562,38 @@ describe('Polymorphic edge allow-list', () => {
  expect(
  UPG_POLYMORPHIC_EDGE_KEYS.length,
  'UPG_POLYMORPHIC_EDGE_KEYS count changed — update this assertion AND see CONTRIBUTING.md edge-add checklist',
- ).toBe(25)
+ ).toBe(26)
  })
 
- it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly fourteen named families', () => {
+ it('UPG_POLYMORPHIC_EDGE_KEYS partitions into exactly fifteen named families', () => {
  // The JSDoc above the array enumerates the sanctioned families in prose, and
  // prose has nothing checking it: the list still read "Eight semantic families"
  // after the ninth and tenth had shipped. This partition is the check. A new
  // polymorphic key fails here until its author names the family it joins, which
  // is exactly the decision the doc list exists to record, so the two cannot
  // drift apart again without a red test.
- const FAMILIES: Record<string, readonly string[]> = {
- 'universal semantic verbs': ['node_informs_node', 'node_constrains_node', 'node_inspires_node'],
- 'decision-to-anything': ['decision_influences_node', 'decision_constrained_by_node', 'decision_produces_node'],
- 'universal ownership': [
- 'node_owned_by_team',
- 'node_owned_by_role',
- 'node_owned_by_stakeholder',
- 'node_owned_by_department',
- 'node_owned_by_person',
- ],
- 'universal architecture references': ['node_belongs_to_bounded_context'],
- 'framework exercises': ['framework_exercise_includes_node'],
- 'universal classification': ['node_classified_as_classification_value'],
- 'work-item issue links': [
- 'work_item_blocks_work_item',
- 'work_item_relates_to_work_item',
- 'work_item_duplicates_work_item',
- ],
- 'workspace provenance': ['workspace_produced_node'],
- 'canvas arrangement and published-view focus': ['workspace_arranges_node', 'composition_focuses_node'],
- 'benchmark subject': ['eval_benchmark_measures_node'],
- // 0.32.0. Assignment is its OWN family and deliberately not a member of
- // 'universal ownership': keeping them apart in this partition is the same
- // ruling the edge itself makes, so a future author who merges them here is
- // making that decision visibly rather than by tidying a list.
- 'universal assignment': ['node_assigned_to_person'],
- 'capture subject': ['capture_renders_node'],
- 'cadence scheduling': ['planning_cycle_schedules_work_item'],
- // 0.33.0. Project membership is its own family and deliberately not a member
- // of 'cadence scheduling', even though both range over the same work-item set:
- // a cycle SCHEDULES work in time and a project REFERENCES the work it delivers,
- // and merging them here would quietly assert those are one relation.
- 'project membership': ['project_delivers_work_item'],
- }
+ //
+ // THE PARTITION MOVED OUT OF THIS FILE AT 0.34.0 and this test now asserts
+ // AGAINST THE EXPORT rather than restating it. It was a literal here, which
+ // made it unreachable by every consumer, and there is now a real one: the
+ // editorial fingerprint matches source and target types LITERALLY, so an edge
+ // whose endpoint is the `node` wildcard was attributed to nobody, and
+ // project_delivers_work_item moved zero fingerprints on task, bug, user_story
+ // or feature. Duplicating the map inside the gate would have recreated the
+ // very drift this test was written to catch, so the map is EXPORTED and the
+ // gate and this test read the one copy.
+ //
+ // What this test still does, and it is the whole point, is assert that the
+ // export partitions the array EXACTLY, in BOTH directions. A key claimed by
+ // two families fails. A key in the array and in no family fails. A family
+ // naming a key that is not in the array fails. Moving the data out did not
+ // move the check out with it.
+ const FAMILIES: Readonly<Record<string, readonly string[]>> = UPG_POLYMORPHIC_EDGE_FAMILIES
 
  expect(
  Object.keys(FAMILIES),
  'family count changed: update the numbered list in the UPG_POLYMORPHIC_EDGE_KEYS JSDoc to match',
- ).toHaveLength(14)
+ ).toHaveLength(15)
 
  const assigned = Object.values(FAMILIES).flat()
  expect(new Set(assigned).size, 'a polymorphic key is claimed by two families').toBe(assigned.length)

@@ -32,16 +32,41 @@ export interface TeamProperties {
    * ``, ...).
    *
    * @remarks
-   * SUPERSEDES `product.key_prefix` FOR THIS PRODUCT. The moment any team
-   * declares a prefix, the product-level prefix stops being consulted and the
-   * declared team prefixes become the candidate set a create surface offers. A
-   * product-level prefix that still resolved would win on order alone, and a
-   * multi-team product would then silently mint everything under it, which is the
-   * defect this field exists to end.
+   * SUPERSEDES `product.key_prefix` FOR THIS PRODUCT, AND NOTHING ELSE
+   * (normative, narrowed in 0.34.0). The moment any team declares a prefix, the
+   * PRODUCT-LEVEL prefix stops being consulted. A product-level prefix that still
+   * resolved would win on order alone, and a multi-team product would then
+   * silently mint everything under it, which is the defect this field exists to
+   * end.
+   *
+   * THE CANDIDATE SET IS THE UNION OF DECLARED AND OBSERVED PREFIXES. A
+   * declaration adds a candidate; it does not remove one. A prefix stops being
+   * offered only when something claims it or when nothing has ever minted under
+   * it, and while more than one candidate stands the create surface keeps asking.
+   *
+   * WHY THIS WAS NARROWED, stated because 0.33.0 shipped the wider reading and an
+   * implementer built against it. The paragraph above made ANY declaration replace
+   * the candidate set outright, and its own stated rationale is entirely about
+   * `product.key_prefix`: a SINGLE STRING, declared once, that cannot represent
+   * two teams. An OBSERVED prefix is not that. It is evidence of a namespace
+   * already in active use. Suppressing it reproduces the precise defect this field
+   * exists to end, inside one product, and does so silently. Measured on the only
+   * keyed graph in the estate: it carries two observed prefixes, 370 keys under
+   * one and 662 under the other, and declares neither. Under the wider reading,
+   * one team declaring the smaller prefix collapses the candidate set to it, the
+   * picker disappears, and every later create mints under it, including the 662
+   * keys' worth of work belonging to the other namespace. The sentence over-reached
+   * beyond its own reason, and this narrows it back to that reason.
+   *
+   * Shipped as a CHANGE in 0.34.0 rather than as a patch correction. Read as a
+   * correction it is defensible, but implementers had already built to the wider
+   * text, and moving a contract under them in a patch is how a patch becomes a
+   * surprise.
    *
    * A DECLARED PREFIX IS A CANDIDATE BEFORE IT IS OBSERVED. Candidates derived
    * only from keys that already exist cannot see a team's first create, which is
-   * the one that most needs asking about.
+   * the one that most needs asking about. That is why declaration ADDS to the
+   * candidate set; it is not a reason for it to subtract.
    *
    * UNIQUENESS IS PRODUCT-SCOPED, AND A TEAM PREFIX DOES NOT WIDEN IT. The key
    * sequence runs per product across entity types, so two teams in one product
@@ -73,6 +98,82 @@ export interface TeamProperties {
    * independent sequences under one name and hand two different nodes the same
    * citation, with nothing objecting. Portfolio-shared team minting is DEFERRED
    * until a supra-product uniqueness design exists, rather than approximated.
+   *
+   * HOW RULE 1 IS DECIDED: THE EVIDENCE RULE (normative, 0.34.0). Rule 1 names a
+   * first product without saying how a minter knows which one it is. It is decided
+   * by EVIDENCE, not by a stored marker: at mint, if any other IN-SCOPE product
+   * already holds a key under the prefix, refuse. Evidence is derivable from the
+   * graphs themselves, needs no migration, cannot go stale, and cannot disagree
+   * with the keys. A durable home marker could do all three, and would mint state
+   * for a fact the graph already carries. The cost is stated rather than hidden:
+   * evidence is SCOPE-DEPENDENT, which is why the scope is ruled below in the same
+   * breath rather than left open.
+   *
+   * THE UNDECIDABLE CASE: NEITHER MINTS (normative, 0.34.0). When two products
+   * already hold keys under one prefix and nothing establishes which was first,
+   * NEITHER mints. No tiebreak is invented. Creation order is not recorded, and
+   * `max(existing)` measures import volume rather than precedence, so any tiebreak
+   * would be a guess wearing a rule, and a silent one, since it would attribute a
+   * namespace to a product with nothing to say it was wrong. Refusing both is the
+   * NO-KEY outcome rule 2 already sanctions, and it is recoverable: once either
+   * product declares the prefix, the other is unambiguous and a backfill can run.
+   *
+   * WHAT "IN SCOPE" MEANS: ENGINE-DEFINED, WITH A FLOOR AND A CEILING (normative,
+   * 0.34.0). The scope over which the evidence rule looks is defined by the
+   * engine, bounded on both sides.
+   *
+   *   FLOOR. It MUST include every product the engine can enumerate for this
+   *   caller. An engine that looks at fewer products than it can see is choosing
+   *   not to notice a collision it could have seen.
+   *
+   *   CEILING. It MUST NEVER include a product the caller could not otherwise
+   *   read. A wider read is a cross-tenant information channel: refusing a mint
+   *   because of a key in a graph the caller cannot see leaks that the graph
+   *   exists and what is in it. This half is a security constraint and is not
+   *   negotiable.
+   *
+   * PORTFOLIO ALTITUDE IS THE WRONG NORMATIVE ALTITUDE, and it was measured rather
+   * than argued: deleting the portfolio document changes nothing about minting,
+   * because no minter consults the portfolio seam. Stating the invariant there
+   * states it where nobody looks. In practice the local engine's scope is every
+   * graph in the workspace folder and the cloud engine's is the caller's own
+   * product list.
+   *
+   * THE HONEST CONSEQUENCE, which belongs in the text rather than in a later
+   * surprise: the invariant is SCOPE-RELATIVE. Two engines can legitimately
+   * disagree about whether one mint is safe, because they can legitimately see
+   * different sets of products. That is a real limitation of the evidence rule and
+   * the price of the ceiling.
+   *
+   * IMMUTABLE ONCE ANYTHING HAS MINTED UNDER IT, PER PRODUCT (normative, 0.34.0).
+   * Once any key exists under this prefix IN A GIVEN PRODUCT, the declaration
+   * cannot be edited for that product. Refusal-shaped and NO-KEY, matching rule 2:
+   * never an exception, because a keyless create is legal everywhere else in the
+   * ladder.
+   *
+   *   SCOPED PER PRODUCT, NOT PER TEAM, and the reason is that `team` is
+   *   `portfolio_shared`: a team that has never minted in product B must still be
+   *   free to declare there. A per-team global lock would strand it.
+   *
+   *   WHAT IT PREVENTS. Without it, a team edits its prefix after four hundred
+   *   mints and one product silently carries two number lines under two names,
+   *   with nothing recording that they were ever one sequence.
+   *
+   *   RENAMING STAYS POSSIBLE BY THE HONEST ROUTE: a migration that rewrites the
+   *   existing keys. That is a deliberate act with a visible cost, which is the
+   *   difference between renaming a namespace and forking it by accident.
+   *
+   * THE PICKER MAY OFFER WHAT THE MINT REFUSES, AND THE SURFACE OWNS THE
+   * DIVERGENCE (0.34.0). Rule 3 applies on the MINT path and not the picker path,
+   * which is deliberate: the picker cannot cheaply know the answer, since knowing
+   * it requires reading other products. The consequence is that a surface can
+   * present a choice that then fails. The owner is named here rather than left
+   * implicit: A CREATE SURFACE THAT OFFERS A PREFIX THE MINT MAY REFUSE MUST BE
+   * ABLE TO REPORT THE REFUSAL, AND MUST BE ABLE TO PRESENT NO-KEY AS AN OUTCOME
+   * RATHER THAN AS AN ERROR. This is a design obligation on the surface, not a
+   * spec mechanic: the spec cannot fix a UX gap and should not pretend to. The
+   * union ruling above shrinks the divergence considerably, because the picker now
+   * keeps asking in exactly the case that would otherwise resolve wrongly.
    *
    * This rule states the CONTRACT. The behaviour belongs to whatever mints keys,
    * which is not this package: see `UPGBaseNode.key`.

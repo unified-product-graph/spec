@@ -77,6 +77,26 @@ export type UPGProductStage =
  * stable half of the whitelist (these change rarely); the growing, dual-registered
  * half is derived from the `cross_product_eligible` catalog flag — see
  * `CrossProductEligibleEdgeType` and `UPG_CROSS_ELIGIBLE_CATALOG_EDGE_TYPES`.
+ *
+ * @remarks
+ * DECLARED AND UNENFORCED (recorded 0.34.0, exhaustively). No WRITER reads this
+ * array. Not the SDK, not the local MCP server, not the cloud server, not the
+ * graph service. Outside `node_modules` and `dist` it is referenced by its own
+ * definition, two prose comments, one spec test, `check-editorial.mjs`, one
+ * generated mirror, and documents. The tier is a declared vocabulary that nothing
+ * validates at write time, so a graph can carry one of these types anywhere and no
+ * gate objects.
+ *
+ * That is worth stating rather than leaving to be rediscovered, because it changes
+ * what a "non-colliding key" would buy. A within-graph edge minted under a key that
+ * does not collide with one of these would not be safe BECAUSE nothing collides at
+ * runtime; it would be safe by discipline. Discipline and a guarantee should not be
+ * confused in a comment that reads like a contract.
+ *
+ * This is the third artifact damaged by reading one of the two edge registries in
+ * isolation, after the vocabulary check (fixed 0.33.0) and the withdrawn 0.33.0
+ * Item G. The fingerprint half of `check:editorial` was the fourth and is fixed in
+ * 0.34.0.
  */
 export const UPG_CROSS_ONLY_EDGE_TYPES = [
   // Peer overlap: "these two products share / overlap on this thing." Symmetric,
@@ -104,8 +124,28 @@ export const UPG_CROSS_ONLY_EDGE_TYPES = [
   'area_serves_persona',
   'area_targets_market_segment',
   // Foundations (0.9.12): a product-graph entity links to a canonical specification
-  // or primitive in the registry (`registry/{node_id}` target, same shape as
-  // instance_of). Registry-internal spec-to-spec links are catalog edges, not these.
+  // or primitive. Registry-internal spec-to-spec links are catalog edges, not these.
+  //
+  // CORRECTED 0.34.0 — the target contract. This comment said `registry/{node_id}`,
+  // "same shape as instance_of". Every live instance disagrees: all three in the
+  // field target `{product_id}/{node_id}`, and the portfolio's `registry` section
+  // is EMPTY. A reader following the old sentence would look for a registry entry
+  // that has never existed. Both target forms are legitimate — a specification held
+  // as a canonical in the registry, or one held inside the product graph that owns
+  // it — and the field has so far only produced the second.
+  //
+  // THE GAP THIS TIER LEAVES, restated 0.34.0 because the 0.33.0 wording named a
+  // case no graph instantiates. It is NOT "a specification in a graph with no
+  // portfolio around it". It is the HOLDER PRODUCT, and it is live today: the
+  // product graph that HOLDS a specification node has three sibling products
+  // reaching it through this tier and no way to state its own relation to it,
+  // because the cross tier requires two distinct products and there is no
+  // within-graph conformance edge. Not closed in 0.34.0. The verb the live case
+  // wants is `defines` rather than `conforms_to` — a product does not conform to
+  // the specification it authors — and one instance of evidence is not enough to
+  // mint a catalog edge in the area that cost 0.33.0 its shape mid-build. The
+  // condition is the second holder-product instance, or any single-product graph
+  // modelling a specification it conforms to.
   'product_implements_specification',
   'product_exposes_specification',
   'feature_conforms_to_specification',
