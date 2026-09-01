@@ -116,6 +116,16 @@ describe('Metric decomposition', () => {
       // canonical scope), but the deprecated keys still appear in the schema
       // for backwards-compat with consumers. Drop in 0.3.0.
       'metric',
+      // surface — 16 props transitionally (0.36.0, UPG feedback 515a0d9f).
+      // `extensibility` (1 prop) is being replaced by four independent props
+      // (`extension_mechanism` / `extension_audience` / `extension_scope` /
+      // `extension_point`) because the single enum forced false `closed`
+      // readings on 27/154 surfaces in a real audit — a genuine
+      // under-decomposition, not a monolith drifting wider. `extensibility`
+      // is staged (@deprecated since 0.36.0, removeIn 1.0.0) rather than
+      // dropped immediately, so the count is transitionally 16 until the
+      // removal version; drops back to 15 at 1.0.0.
+      'surface',
     ])
     const offenders: { type: string; count: number }[] = []
     for (const [type, props] of Object.entries(UPG_PROPERTY_SCHEMA)) {

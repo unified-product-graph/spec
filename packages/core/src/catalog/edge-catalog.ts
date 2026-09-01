@@ -788,6 +788,25 @@ export const UPG_EDGE_CATALOG = {
   // (graph traversal) treat 'semantic' as the catch-all for non-causal,
   // non-hierarchical relationships.
   journey_step_precedes_journey_step: { forward_verb: 'precedes', reverse_verb: 'follows', classification: 'semantic', source_type: 'journey_step', target_type: 'journey_step' },
+  // (0.36.0, UPG feedback 510c4bfa) A user_flow states which user_journey it
+  // maps onto (`user_flow_maps_user_journey`) but not which of that journey's
+  // steps, in what order, it actually walks — the only recovery without this
+  // edge is inferring scope from shared screens, which both over-matches
+  // (co-located read-only steps) and under-matches (steps rendered off-screen).
+  // `journey_step` stays owned by its journey via `user_journey_contains_journey_step`;
+  // this is a reference into that ownership, not a second containment.
+  // `semantic`, not `cross-domain`: both `user_flow` and `journey_step` are in
+  // the ux_design domain, and T1.7's guardrail treats same-domain
+  // `cross-domain` edges as reclassification debt to pay down, not a pattern
+  // to extend — `journey_phase_spans_journey_step` carries that debt already;
+  // this edge does not repeat it. Same reasoning as `journey_step_precedes_journey_step`:
+  // 'semantic' is the catch-all for a non-causal, non-hierarchical, in-domain
+  // relationship. No `carries_properties`: the walked steps' own `step_order`
+  // is already the source of truth for sequence, so ordering is read off the
+  // target, not a second order system that could drift from the journey's. A
+  // flow walking steps out of journey order is a future `carries_properties`
+  // widening, not this one.
+  user_flow_walks_journey_step: { forward_verb: 'walks', reverse_verb: 'walked_by', classification: 'semantic', source_type: 'user_flow', target_type: 'journey_step' },
   user_flow_routes_through_screen: { forward_verb: 'routes_through', reverse_verb: 'routed_in', classification: 'hierarchy', source_type: 'user_flow', target_type: 'screen' },
   screen_renders_as_screen_state: { forward_verb: 'renders_as', reverse_verb: 'rendered_by', classification: 'hierarchy', source_type: 'screen', target_type: 'screen_state' },
   need_reframed_as_design_question: { forward_verb: 'reframed_as', reverse_verb: 'reframes', classification: 'causal', source_type: 'need', target_type: 'design_question' },

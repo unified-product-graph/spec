@@ -73,10 +73,10 @@ describe('surface is a full roster entity', () => {
 
 // ─── The eight properties ────────────────────────────────────────────────────
 
-describe('surface properties (eight ratified, four added by field data)', () => {
+describe('surface properties (eight ratified, four added by field data, four more from a 154-surface audit)', () => {
   const schema = UPG_PROPERTY_SCHEMA['surface']
 
-  it('exposes exactly the twelve ratified keys', () => {
+  it('exposes exactly the sixteen ratified keys', () => {
     expect(Object.keys(schema).sort()).toEqual(
       [
         // 0.27.0
@@ -93,6 +93,13 @@ describe('surface properties (eight ratified, four added by field data)', () => 
         'cardinality',
         'composition_mode',
         'instance_scope',
+        // 0.36.0 — feedback 515a0d9f, from a 154-surface field audit. Splits
+        // `extensibility` (kept, @deprecated since 0.36.0, removeIn 1.0.0)
+        // into independent mechanism/audience/scope/entry-point facts.
+        'extension_audience',
+        'extension_mechanism',
+        'extension_point',
+        'extension_scope',
       ].sort(),
     )
   })

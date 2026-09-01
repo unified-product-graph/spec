@@ -420,8 +420,40 @@ export type SurfacePersistence = 'always' | 'conditional' | 'on_demand' | 'trans
  * - `closed` — the occupant set is fixed by the product team.
  * - `plugin_registerable` — extensions may register occupants through a published contract.
  * - `user_configurable` — the end user chooses what occupies it.
+ *
+ * @deprecated since 0.36.0, removeIn 1.0.0. Use `extension_mechanism` /
+ * `extension_audience` / `extension_scope` / `extension_point`. Found
+ * modelling 154 real surfaces of a public content-editing Studio: 71% came
+ * out `closed`, 27 of those falsely (they were overridable via documented
+ * API) — this single enum cannot separate "has no registration list of its
+ * own" from "cannot be customized", so the modeller was forced to assert the
+ * stronger, wrong one. See `SurfaceExtensionMechanism`.
  */
 export type SurfaceExtensibility = 'closed' | 'plugin_registerable' | 'user_configurable'
+
+/**
+ * HOW a surface is customized — the mechanism half of what `extensibility`
+ * used to conflate with audience and scope.
+ *
+ * - `none` — not customizable by this mechanism (the surface may still be
+ *   customizable by a different mechanism; declare each that applies).
+ * - `component_wrap` — the override receives a `renderDefault` callback and
+ *   wraps the default rather than replacing it.
+ * - `component_replace` — the override fully replaces the default.
+ * - `list_resolve` — config supplies an array, or a resolver that receives
+ *   the previous list and may filter/reorder/append.
+ * - `register` — registration into a named collection (tools, asset sources).
+ * - `config_flag` — a boolean config flag turns the surface on or off.
+ * - `render_callback` — a bare render-prop/callback with no default to wrap.
+ */
+export type SurfaceExtensionMechanism =
+  | 'none'
+  | 'component_wrap'
+  | 'component_replace'
+  | 'list_resolve'
+  | 'register'
+  | 'config_flag'
+  | 'render_callback'
 
 /** How many instances of the surface exist, in UML multiplicity notation.
  *
@@ -667,8 +699,66 @@ export interface SurfaceProperties {
    * chained surface, which owes no arbitration rule at all.
    */
   arbitration_state?: SurfaceArbitrationState
-  /** Who may add occupants to the surface. */
+  /**
+   * Who may add occupants to the surface. @deprecated since 0.36.0,
+   * removeIn 1.0.0. Use `extension_mechanism` / `extension_audience` /
+   * `extension_scope` / `extension_point`: this single enum collapses four
+   * independent facts (mechanism, audience, scope, and the named API entry
+   * point) into one value, which forces false `closed` readings on surfaces
+   * that are overridable through a mechanism the enum has no room to name.
+   * STAGED, not renamed: the field is kept and still read, no stored bytes
+   * change. There is no `PROPERTY_SCALE_MAP_BY_ENTITY` entry for this one:
+   * unlike `risk.probability` → `likelihood_5`, this is a structural split
+   * with no scale to remap onto, so no machine migration ships; re-modelling
+   * a surface's real mechanism/audience/scope is a judgement call, same as
+   * promoting `objective.timeframe` to a `planning_cycle` node.
+   */
   extensibility?: SurfaceExtensibility
+  /**
+   * The mechanism by which this surface is customized: e.g. `component_wrap`
+   * for a `renderDefault`-style override, `list_resolve` for a filter/append
+   * resolver, `register` for named-collection registration. Independent of
+   * `extension_audience` and `extension_scope`. `none` means not
+   * customizable by this mechanism, not unassessed.
+   *
+   * @remarks
+   * A surface can be `component_wrap`-able by a schema author globally and
+   * `register`-able by a plugin author per type at the same time, which is
+   * exactly the shape `extensibility` could not hold: it named only a
+   * mechanism-or-audience, never both.
+   */
+  extension_mechanism?: SurfaceExtensionMechanism
+  /**
+   * WHO may customize the surface through the declared `extension_mechanism`:
+   * the studio config author, the schema author, a plugin author, or the end
+   * user. Multi-valued because the same surface is often overridable by more
+   * than one audience through different entry points (e.g. globally by a
+   * config author, per-type by a schema author).
+   */
+  extension_audience?: Array<'config_author' | 'schema_author' | 'plugin_author' | 'end_user'>
+  /**
+   * AT WHAT SCOPE the customization applies: the whole surface, one type, one
+   * field, or one instance. Multi-valued: a form field surface can be
+   * overridable globally and per type at once.
+   *
+   * @remarks
+   * This is the fact `extensibility: 'closed'` got wrong most often: "has no
+   * registration list of its own" (no per-instance entry, e.g.
+   * `form.components.field` has none) does not mean "cannot be customized"
+   * (it is still overridable globally and per type via a schema-level
+   * `components` declaration).
+   */
+  extension_scope?: Array<'global' | 'per_type' | 'per_field' | 'per_instance'>
+  /**
+   * The named API entry point through which the customization happens.
+   * @example "form.components.field", "document.actions", "studio.tools"
+   *
+   * @remarks
+   * A durable, checkable link from the model to the code, in the same spirit
+   * as recording a DOM selector: it makes the customization fact verifiable
+   * against the real API rather than asserted from memory.
+   */
+  extension_point?: string
   /**
    * Whether occupying this surface can change the underlying content, as
    * opposed to only selecting or revealing it. The selector-versus-mutator
