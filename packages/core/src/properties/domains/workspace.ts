@@ -564,6 +564,65 @@ export interface UPGViewQuery {
   clauses?: UPGViewClause[]
 }
 
+/** One grouping axis: a value partition, or an edge dimension.
+ *
+ * The string form is a property name, base field, or `status_category`,
+ * partitioning members on a value. The object form lanes members by an EDGE:
+ * each lane is a far-end neighbour of the named edge type ("board laned by
+ * assignee" is `{ dimension: 'edge', edge_type: 'node_assigned_to_person' }`).
+ * Lane identity is the neighbour node's id and its label is that node's title.
+ *
+ * @remarks
+ * The object form mirrors the edge grammar the QUERY side already speaks
+ * (`UPGViewClause`'s `dimension: 'edge'`) rather than minting a second one.
+ * `direction` is which way the edge is walked FROM THE MEMBER: `'out'` (absent
+ * means `'out'`) lanes a member by the targets of its outgoing edges, `'in'`
+ * by the sources of its incoming ones. Direction is explicit in the object
+ * form from day one, never guessed, which is the lesson `nest_by`'s bare-name
+ * orientation rule taught (F-7). The failure case is stated rather than left
+ * to the renderer: a member with NO such edge lands in a `none` lane, never
+ * dropped, for the same reason `orphan_disposition` defaults to `root`.
+ */
+export type UPGViewAxis =
+  | string
+  | {
+      dimension: 'edge'
+      /** Canonical edge type whose far-end neighbour identifies the lane. */
+      edge_type: string
+      /** Which way the edge is walked from the member. Absent means `'out'`. */
+      direction?: 'out' | 'in'
+    }
+
+/** One `nest_by` entry: a bare edge-type name, or the explicit-orientation form.
+ *
+ * @remarks
+ * A bare name binds in catalog-declared orientation, source = parent (the
+ * normative rule, F-7). The object form exists for the intent a bare name
+ * cannot state: nesting children under the edge's TARGET end. `parent` names
+ * which declared endpoint of the edge is the tree parent; a bare string is
+ * exactly `{ parent: 'source' }`.
+ */
+export type UPGViewNestEntry = string | { edge_type: string; parent: 'source' | 'target' }
+
+/** Where a tree roots: the product node, every member of a type, or the focus set.
+ *
+ * @remarks
+ * Root choice is PRESENTATION, not scope (ruled 2026-09-01, F-8): it never
+ * changes the selected set, only which already-selected members are drawn as
+ * the tree's tops, and `orphan_disposition`'s absent-means-`root` default is
+ * what keeps it safely ignorable. `'focus'` roots at the composition's
+ * `composition_focuses_node` edge set, the same portable anchor `from_focus`
+ * uses. Absent means `'product'`, which states the fallback consumers already
+ * applied. A portable root is also what makes an authored
+ * `orphan_disposition: 'hide'` safe to honour: measured on the registry, 8 of
+ * 57 saved trees collapsed to a single node on bare read-back precisely
+ * because they hid orphans while their non-product root went unstated.
+ */
+export type UPGViewTreeRoot =
+  | { kind: 'product' }
+  | { kind: 'type'; type: string }
+  | { kind: 'focus' }
+
 /** Advisory rendering intent. A consumer MAY ignore every field here.
  *
  * @remarks
@@ -577,12 +636,58 @@ export interface UPGViewQuery {
  * const p: UPGViewPresentation = { group_by: 'status_category', layout: 'board' }
  */
 export interface UPGViewPresentation {
-  /** Property name, base field, or `status_category`, to group lanes by. */
-  group_by?: string
+  /** The lane (column) axis. A property/base-field/`status_category` string,
+   *  or an edge dimension (see {@link UPGViewAxis}). */
+  group_by?: UPGViewAxis
+  /**
+   * The row axis, making the board a two-axis grid (`rows_by` × `group_by`).
+   * Absent means a one-axis board, which is exactly what every pre-0.37.0
+   * view already meant.
+   *
+   * @remarks
+   * A named second slot rather than an axes array, deliberately: a grid is
+   * two-dimensional, the generality of an array is unearned, and an array
+   * would put the first axis in two homes beside `group_by`, which is the
+   * shadow-pair shape the property-fit cleanup exists to kill. Dropping this
+   * field degrades `priority × status` into a flat status board: same nodes,
+   * but the dimension the author was REASONING in is gone, which is why the
+   * field is portable rather than app-local.
+   */
+  rows_by?: UPGViewAxis
   /** Sort keys in precedence order. */
   sort?: Array<{ key: string; direction: 'asc' | 'desc' }>
   /** Requested layout family. Advisory. */
   layout?: 'board' | 'table' | 'list' | 'cards' | 'timeline' | 'gallery' | 'tree'
+  /**
+   * Lane keys in display order, leftmost first. Lane keys are the `group_by`
+   * values (node ids when the axis is an edge dimension).
+   *
+   * @remarks
+   * The presentation split's own charter names this case: a lane arrangement
+   * is a preference of the tool that drew it. Same class as `sort`. The
+   * failure case is stated: lanes not listed here follow the listed ones in
+   * natural order, so a new value never vanishes for being unlisted.
+   */
+  lane_order?: string[]
+  /**
+   * Lane keys drawn collapsed. Advisory; a consumer that ignores this renders
+   * every lane expanded, which is the safe direction (it shows more, never
+   * hides).
+   *
+   * @remarks
+   * Not ephemeral-UI territory: `workspace_arranges_node`'s `expanded` already
+   * blesses persisted collapse state as presentation that survives a reload,
+   * unlike selection. This is the same cut at lane level.
+   */
+  collapsed_lanes?: string[]
+  /** Row keys drawn collapsed, when `rows_by` is set. Same contract as
+   *  `collapsed_lanes`, on the row axis. */
+  collapsed_rows?: string[]
+  /**
+   * Where the tree roots, when `layout` is `'tree'`. Absent means
+   * `{ kind: 'product' }`. See {@link UPGViewTreeRoot}.
+   */
+  root?: UPGViewTreeRoot
   /**
    * Edge types to nest by, outermost first, when `layout` is `'tree'`. Advisory,
    * like everything else here.
@@ -594,8 +699,25 @@ export interface UPGViewPresentation {
    * layout family can still read which relation the author meant to nest on.
    *
    * A consumer may ignore this entirely, render flat, and remain conformant.
+   *
+   * ORIENTATION IS NORMATIVE (ruled 2026-09-01, F-7): a bare name binds in its
+   * catalog-declared orientation — the edge's `source_type` is the PARENT and
+   * its `target_type` is the CHILD. That is the convention every hierarchy edge
+   * in the catalog already follows (`user_journey_contains_journey_step`:
+   * source = journey = parent), and it is what makes a bare name deterministic:
+   * two conformant consumers reading the same `nest_by` must build the same
+   * tree. Guessing the orientation, or walking an edge in its converse
+   * direction on a bare name, is non-conformant. Intent whose parent sits at
+   * the edge's TARGET end (e.g. children under their
+   * `opportunity_pursues_outcome` target) takes the explicit object form,
+   * `{ edge_type, parent: 'target' }` (0.37.0); a bare string is exactly
+   * `{ parent: 'source' }`. Direction is semantics, never a rendering
+   * preference: the catalog legally holds distinct edge types between the same
+   * endpoints in opposite directions (`outcome_reveals_opportunity` is
+   * provenance, `opportunity_pursues_outcome` is intent), so no consumer may
+   * rewrite one into the other to make a tree connect.
    */
-  nest_by?: string[]
+  nest_by?: UPGViewNestEntry[]
   /**
    * What to do with a selected member the nest relation does not reach.
    * Absent means `'root'`.

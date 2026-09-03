@@ -7,6 +7,43 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.37.0] - 2026-09-01
+
+**The presentation review: six fields and a widening, one pass over `UPGViewPresentation`.** Every item arrived as measured field evidence from the W2 board charter and the tree-builder investigation (B0, B-1, F-7, F-8), was ruled individually, and lands together so the interface is reviewed once. Additive throughout; every bare pre-0.37.0 form keeps its exact meaning.
+
+### Added
+
+- **`rows_by`** on `UPGViewPresentation`. The row axis, making a board a two-axis grid (`rows_by` × `group_by`). A named second slot rather than an axes array: a grid is two-dimensional, and an array would put the first axis in two homes beside `group_by`. Absent means the one-axis board every earlier view already meant. Without a portable home, `priority × status` degraded into a flat status board for any conformant foreign consumer: same nodes, but the dimension the author was reasoning in was gone.
+- **`lane_order`**. Lane keys in display order. The presentation split's own charter prose names this case ("a lane arrangement is a preference of the tool that drew it"); same class as `sort`. Unlisted lanes follow the listed ones in natural order, so a new value never vanishes for being unlisted.
+- **`collapsed_lanes`** / **`collapsed_rows`**. Persisted collapse state per lane/row. Not ephemeral UI: `workspace_arranges_node.expanded` already blesses collapse state as presentation that survives a reload. A consumer that ignores them renders everything expanded, the safe direction.
+- **`root`** (`UPGViewTreeRoot`: `{kind:'product'} | {kind:'type', type} | {kind:'focus'}`). Where a tree roots. Ruled PRESENTATION, not scope (F-8): root never changes the selected set, only which already-selected members are drawn as tops, and `orphan_disposition`'s absent-means-`root` default keeps it ignorable. Measured on the registry: 12 of 57 saved trees diverged on bare read-back and 8 collapsed to a single node, all of them `hide` trees whose non-product root went unstated. A portable root is what makes an authored `hide` safe to honour.
+
+### Changed
+
+- **`group_by`** widens from `string` to `UPGViewAxis` (`string | { dimension: 'edge', edge_type, direction? }`). A board can now lane by an edge ("board laned by assignee"); lanes are the far-end neighbours of the named edge type. The object form mirrors the edge grammar the query side already speaks (`UPGViewClause`'s `dimension: 'edge'`) rather than minting a second one. A member with no such edge lands in a `none` lane, never dropped. Absent `direction` means `'out'`.
+- **`nest_by`** items widen from `string` to `UPGViewNestEntry` (`string | { edge_type, parent: 'source' | 'target' }`). The bare-name orientation rule (F-7, stated in 0.36.0's window: source = parent, catalog-declared, never guessed) stands; the object form exists for the one intent a bare name cannot state, nesting children under the edge's TARGET end. A bare string is exactly `{ parent: 'source' }`.
+
+### Held out, deliberately
+
+- **Lane WIP limits.** A WIP limit is a statement about a team's process, not about how one view draws, and per-view placement would let two boards over the same work disagree about the same team's limit. Recurrence unmet; apps carry it locally until a second consumer or a per-phase-policy ask pulls it forward.
+
+## [0.36.0] - 2026-09-01
+
+**Two feedback reports, both from real MCP-client modelling sessions, both evidence-backed against live products.** Retrieved from the `upg.feedback` triage queue on the morning the queue's own database came back from a DNS outage. Additive; one staged deprecation; no data migration.
+
+*(This entry was written after the release shipped: the 0.36.0 train went to npm without a CHANGELOG entry, and no gate noticed. Recorded here rather than silently backfilled.)*
+
+### Added
+
+- **`user_flow_walks_journey_step`** (semantic). A `user_flow` could state which `user_journey` it maps onto (`user_flow_maps_user_journey`) but not which of that journey's steps, in what order, it actually walks; the only recovery, shared-screen inference, both over- and under-matched in the reporter's concrete case. No `carries_properties`: ordering reads off the walked steps' own `step_order`, the existing source of truth for sequence, rather than a second order system that could drift. Classified `semantic`, not `cross-domain`, per T1.7's own guardrail: both endpoints live in the ux_design domain, and same-domain cross-domain edges are reclassification debt to pay down, not extend.
+- **`surface.extension_mechanism`** (enum: `none | component_wrap | component_replace | list_resolve | register | config_flag | render_callback`), **`extension_audience`** (multi: `config_author | schema_author | plugin_author | end_user`), **`extension_scope`** (multi: `global | per_type | per_field | per_instance`), **`extension_point`** (string, the named API path). A 154-surface field audit found 71% of surfaces coming out `closed` under the old single enum, 27 of them falsely: "has no registration list of its own" and "cannot be customized" are different facts, and one value could not separate mechanism from audience from scope.
+
+### Deprecated
+
+- **`surface.extensibility`** (`@deprecated since 0.36.0, removeIn 1.0.0`). Kept and still read; no stored bytes change. Unlike `risk.probability` → `likelihood_5` there is no scale to remap onto, so no machine migration ships: re-modelling a surface's real mechanism/audience/scope is a judgement call, the same cut as promoting `objective.timeframe` to a `planning_cycle` node.
+
+---
+
 ## [0.35.0] - 2026-08-23
 
 **Six card designs asked the graph a question it could not answer, and one property name was quietly two different measurements.** The UCS edge-canon packet (Captain-ratified 2026-08-22) filed eight edge asks against the catalogue; three were already answerable, so five landed. The same audit found `risk` rating likelihood on an epistemic ladder and severity on a benefit-framed one, which rendered a catastrophic risk green. Additive throughout, with one staged deprecation: no data migration, no breaking change.

@@ -142,3 +142,80 @@ describe('the superset law — the persisted app shape still maps by rename at m
     expect(assignee.edge?.target_designation).toBe('viewer')
   })
 })
+
+describe('0.37.0 — the presentation review (six fields + the nest_by widening)', () => {
+  it('a board lanes by an edge dimension, mirroring the query grammar', () => {
+    const p: UPGViewPresentation = {
+      layout: 'board',
+      group_by: { dimension: 'edge', edge_type: 'node_assigned_to_person' },
+    }
+    // Absent direction means 'out' — explicit-by-default is F-7's lesson; the
+    // consumer applies the stated default, never a guess.
+    expect(typeof p.group_by).toBe('object')
+    if (typeof p.group_by === 'object') {
+      expect(p.group_by.edge_type).toBe('node_assigned_to_person')
+      expect(p.group_by.direction).toBeUndefined()
+    }
+  })
+
+  it('the bare-string axis form survives the widening untouched', () => {
+    // Backward compatibility is the contract: every pre-0.37.0 presentation
+    // must still typecheck and mean the same thing.
+    const p: UPGViewPresentation = { group_by: 'status_category', layout: 'board' }
+    expect(p.group_by).toBe('status_category')
+  })
+
+  it('rows_by makes the grid two-axis; absent means the one-axis board it always was', () => {
+    const grid: UPGViewPresentation = {
+      layout: 'board',
+      group_by: 'status_category',
+      rows_by: 'priority',
+      collapsed_rows: ['low'],
+    }
+    expect(grid.rows_by).toBe('priority')
+    const flat: UPGViewPresentation = { layout: 'board', group_by: 'status_category' }
+    expect(flat.rows_by).toBeUndefined()
+  })
+
+  it('lane_order and collapsed_lanes carry lane keys, same class as sort', () => {
+    const p: UPGViewPresentation = {
+      layout: 'board',
+      group_by: 'status_category',
+      lane_order: ['started', 'unstarted', 'completed'],
+      collapsed_lanes: ['completed'],
+    }
+    expect(p.lane_order?.[0]).toBe('started')
+    expect(p.collapsed_lanes).toContain('completed')
+  })
+
+  it('nest_by accepts the explicit-orientation object beside bare names', () => {
+    // A bare string is exactly { parent: 'source' }; the object form exists
+    // for parent-at-target intent a bare name cannot state (F-7).
+    const p: UPGViewPresentation = {
+      layout: 'tree',
+      nest_by: [
+        'user_journey_contains_journey_step',
+        { edge_type: 'opportunity_pursues_outcome', parent: 'target' },
+      ],
+    }
+    expect(p.nest_by?.[0]).toBe('user_journey_contains_journey_step')
+    const second = p.nest_by?.[1]
+    expect(typeof second).toBe('object')
+    if (typeof second === 'object') expect(second.parent).toBe('target')
+  })
+
+  it('root designates tops over the selected set and holds no node id', () => {
+    // F-8: root is presentation. The three kinds are product, type, focus —
+    // none of them carries an id, for the same reason the viewer designation
+    // does not: a portable shape names WHAT, never WHICH instance.
+    const byType: UPGViewPresentation = {
+      layout: 'tree',
+      root: { kind: 'type', type: 'feature_area' },
+      orphan_disposition: 'hide',
+    }
+    expect(byType.root?.kind).toBe('type')
+    expect(JSON.stringify(byType.root)).not.toMatch(/id/)
+    const focus: UPGViewPresentation = { layout: 'tree', root: { kind: 'focus' } }
+    expect(focus.root?.kind).toBe('focus')
+  })
+})
