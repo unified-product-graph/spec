@@ -7,6 +7,24 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.38.0] - 2026-09-03
+
+**Cloud-agent hardening: a field brief from a five-repo Cursor Cloud environment found the server fabricating phantom graphs, unverifiable at build time, and unhelpable at setup time.** Seven findings, six accepted (the seventh, filesystem-coupled `code_url` checks, deferred on doctrine); every fix verified live over stdio against the built binaries. Zero catalog/schema surface; minor rather than patch because two behaviors change deliberately.
+
+### Changed (behavior)
+
+- **The mcp-server's empty-resolution fallback dies.** Finding nothing no longer creates a blank `product.upg`: the server REFUSES to start (exit 1), naming the cwd and every path checked. Creation is opt-in via `--init`. In an environment whose cwd you do not control, a silently fabricated graph means every tool call "succeeds" against a phantom and writes are lost with no signal — the refusal is the safe direction, and its message carries the fix.
+- **`upg workspace switch` is session-only.** It writes the gitignored `.upg/workspace.session.json` cursor instead of rewriting the tracked `workspace.json`, so a read-only exploration never leaves a git-backed workspace dirty and an agent's `git add -A` never commits a cursor move. The new `workspace set-default` is the explicit tracked write. The MCP server's `switch_product` always behaved this way; the CLI catches up to the server's own standard.
+
+### Added
+
+- **`--workspace <dir>` / `UPG_WORKSPACE`** on the mcp-server: point at the directory holding the graphs and the server arranges its own cwd (internalizing the shell wrapper cloud environments were hand-writing, the exact layout the field brief verified). `get_workspace_info` and `get_graph_digest` report `workspace_abs_path` so an agent can assert its location.
+- **`upg-mcp-server --check`**: resolves the workspace exactly as the server would, prints `{ok, workspace, resolved_file, products, spec_version, server_version}`, exits 0/1, never starts the transport, never writes. For environment install scripts, so a misconfigured environment fails at build time instead of mid-session. `--help` works (it was an unknown-option error).
+- **`--profile read-only|author`** on the mcp-server: server-side tool-surface filtering applied to `tools/list` AND `tools/call` (the list is discovery, the refusal is the gate), with the profile named in the handshake's server name. Classification fails closed: a new tool is gated out of `read-only` until deliberately classified. `read-only` = the 44 pure reads (plus `switch_product`/`reload_product`; `submit_feedback` excluded, it POSTs externally); `author` gates deletes, migrations, `rename_edge_type`, `push_to_cloud`, `init_workspace`, `create_product`, and the three that delete under another verb.
+- **Spec-version drift warning** at server startup when a graph's sealed `spec_version` is behind the server's (the field case: graphs sealed at 0.8.13 meeting a 0.36.0 server with no signal anywhere).
+- **`--target cursor`** on `upg mcp setup` (writes `.cursor/mcp.json` and prints the team-dashboard snippet cloud agents actually need) and `upg install-skills` (installs the bundled skills into `.cursor/skills/<name>/SKILL.md`).
+- **Deprecated aliases resolve their domain through their replacement** (`getDomainForType`): 36 icon-carrying aliases (`kpi`, `pain_point`, `sla`, `jtbd`, …) rendered tone-neutral in every surface because their names had no domain row while every replacement had one. A rule, not rows — alias rows would make deprecated names look canonical.
+
 ## [0.37.0] - 2026-09-01
 
 **The presentation review: six fields and a widening, one pass over `UPGViewPresentation`.** Every item arrived as measured field evidence from the W2 board charter and the tree-builder investigation (B0, B-1, F-7, F-8), was ruled individually, and lands together so the interface is reviewed once. Additive throughout; every bare pre-0.37.0 form keeps its exact meaning.

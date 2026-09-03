@@ -4,6 +4,7 @@
  */
 
 import type { UPGEntityType } from '../catalog/entity-catalog.js'
+import { isDeprecatedType, getReplacementType } from './entity-meta.js'
 
 // ─── Domain definition ──────────────────────────────────────────────────────────
 
@@ -408,7 +409,25 @@ export function getTypes(): string[] {
  */
 export function getDomainForType(entityType: string): UPGDomain | undefined {
   // `types` is a narrow literal tuple per domain; widen for runtime .includes.
-  return UPG_DOMAINS.find((d) => (d.types as readonly string[]).includes(entityType))
+  const direct = UPG_DOMAINS.find((d) => (d.types as readonly string[]).includes(entityType))
+  if (direct) return direct
+  // A deprecated alias resolves its domain THROUGH its replacement (0.38.0).
+  // Rule, not rows: putting alias rows into UPG_DOMAINS would make deprecated
+  // names look canonical in every consumer that iterates a domain's `types`,
+  // and 36 duplicated assignments would drift. The field case: 36 icon-carrying
+  // aliases (kpi, pain_point, sla, jtbd, ...) rendered tone-neutral in every
+  // surface because their names had no direct row — each of their replacements
+  // always had one. Hop limit guards a hypothetical alias-to-alias chain.
+  let name = entityType
+  for (let hop = 0; hop < 3; hop++) {
+    if (!isDeprecatedType(name)) return undefined
+    const replacement = getReplacementType(name)
+    if (!replacement) return undefined
+    const viaReplacement = UPG_DOMAINS.find((d) => (d.types as readonly string[]).includes(replacement))
+    if (viaReplacement) return viaReplacement
+    name = replacement
+  }
+  return undefined
 }
 
 /**
