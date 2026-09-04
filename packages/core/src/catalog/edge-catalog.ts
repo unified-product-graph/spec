@@ -1932,6 +1932,95 @@ export const UPG_EDGE_CATALOG = {
   // arbitrary work. deliberate_only because project membership is authored,
   // never inferred from co-occurrence.
   project_delivers_work_item: { forward_verb: 'delivers', reverse_verb: 'delivered_by', classification: 'semantic', source_type: 'project', target_type: 'node', deliberate_only: true },
+
+  // ── project as a first-class home for work (0.41.0, Captain-ratified) ──────
+  //
+  // Teams model in Linear, where an Initiative holds Projects and a Project
+  // holds Issues; UPG must express that natively or every sync leaves a reader
+  // guessing which node is which. `project_implements_initiative` already
+  // carries the upper relation (read from the project's side). These five carry
+  // the lower one, and the set is exactly what the Linear issue-type map
+  // produces: an issue becomes a feature, bug, task, user_story or epic.
+  //
+  // WHY THESE ARE CONTAINMENT AND `project_delivers_work_item` IS NOT.
+  // 0.33.0 widened `project_delivers_epic` into the polymorphic
+  // `project_delivers_work_item` and ruled, correctly, that it could not be a
+  // `contains` verb: containment obliges a `UPG_VALID_CHILDREN` pair keyed by
+  // CONCRETE type names, which a wildcard endpoint can never supply. That
+  // argument forecloses containment for the wildcard; it does not foreclose
+  // containment for concrete pairs, which is what these are. So this is not a
+  // reversal of that ruling — it is the half the wildcard could not reach.
+  //
+  // A KNOWN SHADOW PAIR, ACCEPTED DELIBERATELY (Captain, 2026-09-04). Both an
+  // authored `project_contains_task` and a `project_delivers_work_item` can
+  // name the same pair. That duplication is real and is taken on purpose, to
+  // avoid a migration on live `project_delivers_work_item` instances. The
+  // precedence is stated so it is never ambiguous: CONTAINMENT IS THE PARENT
+  // AXIS AND WINS; the polymorphic edge stays the reference for targets outside
+  // the concrete set. If a real graph is ever observed holding both for one
+  // pair, that is the signal to retire the polymorphic edge for these five
+  // types and migrate — the option deliberately not taken here.
+  project_contains_epic: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'project', target_type: 'epic' },
+  project_contains_feature: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'project', target_type: 'feature' },
+  project_contains_user_story: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'project', target_type: 'user_story' },
+  project_contains_task: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'project', target_type: 'task' },
+  project_contains_bug: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'project', target_type: 'bug' },
+
+  // ── project's strategic reach (0.41.0) ────────────────────────────────────
+  //
+  // The parity half. `initiative` and `project` are two granularities of the
+  // same idea, and teams pick one: Linear-shaped teams put the dated, owned,
+  // key-result-linked bet in a PROJECT, while the standard's `initiative`
+  // carried all the strategic reach and `project` reached milestone,
+  // deliverable and a wildcard. A team choosing the honest name for its
+  // granularity should not lose its connection to strategy.
+  //
+  // Mirrors of initiative's edges on the FORWARD verbs, so a reader moving
+  // between the two granularities is never re-learning the vocabulary. The
+  // mirror is deliberately not total, and the two places it stops are both
+  // correct rather than sloppy:
+  //
+  //   REVERSE VERBS. `strategic_theme_pursues_initiative` reverses to
+  //   `pursued_under`, which reads as membership in a theme's programme.
+  //   `strategic_theme_pursues_project` reverses to `pursued_by`, because a
+  //   project is the vehicle doing the pursuing, not a subdivision of the
+  //   theme. Same forward verb, different relationship on the way back.
+  //
+  //   CLASSIFICATION. Initiative's five are causal / cross-domain / hierarchy
+  //   / semantic; all five of these are `cross-domain`. That is domain
+  //   arithmetic, not inconsistency: `initiative` sits in `strategy` alongside
+  //   its targets, so a `cross-domain` classification there would be T1.7
+  //   same-domain debt, while `project` is `program_mgmt` and every target
+  //   here is `strategy`, so `cross-domain` is the measured truth and adds
+  //   nothing to that debt.
+  //
+  // CROSS-PRODUCT SCOPE, ruled deliberately (2026-09-04, raised by Troi during
+  // the 0.41.0 editorial pass). Three of initiative's carry
+  // `cross_product_eligible: true` and none of these do, which looks at first
+  // like reinstating at the portfolio seam the reach this change removes
+  // elsewhere. It is not: `key_result`, `outcome` and `strategic_theme` are
+  // all `portfolio_shared`, so these edges already resolve `provisional` and
+  // ARE authorable across graphs today, with a warning, not rejected. The
+  // difference is curated (hard-allow, silent) versus provisional (allowed,
+  // warned). Left provisional on purpose: the curated set is a ratified
+  // snapshot that grows on measured need, and no field evidence yet shows
+  // anyone authoring these across graphs. Promote to curated when it appears,
+  // which is a one-flag change per edge.
+  //
+  // Deliberately NOT mirrored: `initiative_enters_market_segment`,
+  // `_realises_value_proposition`, `_unlocks_revenue_stream` and
+  // `_raises_strategic_question`. A delivery-scoped project does not enter a
+  // market or unlock a revenue stream; that reach belongs to the coarser level,
+  // and copying it down would make the two types synonyms rather than
+  // granularities. `capability` needs no edge either: a project reaches it
+  // through the features it now contains (`capability_implemented_by_feature`),
+  // and `decision` already reaches a project through the polymorphic
+  // `decision_influences_node`.
+  project_advances_key_result: { forward_verb: 'advances', reverse_verb: 'advanced_by', classification: 'cross-domain', source_type: 'project', target_type: 'key_result' },
+  project_drives_outcome: { forward_verb: 'drives', reverse_verb: 'driven_by', classification: 'cross-domain', source_type: 'project', target_type: 'outcome' },
+  project_assumes_assumption: { forward_verb: 'assumes', reverse_verb: 'assumed_by', classification: 'cross-domain', source_type: 'project', target_type: 'assumption' },
+  constraint_constrains_project: { forward_verb: 'constrains', reverse_verb: 'constrained_by', classification: 'cross-domain', source_type: 'constraint', target_type: 'project' },
+  strategic_theme_pursues_project: { forward_verb: 'pursues', reverse_verb: 'pursued_by', classification: 'cross-domain', source_type: 'strategic_theme', target_type: 'project' },
   milestone_gates_release: { forward_verb: 'gates', reverse_verb: 'gated_by', classification: 'cross-domain', source_type: 'milestone', target_type: 'release' },
   milestone_triggers_release: { forward_verb: 'triggers', reverse_verb: 'triggered_by', classification: 'cross-domain', source_type: 'milestone', target_type: 'release' },
   deliverable_ships_feature: { forward_verb: 'ships', reverse_verb: 'shipped_by', classification: 'cross-domain', source_type: 'deliverable', target_type: 'feature' },

@@ -24,6 +24,29 @@
  *                      the containment guardrail (persona↔job↔need decompositions,
  *                      product-local reasoning) that must stay in-graph.
  *
+ * WILDCARD ENDPOINTS, STATED PLAINLY (0.41.0, field report `7aaa2f7e`). The
+ * mechanism is described on `isCrossCapable` below, but its consequence was
+ * never written down where a reader looks for it, so a reporter reasonably
+ * read a `decision_*_node` edge's absent scope as unfinished work and proposed
+ * declaring it `provisional`. It cannot be declared: scope is DERIVED, never
+ * authored. And `node` is not a type, so it can never be `portfolio_shared`
+ * and never carries the gate on its own. Therefore:
+ *
+ *   **An edge with a `node` wildcard endpoint is `resident` unless its OTHER,
+ *   concrete endpoint is a portfolio-shared type, or the edge type is curated
+ *   into `UPG_CROSS_EDGE_TYPES` by name.**
+ *
+ * That is why `node_owned_by_team` is cross-capable (team is shared) while
+ * `decision_influences_node`, `decision_produces_node`,
+ * `decision_constrained_by_node` and `risk_threatens_node` are resident:
+ * `decision` and `risk` are not in the shared tier. Only three wildcard edges
+ * are cross-capable today, all of them curated BY NAME.
+ *
+ * Widening one is a two-option decision and BOTH amend a ratified list, which
+ * is why it is not a spec-writer's call: curate the edge type by name, or
+ * promote the concrete endpoint type into the portfolio-shared tier, which
+ * moves every other edge touching that type at the same time.
+ *
  * The gate (`isCrossCapable`) is DERIVED from `EntityTypeMeta.portfolio_shared`, so
  * the guardrail is self-maintaining: a new persona/job/need internal edge is
  * auto-rejected with no list to touch. The gate LOGIC itself never changes the

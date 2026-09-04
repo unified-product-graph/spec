@@ -350,3 +350,48 @@ describe('cross-product 3-state derivation (0.18.0)', () => {
     expect(crossProductScope('not_a_real_edge_type')).toBe('resident')
   })
 })
+
+// ─── Wildcard endpoints are resident unless curated (0.41.0, F3) ────────────
+//
+// The rule was true and enforced, but written down only as a mechanism note on
+// `isCrossCapable`, so a field reporter read a `decision_*_node` edge's absent
+// scope as an oversight and proposed DECLARING it provisional. Scope is
+// derived, never declared, and `node` is not a type, so it can never be
+// portfolio-shared. These tests turn the documentation into an enforced claim.
+
+describe('wildcard-endpoint edges and cross-product scope (F3)', () => {
+  const wildcardEdges = Object.entries(UPG_EDGE_CATALOG).filter(
+    ([, def]) => def.source_type === 'node' || def.target_type === 'node',
+  )
+
+  it('the catalog actually has wildcard edges to reason about', () => {
+    expect(wildcardEdges.length).toBeGreaterThan(0)
+  })
+
+  it('every wildcard edge is resident unless curated by name or paired with a shared type', () => {
+    for (const [type, def] of wildcardEdges) {
+      const scope = crossProductScope(type)
+      if (scope === 'resident') continue
+      // Anything not resident must be explainable by exactly one of the two
+      // documented routes. A third route appearing here means the derivation
+      // changed and the module header is now wrong.
+      const curated = UPG_CROSS_EDGE_TYPES.includes(type as (typeof UPG_CROSS_EDGE_TYPES)[number])
+      const concrete = def.source_type === 'node' ? def.target_type : def.source_type
+      const sharedPartner = isPortfolioSharedType(concrete as never)
+      expect(
+        curated || sharedPartner,
+        `${type} is ${scope} but is neither curated nor paired with a portfolio-shared type`,
+      ).toBe(true)
+    }
+  })
+
+  it("decision's three wildcard edges are resident, which is a ruling and not a gap", () => {
+    for (const type of ['decision_influences_node', 'decision_produces_node', 'decision_constrained_by_node']) {
+      expect(UPG_EDGE_CATALOG[type as keyof typeof UPG_EDGE_CATALOG]).toBeDefined()
+      expect(crossProductScope(type)).toBe('resident')
+    }
+    // The reason, pinned so the test explains itself if it ever fails:
+    // `decision` is not in the portfolio-shared tier.
+    expect(isPortfolioSharedType('decision' as never)).toBe(false)
+  })
+})

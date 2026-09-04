@@ -402,7 +402,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
 
   // ── Program Management hierarchy ─────────────────────────────────────────────
   program: ['project', 'risk_register', 'change_request', 'resource_allocation', 'status_report'],
-  project: ['milestone', 'deliverable'],
+  project: ['milestone', 'deliverable', 'epic', 'feature', 'user_story', 'task', 'bug'],
   risk_register: ['risk'],
 
   // ── Accessibility hierarchy ──────────────────────────────────────────────────
