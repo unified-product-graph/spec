@@ -661,6 +661,15 @@ export const UPG_EDGE_CATALOG = {
   product_categorises_by_roadmap_theme: { forward_verb: 'categorises_by', reverse_verb: 'categorises', classification: 'hierarchy', source_type: 'product', target_type: 'roadmap_theme' },
   feature_area_contains_feature: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'feature_area', target_type: 'feature' },
   feature_area_contains_feature_area: { forward_verb: 'contains', reverse_verb: 'belongs_to', classification: 'hierarchy', source_type: 'feature_area', target_type: 'feature_area' },
+  // (0.39.0, B4) Component catalogs group by area -- a storybook sidebar that
+  // follows the source tree, a visual-coverage report -- and the graph had no
+  // edge for it, so a measured estate tagged 133 components `area:<group>`
+  // instead. `groups`, not `contains`: the area does not OWN the component
+  // (a design_system or product does); it is a grouping view over components
+  // owned elsewhere, the same non-owning relationship `journey_phase_spans_journey_step`
+  // records. Multi-parent GRAMMAR with single per-instance parentage, the
+  // `quote` precedent.
+  feature_area_groups_design_component: { forward_verb: 'groups', reverse_verb: 'grouped_in', classification: 'hierarchy', source_type: 'feature_area', target_type: 'design_component' },
   outcome_delivered_by_feature: { forward_verb: 'delivered_by', reverse_verb: 'delivers', classification: 'cross-domain', source_type: 'outcome', target_type: 'feature' },
   outcome_delivered_via_feature_area: { forward_verb: 'delivered_via', reverse_verb: 'delivers_for', classification: 'cross-domain', source_type: 'outcome', target_type: 'feature_area' },
   feature_decomposed_into_epic: { forward_verb: 'decomposed_into', reverse_verb: 'implements', classification: 'hierarchy', source_type: 'feature', target_type: 'epic' },
@@ -985,10 +994,32 @@ export const UPG_EDGE_CATALOG = {
   // decision records design choices about the system; not contained by it.
   design_system_decided_via_decision: { forward_verb: 'decided_via', reverse_verb: 'decided_for', classification: 'semantic', source_type: 'design_system', target_type: 'decision' },
   design_component_styled_by_design_token: { forward_verb: 'styled_by', reverse_verb: 'styles', classification: 'hierarchy', source_type: 'design_component', target_type: 'design_token' },
+  // (0.39.0, B2) The alias tier. A modern token system is two or three tiers --
+  // primitives (`--gray-100`) that semantic tokens alias
+  // (`--background-high: light-dark(var(--gray-100), var(--gray-900))`) that
+  // components consume -- and the spec could hold the ends but not the middle,
+  // so a measured estate (163 DTCG primitives, 45 semantic aliases) kept its
+  // alias chain in descriptions. `causal`, not `semantic`: the alias's VALUE is
+  // computed from the primitive's, so the dependency is real and directional.
+  // `cross_product_eligible` because the primitive tier is routinely its own
+  // published package (its own graph) while the semantic tier lives with the
+  // component library. Makes "which primitives does this component ultimately
+  // depend on" and "which primitives are dead" traversals rather than scripts.
+  design_token_derives_from_design_token: { forward_verb: 'derives_from', reverse_verb: 'derived_into', classification: 'causal', source_type: 'design_token', target_type: 'design_token', cross_product_eligible: true },
   design_component_follows_design_pattern: { forward_verb: 'follows', reverse_verb: 'followed_by', classification: 'hierarchy', source_type: 'design_component', target_type: 'design_pattern' },
   design_component_governed_by_design_guideline: { forward_verb: 'governed_by', reverse_verb: 'governs', classification: 'hierarchy', source_type: 'design_component', target_type: 'design_guideline' },
   design_component_specified_by_interaction_spec: { forward_verb: 'specified_by', reverse_verb: 'specifies', classification: 'hierarchy', source_type: 'design_component', target_type: 'interaction_spec' },
-  design_component_composes_design_component: { forward_verb: 'composes', reverse_verb: 'composed_in', classification: 'hierarchy', source_type: 'design_component', target_type: 'design_component' },
+  // (0.39.0, B1) `cross_product_eligible` because a design system and the
+  // product that consumes it are two graphs: a Studio shadow component wrapping
+  // the @sanity/ui primitive it is built on could not be stated, and 11 such
+  // wrappers recorded the relationship in prose instead. Widened rather than
+  // minting `design_component_wraps_design_component`: a wrap IS composition
+  // read across a graph boundary, and a second verb for one relationship is the
+  // shadow-pair shape Pattern D collapses. `design_component` is already
+  // portfolio_shared, and the three sibling component edges
+  // (surface_renders_, screen_renders_, feature_uses_) are already eligible;
+  // this closes the last link between a product graph and its design system.
+  design_component_composes_design_component: { forward_verb: 'composes', reverse_verb: 'composed_in', classification: 'hierarchy', source_type: 'design_component', target_type: 'design_component', cross_product_eligible: true },
   prototype_annotated_with_annotation: { forward_verb: 'annotated_with', reverse_verb: 'annotates', classification: 'hierarchy', source_type: 'prototype', target_type: 'annotation' },
   screen_renders_design_component: { forward_verb: 'renders', reverse_verb: 'rendered_on', classification: 'hierarchy', source_type: 'screen', target_type: 'design_component', cross_product_eligible: true },
   // Marketing surface to product (0.12.7/698). A marketing/landing screen

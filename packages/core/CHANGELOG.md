@@ -7,6 +7,28 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.39.0] - 2026-09-04
+
+**A write said "done" while the disk disagreed, and a design system could not point at itself.** Six findings from a second Sanity field brief, written while populating a Studio design layer through roughly two thousand MCP calls across seven graph PRs. One is a correctness bug in the workflow this project's own README recommends; the rest are the design layer's missing vocabulary. Additive throughout.
+
+### Fixed
+
+- **Write tools now return only after the file is written.** `store` saves on a 300ms fire-and-forget debounce, so a successful write returned while the file still held the pre-write state: the documented `batch_*` → read-back → `batch_*` loop raced its own writes, and three field scripts read stale state and worked around it with sleeps. Every mutating tool now awaits the flush at the single dispatcher chokepoint, so the guarantee is structural rather than resting on forty handlers each remembering. A flush failure downgrades the response to an error instead of reporting success over an unwritten file.
+
+### Added
+
+- **`design_token_derives_from_design_token`** (causal, cross-product eligible). The alias tier: primitives (`--gray-100`) that semantic tokens alias (`--background-high: light-dark(var(--gray-100), …)`) that components consume. Measured estate: 163 primitives and 45 aliases whose chain lived in prose. Causal because the alias's value is computed from the primitive's. Makes "which primitives does this component depend on" and "which primitives are dead" traversals.
+- **`feature_area_groups_design_component`** (hierarchy). Component catalogs group by area; 133 components carried an `area:` tag instead. `groups`, not `contains`: the area does not own the component, so this is the non-owning overlay `journey_phase_spans_journey_step` already models.
+- **`validate_graph` reports `property_enum_drift`.** A declared enum was documentation: nothing checked a stored value against it, so an estate wrote `shadow` / `size` / `opacity` into `design_token.category` and saw zero drift, unable to tell whether the enum was strict, extensible, or decorative. Reported, never refused, the `undeclared_property_drift` posture.
+- **`portfolio_validate` reports `registry_file_path_drift`, and `update_product` accepts `file_path`.** A registry entry can point at a path the graph no longer occupies; discovery keeps working because `workspace.json` is authoritative, so nothing surfaced it and nothing repaired it. The report names where the graph actually is; the repair corrects the registry without moving anything, and refuses a path that resolves to nothing.
+
+### Changed
+
+- **`design_component_composes_design_component` is cross-product eligible.** A product graph's shadow component could not point at the design-system primitive it wraps, and eleven wrappers recorded the relationship in descriptions. Widened rather than minting a `_wraps_` twin: a wrap is composition read across a graph boundary, and a second verb for one relationship is a shadow pair.
+- **`design_token.category` speaks the DTCG `$type` vocabulary** alongside its original five values, with the non-one-to-one mapping stated on the property: a `radius` token is a DTCG `dimension`, `motion` is usually a `duration` or `cubicBezier`, `typography` is a composite. Both spellings are accepted, so neither an estate that speaks DTCG nor one that speaks UPG's original five has to translate at the boundary.
+
+Catalog: 1092 → 1094 edges (456 hierarchy · 425 cross-domain · 95 causal · 118 semantic); cross-product 69 → 71. No entity types added or removed.
+
 ## [0.38.0] - 2026-09-03
 
 **Cloud-agent hardening: a field brief from a five-repo Cursor Cloud environment found the server fabricating phantom graphs, unverifiable at build time, and unhelpable at setup time.** Seven findings, six accepted (the seventh, filesystem-coupled `code_url` checks, deferred on doctrine); every fix verified live over stdio against the built binaries. Zero catalog/schema surface; minor rather than patch because two behaviors change deliberately.

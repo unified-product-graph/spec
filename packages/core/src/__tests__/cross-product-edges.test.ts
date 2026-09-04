@@ -263,6 +263,16 @@ const CURATED_GATE_EXCEPTIONS = [
   // surface_renders_design_component and surface_measured_by_metric, pass the
   // gate on their shared TARGET (design_component / metric) and need no entry.
   'surface_governed_by_design_guideline',
+  // 0.39.0 (B2, feedback 60be1c59): the token alias tier. Exactly the
+  // design_guideline shape one entry up — design_system and design_component
+  // are portfolio_shared, design_token was never tagged — so the curated flag
+  // overrides the type gate. Kept as a documented exception rather than
+  // promoting design_token into the shared tier: that would change the
+  // ratified 28-name snapshot and make every design_token edge
+  // provisionally cross-capable, which is a Captain-class widening and not
+  // this batch's charter. Filed as the open question; a second estate needing
+  // shared tokens is the condition that pulls it forward.
+  'design_token_derives_from_design_token',
 ].sort()
 
 describe('cross-product 3-state derivation (0.18.0)', () => {
@@ -285,8 +295,12 @@ describe('cross-product 3-state derivation (0.18.0)', () => {
     }
   })
 
-  it('every curated cross type classifies as scope "curated" (canonical 69 as of 0.27.0)', () => {
-    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(69)
+  it('every curated cross type classifies as scope "curated" (canonical 71 as of 0.39.0)', () => {
+    // 69 → 71 at 0.39.0: design_component_composes_design_component widened
+    // (B1) and design_token_derives_from_design_token minted (B2), both
+    // cross_product_eligible so a product graph can point into the design
+    // system it consumes.
+    expect(UPG_CROSS_EDGE_TYPES).toHaveLength(71)
     for (const t of UPG_CROSS_EDGE_TYPES) {
       expect(crossProductScope(t), `${t} should classify as curated`).toBe('curated')
       expect(isCuratedCrossEligible(t), `${t} should be curated-eligible`).toBe(true)

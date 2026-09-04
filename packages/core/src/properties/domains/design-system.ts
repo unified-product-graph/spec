@@ -44,8 +44,45 @@ export interface DesignComponentProperties {
  * }
  */
 export interface DesignTokenProperties {
-  /** Category */
-  category?: 'color' | 'spacing' | 'typography' | 'radius' | 'motion'
+  /**
+   * What kind of value this token holds. Aligned to the Design Tokens
+   * Community Group `$type` vocabulary so a DTCG export maps across without
+   * translation; the five original UPG values are kept, `color` and `spacing`
+   * being the ones DTCG spells the same and `typography`, `radius`, `motion`
+   * being groupings a design system names in its own terms.
+   *
+   * @remarks
+   * DTCG mapping for the values that are not one-to-one: a `radius` token is a
+   * DTCG `dimension`, a `motion` token is usually a `duration` or a
+   * `cubicBezier`, and a `typography` token is a composite over `fontFamily` /
+   * `fontWeight` / `dimension`. Both spellings are accepted: an estate that
+   * speaks DTCG writes the `$type` name, one that speaks UPG's original five
+   * keeps writing them, and neither has to translate at the boundary.
+   *
+   * Extended at 0.39.0 from a measured estate (163 DTCG primitives) whose
+   * `shadow`, `dimension` and `opacity` tokens had no category to land on. The
+   * enum was documented but unenforced then; `validate_graph`'s
+   * `property_enum_drift` class (same release) is what makes it real, which is
+   * why the vocabulary had to be right before the check arrived.
+   */
+  category?:
+    | 'color'
+    | 'spacing'
+    | 'typography'
+    | 'radius'
+    | 'motion'
+    | 'dimension'
+    | 'fontFamily'
+    | 'fontWeight'
+    | 'duration'
+    | 'cubicBezier'
+    | 'number'
+    | 'shadow'
+    | 'gradient'
+    | 'border'
+    | 'transition'
+    | 'strokeStyle'
+    | 'opacity'
   /** Resolved value */
   value: string
   /** CSS custom property name */

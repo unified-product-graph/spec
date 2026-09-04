@@ -266,7 +266,7 @@ export const UPG_VALID_CHILDREN: Record<string, readonly string[]> = {
   // parent. Same widening shape as the 0.23.0 epic twins: an existing leaf type
   // gains a second, SHALLOWER parent, verbs inherited from the deeper edge.
   feature: ['epic', 'bug', 'task', 'user_story'],
-  feature_area: ['feature', 'feature_area'],
+  feature_area: ['feature', 'feature_area', 'design_component'],
   // epic owns user_story (the templated promise) and, mirroring feature, may
   // also directly contain bug/task — heterogeneous imported tickets that belong
   // to one epic rather than the feature as a whole (feedback df99026a).
