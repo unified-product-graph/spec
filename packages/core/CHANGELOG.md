@@ -7,6 +7,19 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.40.0] - 2026-09-04
+
+**Two gates could not see the thing they were built to catch.** Everything here came out of the 0.39.0 editorial pass rather than a feature request: a stale number that survived several releases in plain sight, and a citation check that had quietly stopped detecting one of its own founding defects. Tooling only; no catalog, schema, or entity surface moves.
+
+### Fixed
+
+- **`check:count-drift` now sees claims a formatter has wrapped.** Every claim pattern was written with literal spaces, so a line break between two words of a phrase defeated the match. A "61 cross-product edge types" claim — wrong by ten — sat in a Prettier-wrapped caption through several releases while the identical claim one line long was caught every time. Each top-level literal space is now compiled to `\s+` at load, leaving escapes and character classes alone, so patterns stay readable and line numbers stay accurate. Wrapped Markdown had the same exposure.
+- **`check:editorial` can catch its founding defect again.** The edge-shape test drew its type names from the 324 live types and none of the 38 deprecated ones, at *both* ends of the test — so a citation orphaned by a type rename, which names the old (now deprecated) type by construction, was structurally invisible. `task_implements_story_statement`, one of the three fabrications this check was built for, had stopped being detected when the 0.34.0 tail condition landed, because `story_statement` was deprecated at 0.7.0. Two further miscitations were live in published docs and were found by reading rather than by gate. The deprecated names are now in the list; the false-positive fences the tail condition bought are unchanged and pinned by the selftest.
+
+### Changed
+
+- **`batch_create_nodes` echoes what the caller wrote.** Successful responses now carry each created node's properties (omitted when empty) and, when refs were used, the alias `ref_map`. Both existed only as re-reads before: keying 163 tokens by their CSS variable meant re-reading the file, and `ref_map` was reported on dry-run and on failure but not on success — the call described its ref resolutions when it refused and when it pretended, and went quiet when it did the work.
+
 ## [0.39.0] - 2026-09-04
 
 **A write said "done" while the disk disagreed, and a design system could not point at itself.** Six findings from a second Sanity field brief, written while populating a Studio design layer through roughly two thousand MCP calls across seven graph PRs. One is a correctness bug in the workflow this project's own README recommends; the rest are the design layer's missing vocabulary. Additive throughout.
