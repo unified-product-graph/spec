@@ -106,6 +106,15 @@ export type StructurePattern =
   | 'collection'
   | 'quadrant'
   | 'flow'
+  /**
+   * A flow that CLOSES: the last step returns to the first. Distinct from
+   * `flow`, which ends. The distinction is not decorative — a framework whose
+   * whole claim is that it repeats (Build → Measure → Learn → Build) loses its
+   * argument when rendered as a line that stops at Learn. Added 0.42.0 after
+   * `build-measure-learn` and `shape-up` were found declaring `flow` because
+   * nothing else existed.
+   */
+  | 'cycle'
 
 /** All valid structure patterns as a runtime array */
 export const UPG_STRUCTURE_PATTERNS: readonly StructurePattern[] = [
@@ -116,4 +125,5 @@ export const UPG_STRUCTURE_PATTERNS: readonly StructurePattern[] = [
   'collection',
   'quadrant',
   'flow',
+  'cycle',
 ] as const

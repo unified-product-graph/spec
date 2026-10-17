@@ -442,6 +442,7 @@ export interface TableColumn {
  * @example { type: 'quadrant', x_axis: 'impact', y_axis: 'effort', x_label: 'Impact', y_label: 'Effort' }
  * @example { type: 'grid', groupBy: 'domain' }
  * @example { type: 'flow', direction: 'LR' }
+ * @example { type: 'cycle', direction: 'clockwise' }
  */
 export type FrameworkLayout =
   | { /** Tree layout */ type: 'tree'; /** Layout direction */ direction: 'TB' | 'LR'; /** Layout engine */ engine?: 'dagre' | 'elk' }
@@ -452,6 +453,13 @@ export type FrameworkLayout =
   | { /** Quadrant / 2x2 layout */ type: 'quadrant'; /** X-axis property */ x_axis: string; /** Y-axis property */ y_axis: string; /** X-axis label */ x_label?: string; /** Y-axis label */ y_label?: string }
   | { /** Grouped grid layout */ type: 'grid'; /** Property to group entities by */ groupBy: string }
   | { /** Directed flow layout */ type: 'flow'; /** Flow direction */ direction: 'LR' | 'TB' }
+  /**
+   * A flow whose last step returns to its first. `flow` renders a line that
+   * ends; this renders a loop that closes. Frameworks whose entire claim is
+   * repetition need it: rendered as `flow`, Build → Measure → Learn stops at
+   * Learn and the framework's argument is silently dropped.
+   */
+  | { /** Closed cycle layout */ type: 'cycle'; /** Direction the cycle is read in */ direction?: 'clockwise' | 'anticlockwise' }
 
 /** How the framework should be rendered in a UI */
 export interface FrameworkPresentationSpec {

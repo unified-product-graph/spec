@@ -2225,12 +2225,12 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "required_properties": {}
     },
     "structure": {
-      "pattern": "flow"
+      "pattern": "cycle"
     },
     "presentation": {
       "layout": {
-        "type": "flow",
-        "direction": "LR"
+        "type": "cycle",
+        "direction": "clockwise"
       },
       "colour_by": "status",
       "card_fields": [
@@ -2597,18 +2597,42 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Now",
         "role": "now",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "horizon",
+            "op": "eq",
+            "value": "now"
+          }
+        ],
         "entityTypeId": "feature",
         "description": "Committed work in progress"
       },
       {
         "label": "Next",
         "role": "next",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "horizon",
+            "op": "eq",
+            "value": "next"
+          }
+        ],
         "entityTypeId": "feature",
         "description": "High-confidence upcoming work"
       },
       {
         "label": "Later",
         "role": "later",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "horizon",
+            "op": "eq",
+            "value": "later"
+          }
+        ],
         "entityTypeId": "initiative",
         "description": "Exploratory, needs more discovery"
       }
@@ -2624,31 +2648,46 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         }
       ],
-      "required_properties": {}
+      "required_properties": {
+        "feature": [
+          {
+            "property": "horizon",
+            "type": "enum",
+            "required": true,
+            "scope": "framework",
+            "label": "Roadmap horizon",
+            "description": "Which horizon this item sits in for the current roadmap",
+            "enum_values": [
+              "now",
+              "next",
+              "later"
+            ]
+          }
+        ],
+        "initiative": [
+          {
+            "property": "horizon",
+            "type": "enum",
+            "required": true,
+            "scope": "framework",
+            "label": "Roadmap horizon",
+            "description": "Which horizon this item sits in for the current roadmap",
+            "enum_values": [
+              "now",
+              "next",
+              "later"
+            ]
+          }
+        ]
+      }
     },
     "structure": {
-      "pattern": "table"
+      "pattern": "collection"
     },
     "presentation": {
       "layout": {
-        "type": "table",
-        "columns": [
-          {
-            "property": "title",
-            "label": "Now",
-            "sortable": true
-          },
-          {
-            "property": "title",
-            "label": "Next",
-            "sortable": true
-          },
-          {
-            "property": "title",
-            "label": "Later",
-            "sortable": true
-          }
-        ]
+        "type": "grid",
+        "groupBy": "horizon"
       },
       "sort_by": {
         "property": "title",
@@ -2698,9 +2737,60 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "slots": [
       {
-        "label": "Requirements to categorise",
+        "label": "Must have",
+        "role": "must",
         "entityTypeId": "feature",
-        "description": "Features or requirements sorted into the four MoSCoW buckets"
+        "description": "Non-negotiable for this release; without it the release fails",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "moscow",
+            "op": "eq",
+            "value": "must"
+          }
+        ]
+      },
+      {
+        "label": "Should have",
+        "role": "should",
+        "entityTypeId": "feature",
+        "description": "Important but not release-blocking; a workaround exists",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "moscow",
+            "op": "eq",
+            "value": "should"
+          }
+        ]
+      },
+      {
+        "label": "Could have",
+        "role": "could",
+        "entityTypeId": "feature",
+        "description": "Desirable, included only if capacity allows",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "moscow",
+            "op": "eq",
+            "value": "could"
+          }
+        ]
+      },
+      {
+        "label": "Won't have",
+        "role": "wont",
+        "entityTypeId": "feature",
+        "description": "Explicitly out of scope for this release, recorded so the decision is visible",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "moscow",
+            "op": "eq",
+            "value": "wont"
+          }
+        ]
       }
     ],
     "data": {
@@ -3741,12 +3831,12 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       "required_properties": {}
     },
     "structure": {
-      "pattern": "flow"
+      "pattern": "cycle"
     },
     "presentation": {
       "layout": {
-        "type": "flow",
-        "direction": "LR"
+        "type": "cycle",
+        "direction": "clockwise"
       },
       "colour_by": "status",
       "card_fields": [
@@ -3776,7 +3866,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "name": "Pirate Metrics AARRR",
     "version": "1.0.0",
-    "description": "Track user lifecycle across five stages: Acquisition, Activation, Retention, Revenue, and Referral.",
+    "description": "Track user lifecycle across five stages: Acquisition, Activation, Retention, Referral, and Revenue.",
     "category": "growth",
     "origin": {
       "type": "practitioner",
@@ -3792,9 +3882,74 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     ],
     "slots": [
       {
-        "label": "Lifecycle metric",
+        "label": "Acquisition",
+        "role": "acquisition",
         "entityTypeId": "metric",
-        "description": "A metric tracking one stage of the customer lifecycle funnel"
+        "description": "Metrics for how users first find the product",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "metric_category",
+            "op": "eq",
+            "value": "acquisition"
+          }
+        ]
+      },
+      {
+        "label": "Activation",
+        "role": "activation",
+        "entityTypeId": "metric",
+        "description": "Metrics for whether users reach their first meaningful outcome",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "metric_category",
+            "op": "eq",
+            "value": "activation"
+          }
+        ]
+      },
+      {
+        "label": "Retention",
+        "role": "retention",
+        "entityTypeId": "metric",
+        "description": "Metrics for whether users keep coming back",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "metric_category",
+            "op": "eq",
+            "value": "retention"
+          }
+        ]
+      },
+      {
+        "label": "Referral",
+        "role": "referral",
+        "entityTypeId": "metric",
+        "description": "Metrics for whether users bring others with them",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "metric_category",
+            "op": "eq",
+            "value": "referral"
+          }
+        ]
+      },
+      {
+        "label": "Revenue",
+        "role": "revenue",
+        "entityTypeId": "metric",
+        "description": "Metrics for whether users pay",
+        "predicate": [
+          {
+            "scope": "entity",
+            "property": "metric_category",
+            "op": "eq",
+            "value": "revenue"
+          }
+        ]
       }
     ],
     "data": {
@@ -3816,8 +3971,8 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
               "acquisition",
               "activation",
               "retention",
-              "revenue",
-              "referral"
+              "referral",
+              "revenue"
             ]
           }
         ]
@@ -3845,14 +4000,14 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "entity_type": "metric"
         },
         {
-          "id": "revenue",
-          "label": "Revenue",
+          "id": "referral",
+          "label": "Referral",
           "order": 3,
           "entity_type": "metric"
         },
         {
-          "id": "referral",
-          "label": "Referral",
+          "id": "revenue",
+          "label": "Revenue",
           "order": 4,
           "entity_type": "metric"
         }
@@ -4094,18 +4249,42 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Outer Ring",
         "role": "outer_ring",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "bullseye_ring",
+            "op": "eq",
+            "value": "outer"
+          }
+        ],
         "entityTypeId": "acquisition_channel",
         "description": "All 19 traction channels brainstormed"
       },
       {
         "label": "Middle Ring",
         "role": "middle_ring",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "bullseye_ring",
+            "op": "eq",
+            "value": "middle"
+          }
+        ],
         "entityTypeId": "acquisition_channel",
         "description": "Top 6 channels worth testing"
       },
       {
         "label": "Inner Ring",
         "role": "inner_ring",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "bullseye_ring",
+            "op": "eq",
+            "value": "inner"
+          }
+        ],
         "entityTypeId": "acquisition_channel",
         "description": "Top 3 channels to focus on"
       },
@@ -4118,6 +4297,14 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
       {
         "label": "Bullseye Channel",
         "role": "bullseye_channel",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "bullseye_ring",
+            "op": "eq",
+            "value": "bullseye"
+          }
+        ],
         "entityTypeId": "acquisition_channel",
         "description": "The single best-performing channel"
       }
@@ -4133,7 +4320,24 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
           "role": "item"
         }
       ],
-      "required_properties": {}
+      "required_properties": {
+        "acquisition_channel": [
+          {
+            "property": "bullseye_ring",
+            "type": "enum",
+            "required": true,
+            "scope": "framework",
+            "label": "Bullseye ring",
+            "description": "Which ring this channel currently sits in as the field narrows",
+            "enum_values": [
+              "outer",
+              "middle",
+              "inner",
+              "bullseye"
+            ]
+          }
+        ]
+      }
     },
     "structure": {
       "pattern": "funnel"
@@ -6277,24 +6481,104 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Quick Wins",
         "entityTypeId": "feature",
         "role": "quick_win",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "value",
+            "op": "band",
+            "value": [
+              6,
+              11
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "effort",
+            "op": "band",
+            "value": [
+              1,
+              6
+            ]
+          }
+        ],
         "description": "High value, low effort: do first"
       },
       {
         "label": "Big Bets",
         "entityTypeId": "feature",
         "role": "big_bet",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "value",
+            "op": "band",
+            "value": [
+              6,
+              11
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "effort",
+            "op": "band",
+            "value": [
+              6,
+              11
+            ]
+          }
+        ],
         "description": "High value, high effort: plan carefully"
       },
       {
         "label": "Fill-ins",
         "entityTypeId": "feature",
         "role": "fill_in",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "value",
+            "op": "band",
+            "value": [
+              1,
+              6
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "effort",
+            "op": "band",
+            "value": [
+              1,
+              6
+            ]
+          }
+        ],
         "description": "Low value, low effort: do when idle"
       },
       {
         "label": "Avoid",
         "entityTypeId": "feature",
         "role": "money_pit",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "value",
+            "op": "band",
+            "value": [
+              1,
+              6
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "effort",
+            "op": "band",
+            "value": [
+              6,
+              11
+            ]
+          }
+        ],
         "description": "Low value, high effort: deprioritise"
       }
     ],
@@ -6311,6 +6595,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "value",
             "type": "number",
             "required": true,
+            "scope": "framework",
             "label": "Value",
             "description": "Expected business value (1-10)"
           },
@@ -6318,6 +6603,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "effort",
             "type": "number",
             "required": true,
+            "scope": "framework",
             "label": "Effort",
             "description": "Implementation effort (1-10)"
           }
@@ -6339,10 +6625,10 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "presentation": {
       "layout": {
         "type": "quadrant",
-        "x_axis": "impact",
-        "y_axis": "effort",
-        "x_label": "Quick Wins",
-        "y_label": "Big Bets"
+        "x_axis": "effort",
+        "y_axis": "value",
+        "x_label": "Effort",
+        "y_label": "Value"
       },
       "colour_by": "group",
       "card_fields": [
@@ -6388,24 +6674,104 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
         "label": "Do First",
         "entityTypeId": "feature",
         "role": "do_first",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "urgency",
+            "op": "band",
+            "value": [
+              4,
+              6
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "importance",
+            "op": "band",
+            "value": [
+              4,
+              6
+            ]
+          }
+        ],
         "description": "Urgent and important: act immediately"
       },
       {
         "label": "Schedule",
         "entityTypeId": "feature",
         "role": "schedule",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "urgency",
+            "op": "band",
+            "value": [
+              1,
+              4
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "importance",
+            "op": "band",
+            "value": [
+              4,
+              6
+            ]
+          }
+        ],
         "description": "Important but not urgent: plan it"
       },
       {
         "label": "Delegate",
         "entityTypeId": "feature",
         "role": "delegate",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "urgency",
+            "op": "band",
+            "value": [
+              4,
+              6
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "importance",
+            "op": "band",
+            "value": [
+              1,
+              4
+            ]
+          }
+        ],
         "description": "Urgent but not important: hand off"
       },
       {
         "label": "Eliminate",
         "entityTypeId": "feature",
         "role": "eliminate",
+        "predicate": [
+          {
+            "scope": "framework",
+            "property": "urgency",
+            "op": "band",
+            "value": [
+              1,
+              4
+            ]
+          },
+          {
+            "scope": "framework",
+            "property": "importance",
+            "op": "band",
+            "value": [
+              1,
+              4
+            ]
+          }
+        ],
         "description": "Neither urgent nor important: drop it"
       }
     ],
@@ -6422,6 +6788,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "urgency",
             "type": "number",
             "required": true,
+            "scope": "framework",
             "label": "Urgency",
             "description": "How time-sensitive is this? (1-5)"
           },
@@ -6429,6 +6796,7 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
             "property": "importance",
             "type": "number",
             "required": true,
+            "scope": "framework",
             "label": "Importance",
             "description": "How important is this to goals? (1-5)"
           }
@@ -6450,10 +6818,10 @@ export const UPG_FRAMEWORKS: UPGFramework[] = [
     "presentation": {
       "layout": {
         "type": "quadrant",
-        "x_axis": "impact",
-        "y_axis": "effort",
-        "x_label": "Do First",
-        "y_label": "Schedule"
+        "x_axis": "urgency",
+        "y_axis": "importance",
+        "x_label": "Urgency",
+        "y_label": "Importance"
       },
       "colour_by": "group",
       "card_fields": [

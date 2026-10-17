@@ -7,6 +7,24 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.42.0] - 2026-10-17
+
+**A graph could record the same relationship twice and nothing would say so.** 131 of them were sitting in this project's own graphs, `entopo.upg` included. Plus the framework definitions that could not express their own frameworks.
+
+### Added
+
+- **`validate_graph` reports `duplicate_relationship_drift`.** Two shapes of one mistake. **Exact**: an identical `(source, target, type)` on several rows, which nothing distinguishes, so every row after the first inflates each edge count that reads the pair. **Shadow**: a pair carrying both a `project_contains_*` edge and `project_delivers_work_item`, the two spellings either side of 0.41.0's carrier move, which 0.41.0 accepted on the condition it become visible. Measured when it shipped: 131 exact duplicates across 160 redundant rows in 35 local graphs, and zero shadows. **Reported, never gated** — the `undeclared_property_drift` posture. Folding 131 existing instances into `structurally_valid` would flip that signal to false across every estate the day it shipped, punishing graphs for a defect nothing could previously detect. It gates once the backlog can be cleared.
+- **`deduplicate_edges`** (tools 99 → 100). `kind: "exact"` (the default) keeps the first row and drops the rest. `kind: "shadow"` drops the polymorphic row where containment is also present, because 0.41.0's ruling already named containment the parent axis and the winner; the tool applies that decision rather than making one. Shadows are untouched by the default kind, so a routine dedupe can never quietly enact a ruling the caller did not ask for. `dry_run` defaults to true; it deletes edges only and never touches a node.
+- **A `cycle` layout and structure pattern.** `FrameworkLayout` had eight shapes and no way to close a loop, so `build-measure-learn` and `shape-up` both declared `flow` — the only thing available. Rendered as a flow, Build → Measure → Learn is a line that stops at Learn and the framework's entire claim, that it repeats, is silently dropped. Both are canonical and both ship today.
+
+### Changed
+
+- **Five framework definitions can now express their own framework.** `pirate-metrics-aarrr` declared five stages and carried ONE slot, so five stages rendered as one undifferentiated bucket; it now has a slot per stage joined by `role`, each with a `metric_category` predicate. Its stage ORDER is corrected to Acquisition, Activation, Retention, **Referral, Revenue** — not on the acronym, which cannot disambiguate three R-words, but on fidelity to the 2007 source the record itself cites. `moscow`'s four buckets existed only as `enum_values`, readable by a human and unreachable by anything projecting the framework; they are slots now. `eisenhower-matrix` and `value-vs-effort` both declared `x_axis: 'impact'`, a property neither of them defines, with their labels holding the names of two of their four cells; axes, labels and per-cell band predicates are now correct and their partitions verified exhaustive and non-overlapping. `now-next-later` was a table of three columns all bound to `title`, and `bullseye-framework` had three rings reading one entity type with nothing to tell them apart.
+
+### Notes
+
+- **`user_story` keeps its lifecycle-freedom**, against a request to give it one. Pre-v0.2.7 it had a `draft → ready → in_progress → done` lifecycle; that was removed because it conflated statement-shape state with task-shape state, and the lifecycle moved onto the `task` that implements the statement. Nothing is lost on import: `user_story` declares `workflow_state`, which exists to round-trip a source tool's raw state losslessly, and the implementing task carries the state machine.
+
 ## [0.41.1] - 2026-09-20
 
 **Everything here is a defect an adversarial sweep of the published 0.41.0 found, and four of the five are mine.** The theme is a tool answering a confident number about a question it never actually asked.
