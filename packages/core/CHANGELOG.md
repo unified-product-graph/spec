@@ -7,6 +7,25 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.42.1] - 2026-10-17
+
+**A repair tool could certify a graph it had not repaired.** The dispatcher's content-dedup ledger replayed a successful result for any identical mutating call, without executing it. Correct for a create, where a re-delivery must not write a second copy. Silent write loss for an operation defined by a target state.
+
+Measured: `migrate_status` moved 2 tasks; one was reset; the identical call reported `migrated_nodes: 2` and that task stayed put. `deduplicate_edges` reported removing four already-deleted edges while a freshly-injected duplicate survived. This is the defect filed for months as a `migrate_status` "stale read-back" in the store. It was never the store, and it has been live since 0.9.23.
+
+### Fixed
+
+- **Convergent tools are no longer content-deduped.** `CONVERGENT_TOOLS` names the 13 mutating tools whose effect is a target state rather than the act of calling them: the four `migrate_*`, both `deduplicate_*`, `rename_edge_type`, `repair_dangling_edges`, and the delete family. Their duplicate-delivery protection comes from their own idempotence, so the ledger bought them nothing and cost them truthfulness. Creates stay protected: that is the case the ledger exists for, and its tests are unchanged and still green.
+- **`migrate_status` no longer refuses dispatcher-level parameters.** 0.41.1 gave it a strict allow-list naming only its own four filters, which rejected `allow_duplicate` (the dedup bypass, and so the only escape from the bug above) and `expect_product` (the assertion that keeps a bulk status rewrite in the intended product). Both now arrive via a shared `DISPATCHER_LEVEL_KEYS`, so a future dispatcher parameter reaches existing guards instead of being refused by them.
+
+### Notes
+
+Salting the dedup key with a graph hash was considered and rejected: it would fix convergent tools but break creates, because the first create changes the graph and a re-delivery would then hash differently and write a second copy.
+
+The root cause of the original duplication was structural — one process running two server instances via `cli mcp run` — found and fixed in 0.9.25. The ledger is defence-in-depth behind that fix, which is further reason not to let it eat writes.
+
+No spec change. No entity, edge, tool or check added or removed: 324 entities, 1104 edges, 100 tools.
+
 ## [0.42.0] - 2026-10-17
 
 **A graph could record the same relationship twice and nothing would say so.** 131 of them were sitting in this project's own graphs, `entopo.upg` included. Plus the framework definitions that could not express their own frameworks.
