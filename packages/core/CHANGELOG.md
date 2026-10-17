@@ -7,6 +7,22 @@ This project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.41.1] - 2026-09-20
+
+**Everything here is a defect an adversarial sweep of the published 0.41.0 found, and four of the five are mine.** The theme is a tool answering a confident number about a question it never actually asked.
+
+### Fixed
+
+- **Product discovery never entered `.upg/products/`.** The workspace scan walked one directory level, so the folder `create_product` writes into by default was invisible. A workspace whose `workspace.json` carries `default_product` but no `products[]` therefore had `list_local_products` return `[]` and `--check` report 0, while `switch_product` on that very file succeeded: the discovery tool said nothing was there and the loading tool then loaded it. Discovery now recurses inside the workspace directory, still skipping `_`-prefixed folders, which is the distinction 0.41.0's own comment got wrong by generalising from `_archive/` (unregistered on purpose) to `products/` (the conventional home).
+- **`--check` validated with a lenient parser while startup uses the strict loader.** A document with no `$upg` block, a node missing `type`, or a dangling edge all parse clean and all fail to load, so `--check` returned `ok: true` and exit 0 on workspaces the server then refused to start on. That is worse than no preflight, because an install script asserts on it and reports the environment healthy. It now loads through the same path, and a test pins that its verdict matches what starting the server actually does.
+- **An unknown filter is now an error rather than an empty result.** `query({from})`, `query({traverse})`, `list_nodes({type})`, `export_edges({types})` and `migrate_status({entity_type})` each answered a clean zero for a name the spec has never heard of. The reader cannot tell "you have none of these" from "that name does not exist", and the two need opposite next moves. 0.41.0 made it live: an agent traversing the legacy `project_delivers_work_item` after the containment edges landed gets `total_edges: 0` and concludes the project has no work items. Deprecated names stay accepted, since filtering by one is exactly what a cleanup pass does.
+- **`migrate_status` accepted parameters it does not declare.** `{type, from, to}` — the names its own output uses, and the ones `rename_edge_type` takes — were accepted in silence and reported a successful no-op, as were `{}` and `{zzz: 1}`. Auto mode with no arguments is legitimate, so unknown KEYS are refused rather than required ones demanded.
+- **`migrate_status` would write a status `update_node` rejects.** Same type, same value, opposite outcomes, on the path that writes in bulk — so a single call could put every node of a type out of lifecycle. The target is now validated against the type's lifecycle, and the graph is left untouched when it is refused.
+
+### Known
+
+- **The shadow pair is real, accepted, and not yet detectable by any tool.** 0.41.0 moved the project-to-work-item carrier, so a graph imported both before and after that release can hold `project_contains_task` and `project_delivers_work_item` for one pair. Both are individually legal, so `validate_graph` is silent; `deduplicate_nodes` is nodes-only. Until 0.42.0 adds a drift class for it, you can enumerate your own with `export_edges`: group the rows by `(source, target)` and keep only the groups whose types include BOTH a `project_contains_*` edge AND `project_delivers_work_item`. Do not simply keep every group larger than one — multiple edges between one pair are ordinarily legal, and on our own graphs that broader rule returns 172 hits and no true positives.
+
 ## [0.41.0] - 2026-09-04
 
 **A project could reference the work it delivered, but never hold it.** Teams model in Linear, where an Initiative holds Projects and a Project holds Issues. UPG carried the upper relation and not the lower, so a graph living alongside Linear had to explain itself twice. Plus two defects in tooling shipped earlier this week, both found by a field reporter reading output that looked clean.

@@ -3,10 +3,10 @@
  *
  * The public surface ships the **canonical frameworks** in
  * `canonical.ts`: famous, universally-taught product frameworks curated
- * for editorial confidence (42 at present; promoted one at a time).
+ * for editorial confidence (53 at present; promoted one at a time).
  *
  * `definitions/` is the single source of truth for framework content: the
- * full research catalog (~182 additional definitions) plus the canonical
+ * full research catalog (167 additional definitions) plus the canonical
  * subset. It is used by internal consumers (label vocabulary, tier-1 wiring
  * tests, the shape audit), excluded from public mirrors via
  * `scripts/sync-oss-repos.sh`, and not re-exported from the package entry

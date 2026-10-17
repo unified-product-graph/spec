@@ -10,8 +10,12 @@ A framework layers its own fields over canonical entities. RICE adds `reach`, `i
 
 | Surface | What | Where | Ships in |
 |---|---|---|---|
-| **Canonical** | The famous, battle-tested frameworks that anchor the public catalog (42 at present). | `canonical.ts` (generated) | `@unified-product-graph/core` (npm + GitHub) |
-| **Research** | The full authored library (~182 additional framework definitions), source of truth for everything, used by internal tooling, vocabulary mapping, the shape audit, and tier-1 wiring tests. | `definitions/` (30 category files) | Monorepo only; **excluded** from the `core` mirror via `scripts/sync-oss-repos.sh` |
+| **Canonical** | The famous, battle-tested frameworks that anchor the public catalog (53 at present). | `canonical.ts` (generated) | `@unified-product-graph/core` (npm + GitHub) |
+| **Research** | The full authored library (167 additional framework definitions), source of truth for everything, used by internal tooling, vocabulary mapping, the shape audit, and tier-1 wiring tests. | `definitions/` (30 category files) | Monorepo only; **excluded** from the `core` mirror via `scripts/sync-oss-repos.sh` |
+
+> Counts are measured at HEAD from the generated `canonical.ts` (53 records) and
+> `definitions/` (220 records, 167 of them not yet promoted). Re-derive with
+> `rg -c '^    "id": "' canonical.ts` and `rg --no-filename -o "^    id: '[^']+'" definitions/ | sort -u | wc -l`.
 
 The public surface ships only the canonical subset. To promote a framework, add its id to the array in `canonical.ts` and run `npm run regen:canonical`; the body is filled from its definition. To edit a published framework, edit its definition in `definitions/` and regenerate. `npm run check:canonical` (`--check`) is the sync gate — wired into core's `prepublishOnly`, it fails if `canonical.ts` has drifted from `definitions/`, so a hand-edit or a stale projection can never be published.
 
@@ -38,8 +42,8 @@ Internal consumers (vocabulary mapping in `presentation/labels.ts`, tier-1 wirin
 | `types.ts` | The `UPGFramework` interface. Four layers: data, structure, presentation, education. |
 | `categories.ts` | `UPG_FRAMEWORK_CATEGORIES` and `UPG_STRUCTURE_PATTERNS`. |
 | `validate.ts` | `validateUPGFramework()`: structural validation for individual records. |
-| `canonical.ts` | **Generated**: the 34 canonical framework records. Public surface. |
-| `definitions/` | 30 category files holding the full 216-record research library. Internal-only. |
+| `canonical.ts` | **Generated**: the 53 canonical framework records. Public surface. |
+| `definitions/` | 30 category files holding the full 220-record research library. Internal-only. |
 
 ## Start here
 
